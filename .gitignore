@@ -2,6 +2,7 @@
 !/configs/config.yaml
 /exports/*
 !/exports/.gitkeep
+/last_successful/*
 !/last_successful/.gitkeep
 /safetyculture-sdk-python/tools/exporter/__pycache__/*
 /safetyculture-sdk-python/tools/exporter/Adminer/
