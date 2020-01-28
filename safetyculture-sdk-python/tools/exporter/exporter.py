@@ -4,7 +4,7 @@
 
 from sqlalchemy import *
 from sqlalchemy.orm import sessionmaker
-from model import Base, set_table, SQL_HEADER_ROW
+from model import Base, set_table, SQL_HEADER_ROW, ACTIONS_HEADER_ROW, set_actions_table
 import pandas as pd
 import numpy as np
 import argparse
@@ -84,6 +84,8 @@ EXPORT_ARCHIVED = 'export_archived'
 EXPORT_COMPLETED = 'export_completed'
 MERGE_ROWS = 'merge_rows'
 ALLOW_TABLE_CREATION = 'allow_table_creation'
+ACTIONS_TABLE = 'actions_table'
+ACTIONS_MERGE_ROWS = 'actions_merge_rows'
 
 # Used to create a default config file for new users
 DEFAULT_CONFIG_FILE_YAML = [
@@ -103,6 +105,7 @@ DEFAULT_CONFIG_FILE_YAML = [
     '\n    media_sync_offset_in_seconds: ',
     '\n    template_ids: ',
     '\n    merge_rows: false',
+    '\n    actions_merge_rows: false',
     '\n    allow_table_creation: false',    
     '\n    sql_table: ',
     '\n    database_type: ',
@@ -138,6 +141,27 @@ def load_setting_api_access_token(logger, config_settings):
     """
     try:
         api_token = config_settings['API']['token']
+        token_is_valid = re.match('^[a-f0-9]{64}$', api_token)
+        if token_is_valid:
+            logger.debug('API token matched expected pattern')
+            return api_token
+        else:
+            logger.error('API token failed to match expected pattern')
+            return None
+    except Exception as ex:
+        log_critical_error(logger, ex, 'Exception parsing API token from config.yaml')
+        return None
+
+
+def docker_load_setting_api_access_token(logger, api_token):
+    """
+    Attempt to parse API token from config settings
+
+    :param logger:           the logger
+    :param config_settings:  config settings loaded from config file
+    :return:                 API token if valid, else None
+    """
+    try:
         token_is_valid = re.match('^[a-f0-9]{64}$', api_token)
         if token_is_valid:
             logger.debug('API token matched expected pattern')
@@ -335,6 +359,44 @@ def save_web_report_link_to_file(logger, export_dir, web_report_data):
                 web_report_link_csv.close()
         except Exception as ex:
             log_critical_error(logger, ex, 'Exception while writing' + file_path + ' to file')
+
+
+def save_exported_actions_to_db(logger, actions_array, settings, get_started):
+    """
+    Write Actions to 'iauditor_actions.csv' on disk at specified location
+    :param get_started:
+    :param logger:          the logger
+    :param export_path:     path to directory for exports
+    :param actions_array:   Array of action objects to be converted to CSV and saved to disk
+    """
+    print(get_started)
+    engine = get_started[1]
+    actions_db = get_started[4]
+
+    if not actions_array:
+        logger.info('No actions returned after ' + get_last_successful_actions_export(logger))
+        return
+    logger.info('Exporting ' + str(len(actions_array)) + ' actions')
+    Session = sessionmaker(bind=engine)
+    session = Session()
+    bulk_actions = []
+    for action in actions_array:
+        action_as_list = transform_action_object_to_list(action)
+        bulk_actions.append(action_as_list)
+    df = pd.DataFrame.from_records(bulk_actions, columns=ACTIONS_HEADER_ROW)
+    df['DatePK'] = pd.to_datetime(df['modifiedDatetime']).values.astype(np.int64) // 10 ** 6
+    df_dict = df.to_dict(orient='records')
+    try:
+        session.bulk_insert_mappings(actions_db, df_dict)
+    except:
+        # If the bulk insert fails, we do a slower merge
+        logger.warning('Duplicate found, attempting to update')
+        session.rollback()
+        for action in df_dict:
+            row_to_dict = actions_db(**action)
+            session.merge(row_to_dict)
+        logger.debug('Row successfully updated.')
+    session.commit()
 
 
 def save_exported_actions_to_csv_file(logger, export_path, actions_array):
@@ -562,7 +624,27 @@ def configure_logger():
     return logger
 
 
-def load_config_settings(logger, path_to_config_file):
+def set_env_defaults(name, env_var, logger):
+    # if env_var is None or '':
+    if not env_var:
+        if name == 'CONFIG_NAME':
+            logger.error('You must set the CONFIG_NAME')
+            sys.exit()
+        if name == 'DB_SCHEMA':
+            env_var = 'dbo'
+        if name.startswith('DB_'):
+            env_var = None
+        if name == 'SQL_TABLE':
+            env_var = None
+        if name == 'TEMPLATE_IDS':
+            env_var = None
+        else:
+            env_var = false
+    print(name,' set to ',env_var)
+    return env_var
+
+
+def load_config_settings(logger, path_to_config_file, docker_enabled):
     """
     Load config settings from config file
 
@@ -573,35 +655,67 @@ def load_config_settings(logger, path_to_config_file):
                                 filename_item_id, sync_delay_in_seconds loaded from
                                 config file, media_sync_offset_in_seconds
     """
-    config_settings = yaml.safe_load(open(path_to_config_file))
-    settings = {
-        API_TOKEN: load_setting_api_access_token(logger, config_settings),
-        EXPORT_PATH: load_setting_export_path(logger, config_settings),
-        PREFERENCES: load_setting_preference_mapping(logger, config_settings),
-        FILENAME_ITEM_ID: get_filename_item_id(logger, config_settings),
-        SYNC_DELAY_IN_SECONDS: load_setting_sync_delay(logger, config_settings),
-        EXPORT_INACTIVE_ITEMS_TO_CSV: load_export_inactive_items_to_csv(logger, config_settings),
-        MEDIA_SYNC_OFFSET_IN_SECONDS: load_setting_media_sync_offset(logger, config_settings),
-        TEMPLATE_IDS: config_settings['export_options']['template_ids'],
-        SQL_TABLE: config_settings['export_options']['sql_table'],
-        DB_TYPE: config_settings['export_options']['database_type'],
-        DB_USER: config_settings['export_options']['database_user'],
-        DB_PWD: config_settings['export_options']['database_pwd'],
-        DB_SERVER: config_settings['export_options']['database_server'],
-        DB_PORT: config_settings['export_options']['database_port'],
-        DB_NAME: config_settings['export_options']['database_name'],
-        DB_SCHEMA: config_settings['export_options']['database_schema'],
-        USE_REAL_TEMPLATE_NAME: config_settings['export_options']['use_real_template_name'],
-        CONFIG_NAME: config_settings['config_name'],
-        EXPORT_ARCHIVED: config_settings['export_options']['export_archived'],
-        EXPORT_COMPLETED: config_settings['export_options']['export_completed'],
-        MERGE_ROWS: config_settings['export_options']['merge_rows'],
-        ALLOW_TABLE_CREATION: config_settings['export_options']['allow_table_creation']
-    }
+
+    if docker_enabled is True:
+        settings = {
+            API_TOKEN: docker_load_setting_api_access_token(logger, os.environ['API_TOKEN']),
+            EXPORT_PATH: None,
+            # PREFERENCES: load_setting_preference_mapping(logger, config_settings),
+            # FILENAME_ITEM_ID: get_filename_item_id(logger, config_settings),
+            SYNC_DELAY_IN_SECONDS: int(os.environ['SYNC_DELAY_IN_SECONDS']),
+            # EXPORT_INACTIVE_ITEMS_TO_CSV: load_export_inactive_items_to_csv(logger, config_settings),
+            MEDIA_SYNC_OFFSET_IN_SECONDS: int(os.environ['MEDIA_SYNC_OFFSET_IN_SECONDS']),
+            TEMPLATE_IDS: set_env_defaults('TEMPLATE_IDS', os.environ['TEMPLATE_IDS'], logger),
+            SQL_TABLE: set_env_defaults('SQL_TABLE', os.environ['SQL_TABLE'], logger),
+            DB_TYPE: set_env_defaults('DB_TYPE', os.environ['DB_TYPE'], logger),
+            DB_USER: set_env_defaults('DB_USER', os.environ['DB_USER'], logger),
+            DB_PWD: set_env_defaults('DB_PWD', os.environ['DB_PWD'], logger),
+            DB_SERVER: set_env_defaults('DB_SERVER', os.environ['DB_SERVER'], logger),
+            DB_PORT: set_env_defaults('DB_PORT', os.environ['DB_PORT'], logger),
+            DB_NAME: set_env_defaults('DB_NAME', os.environ['DB_NAME'], logger),
+            DB_SCHEMA: set_env_defaults('DB_SCHEMA', os.environ['DB_SCHEMA'], logger),
+            USE_REAL_TEMPLATE_NAME: set_env_defaults('USE_REAL_TEMPLATE_NAME', os.environ['USE_REAL_TEMPLATE_NAME'],
+                                                     logger),
+            CONFIG_NAME: set_env_defaults('CONFIG_NAME', os.environ['CONFIG_NAME'], logger),
+            EXPORT_ARCHIVED: set_env_defaults('EXPORT_ARCHIVED', os.environ['EXPORT_ARCHIVED'], logger),
+            EXPORT_COMPLETED: set_env_defaults('EXPORT_COMPLETED', os.environ['EXPORT_COMPLETED'], logger),
+            MERGE_ROWS: set_env_defaults('MERGE_ROWS', os.environ['MERGE_ROWS'], logger),
+            ALLOW_TABLE_CREATION: set_env_defaults('ALLOW_TABLE_CREATION', os.environ['ALLOW_TABLE_CREATION'], logger),
+            ACTIONS_TABLE: 'iauditor_actions_data',
+            ACTIONS_MERGE_ROWS: set_env_defaults('ACTIONS_MERGE_ROWS', os.environ['ACTIONS_MERGE_ROWS'], logger)
+        }
+    else:
+        config_settings = yaml.safe_load(open(path_to_config_file))
+        settings = {
+            API_TOKEN: load_setting_api_access_token(logger, config_settings),
+            EXPORT_PATH: load_setting_export_path(logger, config_settings),
+            PREFERENCES: load_setting_preference_mapping(logger, config_settings),
+            FILENAME_ITEM_ID: get_filename_item_id(logger, config_settings),
+            SYNC_DELAY_IN_SECONDS: load_setting_sync_delay(logger, config_settings),
+            EXPORT_INACTIVE_ITEMS_TO_CSV: load_export_inactive_items_to_csv(logger, config_settings),
+            MEDIA_SYNC_OFFSET_IN_SECONDS: load_setting_media_sync_offset(logger, config_settings),
+            TEMPLATE_IDS: config_settings['export_options']['template_ids'],
+            SQL_TABLE: config_settings['export_options']['sql_table'],
+            DB_TYPE: config_settings['export_options']['database_type'],
+            DB_USER: config_settings['export_options']['database_user'],
+            DB_PWD: config_settings['export_options']['database_pwd'],
+            DB_SERVER: config_settings['export_options']['database_server'],
+            DB_PORT: config_settings['export_options']['database_port'],
+            DB_NAME: config_settings['export_options']['database_name'],
+            DB_SCHEMA: config_settings['export_options']['database_schema'],
+            USE_REAL_TEMPLATE_NAME: config_settings['export_options']['use_real_template_name'],
+            CONFIG_NAME: config_settings['config_name'],
+            EXPORT_ARCHIVED: config_settings['export_options']['export_archived'],
+            EXPORT_COMPLETED: config_settings['export_options']['export_completed'],
+            MERGE_ROWS: config_settings['export_options']['merge_rows'],
+            ALLOW_TABLE_CREATION: config_settings['export_options']['allow_table_creation'],
+            ACTIONS_TABLE: 'iauditor_actions_data',
+            ACTIONS_MERGE_ROWS: config_settings['export_options']['actions_merge_rows']
+        }
     return settings
 
 
-def configure(logger, path_to_config_file, export_formats):
+def configure(logger, path_to_config_file, export_formats, docker_enabled):
     """
     instantiate and configure logger, load config settings from file, instantiate SafetyCulture SDK
     :param logger:              the logger
@@ -610,7 +724,7 @@ def configure(logger, path_to_config_file, export_formats):
     :return:                    instance of SafetyCulture SDK object, config settings
     """
 
-    config_settings = load_config_settings(logger, path_to_config_file)
+    config_settings = load_config_settings(logger, path_to_config_file, docker_enabled)
     config_settings[EXPORT_FORMATS] = export_formats
     sc_client = sp.SafetyCulture(config_settings[API_TOKEN])
 
@@ -645,6 +759,7 @@ def parse_command_line_arguments(logger):
     """
     parser = argparse.ArgumentParser()
     parser.add_argument('--config', help='config file to use, defaults to ' + DEFAULT_CONFIG_FILENAME)
+    parser.add_argument('--docker', nargs='*', help='Switches settings to ENV variables for use with docker.')
     parser.add_argument('--format', nargs='*', help='formats to download, valid options are pdf, '
                                                         'json, docx, csv, media, web-report-link, actions, pickle, sql')
     parser.add_argument('--list_preferences', nargs='*', help='display all preferences, or restrict to specific'
@@ -685,8 +800,9 @@ def parse_command_line_arguments(logger):
                 export_formats.append(option)
 
     loop_enabled = True if args.loop is not None else False
+    docker_enabled = True if args.docker is not None else False
 
-    return config_filename, export_formats, args.list_preferences, loop_enabled
+    return config_filename, export_formats, args.list_preferences, loop_enabled, docker_enabled
 
 
 def initial_setup(logger):
@@ -778,19 +894,23 @@ def show_preferences_and_exit(list_preferences, sc_client):
         sys.exit(0)
 
 
-def export_actions(logger, settings, sc_client):
+def export_actions(logger, settings, sc_client, get_started):
     """
     Export all actions created after date specified
     :param logger:      The logger
     :param settings:    Settings from command line and configuration file
     :param sc_client:   instance of safetypy.SafetyCulture class
     """
+
     logger.info('Exporting iAuditor actions')
     last_successful_actions_export = get_last_successful_actions_export(logger)
     actions_array = sc_client.get_audit_actions(last_successful_actions_export)
     if actions_array is not None:
         logger.info('Found ' + str(len(actions_array)) + ' actions')
-        save_exported_actions_to_csv_file(logger, settings[EXPORT_PATH], actions_array)
+        if not get_started:
+            save_exported_actions_to_csv_file(logger, settings[EXPORT_PATH], actions_array)
+        else:
+            save_exported_actions_to_db(logger, actions_array, settings, get_started)
         utc_iso_datetime_now = datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.000Z')
         update_actions_sync_marker_file(logger, utc_iso_datetime_now)
 
@@ -803,6 +923,7 @@ def sync_exports(logger, settings, sc_client):
     :param settings:  Settings from command line and configuration file
     :param sc_client: Instance of SDK object
     """
+    get_started = None
     if settings[EXPORT_ARCHIVED] is not None:
         archived_setting = settings[EXPORT_ARCHIVED]
     else:
@@ -811,9 +932,11 @@ def sync_exports(logger, settings, sc_client):
         completed_setting = settings[EXPORT_COMPLETED]
     else:
         completed_setting = True
-    
     if 'actions' in settings[EXPORT_FORMATS]:
-        export_actions(logger, settings, sc_client)
+        get_started = sql_setup(logger, settings, 'actions')
+        export_actions(logger, settings, sc_client, get_started)
+    # if 'actions' in settings[EXPORT_FORMATS]:
+    #     export_actions(logger, settings, sc_client, get_started)
     if not bool(
             set(settings[EXPORT_FORMATS]) & {'pdf', 'docx', 'csv', 'media', 'web-report-link', 'json', 'sql', 'pickle',
                                              'doc_creation'}):
@@ -840,7 +963,7 @@ def sync_exports(logger, settings, sc_client):
         get_started = 'ignored'
         for export_format in settings[EXPORT_FORMATS]:
             if export_format == 'sql':
-                get_started = sql_setup(logger, settings, export_count)
+                get_started = sql_setup(logger, settings, 'audits')
             elif export_format in ['pickle']:
                 get_started = ['complete', 'complete']
                 if export_format == 'pickle' and os.path.isfile('{}.pkl'.format(settings[SQL_TABLE])):
@@ -979,17 +1102,32 @@ def export_audit_csv(settings, audit_json):
             os.path.join(settings[EXPORT_PATH], csv_export_filename + '.csv'))
 
 
-def sql_setup(logger, settings, export_count):
+def sql_setup(logger, settings, action_or_audit):
     if settings[MERGE_ROWS] is True or False:
         merge = settings[MERGE_ROWS]
     else:
         merge = False
-    if settings[SQL_TABLE] != None:
-        table = settings[SQL_TABLE]
+
+    if settings[ACTIONS_MERGE_ROWS] is True or False:
+        actions_merge = settings[MERGE_ROWS]
     else:
-        table = 'iauditor_data'
+        actions_merge = False
+
     Base.metadata.clear()
-    Database = set_table(table, merge)
+
+    if action_or_audit is 'audit':
+        if settings[SQL_TABLE] is not None:
+            table = settings[SQL_TABLE]
+        else:
+            table = 'iauditor_data'
+        Database = set_table(table, actions_merge)
+    else:
+        if settings[ACTIONS_TABLE] is not None:
+            table = settings[ACTIONS_TABLE]
+        else:
+            table = 'iauditor_actions_data'
+        ActionsDatabase = set_actions_table(table, merge)
+
     connection_string = '{}://{}:{}@{}:{}/{}'.format(settings[DB_TYPE],
                                                      settings[DB_USER],
                                                      settings[DB_PWD],
@@ -1000,32 +1138,61 @@ def sql_setup(logger, settings, export_count):
     engine = create_engine(connection_string)
     meta = MetaData()
     logger.debug('Making connection to ' + str(engine))
-
-    if not engine.dialect.has_table(engine, settings[SQL_TABLE], schema=settings[DB_SCHEMA]):
-        logger.info(settings[SQL_TABLE] + ' not Found.')
-        print(settings[DB_TYPE])
-        if settings[ALLOW_TABLE_CREATION] is True:
-            Database.__table__.create(engine)
-        elif settings[ALLOW_TABLE_CREATION] is False:
-            logger.error('You need to create the table {} in your database before continuing. If you want the script to do it for you, set ALLOW_TABLE_CREATION to True in your config file'.format(settings[SQL_TABLE]))
-            sys.exit()
-        else:
-            validation = input('It doesn\'t look like a table called {} exists on your server. '
-                            'Would you like the script to try and create the table '
-                            'for you now? (If you\'re using docker, you need to set APPROVE_TABLE_CREATION to true in your config file) (y/n)  '.format(settings[SQL_TABLE]))
-            validation = validation.lower()
-            if validation.startswith('y'):
+    if action_or_audit is 'audit':
+        if not engine.dialect.has_table(engine, settings[SQL_TABLE], schema=settings[DB_SCHEMA]):
+            logger.info(settings[SQL_TABLE] + ' not Found.')
+            print(settings[DB_TYPE])
+            if settings[ALLOW_TABLE_CREATION] is True:
                 Database.__table__.create(engine)
-            else:
-                logger.info('Stopping the script. Please either re-run the script or create your table manually.')
+            elif settings[ALLOW_TABLE_CREATION] is False:
+                logger.error('You need to create the table {} in your database before continuing. If you want the script '
+                             'to do it for you, set ALLOW_TABLE_CREATION to '
+                             'True in your config file'.format(settings[SQL_TABLE]))
                 sys.exit()
-    setup = 'complete'
-    logger.info('Successfully setup Database and connection')
+            else:
+                validation = input('It doesn\'t look like a table called {} exists on your server. Would you like the '
+                                   'script to try and create the table for you now? (If you\'re using '
+                                   'docker, you need to set APPROVE_TABLE_CREATION to true in your config file) '
+                                   '(y/n)  '.format(settings[SQL_TABLE]))
+                validation = validation.lower()
+                if validation.startswith('y'):
+                    Database.__table__.create(engine)
+                else:
+                    logger.info('Stopping the script. Please either re-run the script or create your table manually.')
+                    sys.exit()
+        setup = 'complete'
+        logger.info('Successfully setup Database and connection')
+    else:
+        if not engine.dialect.has_table(engine, settings[ACTIONS_TABLE], schema=settings[DB_SCHEMA]):
+            logger.info(settings[ACTIONS_TABLE] + ' not Found.')
+            if settings[ALLOW_TABLE_CREATION] is True:
+                ActionsDatabase.__table__.create(engine)
+            elif settings[ALLOW_TABLE_CREATION] is False:
+                logger.error('You need to create the table {} in your database before continuing. If you want the '
+                             'script to do it for you, set ALLOW_TABLE_CREATION to True in your '
+                             'config file'.format(settings[SQL_TABLE]))
+                sys.exit()
+            else:
+                validation = input('It doesn\'t look like a table called {} exists on your server. Would you like the '
+                                   'script to try and create the table for you now? (If you\'re using '
+                                   'docker, you need to set APPROVE_TABLE_CREATION to true in your config file) '
+                                   '(y/n)  '.format(settings[ACTIONS_TABLE]))
+                validation = validation.lower()
+                if validation.startswith('y'):
+                    ActionsDatabase.__table__.create(engine)
+                else:
+                    logger.info('Stopping the script. Please either re-run the script or create your table manually.')
+                    sys.exit()
+        setup = 'complete'
+        logger.info('Successfully setup Database and connection')
 
-    return setup, engine, connection_string, meta, Database
+    if action_or_audit is 'audit':
+        return setup, engine, connection_string, meta, Database
+    else:
+        return setup, engine, connection_string, meta, ActionsDatabase
 
 
-def export_audit_sql(logger, settings, audit_json, get_started, export_count):
+def export_audit_sql(logger, settings, audit_json, get_started):
     """
     Save audit to a database.
     :param logger:      The logger
@@ -1206,8 +1373,8 @@ def loop(logger, sc_client, settings):
 def main():
     try:
         logger = configure_logger()
-        path_to_config_file, export_formats, preferences_to_list, loop_enabled = parse_command_line_arguments(logger)
-        sc_client, settings = configure(logger, path_to_config_file, export_formats)
+        path_to_config_file, export_formats, preferences_to_list, loop_enabled, docker_enabled = parse_command_line_arguments(logger)
+        sc_client, settings = configure(logger, path_to_config_file, export_formats, docker_enabled)
         if settings[CONFIG_NAME] is not None:
             global ACTIONS_SYNC_MARKER_FILENAME
             ACTIONS_SYNC_MARKER_FILENAME = 'last_successful/last_successful_actions_export-{}.txt'.format(settings[CONFIG_NAME])
@@ -1215,7 +1382,6 @@ def main():
             SYNC_MARKER_FILENAME = 'last_successful/last_successful-{}.txt'.format(settings[CONFIG_NAME])
         if preferences_to_list is not None:
             show_preferences_and_exit(preferences_to_list, sc_client)
-
         if loop_enabled:
             loop(logger, sc_client, settings)
         else:

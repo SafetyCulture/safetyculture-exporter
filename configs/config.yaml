@@ -1,6 +1,6 @@
 API:
-    token: YOUR-API-TOKEN-HERE
-config_name: test
+    token:
+config_name: iauditor
 export_options:
     export_path:
     timezone:
@@ -15,12 +15,13 @@ export_options:
     sync_delay_in_seconds: 70
     media_sync_offset_in_seconds: 0
     allow_table_creation: true
-    merge_rows: true
+    merge_rows: false
+    actions_merge_rows: false
     sql_table: iauditor_data
     database_type: mssql+pyodbc_mssql
-    database_user: 
-    database_pwd: 
-    database_server: 
+    database_user:
+    database_pwd:
+    database_server:
     database_port: 1433
-    database_schema: 
+    database_schema: dbo
     database_name: iAuditor?driver=ODBC Driver 17 for SQL Server

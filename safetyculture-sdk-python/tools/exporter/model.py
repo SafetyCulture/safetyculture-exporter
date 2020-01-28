@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Integer, Date, Float, DateTime , Boolean
+from sqlalchemy import Column, String, Integer, Float, DateTime, Boolean, BigInteger
 from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
@@ -95,6 +95,7 @@ def set_table(table, merge):
             Archived = Column(Boolean)
     return Database
 
+
 SQL_HEADER_ROW = [
     'ItemType',
     'Label',
@@ -137,4 +138,70 @@ SQL_HEADER_ROW = [
     'AuditArea',
     'AuditRegion',
     'Archived'
+]
+
+
+def set_actions_table(table, merge):
+    class ActionsDatabase(Base):
+        if merge is False:
+            __tablename__ = table
+            description = Column(String(None))
+            assignee = Column(String(None))
+            priority = Column(String(None))
+            priorityCode = Column(Integer)
+            status = Column(String(None))
+            statusCode = Column(Integer)
+            dueDatetime = Column(DateTime)
+            actionId = Column(String(100), primary_key=True, autoincrement=False)
+            audit = Column(String(None))
+            auditId = Column(String(None))
+            linkedToItem = Column(String(None))
+            linkedToItemId = Column(String(None))
+            creatorName = Column(String(None))
+            creatorId = Column(String(None))
+            createdDatetime = Column(DateTime)
+            modifiedDatetime = Column(DateTime)
+            completedDatetime = Column(DateTime)
+        else:
+            __tablename__ = table
+            description = Column(String(None))
+            assignee = Column(String(None))
+            priority = Column(String(None))
+            priorityCode = Column(Integer)
+            status = Column(String(None))
+            statusCode = Column(Integer)
+            dueDatetime = Column(DateTime)
+            actionId = Column(String(100), primary_key=True, autoincrement=False)
+            DatePK = Column(BigInteger, primary_key=True, autoincrement=False)
+            audit = Column(String(None))
+            auditId = Column(String(None))
+            linkedToItem = Column(String(None))
+            linkedToItemId = Column(String(None))
+            creatorName = Column(String(None))
+            creatorId = Column(String(None))
+            createdDatetime = Column(DateTime)
+            modifiedDatetime = Column(DateTime)
+            completedDatetime = Column(DateTime)
+    return ActionsDatabase
+
+
+
+ACTIONS_HEADER_ROW = [
+    'actionId',
+    'description',
+    'assignee',
+    'priority',
+    'priorityCode',
+    'status',
+    'statusCode',
+    'dueDatetime',
+    'audit',
+    'auditId',
+    'linkedToItem',
+    'linkedToItemId',
+    'creatorName',
+    'creatorId',
+    'createdDatetime',
+    'modifiedDatetime',
+    'completedDatetime'
 ]

@@ -5,7 +5,8 @@ RUN        apt-get update \
                 && curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - \
                 && curl https://packages.microsoft.com/config/debian/10/prod.list > /etc/apt/sources.list.d/mssql-release.list \
                 && apt-get update \
-                && ACCEPT_EULA=Y apt-get install -y msodbcsql17 mssql-tools
+                && ACCEPT_EULA=Y apt-get install -y msodbcsql17 \
+                && ACCEPT_EULA=Y apt-get install -y mssql-tools
 RUN        apt-get install -y \
            build-essential \
            libffi6 \
@@ -14,10 +15,11 @@ RUN        apt-get install -y \
            libssl-dev \
            libxml2-dev \
            libxslt-dev \
+           unixodbc \
            unixodbc-dev
 COPY       . /app
 WORKDIR    /app
 RUN        pip install --user /app
 WORKDIR    /app/tools/exporter
 RUN        pip install -r requirements.txt
-ENTRYPOINT python exporter.py --loop --format $format
+ENTRYPOINT python exporter.py --docker --loop --format $format
