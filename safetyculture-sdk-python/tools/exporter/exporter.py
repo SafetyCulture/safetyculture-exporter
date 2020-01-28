@@ -1086,9 +1086,9 @@ def export_audit_csv(settings, audit_json):
     """
 
     csv_exporter = csvExporter.CsvExporter(audit_json, settings[EXPORT_INACTIVE_ITEMS_TO_CSV])
-    if settings[USE_REAL_TEMPLATE_NAME] == False:
+    if settings[USE_REAL_TEMPLATE_NAME] is False:
         csv_export_filename = audit_json['template_id']
-    elif settings[USE_REAL_TEMPLATE_NAME] == True:
+    elif settings[USE_REAL_TEMPLATE_NAME] is True:
         csv_export_filename = audit_json['template_data']['metadata']['name']+' - '+audit_json['template_id']
         csv_export_filename = csv_export_filename.replace('/', ' ').replace('\\', ' ')
     elif settings[USE_REAL_TEMPLATE_NAME].startswith('role_'):
@@ -1128,6 +1128,7 @@ def sql_setup(logger, settings, action_or_audit):
             table = 'iauditor_actions_data'
         ActionsDatabase = set_actions_table(table, actions_merge)
     else:
+        print('No Match')
         sys.exit()
     connection_string = '{}://{}:{}@{}:{}/{}'.format(settings[DB_TYPE],
                                                      settings[DB_USER],
@@ -1139,7 +1140,7 @@ def sql_setup(logger, settings, action_or_audit):
     engine = create_engine(connection_string)
     meta = MetaData()
     logger.debug('Making connection to ' + str(engine))
-    if action_or_audit is 'audit':
+    if action_or_audit == 'audit':
         if not engine.dialect.has_table(engine, settings[SQL_TABLE], schema=settings[DB_SCHEMA]):
             logger.info(settings[SQL_TABLE] + ' not Found.')
             print(settings[DB_TYPE])
