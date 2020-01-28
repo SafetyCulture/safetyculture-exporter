@@ -1143,7 +1143,7 @@ def sql_setup(logger, settings, action_or_audit):
     if action_or_audit == 'audit':
         if not engine.dialect.has_table(engine, settings[SQL_TABLE], schema=settings[DB_SCHEMA]):
             logger.info(settings[SQL_TABLE] + ' not Found.')
-            print(settings[DB_TYPE])
+            print(settings[ALLOW_TABLE_CREATION])
             if settings[ALLOW_TABLE_CREATION] is True:
                 Database.__table__.create(engine)
             elif settings[ALLOW_TABLE_CREATION] is False:
