@@ -974,7 +974,7 @@ def sync_exports(logger, settings, sc_client):
                     sys.exit(0)
         for audit in list_of_audits['audits']:
             logger.info('Processing audit (' + str(export_count) + '/' + str(export_total) + ')')
-            process_audit(logger, settings, sc_client, audit, get_started, export_count)
+            process_audit(logger, settings, sc_client, audit, get_started)
             export_count += 1
 
 
