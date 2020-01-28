@@ -1,8 +1,8 @@
-/configs/edd.yaml
+!/configs/config.yaml
 /exports/*
 /last_successful/*
-/safetyculture-sdk-python/tools/exporter/__pycache__/model.cpython-37.pyc
+/safetyculture-sdk-python/tools/exporter/__pycache__/*
 /safetyculture-sdk-python/tools/exporter/Adminer/
 /safetyculture-sdk-python/tools/exporter/last_successful/
-edd-compose.yml
+/edd-compose.yml
 /.idea
