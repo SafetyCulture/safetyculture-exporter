@@ -683,7 +683,8 @@ def load_config_settings(logger, path_to_config_file, docker_enabled):
             ALLOW_TABLE_CREATION: set_env_defaults('ALLOW_TABLE_CREATION', os.environ['ALLOW_TABLE_CREATION'], logger),
             ACTIONS_TABLE: 'iauditor_actions_data',
             ACTIONS_MERGE_ROWS: set_env_defaults('ACTIONS_MERGE_ROWS', os.environ['ACTIONS_MERGE_ROWS'], logger),
-            PREFERENCES: None
+            PREFERENCES: None,
+            FILENAME_ITEM_ID: None
         }
     else:
         config_settings = yaml.safe_load(open(path_to_config_file))
