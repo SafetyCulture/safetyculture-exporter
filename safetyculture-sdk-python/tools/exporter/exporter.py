@@ -1109,19 +1109,19 @@ def sql_setup(logger, settings, action_or_audit):
         merge = False
 
     if settings[ACTIONS_MERGE_ROWS] is True or False:
-        actions_merge = settings[MERGE_ROWS]
+        actions_merge = settings[ACTIONS_MERGE_ROWS]
     else:
         actions_merge = False
 
     Base.metadata.clear()
 
-    if action_or_audit is 'audit':
+    if action_or_audit == 'audit':
         if settings[SQL_TABLE] is not None:
             table = settings[SQL_TABLE]
         else:
             table = 'iauditor_data'
         Database = set_table(table, merge)
-    elif action_or_audit is 'actions':
+    elif action_or_audit == 'actions':
         if settings[ACTIONS_TABLE] is not None:
             table = settings[ACTIONS_TABLE]
         else:
