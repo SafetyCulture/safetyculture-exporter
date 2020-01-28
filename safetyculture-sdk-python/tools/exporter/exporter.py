@@ -684,7 +684,8 @@ def load_config_settings(logger, path_to_config_file, docker_enabled):
             ACTIONS_TABLE: 'iauditor_actions_data',
             ACTIONS_MERGE_ROWS: set_env_defaults('ACTIONS_MERGE_ROWS', os.environ['ACTIONS_MERGE_ROWS'], logger),
             PREFERENCES: None,
-            FILENAME_ITEM_ID: None
+            FILENAME_ITEM_ID: None,
+            EXPORT_INACTIVE_ITEMS_TO_CSV: None
         }
     else:
         config_settings = yaml.safe_load(open(path_to_config_file))
