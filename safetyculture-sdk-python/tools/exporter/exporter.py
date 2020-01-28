@@ -1188,7 +1188,7 @@ def sql_setup(logger, settings, action_or_audit):
         setup = 'complete'
         logger.info('Successfully setup Database and connection')
 
-    if action_or_audit is 'audit':
+    if action_or_audit == 'audit':
         return setup, engine, connection_string, meta, Database
     else:
         return setup, engine, connection_string, meta, ActionsDatabase
