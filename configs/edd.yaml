@@ -1,0 +1,27 @@
+API:
+    token: 874fcaa47add992a4de345f6d1ede438e29ec5db9788705b0491f62be98290be
+config_name: test
+export_options:
+    export_path:
+    timezone:
+    filename:
+    export_archived: false
+    export_completed: both
+    use_real_template_name: false
+    csv_options:
+        export_inactive_items: false
+    export_profiles:
+    template_ids: 
+    sync_delay_in_seconds: 70
+    media_sync_offset_in_seconds: 0
+    allow_table_creation: true
+    merge_rows: true
+    actions_merge_rows: true
+    sql_table: iauditor_data
+    database_type: mssql+pyodbc_mssql
+    database_user: edd
+    database_pwd: sty2shapal
+    database_server: 192.168.21.242
+    database_port: 1433
+    database_schema: dbo
+    database_name: iAuditor?driver=ODBC Driver 17 for SQL Server
