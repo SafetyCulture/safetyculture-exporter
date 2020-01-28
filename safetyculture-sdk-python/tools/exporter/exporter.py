@@ -1001,7 +1001,7 @@ def check_if_media_sync_offset_satisfied(logger, settings, audit):
     return True
 
 
-def process_audit(logger, settings, sc_client, audit, get_started, export_count):
+def process_audit(logger, settings, sc_client, audit, get_started):
     """
     Export audit in the format specified in settings. Formats include PDF, JSON, CSV, MS Word (docx), media, or
     web report link.
