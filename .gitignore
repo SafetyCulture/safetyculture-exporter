@@ -1,7 +1,6 @@
 /configs/edd.yaml
-/exports/docker_demo/
-/exports/test/
-/last_successful/
+/exports/*
+/last_successful/*
 /safetyculture-sdk-python/tools/exporter/__pycache__/model.cpython-37.pyc
 /safetyculture-sdk-python/tools/exporter/Adminer/
 /safetyculture-sdk-python/tools/exporter/last_successful/
