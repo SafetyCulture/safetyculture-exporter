@@ -156,7 +156,7 @@ class SafetyCulture:
                 self.log_critical_error(ex, 'An error happened trying to create ' + path)
                 raise
 
-    def discover_audits(self, template_id=None, modified_after=None, completed=True,archived=False):
+    def discover_audits(self, template_id=None, modified_after=None, completed=True, archived=False):
         """
         Return IDs of all completed audits if no parameters are passed, otherwise restrict search
         based on parameter values

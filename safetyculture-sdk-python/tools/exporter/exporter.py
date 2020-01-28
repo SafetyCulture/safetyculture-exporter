@@ -963,7 +963,7 @@ def sync_exports(logger, settings, sc_client):
         get_started = 'ignored'
         for export_format in settings[EXPORT_FORMATS]:
             if export_format == 'sql':
-                get_started = sql_setup(logger, settings, 'audits')
+                get_started = sql_setup(logger, settings, 'audit')
             elif export_format in ['pickle']:
                 get_started = ['complete', 'complete']
                 if export_format == 'pickle' and os.path.isfile('{}.pkl'.format(settings[SQL_TABLE])):
@@ -1120,14 +1120,15 @@ def sql_setup(logger, settings, action_or_audit):
             table = settings[SQL_TABLE]
         else:
             table = 'iauditor_data'
-        Database = set_table(table, actions_merge)
-    else:
+        Database = set_table(table, merge)
+    elif action_or_audit is 'actions':
         if settings[ACTIONS_TABLE] is not None:
             table = settings[ACTIONS_TABLE]
         else:
             table = 'iauditor_actions_data'
-        ActionsDatabase = set_actions_table(table, merge)
-
+        ActionsDatabase = set_actions_table(table, actions_merge)
+    else:
+        sys.exit()
     connection_string = '{}://{}:{}@{}:{}/{}'.format(settings[DB_TYPE],
                                                      settings[DB_USER],
                                                      settings[DB_PWD],
@@ -1237,7 +1238,7 @@ def export_audit_pandas(logger, settings, audit_json, get_started, export_count)
     for export_format in settings[EXPORT_FORMATS]:
         if export_format == 'sql':
             # try:
-            export_audit_sql(logger, settings, audit_json, get_started, export_count)
+            export_audit_sql(logger, settings, audit_json, get_started)
             # except:
             #     logger.error('Something went wrong processing this inspection - likely a connection issue. Retrying in 30 seconds.')
             #     time.sleep(10)
