@@ -1144,9 +1144,9 @@ def sql_setup(logger, settings, action_or_audit):
         if not engine.dialect.has_table(engine, settings[SQL_TABLE], schema=settings[DB_SCHEMA]):
             logger.info(settings[SQL_TABLE] + ' not Found.')
             print(settings[ALLOW_TABLE_CREATION])
-            if settings[ALLOW_TABLE_CREATION] is True:
+            if settings[ALLOW_TABLE_CREATION] == 'true':
                 Database.__table__.create(engine)
-            elif settings[ALLOW_TABLE_CREATION] is False:
+            elif settings[ALLOW_TABLE_CREATION] == 'false':
                 logger.error('You need to create the table {} in your database before continuing. If you want the script '
                              'to do it for you, set ALLOW_TABLE_CREATION to '
                              'True in your config file'.format(settings[SQL_TABLE]))
