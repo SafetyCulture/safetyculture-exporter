@@ -1040,7 +1040,7 @@ def process_audit(logger, settings, sc_client, audit, get_started):
         #     export_template_creation(logger, settings, audit_json)
         elif export_format in ['sql', 'pickle']:
             if get_started[0] == 'complete':
-                export_audit_pandas(logger, settings, audit_json, get_started, export_count)
+                export_audit_pandas(logger, settings, audit_json, get_started)
             elif get_started[0] != 'complete':
                 logger.error('Something went wrong connecting to the database, please check your settings.')
                 sys.exit(1)
