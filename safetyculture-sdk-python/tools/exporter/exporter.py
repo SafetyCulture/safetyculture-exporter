@@ -817,7 +817,7 @@ def initial_setup(logger):
     :param logger:  the logger
     """
     # setup variables
-    current_directoy_path = os.getcwd()
+    current_directory_path = os.getcwd()
     exports_folder_name = 'iauditor_exports_folder'
 
     # get token, set token
@@ -832,8 +832,8 @@ def initial_setup(logger):
     create_directory_if_not_exists(logger, exports_folder_name)
 
     # write config file
-    path_to_config_file = os.path.join(current_directoy_path, exports_folder_name, 'configs', 'config.yaml')
-    create_directory_if_not_exists(logger, os.path.join(current_directoy_path, exports_folder_name,'configs'))
+    path_to_config_file = os.path.join(current_directory_path, exports_folder_name, 'configs', 'config.yaml')
+    create_directory_if_not_exists(logger, os.path.join(current_directory_path, exports_folder_name,'configs'))
     if os.path.exists(path_to_config_file):
         logger.critical("Config file already exists at {0}".format(path_to_config_file))
         logger.info("Please remove or rename the existing config file, then retry this setup program.")
