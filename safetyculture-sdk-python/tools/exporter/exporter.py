@@ -10,7 +10,7 @@ import numpy as np
 import argparse
 import errno
 import json
-import logging
+import coloredlogs, logging
 import os
 import re
 import sys
@@ -620,6 +620,7 @@ def configure_logger():
     create_directory_if_not_exists(None, log_dir)
     configure_logging(log_dir)
     logger = logging.getLogger('exporter_logger')
+    coloredlogs.install()
     return logger
 
 

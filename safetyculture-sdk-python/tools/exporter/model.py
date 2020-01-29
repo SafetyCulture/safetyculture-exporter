@@ -153,7 +153,7 @@ def set_actions_table(table, merge):
             statusCode = Column(Integer)
             dueDatetime = Column(DateTime)
             actionId = Column(String(100), primary_key=True, autoincrement=False)
-            DatePK = Column(BigInteger, primary_key=True, autoincrement=False)
+            DatePK = Column(BigInteger, autoincrement=False)
             audit = Column(String(None))
             auditId = Column(String(None))
             linkedToItem = Column(String(None))
