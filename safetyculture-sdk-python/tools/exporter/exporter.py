@@ -369,7 +369,6 @@ def save_exported_actions_to_db(logger, actions_array, settings, get_started):
     :param export_path:     path to directory for exports
     :param actions_array:   Array of action objects to be converted to CSV and saved to disk
     """
-    print(get_started)
     engine = get_started[1]
     actions_db = get_started[4]
 
@@ -1146,7 +1145,6 @@ def sql_setup(logger, settings, action_or_audit):
     if action_or_audit == 'audit':
         if not engine.dialect.has_table(engine, settings[SQL_TABLE], schema=settings[DB_SCHEMA]):
             logger.info(settings[SQL_TABLE] + ' not Found.')
-            print(settings[ALLOW_TABLE_CREATION])
             if settings[ALLOW_TABLE_CREATION] == 'true':
                 Database.__table__.create(engine)
             elif settings[ALLOW_TABLE_CREATION] == 'false':
