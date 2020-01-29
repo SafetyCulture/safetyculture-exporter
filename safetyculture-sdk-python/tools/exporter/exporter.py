@@ -1170,9 +1170,9 @@ def sql_setup(logger, settings, action_or_audit):
     else:
         if not engine.dialect.has_table(engine, settings[ACTIONS_TABLE], schema=settings[DB_SCHEMA]):
             logger.info(settings[ACTIONS_TABLE] + ' not Found.')
-            if settings[ALLOW_TABLE_CREATION] is True:
+            if settings[ALLOW_TABLE_CREATION] == 'true':
                 ActionsDatabase.__table__.create(engine)
-            elif settings[ALLOW_TABLE_CREATION] is False:
+            elif settings[ALLOW_TABLE_CREATION] == 'false':
                 logger.error('You need to create the table {} in your database before continuing. If you want the '
                              'script to do it for you, set ALLOW_TABLE_CREATION to True in your '
                              'config file'.format(settings[SQL_TABLE]))
