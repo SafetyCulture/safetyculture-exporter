@@ -9,9 +9,11 @@
 /safetyculture-sdk-python/tools/exporter/__pycache__/*
 /safetyculture-sdk-python/tools/exporter/Adminer/
 /safetyculture-sdk-python/tools/exporter/last_successful/
+/safetyculture-sdk-python/tools/exporter/log/*
+!/safetyculture-sdk-python/tools/exporter/log/.gitkeep
 /edd-compose.yml
 /.idea
 .DS_Store
-!/safetyculture-sdk-python/tools/exporter/exporter.spec
+/safetyculture-sdk-python/tools/exporter/exporter.spec
 safetyculture-sdk-python/tools/exporter/dist/*
 safetyculture-sdk-python/tools/exporter/build/*

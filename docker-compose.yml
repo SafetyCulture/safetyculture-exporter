@@ -1,14 +1,6 @@
 version: '3.7'
 
 services:
-  web:
-    container_name: config_editor
-    ports:
-      - 4000:8000
-    volumes:
-      - ./configs:/iauditor_configs
-    image: coderaiser/cloudcmd
-    restart: unless-stopped
   exporter:
     build: ./safetyculture-sdk-python
     container_name: sc-exporter-tool
