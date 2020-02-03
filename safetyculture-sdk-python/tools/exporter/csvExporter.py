@@ -37,6 +37,7 @@ CSV_HEADER_ROW = [
     'TemplateName',
     'TemplateAuthor',
     'ItemCategory',
+    'RepeatingSectionParentID',
     'DocumentNo',
     'ConductedOn',
     'PreparedBy',
@@ -67,7 +68,9 @@ PARENT_ID = 'parent_id'
 RESPONSE = 'response'
 INACTIVE = 'inactive'
 ID = 'item_id'
+MEDIAID = 'media_id'
 HREF = 'href'
+EXT = 'file_ext'
 SIGNATURE = 'signature'
 INFORMATION = 'information'
 MEDIA = 'media'
@@ -178,6 +181,7 @@ class CsvExporter:
         self.audit_json = audit_json
         self.export_inactive_items = export_inactive_items
         self.item_category = EMPTY_RESPONSE
+        self.repeating_section_title = EMPTY_RESPONSE
         self.item_map = {}
         self.map_items()
         self.audit_table = self.convert_audit_to_table()
@@ -221,6 +225,25 @@ class CsvExporter:
         else:
             return self.get_item_category(self.item_map[item_id]['parent_id'])
 
+    def get_repeating_section_title(self, item_id, count):
+        """
+        Recursively traverses the item Map, following parent IDs until it gets to an element.
+        When a Section or Category is found, the item ID is logged - it can then be used to group like questions together.
+        Needed whenever questions are nested within a repeating section (e.g. within smart fields.)
+        Count used to stop it running longer than needed.
+        :param item_id: item ID to find Category for
+        :return:        Item ID
+        """
+        if not item_id or count >=10:
+            return EMPTY_RESPONSE
+        elif self.item_map[item_id]['type'] == 'element':
+            count = 0
+            return item_id
+
+        else:
+            count += 1
+            return self.get_repeating_section_title(self.item_map[item_id]['parent_id'], count)
+
     def audit_custom_response_id_to_label_map(self):
         """
         :return:     dictionary mapping custom response_id's to their label
@@ -259,6 +282,7 @@ class CsvExporter:
             audit_data_as_list.append('Untitled Template')
         audit_data_as_list.append(template_data_property['authorship']['author'])
         audit_data_as_list.append(self.item_category)
+        audit_data_as_list.append(self.repeating_section_title)
         audit_data_as_list.append(self.get_header_item(header_data, 'DocumentNo'))
         audit_data_as_list.append(self.get_header_item(header_data, 'ConductedOn'))
         audit_data_as_list.append(self.get_header_item(header_data, 'PreparedBy'))
@@ -315,8 +339,10 @@ class CsvExporter:
         for item in self.audit_items():
             if item.get('parent_id'):
                 self.item_category = self.get_item_category(item['parent_id'])
+                self.repeating_section_title = self.get_repeating_section_title(item['parent_id'], 0)
             else:
                 self.item_category = EMPTY_RESPONSE
+                self.repeating_section_title = EMPTY_RESPONSE
             row_array = self.item_properties_as_list(item) + self.common_audit_data()
             if get_json_property(item, INACTIVE) and not self.export_inactive_items:
                 continue
@@ -517,11 +543,13 @@ class CsvExporter:
         """
         item_type = get_json_property(item, TYPE)
         if item_type == INFORMATION and get_json_property(item, 'options', TYPE) == MEDIA:
-            media_href = get_json_property(item, 'options', MEDIA, HREF)
+            media_href = ('{}.{}'.format(get_json_property(item, 'options', MEDIA, MEDIAID), get_json_property(item, 'options', MEDIA, EXT)))
         elif item_type in ['drawing', SIGNATURE]:
-            media_href = get_json_property(item, RESPONSES, 'image', HREF)
+            media_href = ('{}.{}'.format(get_json_property(item, RESPONSES, 'image', MEDIAID), get_json_property(item, RESPONSES, 'image', EXT)))
         else:
-            media_href = '\n'.join(image[HREF] for image in get_json_property(item, MEDIA))
+            media_href = '\n'.join(image[MEDIAID]+'.'+image[EXT] for image in get_json_property(item, MEDIA))
+        if media_href == '.':
+            media_href = None
         return media_href
 
     @staticmethod

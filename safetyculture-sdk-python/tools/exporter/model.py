@@ -39,6 +39,7 @@ def set_table(table, merge):
             TemplateName = Column(String(None))
             TemplateAuthor = Column(String(None))
             ItemCategory = Column(String(None))
+            RepeatingSectionParentID = Column(String(None))
             DocumentNo = Column(String(None))
             ConductedOn = Column(DateTime)
             PreparedBy = Column(String(None))
@@ -83,6 +84,7 @@ def set_table(table, merge):
             TemplateName = Column(String(None))
             TemplateAuthor = Column(String(None))
             ItemCategory = Column(String(None))
+            RepeatingSectionParentID = Column(String(None))
             DocumentNo = Column(String(None))
             ConductedOn = Column(DateTime)
             PreparedBy = Column(String(None))
@@ -128,6 +130,7 @@ SQL_HEADER_ROW = [
     'TemplateName',
     'TemplateAuthor',
     'ItemCategory',
+    'RepeatingSectionParentID',
     'DocumentNo',
     'ConductedOn',
     'PreparedBy',

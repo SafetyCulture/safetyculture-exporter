@@ -464,6 +464,8 @@ def save_exported_media_to_file(logger, export_dir, media_file, filename, extens
     :param filename:    filename to give exported image
     :param extension:   extension to give exported image
     """
+    print(filename)
+    print(extension)
     if not os.path.exists(export_dir):
         logger.info("Creating directory at {0} for media files.".format(export_dir))
         os.makedirs(export_dir)
@@ -1221,7 +1223,7 @@ def export_audit_sql(logger, settings, audit_json, get_started):
         session.bulk_insert_mappings(Database, df_dict)
     except:
         # If the bulk insert fails, we do a slower merge
-        logger.warn('Duplicate found, attempting to update')
+        logger.warning('Duplicate found, attempting to update')
         session.rollback()
         for row in df_dict:
             row_to_dict = Database(**row)
@@ -1267,36 +1269,60 @@ def export_audit_media(logger, sc_client, settings, audit_json, audit_id, export
     :param audit_id:    Unique audit UUID
     :param export_filename:     String indicating what to name the exported audit file
     """
-
-    media_id_list = get_media_from_audit(logger, audit_json, settings)
-    doc_creation_media_check = False
-    if len(media_id_list) > 0:
-        if type(media_id_list[0]) is tuple:
-            doc_creation_media_check = True
-            media_export_path = os.path.join('exports/doc_creation/{}/{}'.format(audit_json['template_id'],
-                                                                                 audit_id), 'media')
-        else:
-            media_export_path = os.path.join(settings[EXPORT_PATH], 'media', export_filename)
-    else:
-        media_export_path = os.path.join(settings[EXPORT_PATH], 'media', export_filename)
-        doc_creation_media_check = False
-    extension = 'jpg'
-    media_id_list = get_media_from_audit(logger, audit_json, settings)
+    media_export_path = os.path.join(settings[EXPORT_PATH], settings[CONFIG_NAME], 'media', export_filename)
+    media_id_list = get_media_from_audit(logger, audit_json)
+    print(media_id_list)
     for media_id in media_id_list:
-        if type(media_id) is tuple:
-            media_id = media_id[1]
+        extension = media_id[1]
+        media_id = media_id[0]
+        if not extension:
+            extension = 'jpg'
         logger.info("Saving media_{0} to disc.".format(media_id))
         media_file = sc_client.get_media(audit_id, media_id)
         media_export_filename = media_id
-        save_exported_media_to_file(logger,
-                                    media_export_path,
-                                    media_file,
-                                    media_export_filename,
-                                    extension
-                                    )
+        save_exported_media_to_file(logger, media_export_path, media_file, media_export_filename, extension)
 
-    if doc_creation_media_check == True:
-        return media_id_list
+
+# def export_audit_media(logger, sc_client, settings, audit_json, audit_id, export_filename):
+#     """
+#     Save audit media files to disk
+#     :param logger:      The logger
+#     :param sc_client:   instance of safetypy.SafetyCulture class
+#     :param settings:    Settings from command line and configuration file
+#     :param audit_json:  Audit JSON
+#     :param audit_id:    Unique audit UUID
+#     :param export_filename:     String indicating what to name the exported audit file
+#     """
+#
+#     media_id_list = get_media_from_audit(logger, audit_json)
+#     doc_creation_media_check = False
+#     if len(media_id_list) > 0:
+#         if type(media_id_list[0]) is tuple:
+#             doc_creation_media_check = True
+#             media_export_path = os.path.join('exports/doc_creation/{}/{}'.format(audit_json['template_id'],
+#                                                                                  audit_id), 'media')
+#         else:
+#             media_export_path = os.path.join(settings[EXPORT_PATH], 'media', export_filename)
+#     else:
+#         media_export_path = os.path.join(settings[EXPORT_PATH], 'media', export_filename)
+#         doc_creation_media_check = False
+#     extension = 'jpg'
+#     media_id_list = get_media_from_audit(logger, audit_json)
+#     for media_id in media_id_list:
+#         if type(media_id) is tuple:
+#             media_id = media_id[1]
+#         logger.info("Saving media_{0} to disc.".format(media_id))
+#         media_file = sc_client.get_media(audit_id, media_id)
+#         media_export_filename = media_id
+#         save_exported_media_to_file(logger,
+#                                     media_export_path,
+#                                     media_file,
+#                                     media_export_filename,
+#                                     extension
+#                                     )
+#
+#     if doc_creation_media_check == True:
+#         return media_id_list
 
 
 def export_audit_web_report_link(logger, settings, sc_client, audit_json, audit_id, template_id):
@@ -1320,7 +1346,7 @@ def export_audit_web_report_link(logger, settings, sc_client, audit_json, audit_
     save_web_report_link_to_file(logger, settings[EXPORT_PATH], web_report_data)
 
 
-def get_media_from_audit(logger, audit_json, settings):
+def get_media_from_audit(logger, audit_json):
     """
     Retrieve media IDs from a audit JSON
     :param logger: the logger
@@ -1329,35 +1355,57 @@ def get_media_from_audit(logger, audit_json, settings):
     """
     media_id_list = []
     for item in audit_json['header_items'] + audit_json['items']:
-        itemid = ''.join(e for e in item['item_id'] if e.isalnum())
-        itemid = ''.join(e for e in itemid if not e.isdigit())
-        for export_format in settings[EXPORT_FORMATS]:
-            if export_format == 'doc_creation':
-                # If we are creating documents, we append the itemid to the media id, too
-
-                if 'media' in item.keys():
-                    for media in item['media']:
-                        media_id_list.append((itemid, media['media_id']))
-                # This condition checks for media attached to signature and drawing type fields.
-                if 'responses' in item.keys() and 'image' in item['responses'].keys():
-                    media_id_list.append((itemid, item['responses']['image']['media_id']))
-                # This condition checks for media attached to information type fields.
-                if 'options' in item.keys() and 'media' in item['options'].keys():
-                    media_id_list.append((itemid, item['options']['media']['media_id']))
-            else:
-                # This condition checks for media attached to question and media type fields.
-                if 'media' in item.keys():
-                    for media in item['media']:
-                        media_id_list.append(media['media_id'])
-                # This condition checks for media attached to signature and drawing type fields.
-                if 'responses' in item.keys() and 'image' in item['responses'].keys():
-                    media_id_list.append(item['responses']['image']['media_id'])
-                # This condition checks for media attached to information type fields.
-                if 'options' in item.keys() and 'media' in item['options'].keys():
-                    media_id_list.append(item['options']['media']['media_id'])
-
+        # This condition checks for media attached to question and media type fields.
+        if 'media' in item.keys():
+            for media in item['media']:
+                media_id_list.append([media['media_id'], media['file_ext']])
+        # This condition checks for media attached to signature and drawing type fields.
+        if 'responses' in item.keys() and 'image' in item['responses'].keys():
+            media_id_list.append([item['responses']['image']['media_id'], item['responses']['image']['file_ext']])
+        # This condition checks for media attached to information type fields.
+        if 'options' in item.keys() and 'media' in item['options'].keys():
+            media_id_list.append([item['options']['media']['media_id'], item['options']['media']['file_ext']])
     logger.info("Discovered {0} media files associated with {1}.".format(len(media_id_list), audit_json['audit_id']))
     return media_id_list
+
+# def get_media_from_audit(logger, audit_json, settings):
+#     """
+#     Retrieve media IDs from a audit JSON
+#     :param logger: the logger
+#     :param audit_json: single audit JSON
+#     :return: list of media IDs
+#     """
+#     media_id_list = []
+#     for item in audit_json['header_items'] + audit_json['items']:
+#         itemid = ''.join(e for e in item['item_id'] if e.isalnum())
+#         itemid = ''.join(e for e in itemid if not e.isdigit())
+#         for export_format in settings[EXPORT_FORMATS]:
+#             if export_format == 'doc_creation':
+#                 # If we are creating documents, we append the itemid to the media id, too
+#
+#                 if 'media' in item.keys():
+#                     for media in item['media']:
+#                         media_id_list.append((itemid, media['media_id']))
+#                 # This condition checks for media attached to signature and drawing type fields.
+#                 if 'responses' in item.keys() and 'image' in item['responses'].keys():
+#                     media_id_list.append((itemid, item['responses']['image']['media_id']))
+#                 # This condition checks for media attached to information type fields.
+#                 if 'options' in item.keys() and 'media' in item['options'].keys():
+#                     media_id_list.append((itemid, item['options']['media']['media_id']))
+#             else:
+#                 # This condition checks for media attached to question and media type fields.
+#                 if 'media' in item.keys():
+#                     for media in item['media']:
+#                         media_id_list.append(media['media_id'])
+#                 # This condition checks for media attached to signature and drawing type fields.
+#                 if 'responses' in item.keys() and 'image' in item['responses'].keys():
+#                     media_id_list.append(item['responses']['image']['media_id'])
+#                 # This condition checks for media attached to information type fields.
+#                 if 'options' in item.keys() and 'media' in item['options'].keys():
+#                     media_id_list.append(item['options']['media']['media_id'])
+#
+#     logger.info("Discovered {0} media files associated with {1}.".format(len(media_id_list), audit_json['audit_id']))
+#     return media_id_list
 
 
 def loop(logger, sc_client, settings):
