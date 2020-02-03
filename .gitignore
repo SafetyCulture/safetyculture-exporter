@@ -13,5 +13,5 @@
 /.idea
 .DS_Store
 !/safetyculture-sdk-python/tools/exporter/exporter.spec
-safetyculture-sdk-python/tools/exporter/dist/
-safetyculture-sdk-python/tools/exporter/build/
+safetyculture-sdk-python/tools/exporter/dist/*
+safetyculture-sdk-python/tools/exporter/build/*
