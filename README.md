@@ -7,7 +7,9 @@ A revised version of the iAuditor Exporter Tool for use with Power BI and other 
 
 * Clone the repository
 * Navigate to `safetyculture-sdk-python` and run `pip install .`
+* Navigate to `tools/exporter`
     * `cd safetyculture-sdk-python/tools/exporter`
+* Run `pip install -r requirements.txt`
 * Navigate back to the root
     * `cd ../../../`
 * Open `configs/config.yaml` and edit as needed

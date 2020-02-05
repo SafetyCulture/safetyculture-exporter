@@ -740,7 +740,7 @@ def configure(logger, path_to_config_file, export_formats, docker_enabled):
             logger.error("You must set the config_name in your config file before continuing.")
             sys.exit()
     else:
-        logger.info('Invalid export path was found in ' + path_to_config_file + ', defaulting to /exports')
+        logger.info('No export path was found in ' + path_to_config_file + ', defaulting to /exports')
         config_settings[EXPORT_PATH] = os.path.join(os.getcwd(), 'exports')
         if config_settings[CONFIG_NAME] is not None:
             create_directory_if_not_exists(logger, os.path.join(config_settings[EXPORT_PATH], config_settings[CONFIG_NAME]))
