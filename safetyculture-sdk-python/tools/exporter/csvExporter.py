@@ -24,6 +24,8 @@ CSV_HEADER_ROW = [
     'ParentID',
     'AuditOwner',
     'AuditAuthor',
+    'AuditOwnerID',
+    'AuditAuthorID',
     'AuditName',
     'AuditScore',
     'AuditMaxScore',
@@ -36,6 +38,7 @@ CSV_HEADER_ROW = [
     'TemplateID',
     'TemplateName',
     'TemplateAuthor',
+    'TemplateAuthorID',
     'ItemCategory',
     'RepeatingSectionParentID',
     'DocumentNo',
@@ -266,6 +269,8 @@ class CsvExporter:
         audit_data_as_list = list()
         audit_data_as_list.append(audit_data_property['authorship']['owner'])
         audit_data_as_list.append(audit_data_property['authorship']['author'])
+        audit_data_as_list.append(audit_data_property['authorship']['owner_id'])
+        audit_data_as_list.append(audit_data_property['authorship']['author_id'])
         audit_data_as_list.append(audit_data_property['name'])
         audit_data_as_list.append(audit_data_property[SCORE])
         audit_data_as_list.append(audit_data_property['total_score'])
@@ -281,6 +286,7 @@ class CsvExporter:
         else:
             audit_data_as_list.append('Untitled Template')
         audit_data_as_list.append(template_data_property['authorship']['author'])
+        audit_data_as_list.append(template_data_property['authorship']['author_id'])
         audit_data_as_list.append(self.item_category)
         audit_data_as_list.append(self.repeating_section_title)
         audit_data_as_list.append(self.get_header_item(header_data, 'DocumentNo'))

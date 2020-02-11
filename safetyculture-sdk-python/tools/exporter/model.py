@@ -27,6 +27,8 @@ def set_table(table, merge):
             ParentID = Column(String(None))
             AuditOwner = Column(String(None))
             AuditAuthor = Column(String(None))
+            AuditOwnerID = Column(String(None))
+            AuditAuthorID = Column(String(None))
             AuditName = Column(String(None))
             AuditScore = Column(Float)
             AuditMaxScore = Column(Float)
@@ -38,6 +40,7 @@ def set_table(table, merge):
             TemplateID = Column(String(None))
             TemplateName = Column(String(None))
             TemplateAuthor = Column(String(None))
+            TemplateAuthorID = Column(String(None))
             ItemCategory = Column(String(None))
             RepeatingSectionParentID = Column(String(None))
             DocumentNo = Column(String(None))
@@ -72,6 +75,8 @@ def set_table(table, merge):
             ParentID = Column(String(None))
             AuditOwner = Column(String(None))
             AuditAuthor = Column(String(None))
+            AuditOwnerID = Column(String(None))
+            AuditAuthorID = Column(String(None))
             AuditName = Column(String(None))
             AuditScore = Column(Float)
             AuditMaxScore = Column(Float)
@@ -83,6 +88,7 @@ def set_table(table, merge):
             TemplateID = Column(String(None))
             TemplateName = Column(String(None))
             TemplateAuthor = Column(String(None))
+            TemplateAuthorID = Column(String(None))
             ItemCategory = Column(String(None))
             RepeatingSectionParentID = Column(String(None))
             DocumentNo = Column(String(None))
@@ -117,6 +123,8 @@ SQL_HEADER_ROW = [
     'ParentID',
     'AuditOwner',
     'AuditAuthor',
+    'AuditOwnerID',
+    'AuditAuthorID',
     'AuditName',
     'AuditScore',
     'AuditMaxScore',
@@ -129,6 +137,7 @@ SQL_HEADER_ROW = [
     'TemplateID',
     'TemplateName',
     'TemplateAuthor',
+    'TemplateAuthorID',
     'ItemCategory',
     'RepeatingSectionParentID',
     'DocumentNo',

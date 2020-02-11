@@ -17,3 +17,5 @@
 /safetyculture-sdk-python/tools/exporter/exporter.spec
 safetyculture-sdk-python/tools/exporter/dist/*
 safetyculture-sdk-python/tools/exporter/build/*
+/teamtrain.py
+/trainingpy.py
