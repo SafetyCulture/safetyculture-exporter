@@ -19,3 +19,5 @@ safetyculture-sdk-python/tools/exporter/dist/*
 safetyculture-sdk-python/tools/exporter/build/*
 /teamtrain.py
 /trainingpy.py
+/__pycache__
+/ExampleCSV
