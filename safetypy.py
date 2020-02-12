@@ -519,15 +519,12 @@ class SafetyCulture:
     def get_id_from_email(self, email):
         data = {'email': [email]}
         search_url = self.add_users_url + '/search'
-        response = self.authenticated_request_put(search_url, data)
-        print(response)
-        body = response.content if response.status_code == requests.codes.ok else None
-        print(body)
+        response = self.authenticated_request_post(search_url, json.dumps(data))
+        body = response.json() if response.status_code == requests.codes.ok else None
         if body:
-            email = body['email']
+            email = body['users'][0]['id']
         else:
             email = None
-        print(email)
         return email
 
     def get_users_of_group(self, group_id):

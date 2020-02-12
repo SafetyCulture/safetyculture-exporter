@@ -20,7 +20,6 @@ def get_user_api_token(logger):
     :return:        API Token if authenticated else None
     """
     username = input("TeamTrain email: ")
-    print(username)
     password = getpass()
     generate_token_url = "https://sandpit-api.safetyculture.com/training/api/auth/token"
     post_body = {

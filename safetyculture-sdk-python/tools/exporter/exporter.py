@@ -622,7 +622,7 @@ def configure_logger():
     create_directory_if_not_exists(None, log_dir)
     configure_logging(log_dir)
     logger = logging.getLogger('exporter_logger')
-    coloredlogs.install()
+    coloredlogs.install(logger=logger)
     return logger
 
 

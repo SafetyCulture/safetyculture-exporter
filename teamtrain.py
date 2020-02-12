@@ -5,11 +5,11 @@ import os
 from datetime import datetime
 import sys
 import pandas as pd
+import safetypy as sp
+import configparser
 
 # Possible values here are DEBUG, INFO, WARN, ERROR and CRITICAL
 LOG_LEVEL = logging.DEBUG
-
-api_token = 'IjQxNDY5ZDhlMzI0YzQ5MjU4OTJiOGZhOTM3MGQ4ZDcxIg.B53JT_5mjtSTk6x9dwDKA0gK5rU'
 
 
 def log_critical_error(logger, ex, message):
@@ -77,38 +77,46 @@ def configure_logger():
     create_directory_if_not_exists(None, log_dir)
     configure_logging(log_dir)
     logger = logging.getLogger('exporter_logger')
-    coloredlogs.install()
+    coloredlogs.install(logger=logger)
     return logger
 
 
-def users_to_dict():
+def users_to_dict(logger):
     # Returns a list of one user per row along with their team information.
+    logger.info('Downloading User List')
     list_of_teams = tt.list_teams()
+    logger.info('Found {} teams'.format(len(list_of_teams)))
     combined_list = []
 
     for team_id in list_of_teams:
+        logger.info('Downloading users from {}'.format(team_id['title']))
         row = team_id
         row['TeamID'] = row.pop('id')
         row['TeamName'] = row.pop('title')
         row['TeamDescription'] = row.pop('description')
-        id = team_id['TeamID']
+        id = row['TeamID']
         team_members = tt.list_teams_users(id)
         if team_members:
             for user in team_members:
+                logger.info('Downloading {}'.format(user['email']))
                 user['UserID'] = user.pop('id')
+                iauditor_id = sc.get_id_from_email(user['email'])
+                user['iAuditor UserID'] = iauditor_id
                 user.update(row)
                 combined_list.append(user)
 
     return combined_list
 
 
-def lesson_records_to_dict():
+def lesson_records_to_dict(logger):
     # Returns the completed lessons in a dict
-    user_list = users_to_dict()
+    user_list = users_to_dict(logger)
     combined_list = []
     for user in user_list:
+
         id = user['UserID']
         user_records = tt.discover_lesson_records(user_id=id)
+        logger.info('Downloading {} Records for {}'.format(len(user_records),user['email']))
         for record in user_records:
             record['UserID'] = id
             combined_list.append(record)
@@ -117,8 +125,8 @@ def lesson_records_to_dict():
 
 def main():
     logger = configure_logger()
-    users = users_to_dict()
-    lesson_records = lesson_records_to_dict()
+    users = users_to_dict(logger)
+    lesson_records = lesson_records_to_dict(logger)
     courses = tt.discover_courses()
     df_courses = pd.DataFrame(courses)
     df_users = pd.DataFrame(users)
@@ -131,6 +139,12 @@ def main():
     df_courses.to_csv('courses.csv')
     df_records.to_csv('records.csv')
 
-tt = tp.Training(api_token)
+
+config = configparser.ConfigParser()
+config.read('ttconfig.ini')
+tt_api_key = config['TOKENS']['TeamTrain']
+tt = tp.Training(tt_api_key)
+sc_api_key = config['TOKENS']['iAuditor']
+sc = sp.SafetyCulture(sc_api_key)
 main()
 
