@@ -21,3 +21,9 @@ safetyculture-sdk-python/tools/exporter/build/*
 /trainingpy.py
 /__pycache__
 /ExampleCSV
+/courses.csv
+/records.csv
+/users.csv
+/safetypy.py
+/safetyculture-sdk-python/tools/exporter/hook-sqlalchemy_pyodbc_mssql.py
+/ttconfig.ini
