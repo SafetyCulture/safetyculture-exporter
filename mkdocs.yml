@@ -13,7 +13,7 @@ nav:
     - '3. Setting up the Script':
         - 'Installing Requirements': /script-setup/installing-packages
         - 'Editing the config file': /script-setup/config
-    - '3. Running the Script':
+    - '4. Running the Script':
         - 'Overview': /script-running/overview
 - Data Structure: datastructure.md
 extra_css:
