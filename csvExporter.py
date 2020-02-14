@@ -331,7 +331,7 @@ class CsvExporter:
         if date:
             date_object = datetime.strptime(date, '%Y-%m-%dT%H:%M:%S.%fZ')
             formatted_date = date_object.strftime('%d %B %Y')
-            formatted_time = date_object.strftime('%I:%M %p')
+            formatted_time = date_object.strftime('%I:%M:%S %p')
             return formatted_date + ' ' + formatted_time
         else:
             return EMPTY_RESPONSE

@@ -27,3 +27,4 @@ safetyculture-sdk-python/tools/exporter/build/*
 /safetypy.py
 /safetyculture-sdk-python/tools/exporter/hook-sqlalchemy_pyodbc_mssql.py
 /ttconfig.ini
+/.vscode

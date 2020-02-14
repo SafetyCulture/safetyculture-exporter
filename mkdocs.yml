@@ -1,0 +1,8 @@
+site_name: iAuditor Exporter
+theme: readthedocs
+nav:
+  - Home: index.md
+  - Installation: install.md
+  - Data Structure: datastructure.md
+extra_css:
+    - css/extra.css
