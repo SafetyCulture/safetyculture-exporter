@@ -521,7 +521,7 @@ class SafetyCulture:
         search_url = self.add_users_url + '/search'
         response = self.authenticated_request_post(search_url, json.dumps(data))
         body = response.json() if response.status_code == requests.codes.ok else None
-        if body:
+        if body['users']:
             email = body['users'][0]['id']
         else:
             email = None
@@ -600,3 +600,4 @@ class SafetyCulture:
         status_description = requests.status_codes._codes[status_code][0]
         log_string = str(status_code) + ' [' + status_description + '] status received ' + message
         logger.info(log_string) if status_code == requests.codes.ok else logger.error(log_string)
+
