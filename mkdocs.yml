@@ -1,8 +1,20 @@
 site_name: iAuditor Exporter
 theme: readthedocs
 nav:
-  - Home: index.md
-  - Installation: install.md
-  - Data Structure: datastructure.md
+- Home: index.md
+- Installation:
+    - Quick Install: install.md
+    - '1. Install Python':
+       - 'Mac': /install-python/mac
+       - 'Windows': /install-python/windows
+    - '2. Download the Script':
+       - 'Using Git (Recommended)': /script-download/git
+       - 'Manual Download (If you can''t use Git)': /script-download/manual-dl
+    - '3. Setting up the Script':
+        - 'Installing Requirements': /script-setup/installing-packages
+        - 'Editing the config file': /script-setup/config
+    - '3. Running the Script':
+        - 'Overview': /script-running/overview
+- Data Structure: datastructure.md
 extra_css:
     - css/extra.css

@@ -1,33 +1,8 @@
-# Welcome to MkDocs
+# Overview
+The iAuditor Exporter tool is the primary way to bulk export iAuditor information for use in BI tools such as PowerBI. The tool is coded in the Python programming language and can be ran simply and easily on any computer with Python installed.
 
-For full documentation visit [mkdocs.org](https://mkdocs.org).
+We also have a Docker image available for those who'd prefer to deploy a container instead. 
 
-## Commands
+This documentation aims to make it easy to not only set up the tool, but to also understand and make use of the data it gives out.
 
-* `mkdocs new [dir-name]` - Create a new project.
-* `mkdocs serve` - Start the live-reloading docs server.
-* `mkdocs build` - Build the documentation site.
-* `mkdocs help` - Print this help message.
-
-## Project layout
-
-    mkdocs.yml    # The configuration file.
-    docs/
-        index.md  # The documentation homepage.
-        ...       # Other markdown pages, images and other files.
-
-## Installation
-* If you've used the SafetyCulture Python SDK before, you need to uninstall it (if you're unsure, run the command anyway.):
-    * pip uninstall safetyculture-sdk-python
-* Clone or download the repository
-* Navigate to `safetyculture-sdk-python` and run `pip install .`
-* Navigate to `tools/exporter`
-    * `cd safetyculture-sdk-python/tools/exporter`
-* Run `pip install -r requirements.txt`
-* Open `configs/config.yaml` and edit as needed
-* Run `python exporter.py --format sql` (Or other format support by the exporter)
-
-
-
-## Structure
- - Understanding the Data Set
+If you feel any part of this documentation is lacking or missing, please reach out to support@safetyculture.com and let us know what you'd like to see.
