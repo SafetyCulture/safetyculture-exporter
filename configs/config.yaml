@@ -11,7 +11,7 @@ export_options:
     export_inactive_items: false
     export_profiles:
     template_ids: 
-    sync_delay_in_seconds: 70
+    sync_delay_in_seconds: 900
     media_sync_offset_in_seconds: 0
     allow_table_creation: true
     merge_rows: false

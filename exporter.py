@@ -811,12 +811,12 @@ def parse_command_line_arguments(logger):
 
     export_formats = ['pdf']
     if args.format is not None and len(args.format) > 0:
-        valid_export_formats = ['json', 'docx', 'pdf', 'csv', 'media', 'web-report-link', 'actions', 'sql', 'pickle', 'doc_creation']
+        valid_export_formats = ['json', 'docx', 'pdf', 'csv', 'media', 'web-report-link', 'actions', 'actions-sql', 'sql', 'pickle', 'doc_creation']
         export_formats = []
         for option in args.format:
             if option not in valid_export_formats:
                 print('{0} is not a valid export format.  Valid options are pdf, json, docx, csv, web-report-link, '
-                      'media, actions, pickle, doc_creation, or sql'.format(option))
+                      'media, actions, pickle, actions_sql, or sql'.format(option))
                 logger.info('invalid export format argument: {0}'.format(option))
             else:
                 export_formats.append(option)
@@ -954,11 +954,12 @@ def sync_exports(logger, settings, sc_client):
         completed_setting = settings[EXPORT_COMPLETED]
     else:
         completed_setting = True
-    if 'actions' in settings[EXPORT_FORMATS]:
+    if 'actions-sql' in settings[EXPORT_FORMATS]:
         get_started = sql_setup(logger, settings, 'actions')
         export_actions(logger, settings, sc_client, get_started)
-    # if 'actions' in settings[EXPORT_FORMATS]:
-    #     export_actions(logger, settings, sc_client, get_started)
+    if 'actions' in settings[EXPORT_FORMATS]:
+        get_started = None
+        export_actions(logger, settings, sc_client, get_started)
     if not bool(
             set(settings[EXPORT_FORMATS]) & {'pdf', 'docx', 'csv', 'media', 'web-report-link', 'json', 'sql', 'pickle',
                                              'doc_creation'}):
