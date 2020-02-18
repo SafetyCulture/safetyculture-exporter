@@ -8,7 +8,7 @@ def set_table(table, merge):
     class Database(Base):
         if merge is False:
             __tablename__ = table
-            id = Column(Integer, primary_key=False, autoincrement=True)
+            SortingIndex = Column(Integer)
             ItemType = Column(String(20))
             Label = Column(String(None))
             Response = Column(String(None))
