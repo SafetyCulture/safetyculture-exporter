@@ -7,7 +7,7 @@ import copy
 from datetime import datetime
 
 CSV_HEADER_ROW = [
-    'id',
+    'SortingIndex',
     'ItemType',
     'Label',
     'Response',

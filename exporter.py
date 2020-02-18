@@ -1109,6 +1109,7 @@ def export_audit_csv(settings, audit_json):
     """
 
     csv_exporter = csvExporter.CsvExporter(audit_json, settings[EXPORT_INACTIVE_ITEMS_TO_CSV])
+    count = 0
     if settings[USE_REAL_TEMPLATE_NAME] is False:
         csv_export_filename = audit_json['template_id']
     elif settings[USE_REAL_TEMPLATE_NAME] is True:
@@ -1116,6 +1117,10 @@ def export_audit_csv(settings, audit_json):
         csv_export_filename = csv_export_filename.replace('/', ' ').replace('\\', ' ')
     elif settings[USE_REAL_TEMPLATE_NAME].startswith('single_file'):
         csv_export_filename = settings[CONFIG_NAME]
+
+    for row in csv_exporter.audit_table:
+        count += 1
+        row[0] = count
 
     if settings[CONFIG_NAME] is not None:
         csv_exporter.append_converted_audit_to_bulk_export_file(
