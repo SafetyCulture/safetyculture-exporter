@@ -555,7 +555,14 @@ class CsvExporter:
         elif item_type in ['drawing', SIGNATURE]:
             media_href = ('{}.{}'.format(get_json_property(item, RESPONSES, 'image', MEDIAID), get_json_property(item, RESPONSES, 'image', EXT)))
         else:
-            media_href = '\n'.join(image[MEDIAID]+'.'+image[EXT] for image in get_json_property(item, MEDIA))
+            media_list = []
+            for image in get_json_property(item, MEDIA):
+                if EXT in image.keys():
+                    media_list.append(image[MEDIAID] + '.' + image[EXT])
+                else:
+                    media_list.append(image[MEDIAID] + '.' + 'jpg')
+            media_href = '\n'.join(media_list)
+            # media_href = '\n'.join(image[MEDIAID]+'.'+image[EXT] for image in get_json_property(item, MEDIA))
         if media_href == '.':
             media_href = None
         return media_href
