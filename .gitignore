@@ -1,5 +1,5 @@
 /configs/*
-!/configs/config.yaml
+!/configs/config.yaml.sample
 /exports/*
 !/exports/.gitkeep
 /last_successful/*
