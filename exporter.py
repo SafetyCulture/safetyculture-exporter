@@ -481,8 +481,6 @@ def save_exported_media_to_file(logger, export_dir, media_file, filename, extens
     :param filename:    filename to give exported image
     :param extension:   extension to give exported image
     """
-    print(filename)
-    print(extension)
     if not os.path.exists(export_dir):
         logger.info("Creating directory at {0} for media files.".format(export_dir))
         os.makedirs(export_dir)
@@ -1399,8 +1397,8 @@ def get_media_from_audit(logger, audit_json):
             media_id_list.append([item['responses']['image']['media_id'], file_ext])
         # This condition checks for media attached to information type fields.
         if 'options' in item.keys() and 'media' in item['options'].keys():
-            if 'file_ext' in item['responses']['images'].keys():
-                file_ext = item['responses']['image']['file_ext']
+            if 'file_ext' in item['options']['media'].keys():
+                file_ext = item['options']['media']['file_ext']
             else:
                 file_ext = 'jpg'
             media_id_list.append([item['options']['media']['media_id'], file_ext])
