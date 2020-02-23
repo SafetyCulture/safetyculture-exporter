@@ -2,8 +2,8 @@ version: '3.7'
 
 services:
   iauditor-exporter:
-    image: iauditor-exporter:latest
-    container_name: sc-exporter-tool
+    image: eddabrahamsen/iauditor-exporter:latest
+    container_name: iauditor-exporter
     restart: unless-stopped
     environment:
       - PGID=1000
@@ -31,10 +31,10 @@ services:
     volumes:
       - type: bind
         source: ./last_successful
-        target: /app/tools/exporter/last_successful
+        target: /app/last_successful
       - type: bind
         source: ./exports
-        target: /app/tools/exporter/exports
+        target: /app/exports
   portainer:
     container_name: portainer
     image: portainer/portainer

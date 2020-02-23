@@ -706,13 +706,30 @@ def load_config_settings(logger, path_to_config_file, docker_enabled):
         }
     else:
         config_settings = yaml.safe_load(open(path_to_config_file))
+        if config_settings['config_name'] is None:
+            logger.info('The Config Name has been left blank, defaulting to iauditor.')
+            config_name = 'iauditor'
+        elif ' ' in config_settings['config_name']:
+            config_name = config_settings['config_name'].replace(' ', '_')
+
+        if re.match("^[A-Za-z0-9_-]*$", config_name):
+            config_name = config_name
+        else:
+            logger.critical('Config name can only contain letters, numbers, hyphens or underscores.')
+            sys.exit()
         if 'allow_table_creation' in config_settings['export_options']:
             table_creation = config_settings['export_options']['allow_table_creation']
         else:
             table_creation = False
+        if load_setting_export_path(logger, config_settings) is None:
+            export_path = os.path.join('exports', config_name)
+        else:
+            export_path = os.path.join(load_setting_export_path(logger, config_settings), config_name)
+
+
         settings = {
             API_TOKEN: load_setting_api_access_token(logger, config_settings),
-            EXPORT_PATH: load_setting_export_path(logger, config_settings),
+            EXPORT_PATH: export_path,
             PREFERENCES: load_setting_preference_mapping(logger, config_settings),
             FILENAME_ITEM_ID: get_filename_item_id(logger, config_settings),
             SYNC_DELAY_IN_SECONDS: load_setting_sync_delay(logger, config_settings),
@@ -728,7 +745,7 @@ def load_config_settings(logger, path_to_config_file, docker_enabled):
             DB_NAME: config_settings['export_options']['database_name'],
             DB_SCHEMA: config_settings['export_options']['database_schema'],
             USE_REAL_TEMPLATE_NAME: config_settings['export_options']['use_real_template_name'],
-            CONFIG_NAME: config_settings['config_name'],
+            CONFIG_NAME: config_name,
             EXPORT_ARCHIVED: config_settings['export_options']['export_archived'],
             EXPORT_COMPLETED: config_settings['export_options']['export_completed'],
             MERGE_ROWS: config_settings['export_options']['merge_rows'],
@@ -754,7 +771,7 @@ def configure(logger, path_to_config_file, export_formats, docker_enabled):
 
     if config_settings[EXPORT_PATH] is not None:
         if config_settings[CONFIG_NAME] is not None:
-            create_directory_if_not_exists(logger, os.path.join(config_settings[EXPORT_PATH], config_settings[CONFIG_NAME]))
+            create_directory_if_not_exists(logger, os.path.join(config_settings[EXPORT_PATH]))
         else:
             logger.error("You must set the config_name in your config file before continuing.")
             sys.exit()
@@ -762,7 +779,7 @@ def configure(logger, path_to_config_file, export_formats, docker_enabled):
         logger.info('No export path was found in ' + path_to_config_file + ', defaulting to /exports')
         config_settings[EXPORT_PATH] = os.path.join(os.getcwd(), 'exports')
         if config_settings[CONFIG_NAME] is not None:
-            create_directory_if_not_exists(logger, os.path.join(config_settings[EXPORT_PATH], config_settings[CONFIG_NAME]))
+            create_directory_if_not_exists(logger, os.path.join(config_settings[EXPORT_PATH]))
         else:
             logger.error("You must set the config_name in your config file before continuing.")
             sys.exit()
@@ -1119,17 +1136,19 @@ def export_audit_csv(settings, audit_json):
         csv_export_filename = csv_export_filename.replace('/', ' ').replace('\\', ' ')
     elif settings[USE_REAL_TEMPLATE_NAME].startswith('single_file'):
         csv_export_filename = settings[CONFIG_NAME]
+    else:
+        csv_export_filename = audit_json['template_id']
 
     for row in csv_exporter.audit_table:
         count += 1
         row[0] = count
 
-    if settings[CONFIG_NAME] is not None:
-        csv_exporter.append_converted_audit_to_bulk_export_file(
-            os.path.join(settings[EXPORT_PATH], settings[CONFIG_NAME], csv_export_filename + '.csv'))
-    else:
-        csv_exporter.append_converted_audit_to_bulk_export_file(
-            os.path.join(settings[EXPORT_PATH], csv_export_filename + '.csv'))
+    # if settings[CONFIG_NAME] is not None:
+    #     csv_exporter.append_converted_audit_to_bulk_export_file(
+    #         os.path.join(settings[EXPORT_PATH], settings[CONFIG_NAME], csv_export_filename + '.csv'))
+    # else:
+    csv_exporter.append_converted_audit_to_bulk_export_file(
+        os.path.join(settings[EXPORT_PATH], csv_export_filename + '.csv'))
 
 
 def sql_setup(logger, settings, action_or_audit):
@@ -1298,9 +1317,8 @@ def export_audit_media(logger, sc_client, settings, audit_json, audit_id, export
     :param audit_id:    Unique audit UUID
     :param export_filename:     String indicating what to name the exported audit file
     """
-    media_export_path = os.path.join(settings[EXPORT_PATH], settings[CONFIG_NAME], 'media', export_filename)
+    media_export_path = os.path.join(settings[EXPORT_PATH], 'media', export_filename)
     media_id_list = get_media_from_audit(logger, audit_json)
-    print(media_id_list)
     for media_id in media_id_list:
         extension = media_id[1]
         media_id = media_id[0]
