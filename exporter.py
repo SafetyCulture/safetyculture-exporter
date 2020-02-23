@@ -657,7 +657,7 @@ def set_env_defaults(name, env_var, logger):
             env_var = None
         else:
             env_var = false
-    print(name,' set to ',env_var)
+    print(name, ' set to ', env_var)
     return env_var
 
 
@@ -706,6 +706,10 @@ def load_config_settings(logger, path_to_config_file, docker_enabled):
         }
     else:
         config_settings = yaml.safe_load(open(path_to_config_file))
+        if 'allow_table_creation' in config_settings['export_options']:
+            table_creation = config_settings['export_options']['allow_table_creation']
+        else:
+            table_creation = False
         settings = {
             API_TOKEN: load_setting_api_access_token(logger, config_settings),
             EXPORT_PATH: load_setting_export_path(logger, config_settings),
@@ -728,8 +732,8 @@ def load_config_settings(logger, path_to_config_file, docker_enabled):
             EXPORT_ARCHIVED: config_settings['export_options']['export_archived'],
             EXPORT_COMPLETED: config_settings['export_options']['export_completed'],
             MERGE_ROWS: config_settings['export_options']['merge_rows'],
-            ALLOW_TABLE_CREATION: config_settings['export_options']['allow_table_creation'],
-            ACTIONS_TABLE: 'iauditor_actions_data',
+            ALLOW_TABLE_CREATION: table_creation,
+            ACTIONS_TABLE: config_settings['export_options']['sql_table']+'_actions',
             ACTIONS_MERGE_ROWS: config_settings['export_options']['actions_merge_rows']
         }
     return settings

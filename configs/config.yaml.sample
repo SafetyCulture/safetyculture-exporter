@@ -12,8 +12,7 @@ export_options:
     export_profiles:
     template_ids: 
     sync_delay_in_seconds: 900
-    media_sync_offset_in_seconds: 0
-    allow_table_creation: true
+    media_sync_offset_in_seconds: 900
     merge_rows: false
     actions_merge_rows: false
     sql_table: iauditor_data

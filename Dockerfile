@@ -19,7 +19,5 @@ RUN        apt-get install -y \
            unixodbc-dev
 COPY       . /app
 WORKDIR    /app
-RUN        pip install --user /app
-WORKDIR    /app/tools/exporter
 RUN        pip install -r requirements.txt
 ENTRYPOINT python exporter.py --docker --loop --format $format
