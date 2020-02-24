@@ -711,6 +711,8 @@ def load_config_settings(logger, path_to_config_file, docker_enabled):
             config_name = 'iauditor'
         elif ' ' in config_settings['config_name']:
             config_name = config_settings['config_name'].replace(' ', '_')
+        else:
+            config_name = config_settings['config_name']
 
         if re.match("^[A-Za-z0-9_-]*$", config_name):
             config_name = config_name

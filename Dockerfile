@@ -17,7 +17,7 @@ RUN        apt-get install -y \
            libxslt-dev \
            unixodbc \
            unixodbc-dev
-COPY       . /app
+RUN        git clone https://github.com/SafetyCulture/iauditor-exporter /app
 WORKDIR    /app
 RUN        pip install -r requirements.txt
 ENTRYPOINT python exporter.py --docker --loop --format $format
