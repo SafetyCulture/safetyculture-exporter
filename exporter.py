@@ -22,13 +22,16 @@ import pandas as pd
 import pytz
 import unicodecsv as csv
 import yaml
-from safetypy import safetypy as sp
+import testpy as sp
+# from safetypy import safetypy as sp
 from sqlalchemy import *
 from sqlalchemy.exc import IntegrityError, OperationalError
 from sqlalchemy.orm import sessionmaker
 
 import csvExporter
 from model import Base, set_table, SQL_HEADER_ROW, ACTIONS_HEADER_ROW, set_actions_table
+
+# from doc_creator import *
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..'))
 
@@ -68,6 +71,9 @@ AUDIT_TITLE_ITEM_ID = 'f3245d40-ea77-11e1-aff1-0800200c9a66'
 
 # Properties kept in settings dictionary which takes its values from config.YAML
 API_TOKEN = 'api_token'
+SSL_CERT = 'ssl_cert'
+PROXY_HTTP = 'proxy_http'
+PROXY_HTTPS = 'proxy_https'
 CONFIG_NAME = 'config_name'
 EXPORT_PATH = 'export_path'
 PREFERENCES = 'preferences'
@@ -393,6 +399,15 @@ def save_exported_actions_to_db(logger, actions_array, settings, get_started):
         bulk_actions.append(action_as_list)
     df = pd.DataFrame.from_records(bulk_actions, columns=ACTIONS_HEADER_ROW)
     df['DatePK'] = pd.to_datetime(df['modifiedDatetime']).values.astype(np.int64) // 10 ** 6
+    if settings[DB_TYPE].startswith('mysql'):
+        df.replace({'DateCompleted': ''}, None, inplace=True)
+        df.replace({'ConductedOn': ''}, None, inplace=True)
+        df['createdDatetime'] = pd.to_datetime(df['createdDatetime'])
+        df['modifiedDatetime'] = pd.to_datetime(df['modifiedDatetime'])
+        df['completedDatetime'] = pd.to_datetime(df['completedDatetime'])
+        df['dueDatetime'] = pd.to_datetime(df['dueDatetime'])
+    df.replace({'': np.nan}, inplace=True)
+    df = df.replace({np.nan: None})
     df_dict = df.to_dict(orient='records')
 
     try:
@@ -661,6 +676,29 @@ def set_env_defaults(name, env_var, logger):
     return env_var
 
 
+def load_setting_ssl_cert(logger, config_settings):
+    cert_location = None
+    if 'ssl_cert' in config_settings['API']:
+        if config_settings['API']['ssl_cert']:
+            cert_location = config_settings['API']['ssl_cert']
+    return cert_location
+
+
+def load_setting_proxy(logger, config_settings, http_or_https):
+    proxy = None
+    if http_or_https == 'https':
+        if 'proxy_https' in config_settings['API']:
+            if config_settings['API']['proxy_https']:
+                proxy = config_settings['API']['proxy_https']
+    elif http_or_https == 'http':
+        if 'proxy_http' in config_settings['API']:
+            if config_settings['API']['proxy_http']:
+                proxy = config_settings['API']['proxy_http']
+    else:
+        proxy = None
+    return proxy
+
+
 def load_config_settings(logger, path_to_config_file, docker_enabled):
     """
     Load config settings from config file
@@ -731,6 +769,9 @@ def load_config_settings(logger, path_to_config_file, docker_enabled):
 
         settings = {
             API_TOKEN: load_setting_api_access_token(logger, config_settings),
+            SSL_CERT: load_setting_ssl_cert(logger, config_settings),
+            PROXY_HTTP: load_setting_proxy(logger, config_settings, 'http'),
+            PROXY_HTTPS: load_setting_proxy(logger, config_settings, 'https'),
             EXPORT_PATH: export_path,
             PREFERENCES: load_setting_preference_mapping(logger, config_settings),
             FILENAME_ITEM_ID: get_filename_item_id(logger, config_settings),
@@ -769,7 +810,15 @@ def configure(logger, path_to_config_file, export_formats, docker_enabled):
 
     config_settings = load_config_settings(logger, path_to_config_file, docker_enabled)
     config_settings[EXPORT_FORMATS] = export_formats
-    sc_client = sp.SafetyCulture(config_settings[API_TOKEN])
+    if config_settings[PROXY_HTTP] is not None and config_settings[PROXY_HTTPS] is not None:
+        proxy_settings = {
+            "http": config_settings[PROXY_HTTP],
+            "https": config_settings[PROXY_HTTPS]
+         }
+    else:
+        proxy_settings = None
+
+    sc_client = sp.SafetyCulture(config_settings[API_TOKEN], proxy_settings, config_settings[SSL_CERT])
 
     if config_settings[EXPORT_PATH] is not None:
         if config_settings[CONFIG_NAME] is not None:
@@ -1010,12 +1059,12 @@ def sync_exports(logger, settings, sc_client):
                 get_started = sql_setup(logger, settings, 'audit')
             elif export_format in ['pickle']:
                 get_started = ['complete', 'complete']
-                if export_format == 'pickle' and os.path.isfile('{}.pkl'.format(settings[SQL_TABLE])):
-                    logger.error(
-                        'The Pickle file already exists. Appending to Pickles isn\'t currently possible, please '
-                        'remove {}.pkl and try again.'.format(
-                            settings[SQL_TABLE]))
-                    sys.exit(0)
+                # if export_format == 'pickle' and os.path.isfile('{}.pkl'.format(settings[SQL_TABLE])):
+                #     logger.error(
+                #         'The Pickle file already exists. Appending to Pickles isn\'t currently possible, please '
+                #         'remove {}.pkl and try again.'.format(
+                #             settings[SQL_TABLE]))
+                #     sys.exit(0)
         for audit in list_of_audits['audits']:
             logger.info('Processing audit (' + str(export_count) + '/' + str(export_total) + ')')
             process_audit(logger, settings, sc_client, audit, get_started)
@@ -1250,6 +1299,7 @@ def export_audit_sql(logger, settings, audit_json, get_started):
     :param logger:      The logger
     :param settings:    Settings from command line and configuration file
     :param audit_json:  Audit JSON
+    :get_started:       Tuple containing settings
     """
     engine = get_started[1]
     database = get_started[4]
@@ -1258,12 +1308,19 @@ def export_audit_sql(logger, settings, audit_json, get_started):
     df = csv_exporter.audit_table
     df = pd.DataFrame.from_records(df, columns=SQL_HEADER_ROW)
     df['DatePK'] = pd.to_datetime(df['DateModified']).values.astype(np.int64) // 10 ** 6
-    # df.replace({'DateCompleted': ''}, '1900-01-01 00:00:00', inplace=True)
-    df.replace({'ItemScore': '', 'ItemMaxScore': '', 'ItemScorePercentage': ''}, np.nan, inplace=True)
-    df.fillna(0, inplace=True)
+    if settings[DB_TYPE].startswith('mysql'):
+        df.replace({'DateCompleted': ''}, '1900-01-01 00:00:00', inplace=True)
+        df.replace({'ConductedOn': ''}, '1900-01-01 00:00:00', inplace=True)
+        df['DateStarted'] = pd.to_datetime(df['DateStarted'])
+        df['DateCompleted'] = pd.to_datetime(df['DateCompleted'])
+        df['DateModified'] = pd.to_datetime(df['DateModified'])
+        df['ConductedOn'] = pd.to_datetime(df['ConductedOn'])
+    df.replace({'': np.nan}, inplace=True)
+    # df.replace({'ItemScore': '', 'ItemMaxScore': '', 'ItemScorePercentage': ''}, np.nan, inplace=True)
+    df = df.replace({np.nan: None})
+    # df.fillna(0, inplace=True)
     df['SortingIndex'] = range(1, len(df) + 1)
     df_dict = df.to_dict(orient='records')
-
     Session = sessionmaker(bind=engine)
     session = Session()
 
@@ -1300,6 +1357,7 @@ def export_audit_pandas(logger, settings, audit_json, get_started):
             export_audit_sql(logger, settings, audit_json, get_started)
 
         elif export_format == 'pickle':
+            # export_audit_doc_creation(logger, settings, audit_json, 'docx', 'test.docx', media_list=[])
             logger.info('Writing to Pickle')
             csv_exporter = csvExporter.CsvExporter(audit_json, settings[EXPORT_INACTIVE_ITEMS_TO_CSV])
             df = csv_exporter.audit_table
@@ -1504,7 +1562,6 @@ def main():
     except KeyboardInterrupt:
         print("Interrupted by user, exiting.")
         sys.exit(0)
-
 
 
 if __name__ == '__main__':
