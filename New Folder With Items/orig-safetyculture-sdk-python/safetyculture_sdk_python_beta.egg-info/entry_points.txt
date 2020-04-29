@@ -1,0 +1,5 @@
+[console_scripts]
+export_users = tools.export_users.export_users:main
+import_grs = tools.import_grs.import_grs:main
+sync_users = tools.sync_users.sync_users:main
+
