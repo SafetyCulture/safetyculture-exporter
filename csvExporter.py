@@ -558,7 +558,8 @@ class CsvExporter:
             media_list = []
             for image in get_json_property(item, MEDIA):
                 if EXT in image.keys():
-                    media_list.append(image[MEDIAID] + '.' + image[EXT])
+                    if image[EXT] is not None:
+                        media_list.append(image[MEDIAID] + '.' + image[EXT])
                 else:
                     media_list.append(image[MEDIAID] + '.' + 'jpg')
             media_href = '\n'.join(media_list)

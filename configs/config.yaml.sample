@@ -1,5 +1,8 @@
 API:
-    token:
+    token: 123
+    ssl_cert:
+    proxy_http:
+    proxy_https:
 config_name: iauditor
 export_options:
     export_path:

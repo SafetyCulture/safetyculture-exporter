@@ -1,6 +1,6 @@
 import os
 import csvExporter
-import csv
+import unicodecsv as csv
 from modules.global_variables import EXPORT_PATH
 from modules.logger import log_critical_error
 

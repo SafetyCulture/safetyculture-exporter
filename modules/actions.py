@@ -1,3 +1,13 @@
+# import os
+# import unicodecsv as csv
+import csvExporter
+
+# from datetime import datetime
+# from modules.global_variables import EXPORT_PATH, ACTIONS_EXPORT_FILENAME, CONFIG_NAME
+# from modules.last_successful import get_last_successful_actions_export, update_actions_sync_marker_file
+# from modules.sql import save_exported_actions_to_db
+
+
 def transform_action_object_to_list(action):
     priority_codes = {0: 'None', 10: 'Low', 20: 'Medium', 30: 'High'}
     status_codes = {0: 'To Do', 10: 'In Progress', 50: 'Done', 60: 'Cannot Do'}
@@ -22,25 +32,5 @@ def transform_action_object_to_list(action):
     actions_list.append(get_json_property(action, 'modified_at'))
     actions_list.append(get_json_property(action, 'completed_at'))
     return actions_list
-
-def export_actions(logger, settings, sc_client, get_started):
-    """
-    Export all actions created after date specified
-    :param logger:      The logger
-    :param settings:    Settings from command line and configuration file
-    :param sc_client:   instance of safetypy.SafetyCulture class
-    """
-
-    logger.info('Exporting iAuditor actions')
-    last_successful_actions_export = get_last_successful_actions_export(logger)
-    actions_array = sc_client.get_audit_actions(last_successful_actions_export)
-    if actions_array is not None:
-        logger.info('Found ' + str(len(actions_array)) + ' actions')
-        if not get_started:
-            save_exported_actions_to_csv_file(logger, settings[EXPORT_PATH], actions_array)
-        else:
-            save_exported_actions_to_db(logger, actions_array, settings, get_started)
-        utc_iso_datetime_now = datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.000Z')
-        update_actions_sync_marker_file(logger, utc_iso_datetime_now)
 
 

@@ -202,7 +202,9 @@ class SafetyCulture:
         :param template_id:     Restrict discovery to this template_id
         :param modified_after:  Restrict discovery to audits modified after this UTC timestamp
         :param completed:       Restrict discovery to audits marked as completed, default to True
+        :param archived:        Restrict discovery to audits in the archive
         :return:                JSON object containing IDs of all audits returned by API
+
         """
 
         logger = logging.getLogger('sp_logger')

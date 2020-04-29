@@ -1,59 +1,16 @@
+import pandas as pd
+import numpy as np
+
 from sqlalchemy import *
 from sqlalchemy.exc import IntegrityError, OperationalError
 from sqlalchemy.orm import sessionmaker
 
-def save_exported_actions_to_db(logger, actions_array, settings, get_started):
-    """
-    Write Actions to 'iauditor_actions.csv' on disk at specified location
-    :param get_started:
-    :param logger:          the logger
-    :param export_path:     path to directory for exports
-    :param actions_array:   Array of action objects to be converted to CSV and saved to disk
-    """
-    engine = get_started[1]
-    actions_db = get_started[4]
+import csvExporter
+from modules.actions import transform_action_object_to_list
+from modules.global_variables import *
+from modules.last_successful import get_last_successful_actions_export
+from modules.model import *
 
-    if not actions_array:
-        logger.info('No actions returned after ' + get_last_successful_actions_export(logger))
-        return
-    logger.info('Exporting ' + str(len(actions_array)) + ' actions')
-    Session = sessionmaker(bind=engine)
-    session = Session()
-    bulk_actions = []
-    for action in actions_array:
-        action_as_list = transform_action_object_to_list(action)
-        bulk_actions.append(action_as_list)
-    df = pd.DataFrame.from_records(bulk_actions, columns=ACTIONS_HEADER_ROW)
-    df['DatePK'] = pd.to_datetime(df['modifiedDatetime']).values.astype(np.int64) // 10 ** 6
-    if settings[DB_TYPE].startswith('mysql'):
-        df.replace({'DateCompleted': ''}, None, inplace=True)
-        df.replace({'ConductedOn': ''}, None, inplace=True)
-        df['createdDatetime'] = pd.to_datetime(df['createdDatetime'])
-        df['modifiedDatetime'] = pd.to_datetime(df['modifiedDatetime'])
-        df['completedDatetime'] = pd.to_datetime(df['completedDatetime'])
-        df['dueDatetime'] = pd.to_datetime(df['dueDatetime'])
-    df.replace({'': np.nan}, inplace=True)
-    df = df.replace({np.nan: None})
-    df_dict = df.to_dict(orient='records')
-
-    try:
-        session.bulk_insert_mappings(actions_db, df_dict)
-    except KeyboardInterrupt:
-        logger.warning('Interrupted by user, exiting.')
-        session.rollback()
-        sys.exit(0)
-    except OperationalError as ex:
-        session.rollback()
-        logger.warning('Something went wrong. Here are the details: {}'.format(ex))
-    except IntegrityError as ex:
-        # If the bulk insert fails, we do a slower merge
-        logger.warning('Unable to bulk insert (likely due to a duplicate), attempting to update')
-        session.rollback()
-        for action in df_dict:
-            row_to_dict = actions_db(**action)
-            session.merge(row_to_dict)
-        logger.debug('Row successfully added/updated.')
-    session.commit()
 
 def sql_setup(logger, settings, action_or_audit):
     if settings[MERGE_ROWS] is True or False:
@@ -195,4 +152,58 @@ def export_audit_sql(logger, settings, audit_json, get_started):
             row_to_dict = database(**row)
             session.merge(row_to_dict)
         logger.debug('Row successfully updated.')
+    session.commit()
+
+
+def save_exported_actions_to_db(logger, actions_array, settings, get_started):
+    """
+    Write Actions to 'iauditor_actions.csv' on disk at specified location
+    :param get_started:
+    :param logger:          the logger
+    :param export_path:     path to directory for exports
+    :param actions_array:   Array of action objects to be converted to CSV and saved to disk
+    """
+    engine = get_started[1]
+    actions_db = get_started[4]
+
+    if not actions_array:
+        logger.info('No actions returned after ' + get_last_successful_actions_export(logger, settings[CONFIG_NAME]))
+        return
+    logger.info('Exporting ' + str(len(actions_array)) + ' actions')
+    Session = sessionmaker(bind=engine)
+    session = Session()
+    bulk_actions = []
+    for action in actions_array:
+        action_as_list = transform_action_object_to_list(action)
+        bulk_actions.append(action_as_list)
+    df = pd.DataFrame.from_records(bulk_actions, columns=ACTIONS_HEADER_ROW)
+    df['DatePK'] = pd.to_datetime(df['modifiedDatetime']).values.astype(np.int64) // 10 ** 6
+    if settings[DB_TYPE].startswith('mysql'):
+        df.replace({'DateCompleted': ''}, None, inplace=True)
+        df.replace({'ConductedOn': ''}, None, inplace=True)
+        df['createdDatetime'] = pd.to_datetime(df['createdDatetime'])
+        df['modifiedDatetime'] = pd.to_datetime(df['modifiedDatetime'])
+        df['completedDatetime'] = pd.to_datetime(df['completedDatetime'])
+        df['dueDatetime'] = pd.to_datetime(df['dueDatetime'])
+    df.replace({'': np.nan}, inplace=True)
+    df = df.replace({np.nan: None})
+    df_dict = df.to_dict(orient='records')
+
+    try:
+        session.bulk_insert_mappings(actions_db, df_dict)
+    except KeyboardInterrupt:
+        logger.warning('Interrupted by user, exiting.')
+        session.rollback()
+        sys.exit(0)
+    except OperationalError as ex:
+        session.rollback()
+        logger.warning('Something went wrong. Here are the details: {}'.format(ex))
+    except IntegrityError as ex:
+        # If the bulk insert fails, we do a slower merge
+        logger.warning('Unable to bulk insert (likely due to a duplicate), attempting to update')
+        session.rollback()
+        for action in df_dict:
+            row_to_dict = actions_db(**action)
+            session.merge(row_to_dict)
+        logger.debug('Row successfully added/updated.')
     session.commit()

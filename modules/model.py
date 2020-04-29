@@ -129,7 +129,7 @@ def set_actions_table(table, merge):
         audit = Column(Text())
         auditId = Column(String(50))
         linkedToItem = Column(Text())
-        linkedToItemId = Column(String(50))
+        linkedToItemId = Column(Text())
         creatorName = Column(Text())
         creatorId = Column(String(50))
         createdDatetime = Column(DateTime)

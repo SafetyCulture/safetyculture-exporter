@@ -1,4 +1,10 @@
+import argparse
 import re
+import yaml
+
+from modules.global_variables import *
+from modules.logger import log_critical_error, create_directory_if_not_exists
+from safetyculture_sdk_python_beta import safetypy as sp
 
 
 def load_setting_api_access_token(logger, config_settings):
@@ -221,7 +227,7 @@ def set_env_defaults(name, env_var, logger):
         if name == 'TEMPLATE_IDS':
             env_var = None
         else:
-            env_var = false
+            env_var = 'false'
     print(name, ' set to ', env_var)
     return env_var
 
@@ -247,6 +253,14 @@ def load_setting_proxy(logger, config_settings, http_or_https):
     else:
         proxy = None
     return proxy
+
+
+def load_actions_table(actions_table_name):
+    if actions_table_name is None:
+        actions_table_name = 'iauditor'
+        return actions_table_name
+    else:
+        return actions_table_name
 
 
 def load_config_settings(logger, path_to_config_file, docker_enabled):
@@ -342,7 +356,7 @@ def load_config_settings(logger, path_to_config_file, docker_enabled):
             EXPORT_COMPLETED: config_settings['export_options']['export_completed'],
             MERGE_ROWS: config_settings['export_options']['merge_rows'],
             ALLOW_TABLE_CREATION: table_creation,
-            ACTIONS_TABLE: config_settings['export_options']['sql_table'] + '_actions',
+            ACTIONS_TABLE: load_actions_table(config_settings['export_options']['sql_table']) + '_actions',
             ACTIONS_MERGE_ROWS: config_settings['export_options']['actions_merge_rows']
         }
     return settings
@@ -367,7 +381,7 @@ def configure(logger, path_to_config_file, export_formats, docker_enabled):
     else:
         proxy_settings = None
 
-    sc_client = sp.SafetyCulture(config_settings[API_TOKEN], proxy_settings, config_settings[SSL_CERT])
+    sc_client = sp.SafetyCulture(config_settings[API_TOKEN])
 
     if config_settings[EXPORT_PATH] is not None:
         if config_settings[CONFIG_NAME] is not None:
@@ -385,6 +399,27 @@ def configure(logger, path_to_config_file, export_formats, docker_enabled):
             sys.exit()
 
     return sc_client, config_settings
+
+
+def rename_config_sample(logger):
+    if os.path.isfile('configs/config.yaml.sample'):
+        file_size = os.stat('configs/config.yaml.sample')
+        file_size = file_size.st_size
+        print(file_size)
+        if file_size <= 667:
+            logger.info('It looks like the config file has not been filled out. Open the folder named "configs" '
+                        'and edit the file named "config.yaml.sample" before continuing')
+            sys.exit()
+        if file_size > 667:
+            logger.info('It looks like you have edited config.yaml.sample but have not renamed it. Would you like '
+                        'the '
+                        'script to do it for you (recommended!)? If you say no, you will need to manually remove '
+                        '.sample from the file name.')
+            question = input('     (y/n)')
+            if question == 'y':
+                os.rename(r'configs/config.yaml.sample', r'configs/config.yaml')
+            else:
+                sys.exit()
 
 
 def parse_command_line_arguments(logger):
@@ -412,9 +447,8 @@ def parse_command_line_arguments(logger):
                                                              'be placed in your current directory')
     args = parser.parse_args()
 
-    if args.setup:
-        initial_setup(logger)
-        exit()
+    if args.config is None:
+        rename_config_sample(logger)
 
     if args.config is not None:
         config_filename = os.path.join('configs', args.config)
@@ -424,6 +458,7 @@ def parse_command_line_arguments(logger):
             logger.debug(config_filename + ' passed as config argument')
         else:
             logger.error(config_filename + ' is either missing or corrupt.')
+            rename_config_sample(logger)
             sys.exit(1)
     else:
         config_filename = os.path.join('configs', DEFAULT_CONFIG_FILENAME)
@@ -446,55 +481,3 @@ def parse_command_line_arguments(logger):
 
     return config_filename, export_formats, args.list_preferences, loop_enabled, docker_enabled
 
-
-def initial_setup(logger):
-    """
-    Creates a new directory in current working directory called 'iauditor_exports_folder'.  If 'iauditor_exports_folder'
-    already exists the setup script will notify user that the folder exists and exit. Default config file placed
-    in directory, with user API Token. User is asked for iAuditor credentials in order to generate their
-    API token.
-    :param logger:  the logger
-    """
-    # setup variables
-    current_directory_path = os.getcwd()
-    exports_folder_name = 'iauditor_exports_folder'
-
-    # get token, set token
-    token = sp.get_user_api_token(logger)
-
-    if not token:
-        logger.critical("Problem generating API token.")
-        exit()
-    DEFAULT_CONFIG_FILE_YAML[1] = '\n    token: ' + str(token)
-
-    # create new directory
-    create_directory_if_not_exists(logger, exports_folder_name)
-
-    # write config file
-    path_to_config_file = os.path.join(current_directory_path, exports_folder_name, 'configs', 'config.yaml')
-    create_directory_if_not_exists(logger, os.path.join(current_directory_path, exports_folder_name, 'configs'))
-    if os.path.exists(path_to_config_file):
-        logger.critical("Config file already exists at {0}".format(path_to_config_file))
-        logger.info("Please remove or rename the existing config file, then retry this setup program.")
-        logger.info('Exiting.')
-        exit()
-    try:
-        config_file = open(path_to_config_file, 'w')
-        config_file.writelines(DEFAULT_CONFIG_FILE_YAML)
-    except Exception as ex:
-        log_critical_error(logger, ex, "Problem creating " + path_to_config_file)
-        logger.info("Exiting.")
-        exit()
-    logger.info("Default config file successfully created at {0}.".format(path_to_config_file))
-    os.chdir(exports_folder_name)
-    choice = input('Would you like to start exporting audits from:\n  1. The beginning of time\n  '
-                   '2. Now\n  Enter 1 or 2: ')
-    if choice == '1':
-        logger.info('Audit exporting set to start from earliest audits available')
-        get_last_successful(logger)
-    else:
-        now = datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.000Z')
-        create_directory_if_not_exists(logger, 'last_successful')
-        update_sync_marker_file(now)
-        logger.info('Audit exporting set to start from ' + now)
-    exit()

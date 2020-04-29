@@ -44,7 +44,7 @@ def get_user_api_token(logger):
 
 
 class SafetyCulture:
-    def __init__(self, api_token, proxy_settings, certificate_settings):
+    def __init__(self, api_token, proxy_settings=None, certificate_settings=None):
         self.current_dir = os.getcwd()
         self.log_dir = self.current_dir + '/log/'
         self.api_url = 'https://api.safetyculture.io/'

@@ -1,20 +1,4 @@
-def create_directory_if_not_exists(logger, path):
-    """
-    Creates 'path' if it does not exist
-
-    If creation fails, an exception will be thrown
-
-    :param logger:  the logger
-    :param path:    the path to ensure it exists
-    """
-    try:
-        os.makedirs(path)
-    except OSError as ex:
-        if ex.errno == errno.EEXIST and os.path.isdir(path):
-            pass
-        else:
-            log_critical_error(logger, ex, 'An error happened trying to create ' + path)
-            raise
+import sys
 
 
 def show_preferences_and_exit(list_preferences, sc_client):
@@ -51,4 +35,3 @@ def show_preferences_and_exit(list_preferences, sc_client):
             print(row_format.format(preference_id, preference_name, is_global, is_default))
             print(row_boundary)
         sys.exit(0)
-

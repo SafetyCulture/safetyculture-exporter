@@ -1,3 +1,33 @@
+import errno
+from datetime import datetime
+import logging
+import os
+import sys
+
+import coloredlogs
+
+from modules.global_variables import LOG_LEVEL
+
+
+def create_directory_if_not_exists(logger, path):
+    """
+    Creates 'path' if it does not exist
+
+    If creation fails, an exception will be thrown
+
+    :param logger:  the logger
+    :param path:    the path to ensure it exists
+    """
+    try:
+        os.makedirs(path)
+    except OSError as ex:
+        if ex.errno == errno.EEXIST and os.path.isdir(path):
+            pass
+        else:
+            log_critical_error(logger, ex, 'An error happened trying to create ' + path)
+            raise
+
+
 def log_critical_error(logger, ex, message):
     """
     Logs the exception at 'CRITICAL' log level
@@ -9,6 +39,7 @@ def log_critical_error(logger, ex, message):
     if logger is not None:
         logger.critical(message)
         logger.critical(ex)
+
 
 def configure_logging(path_to_log_directory):
     """
