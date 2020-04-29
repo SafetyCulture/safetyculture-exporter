@@ -1,5 +1,5 @@
 API:
-    token: 123
+    token:
     ssl_cert:
     proxy_http:
     proxy_https:
