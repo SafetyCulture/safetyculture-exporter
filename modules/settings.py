@@ -4,7 +4,7 @@ import yaml
 
 from modules.global_variables import *
 from modules.logger import log_critical_error, create_directory_if_not_exists
-from safetyculture_sdk_python_beta import safetypy as sp
+from safetypy import safetypy as sp
 
 
 def load_setting_api_access_token(logger, config_settings):

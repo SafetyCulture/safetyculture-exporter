@@ -1,1 +1,1 @@
-safetyculture_sdk_python_beta
+safetypy

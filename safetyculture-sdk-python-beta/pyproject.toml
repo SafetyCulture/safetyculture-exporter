@@ -3,6 +3,9 @@ name = "safetyculture-sdk-python-beta"
 version = "2.1.0"
 description = "Beta version of the SafetyCulture Python SDK"
 authors = ["Edd <edward.abrahamsen-mills@safetyculture.io>"]
+packages = [
+    { include = "safetypy"}
+    ]
 
 [tool.poetry.dependencies]
 python = "^3.7"
