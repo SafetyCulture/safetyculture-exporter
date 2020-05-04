@@ -40,6 +40,7 @@ AUDIT_TITLE_ITEM_ID = 'f3245d40-ea77-11e1-aff1-0800200c9a66'
 # Properties kept in settings dictionary which takes its values from config.YAML
 API_TOKEN = 'api_token'
 SSL_CERT = 'ssl_cert'
+SSL_VERIFY = 'ssl_verify'
 PROXY_HTTP = 'proxy_http'
 PROXY_HTTPS = 'proxy_https'
 CONFIG_NAME = 'config_name'

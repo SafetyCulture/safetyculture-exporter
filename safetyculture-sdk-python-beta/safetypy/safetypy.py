@@ -44,7 +44,7 @@ def get_user_api_token(logger):
 
 
 class SafetyCulture:
-    def __init__(self, api_token, proxy_settings=None, certificate_settings=None):
+    def __init__(self, api_token, proxy_settings=None, certificate_settings=None, ssl_verify=None):
         self.current_dir = os.getcwd()
         self.log_dir = self.current_dir + '/log/'
         self.api_url = 'https://api.safetyculture.io/'
@@ -62,14 +62,22 @@ class SafetyCulture:
         else:
             self.proxy = None
         if certificate_settings is not None:
-            if len(certificate_settings) == 2:
-                certs = []
-                for item in certificate_settings:
-                    certs.append(item)
-                certs = tuple(certs)
-                self.certs = certs
+            if ',' in certificate_settings:
+                certs_as_list = certificate_settings.split(',')
+                certs_list = []
+                for item in certs_as_list:
+                    item = item.strip()
+                    certs_list.append(item)
+                certs_list = tuple(certs_list)
+                self.certs = certs_list
+            else:
+                self.certs = certificate_settings
         else:
             self.certs = None
+        if ssl_verify:
+            self.ssl_verify = ssl_verify
+        else:
+            self.ssl_verify = None
         self.create_directory_if_not_exists(self.log_dir)
         self.configure_logging()
         logger = logging.getLogger('sp_logger')
@@ -93,48 +101,38 @@ class SafetyCulture:
             sys.exit(1)
 
     def authenticated_request_get(self, url):
-        if self.proxy is not None:
-            if self.certs is not None:
-                return requests.get(url, headers=self.custom_http_headers, proxies=self.proxy, certs=self.certs)
-            else:
-                return requests.get(url, headers=self.custom_http_headers, proxies=self.proxy)
-        else:
-            return requests.get(url, headers=self.custom_http_headers)
+        return requests.get(url,
+                            headers=self.custom_http_headers,
+                            proxies=self.proxy,
+                            cert=self.certs,
+                            verify=self.ssl_verify)
 
     def authenticated_request_post(self, url, data):
         self.custom_http_headers['content-type'] = 'application/json'
-        if self.proxy is not None:
-            if self.certs is not None:
-                response = requests.post(url, data, headers=self.custom_http_headers, proxies=self.proxy,
-                                         certs=self.certs)
-            else:
-                response = requests.post(url, data, headers=self.custom_http_headers, proxies=self.proxy)
-        else:
-            response = requests.post(url, data, headers=self.custom_http_headers)
+        response = requests.post(url, data,
+                                 headers=self.custom_http_headers,
+                                 proxies=self.proxy,
+                                 cert=self.certs,
+                                 verify=self.ssl_verify)
         del self.custom_http_headers['content-type']
         return response
 
     def authenticated_request_put(self, url, data):
         self.custom_http_headers['content-type'] = 'application/json'
-        if self.proxy is not None:
-            if self.certs is not None:
-                response = requests.put(url, data, headers=self.custom_http_headers, proxies=self.proxy,
-                                        certs=self.certs)
-            else:
-                response = requests.put(url, data, headers=self.custom_http_headers, proxies=self.proxy)
-        else:
-            response = requests.put(url, data, headers=self.custom_http_headers)
+        response = requests.put(url, data,
+                                headers=self.custom_http_headers,
+                                proxies=self.proxy,
+                                cert=self.certs,
+                                verify=self.ssl_verify)
         del self.custom_http_headers['content-type']
         return response
 
     def authenticated_request_delete(self, url):
-        if self.proxy is not None:
-            if self.certs is not None:
-                return requests.delete(url, headers=self.custom_http_headers, proxies=self.proxy, certs=self.certs)
-            else:
-                return requests.delete(url, headers=self.custom_http_headers, proxies=self.proxy)
-        else:
-            return requests.delete(url, headers=self.custom_http_headers)
+        return requests.delete(url,
+                               headers=self.custom_http_headers,
+                               proxies=self.proxy,
+                               cert=self.certs,
+                               verify=self.ssl_verify)
 
     @staticmethod
     def parse_json(json_to_parse):

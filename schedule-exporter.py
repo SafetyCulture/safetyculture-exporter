@@ -1,11 +1,11 @@
-import sys
 import subprocess
 
 configs = ['config']
 
-def start_export(config):
-    # config = '--config {}.yaml'.format(config)
-    subprocess.run('python exporter.py --format csv --config {}.yaml'.format(config), shell=True)
+
+def start_export(selected_config):
+    subprocess.run('python exporter.py --format csv --config {}.yaml'.format(selected_config), shell=True)
+
 
 for config in configs:
     print('Starting {}'.format(config))

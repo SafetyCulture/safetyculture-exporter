@@ -1,6 +1,7 @@
 import argparse
 import re
 import yaml
+from yaml.scanner import ScannerError
 
 from modules.global_variables import *
 from modules.logger import log_critical_error, create_directory_if_not_exists
@@ -201,10 +202,18 @@ def get_filename_item_id(logger, config_settings):
     :param config_settings: config settings loaded from config file
     :return:                item_id extracted from config_settings if valid, else None
     """
+
     try:
         filename_item_id = config_settings['export_options']['filename']
         if filename_item_id is not None:
-            return filename_item_id
+            if len(filename_item_id) > 36:
+                logger.critical('You can only specify one value for the filename. Please remove any additional item '
+                                'IDs and try again. For more complex title rules, consider setting the title rules '
+                                'within iAuditor. Defaulting to Audit ID.')
+            if filename_item_id == 'f3245d42-ea77-11e1-aff1-0800200c9a66':
+                logger.critical('Date fields are not compatible with the title rule feature. Defaulting to Audit ID')
+            else:
+                return filename_item_id
         else:
             return None
     except Exception as ex:
@@ -238,6 +247,14 @@ def load_setting_ssl_cert(logger, config_settings):
         if config_settings['API']['ssl_cert']:
             cert_location = config_settings['API']['ssl_cert']
     return cert_location
+
+
+def load_setting_ssl_verify(logger, config_settings):
+    verify_cert = None
+    if 'ssl_verify' in config_settings['API']:
+        if config_settings['API']['ssl_verify']:
+            verify_cert = config_settings['API']['ssl_verify']
+    return verify_cert
 
 
 def load_setting_proxy(logger, config_settings, http_or_https):
@@ -307,7 +324,18 @@ def load_config_settings(logger, path_to_config_file, docker_enabled):
             EXPORT_INACTIVE_ITEMS_TO_CSV: None
         }
     else:
-        config_settings = yaml.safe_load(open(path_to_config_file))
+        try:
+            config_settings = yaml.safe_load(open(path_to_config_file))
+        except ScannerError as e:
+            logger.error(e)
+            logger.critical('There is a problem with your config file. The most likely reason is not leaving spaces '
+                            'after the colons. Open your config.yaml file and ensure that after every : you have left '
+                            'a space. For example, config_name:iauditor would create this error, it should be '
+                            'config_name: iauditor ')
+            logger.critical('Please refer to '
+                            'https://safetyculture.github.io/iauditor-exporter/script-setup/config/ for more '
+                            'information.')
+            sys.exit()
         if config_settings['config_name'] is None:
             logger.info('The Config Name has been left blank, defaulting to iauditor.')
             config_name = 'iauditor'
@@ -333,6 +361,7 @@ def load_config_settings(logger, path_to_config_file, docker_enabled):
         settings = {
             API_TOKEN: load_setting_api_access_token(logger, config_settings),
             SSL_CERT: load_setting_ssl_cert(logger, config_settings),
+            SSL_VERIFY: load_setting_ssl_cert(logger, config_settings),
             PROXY_HTTP: load_setting_proxy(logger, config_settings, 'http'),
             PROXY_HTTPS: load_setting_proxy(logger, config_settings, 'https'),
             EXPORT_PATH: export_path,
@@ -381,7 +410,10 @@ def configure(logger, path_to_config_file, export_formats, docker_enabled):
     else:
         proxy_settings = None
 
-    sc_client = sp.SafetyCulture(config_settings[API_TOKEN])
+    sc_client = sp.SafetyCulture(config_settings[API_TOKEN],
+                                 proxy_settings=proxy_settings,
+                                 certificate_settings=config_settings[SSL_CERT],
+                                 ssl_verify=config_settings[SSL_VERIFY])
 
     if config_settings[EXPORT_PATH] is not None:
         if config_settings[CONFIG_NAME] is not None:
@@ -405,17 +437,16 @@ def rename_config_sample(logger):
     if os.path.isfile('configs/config.yaml.sample'):
         file_size = os.stat('configs/config.yaml.sample')
         file_size = file_size.st_size
-        print(file_size)
-        if file_size <= 667:
+        if file_size <= 666:
             logger.info('It looks like the config file has not been filled out. Open the folder named "configs" '
                         'and edit the file named "config.yaml.sample" before continuing')
             sys.exit()
-        if file_size > 667:
+        if file_size >= 667:
             logger.info('It looks like you have edited config.yaml.sample but have not renamed it. Would you like '
                         'the '
                         'script to do it for you (recommended!)? If you say no, you will need to manually remove '
-                        '.sample from the file name.')
-            question = input('     (y/n)')
+                        '.sample from the file name.  ')
+            question = input('Please type either y (yes) or n (no) and press enter to continue.   ')
             if question == 'y':
                 os.rename(r'configs/config.yaml.sample', r'configs/config.yaml')
             else:

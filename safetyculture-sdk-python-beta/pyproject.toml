@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "safetyculture-sdk-python-beta"
-version = "2.1.0"
+version = "2.1.1"
 description = "Beta version of the SafetyCulture Python SDK"
 authors = ["Edd <edward.abrahamsen-mills@safetyculture.io>"]
 packages = [

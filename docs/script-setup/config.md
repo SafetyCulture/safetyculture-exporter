@@ -46,6 +46,11 @@ If you want to download everything from the beginning of your account, you can j
 |  Setting | Optional? | Accepted Parameters |Description  |
 |---|---| --- | --- |
 | token | No | N/A | Your API key, generated from iAuditor. [Click here for guidance](https://support.safetyculture.com/integrations/how-to-get-an-api-token/)
+| Below options are only available in version >2.1, ensure you update if you wish to use them. |  |  | 
+| ssl_cert | Yes |  | The path to a CA_BUNDLE file or directory with certificates of trusted CAs - This config option is currently under testing and may not work. Please let us know if you need to use this and we can test it with you.
+| proxy_http | Yes but both HTTP and HTTPS must be filled out if one is used | N/A | If you use a proxy, you can enter it here. (HTTP Traffic)
+| proxy_https | Yes but both HTTP and HTTPS must be filled out if one is used | N/A | If you use a proxy, you can enter it here. (HTTPS Traffic)
+
 | config_name | No | N/A | You can set the name of your configuration here. Very useful if you're managing multiple configurations as it'll be used to name files and organise folders. Do not use any spaces in this name. 
 | export_completed | Yes | `true` `false` `both` | By default, we only export completed inspections from iAuditor. Set this to `true` to _only_ receive _completed_ audits, `false` to _only_ receive _incomplete_ inspections or `both` to export everything regardless of status. In the dataset, anything without a completed date is considered incomplete.  
 | export_archived | Yes | `true` `false` `both` | By default, we do not export inspections . Set this to `true` to _only_ receive archived inspections, `false` to only receive _archived_ inspections or `both` to export everything regardless of status. In the dataset, the column `Archived` will be either `true` or `false` depending on the inspections current status.
@@ -87,13 +92,13 @@ You must fill out all these configuration options to use the SQL export.
 
 |  Setting | Description  |
 |---|--- |
-| sql_table |The name of the table in which you want to store your iAuditor information. Best practice is to make sure it doesn't exist, as the script will create it for you. If you want to build it yourself, check [the model](../..w/understanding-the-data/the-model).
-| database_type |  For SQL use 'mssql+pyodbc_mssql' (More should work, however they're currently untested. please refer to the SQLAlchemy documentation) 
+| sql_table |The name of the table in which you want to store your iAuditor information. Best practice is to make sure it doesn't exist, as the script will create it for you. If you want to build it yourself, check [the model](../../understanding-the-data/the-model).
+| database_type |  For SQL: `mssql+pyodbc_mssql`. For MySQL: `mysql` [Additional MySQL info is here](script-setup/mysql)(. (More should work, however they're currently untested. please refer to the SQLAlchemy documentation) 
 | database_user | The username to login to your database 
 | database_pwd |  Your database password
 | database_server | Server where your database is located
 | database_port |  The port your database is listening on (For SQL, this is usually 1433)
-| database_name |  The name of the database you'll be connecting to. You must also define the driver to use if you need to - for SQL you'll likely want to use `MyDatebase?driver=ODBC Driver 17 for SQL Server` - replacing `MyDatabase` with the name of your database. 
+| database_name |  The name of the database you'll be connecting to. You must also define the driver to use if you need to - for SQL use: `MyDatebase?driver=ODBC Driver 17 for SQL Server` - replacing `MyDatabase` with the name of your database. For MySQL, you only need to specify the database name. 
 
 
 ### Other Options
@@ -101,8 +106,51 @@ You must fill out all these configuration options to use the SQL export.
 |  Setting | Optional? | Description  |
 |---|---| --- |
 export_path  | Yes | absolute or relative path to the directory where to save exported data to (this applies to everything except `SQL` exports)  |
-| filename  |Yes |  an audit item ID whose response is going to be used to name the files of exported audit reports. Can only be an item with a response type of `text` from the header section of the audit such as Audit Title, Document No., Client / Site, Prepared By, Personnel, or any custom header item which has a 'text' type response (Only applies to PDF/Word Exports) |
-| preferences  | Yes| to apply a preference transformation to particular templates, give here a list of preference ids. 
+| filename  |Yes |  an audit item ID whose response is going to be used to name the files of exported audit reports. Must be a single item with a response type of `text` from the header section of the audit. See below for more information. |
+| preferences  | Yes| to apply a preference transformation to particular templates, give here a list of preference ids. See below for more information on this.
 | sync_delay_in_seconds |Yes | time in seconds to wait after completing one export run, before running again
 | export_inactive_items | Yes| This setting only applies when exporting to CSV. Valid values are true (export all items) or false (do not export inactive items). Items that are nested under [Smart Field](https://support.safetyculture.com/templates/smart-fields/) will be 'inactive' if the smart field condition is not satisfied for these items. This option is forced to `true` if you're using SQL and enable either of the `merge_rows` options.
 | media_sync_offset_in_seconds | Yes | time in seconds since an audit has been modified before it will by synced
+
+### Naming exported PDF or Word files
+
+Note that when automatic Audit Title rules are set on the template, the Audit will not contain an Audit Title field by default. Regardless, the export filename setting will still work as expected using the automatically generated Audit name.
+
+When configuring a custom filename convention in export settings (in `config.yaml`) you can provide an audit item ID from the ones below to cause all exported audit reports be named after the response of that particular item in the audit.
+
+Here are some standard item IDs
+
+| Item Name| Item ID|
+|---|---|
+|Audit Title |f3245d40-ea77-11e1-aff1-0800200c9a66|
+|Conducted By |f3245d43-ea77-11e1-aff1-0800200c9a66|
+|Document No |f3245d46-ea77-11e1-aff1-0800200c9a66|
+|Conducted At (Location) |f3245d44-ea77-11e1-aff1-0800200c9a66|
+
+or from any other header item of the audit created by the user (a custom header item). 
+
+!!! Tip
+    To find the item ID of such custom header items export one audit from the template of interest in JSON format and inspect the contents to identify the item ID of interest in the `header_items` section.
+
+
+E.g. the following `config.yaml`
+
+```
+export_options:
+    filename: f3245d40-ea77-11e1-aff1-0800200c9a66
+```
+
+will result in all exported files named after the `Audit Title` field.
+
+### How to list available preference IDs
+To list all available global preference IDs and their associated templates:
+
+```
+iauditor_exporter --list_preferences
+```
+To list global and template specific preference IDs associated with specific templates:
+```
+iauditor_exporter --list_preferences template_3E631E46F466411B9C09AD804886A8B4
+```
+
+Multiple template IDs can be passed, separated by a space

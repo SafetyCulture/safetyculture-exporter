@@ -2,16 +2,31 @@
 # Author: SafetyCulture
 # Copyright: © SafetyCulture 2016
 import time
+import sys
 
-from modules.exporters import export_audit_pdf_word, export_audit_json, export_audit_pandas, export_audit_csv, export_actions
-from modules.global_variables import *
-from modules.last_successful import get_last_successful, update_sync_marker_file
-from modules.logger import configure_logger
-from modules.media import check_if_media_sync_offset_satisfied, export_audit_media
-from modules.other import show_preferences_and_exit
-from modules.settings import parse_export_filename, parse_command_line_arguments, configure
-from modules.sql import sql_setup
-from modules.web_report_links import export_audit_web_report_link
+try:
+    from modules.exporters import export_audit_pdf_word, export_audit_json, export_audit_pandas, export_audit_csv, \
+        export_actions
+    from modules.global_variables import *
+    from modules.last_successful import get_last_successful, update_sync_marker_file
+    from modules.logger import configure_logger
+    from modules.media import check_if_media_sync_offset_satisfied, export_audit_media
+    from modules.other import show_preferences_and_exit
+    from modules.settings import parse_export_filename, parse_command_line_arguments, configure
+    from modules.sql import sql_setup
+    from modules.web_report_links import export_audit_web_report_link
+
+except ImportError as e:
+    print(e)
+    print(
+        'The ModuleNotFoundError indicates that some packages required by the script have not been installed. \n The '
+        'error above will give details of whichever package was found to be missing first.\n Sometimes you need to '
+        'close and reopen your command window after install, so try that first.\n If you still get the error, '
+        'ensure you have run: pip install -r requirements.txt \n'
+        'If pip is not found, try pip install -r requirements.txt instead. \n'
+        'If you continue to see this error, please review this page of the documentation: '
+        'https://safetyculture.github.io/iauditor-exporter/script-setup/installing-packages/')
+    sys.exit()
 
 
 def sync_exports(logger, settings, sc_client):
@@ -42,7 +57,6 @@ def sync_exports(logger, settings, sc_client):
                                              'doc_creation'}):
         return
     last_successful = get_last_successful(logger, settings[CONFIG_NAME])
-    print(last_successful)
     if settings[TEMPLATE_IDS] is not None:
         if settings[TEMPLATE_IDS].endswith('.txt'):
             file = settings[TEMPLATE_IDS].strip()
@@ -157,4 +171,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-

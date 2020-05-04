@@ -5,7 +5,15 @@ This documentation aims to make it easy to not only set up the tool, but to also
 
 ## What's new?
 
-If you've used this tool before, you're likely wondering what's new. Here's the changelog:
+### V2 - May 2020
+* MySQL Support and improved database model. Should mean this will work with other databases, too. 
+* Better error handling. Many common errors will not return useful hints or links to relevant documentation.
+* Proxy support - if you use a proxy, you can specify them in your config file. See config.yaml.sample for where to add this option to your config file.
+* SSL Certs - Initial support for custom SSL certificates. This has received limited testing, please let us know how you get on if you use this.
+* If you export in multiple formats, everything but CSVs will be organised into relevant sub-folders
+* The code has been split into multiple smaller modules to ease development
+* Custom config files and last_successful files now work more reliably. 
+* Fixed a bug where having empty config values caused the script to fail
 
 ### V1 - February 2020
 

@@ -4,7 +4,7 @@ Although the primary use for this tool is to export inspection data into either 
 
 You can run any of these options either individually or together by adding them with a space when running the tool:
 
-`python exporter.py --format sql actions media`
+`python exporter.py --format sql actions-sql media`
 
 In the above example, you'd export all your inspection data and actions to SQL, as well as locally downloading all associated media. 
 ## Formats 
