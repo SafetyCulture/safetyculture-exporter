@@ -119,16 +119,14 @@ def export_audit_sql(logger, settings, audit_json, get_started):
     df = csv_exporter.audit_table
     df = pd.DataFrame.from_records(df, columns=SQL_HEADER_ROW)
     df['DatePK'] = pd.to_datetime(df['DateModified']).values.astype(np.int64) // 10 ** 6
-    if settings[DB_TYPE].startswith('mysql'):
+    if settings[DB_TYPE].startswith(('mysql', 'postgres')):
         df.replace({'DateCompleted': ''}, '1900-01-01 00:00:00', inplace=True)
         df.replace({'ConductedOn': ''}, '1900-01-01 00:00:00', inplace=True)
         df['DateStarted'] = pd.to_datetime(df['DateStarted'])
         df['DateCompleted'] = pd.to_datetime(df['DateCompleted'])
         df['DateModified'] = pd.to_datetime(df['DateModified'])
         df['ConductedOn'] = pd.to_datetime(df['ConductedOn'])
-    # df.replace({'': np.nan}, inplace=True)
     df.replace({'ItemScore': '', 'ItemMaxScore': '', 'ItemScorePercentage': ''}, np.nan, inplace=True)
-    # df = df.replace({np.nan: None})
     df.fillna(0, inplace=True)
     df['SortingIndex'] = range(1, len(df) + 1)
     df_dict = df.to_dict(orient='records')
@@ -178,7 +176,7 @@ def save_exported_actions_to_db(logger, actions_array, settings, get_started):
         bulk_actions.append(action_as_list)
     df = pd.DataFrame.from_records(bulk_actions, columns=ACTIONS_HEADER_ROW)
     df['DatePK'] = pd.to_datetime(df['modifiedDatetime']).values.astype(np.int64) // 10 ** 6
-    if settings[DB_TYPE].startswith('mysql'):
+    if settings[DB_TYPE].startswith(('mysql', 'postgres')):
         df.replace({'DateCompleted': ''}, None, inplace=True)
         df.replace({'ConductedOn': ''}, None, inplace=True)
         df['createdDatetime'] = pd.to_datetime(df['createdDatetime'])
