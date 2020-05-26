@@ -442,15 +442,22 @@ def rename_config_sample(logger):
                         'and edit the file named "config.yaml.sample" before continuing')
             sys.exit()
         if file_size >= 667:
-            logger.info('It looks like you have edited config.yaml.sample but have not renamed it. Would you like '
+            logger.info('It looks like you have not renamed "config.yaml.sample" to "config.yaml". Would you like '
                         'the '
                         'script to do it for you (recommended!)? If you say no, you will need to manually remove '
                         '.sample from the file name.  ')
             question = input('Please type either y (yes) or n (no) and press enter to continue.   ')
-            if question == 'y':
+            if question.startswith('y'):
                 os.rename(r'configs/config.yaml.sample', r'configs/config.yaml')
             else:
                 sys.exit()
+        else:
+            logger.info('No config file found. Please either name it config.yaml or specify it with --config.')
+            sys.exit()
+    else:
+        logger.info('No config file found. Please either name it config.yaml or specify it with --config.')
+        sys.exit()
+
 
 
 def parse_command_line_arguments(logger):
@@ -483,13 +490,11 @@ def parse_command_line_arguments(logger):
 
     if args.config is not None:
         config_filename = os.path.join('configs', args.config)
-        print(args.config)
         if os.path.isfile(config_filename):
             config_filename = os.path.join('configs', args.config)
             logger.debug(config_filename + ' passed as config argument')
         else:
             logger.error(config_filename + ' is either missing or corrupt.')
-            rename_config_sample(logger)
             sys.exit(1)
     else:
         config_filename = os.path.join('configs', DEFAULT_CONFIG_FILENAME)

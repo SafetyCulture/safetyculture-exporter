@@ -89,8 +89,6 @@ def get_last_successful_actions_export(logger, config_name):
 
     last_successful_file = set_last_successful_file_name(config_name, 'actions')
 
-    print(last_successful_file)
-
     if os.path.isfile(last_successful_file):
         with open(last_successful_file, 'r+') as last_run:
             last_successful_actions_export = last_run.readlines()[0]
