@@ -1,5 +1,9 @@
 API:
     token:
+    ssl_cert:
+    ssl_verify:
+    proxy_http:
+    proxy_https:
 config_name: iauditor
 export_options:
     export_path:
@@ -10,7 +14,7 @@ export_options:
     use_real_template_name: false
     export_inactive_items: false
     export_profiles:
-    template_ids: 
+    template_ids:
     sync_delay_in_seconds: 900
     media_sync_offset_in_seconds: 900
     merge_rows: false
