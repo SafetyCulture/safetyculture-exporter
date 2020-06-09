@@ -434,30 +434,30 @@ def configure(logger, path_to_config_file, export_formats, docker_enabled):
 
 
 def rename_config_sample(logger):
-    if os.path.isfile('configs/config.yaml.sample'):
-        file_size = os.stat('configs/config.yaml.sample')
-        file_size = file_size.st_size
-        if file_size <= 666:
-            logger.info('It looks like the config file has not been filled out. Open the folder named "configs" '
-                        'and edit the file named "config.yaml.sample" before continuing')
-            sys.exit()
-        if file_size >= 667:
-            logger.info('It looks like you have not renamed "config.yaml.sample" to "config.yaml". Would you like '
-                        'the '
-                        'script to do it for you (recommended!)? If you say no, you will need to manually remove '
-                        '.sample from the file name.  ')
-            question = input('Please type either y (yes) or n (no) and press enter to continue.   ')
-            if question.startswith('y'):
-                os.rename(r'configs/config.yaml.sample', r'configs/config.yaml')
+    if not os.path.isfile('configs/config.yaml'):
+        if os.path.isfile('configs/config.yaml.sample'):
+            file_size = os.stat('configs/config.yaml.sample')
+            file_size = file_size.st_size
+            if file_size <= 666:
+                logger.info('It looks like the config file has not been filled out. Open the folder named "configs" '
+                            'and edit the file named "config.yaml.sample" before continuing')
+                sys.exit()
+            if file_size >= 667:
+                logger.info('It looks like you have not renamed "config.yaml.sample" to "config.yaml". Would you like '
+                            'the '
+                            'script to do it for you (recommended!)? If you say no, you will need to manually remove '
+                            '.sample from the file name.  ')
+                question = input('Please type either y (yes) or n (no) and press enter to continue.   ')
+                if question.startswith('y'):
+                    os.rename(r'configs/config.yaml.sample', r'configs/config.yaml')
+                else:
+                    sys.exit()
             else:
+                logger.info('No config file found. Please either name it config.yaml or specify it with --config.')
                 sys.exit()
         else:
             logger.info('No config file found. Please either name it config.yaml or specify it with --config.')
             sys.exit()
-    else:
-        logger.info('No config file found. Please either name it config.yaml or specify it with --config.')
-        sys.exit()
-
 
 
 def parse_command_line_arguments(logger):
