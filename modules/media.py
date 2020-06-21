@@ -72,8 +72,11 @@ def export_audit_media(logger, sc_client, settings, audit_json, audit_id, export
         media_id = media_id[0]
         if not extension:
             extension = 'jpg'
-        logger.info("Saving media_{0} to disc.".format(media_id))
         media_file = sc_client.get_media(audit_id, media_id)
+        if media_file is None:
+            logger.warn("Failed to save media object {0}".format(media_id))
+            continue
+        logger.info("Saving media_{0} to disc.".format(media_id))
         media_export_filename = media_id
         save_exported_media_to_file(logger, media_export_path, media_file, media_export_filename, extension)
 
