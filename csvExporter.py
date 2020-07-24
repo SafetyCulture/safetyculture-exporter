@@ -569,20 +569,21 @@ class CsvExporter:
         :return:        item media href links
         """
         item_type = get_json_property(item, TYPE)
+        media_list = []
+
         if item_type == INFORMATION and get_json_property(item, 'options', TYPE) == MEDIA:
-            media_href = ('{}.{}'.format(get_json_property(item, 'options', MEDIA, MEDIAID), get_json_property(item, 'options', MEDIA, EXT)))
+            media_list = [('{}.{}'.format(get_json_property(item, 'options', MEDIA, MEDIAID), get_json_property(item, 'options', MEDIA, EXT)))]
         elif item_type in ['drawing', SIGNATURE]:
-            media_href = ('{}.{}'.format(get_json_property(item, RESPONSES, 'image', MEDIAID), get_json_property(item, RESPONSES, 'image', EXT)))
-        else:
-            media_list = []
-            for image in get_json_property(item, MEDIA):
-                if EXT in image.keys():
-                    if image[EXT] is not None:
-                        media_list.append(image[MEDIAID] + '.' + image[EXT])
-                else:
-                    media_list.append(image[MEDIAID] + '.' + 'jpg')
-            media_href = '\n'.join(media_list)
-            # media_href = '\n'.join(image[MEDIAID]+'.'+image[EXT] for image in get_json_property(item, MEDIA))
+            media_list = [('{}.{}'.format(get_json_property(item, RESPONSES, 'image', MEDIAID), get_json_property(item, RESPONSES, 'image', EXT)))]
+
+        for image in get_json_property(item, MEDIA):
+            if EXT in image.keys():
+                if image[EXT] is not None:
+                    media_list.append(image[MEDIAID] + '.' + image[EXT])
+            else:
+                media_list.append(image[MEDIAID] + '.' + 'jpg')
+        media_href = '\n'.join(media_list)
+        # media_href = '\n'.join(image[MEDIAID]+'.'+image[EXT] for image in get_json_property(item, MEDIA))
         if media_href == '.':
             media_href = None
         return media_href
