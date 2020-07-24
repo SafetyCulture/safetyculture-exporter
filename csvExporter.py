@@ -456,6 +456,16 @@ class CsvExporter:
                   self.audit_id() + ', ' + item.get(ID))
         return response
 
+    def get_item_comment(item):
+        """
+        :param item:    single item in JSON format
+        :return:        note/comment of item
+        """
+        if item.get(TYPE) in ['question', 'list']:
+          return get_json_property(item, RESPONSES, 'text')
+        else:
+          return get_json_property(item, RESPONSES, 'note')
+
     @staticmethod
     def get_item_response_id(item):
         """
@@ -604,7 +614,7 @@ class CsvExporter:
             self.get_item_type(item),
             self.get_item_label(item),
             self.get_item_response(item),
-            get_json_property(item, RESPONSES, 'text') if item.get(TYPE) not in ['text', 'textsingle'] else EMPTY_RESPONSE,
+            self.get_item_comment(item),
             self.get_item_media(item),
             latitude,
             longitude,
