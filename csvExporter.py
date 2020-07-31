@@ -456,6 +456,7 @@ class CsvExporter:
                   self.audit_id() + ', ' + item.get(ID))
         return response
 
+    @staticmethod
     def get_item_comment(item):
         """
         :param item:    single item in JSON format
