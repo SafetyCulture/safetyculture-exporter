@@ -1,0 +1,24 @@
+{
+  "metadata": {
+    "next_page": null,
+    "remaining_records": 0
+  },
+  "data": [
+    {
+      "user_id": "user_1",
+      "group_id": "role_group3"
+    },
+    {
+      "user_id": "user_1",
+      "group_id": "role_group4"
+    },
+    {
+      "user_id": "user_2",
+      "group_id": "role_group3"
+    },
+    {
+      "user_id": "user_2",
+      "group_id": "role_group4"
+    }
+  ]
+}

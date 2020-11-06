@@ -1,0 +1,62 @@
+{
+  "metadata": {
+    "next_page": "/feed/inspections/2",
+    "remaining_records": 2
+  },
+  "data": [
+    {
+      "id": "audit_1",
+      "name": "My Audit",
+      "archived": true,
+      "owner_name": "A User",
+      "owner_id": "user_1",
+      "author_name": "A User",
+      "author_id": "user_1",
+      "score": 0,
+      "max_score": 107,
+      "score_percentage": 0,
+      "duration": 61,
+      "template_id": "template_1",
+      "template_name": "General Workplace Inspection",
+      "template_author": "Anonymous",
+      "date_started": "2014-01-28T23:14:23.000Z",
+      "date_completed": null,
+      "date_modified": "2014-01-28T23:15:24.000Z",
+      "created_at": "2014-01-28T23:14:23.000Z",
+      "modified_at": "2014-01-28T23:14:23.000Z",
+      "document_no": null,
+      "prepared_by": null,
+      "location": null,
+      "conducted_on": "2014-01-28T23:14:23.000Z",
+      "personnel": null,
+      "client_site": null
+    },
+    {
+      "id": "audit_2",
+      "name": "",
+      "archived": true,
+      "owner_name": "A User",
+      "owner_id": "user_1",
+      "author_name": "Another User",
+      "author_id": "user_2",
+      "score": 59,
+      "max_score": 141,
+      "score_percentage": null,
+      "duration": 183,
+      "template_id": "template_2",
+      "template_name": "Group 9 - Townsville Tourism Walking Tour",
+      "template_author": "A User",
+      "date_started": "2014-03-06T04:47:26.000Z",
+      "date_completed": null,
+      "date_modified": "2014-03-07T02:43:15.000Z",
+      "created_at": "2014-03-06T04:47:26.000Z",
+      "modified_at": "2014-03-06T04:47:26.000Z",
+      "document_no": null,
+      "prepared_by": null,
+      "location": null,
+      "conducted_on": "2014-03-06T04:47:26.000Z",
+      "personnel": null,
+      "client_site": null
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "next_page": null,
+    "remaining_records": 43
+  },
+  "data": [
+    {
+      "id": "scheduleitem_1",
+      "description": "Stefani Joanne Angelina's paragraph spacing test - Falls Creek - One off",
+      "recurrence": "INTERVAL=1;FREQ=DAILY;DTSTART=20201030T180000Z;COUNT=1",
+      "duration": "P1DT2H",
+      "modified_at": "2020-10-31T09:01:57.659Z",
+      "from_date": "2020-10-30T07:00:00.000Z",
+      "to_date": null,
+      "start_time_hour": 18,
+      "start_time_minute": 0,
+      "all_must_complete": true,
+      "status": "FINISHED",
+      "timezone": "Australia/Sydney",
+      "can_late_submit": false,
+      "template_id": "template_1",
+      "creator_user_id": "user_3"
+    },
+    {
+      "id": "scheduleitem_2",
+      "description": "Ford Certified Vehicle Checklist - Every year",
+      "recurrence": "INTERVAL=1;FREQ=DAILY;DTSTART=20201007T070000Z;COUNT=1",
+      "duration": "P24DT10H",
+      "modified_at": "2020-10-31T06:01:21.062Z",
+      "from_date": "2020-10-06T20:00:00.000Z",
+      "to_date": null,
+      "start_time_hour": 7,
+      "start_time_minute": 0,
+      "all_must_complete": false,
+      "status": "FINISHED",
+      "timezone": "Australia/Sydney",
+      "can_late_submit": false,
+      "template_id": "template_2",
+      "creator_user_id": "user_2"
+    }
+  ]
+}

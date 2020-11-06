@@ -1,0 +1,38 @@
+# yamllint disable rule:line-length
+---
+name: tests
+
+# yamllint disable-line rule:truthy
+on:
+  push:
+    branches:
+      - "*"
+  pull_request:
+    branches:
+      - "*"
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Go 1.x
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.15
+
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v2
+
+      - name: Test & Coverage
+        env:
+          CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
+        run: |
+          curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+          chmod +x ./cc-test-reporter
+          ./cc-test-reporter before-build
+          go test -coverprofile c.out ./...
+          ./cc-test-reporter after-build --prefix $(go list -m)
+
+      - uses: actions/setup-python@v2
+      - name: Run pre commit linting
+        uses: pre-commit/action@v2.0.0

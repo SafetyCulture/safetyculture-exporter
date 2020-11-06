@@ -1,0 +1,88 @@
+package feed
+
+import (
+	"context"
+	"encoding/json"
+	"time"
+
+	"github.com/SafetyCulture/iauditor-exporter/internal/app/api"
+	"github.com/SafetyCulture/iauditor-exporter/internal/app/util"
+)
+
+// ScheduleAssignee represents a row from the schedule_assignees feed
+type ScheduleAssignee struct {
+	ScheduleID string    `json:"schedule_id" csv:"schedule_id" gorm:"primarykey;column:schedule_id"`
+	AssigneeID string    `json:"id" csv:"assignee_id" gorm:"primarykey;column:assignee_id"`
+	Type       string    `json:"type" csv:"type"`
+	Name       string    `json:"name" csv:"name"`
+	ExportedAt time.Time `json:"exported_at" csv:"exported_at" gorm:"autoUpdateTime"`
+}
+
+// ScheduleAssigneeFeed is a representation of the schedule_assignees feed
+type ScheduleAssigneeFeed struct {
+	TemplateIDs []string
+}
+
+// Name is the name of the feed
+func (f *ScheduleAssigneeFeed) Name() string {
+	return "schedule_assignees"
+}
+
+// Model returns the model of the feed row
+func (f *ScheduleAssigneeFeed) Model() interface{} {
+	return ScheduleAssignee{}
+}
+
+// PrimaryKey returns the primary key(s)
+func (f *ScheduleAssigneeFeed) PrimaryKey() []string {
+	return []string{"schedule_id", "assignee_id"}
+}
+
+// Columns returns the columns of the row
+func (f *ScheduleAssigneeFeed) Columns() []string {
+	return []string{
+		"type",
+		"name",
+	}
+}
+
+// Order returns the ordering when retrieving an export
+func (f *ScheduleAssigneeFeed) Order() string {
+	return "schedule_id, assignee_id"
+}
+
+// Export exports the feed to the supplied exporter
+func (f *ScheduleAssigneeFeed) Export(ctx context.Context, apiClient api.APIClient, exporter Exporter) error {
+	logger := util.GetLogger()
+	feedName := f.Name()
+
+	logger.Infof("%s: exporting", feedName)
+
+	exporter.InitFeed(f, &InitFeedOptions{
+		// Always truncate. This data must be refreshed in order to be accurate
+		Truncate: true,
+	})
+
+	err := apiClient.DrainFeed(ctx, &api.GetFeedRequest{
+		InitialURL: "/feed/schedule_assignees",
+		Params: api.GetFeedParams{
+			TemplateIDs: f.TemplateIDs,
+		},
+	}, func(resp *api.GetFeedResponse) error {
+		rows := []*ScheduleAssignee{}
+
+		err := json.Unmarshal(resp.Data, &rows)
+		util.Check(err, "Failed to unmarshal data to struct")
+
+		if len(rows) != 0 {
+			err = exporter.WriteRows(f, rows)
+			util.Check(err, "Failed to write data to exporter")
+		}
+
+		logger.Infof("%s: %d remaining", feedName, resp.Metadata.RemainingRecords)
+		return nil
+	})
+	util.Check(err, "Failed to export feed")
+
+	return exporter.FinaliseExport(f, &[]*ScheduleAssignee{})
+}

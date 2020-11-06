@@ -1,0 +1,26 @@
+# yamllint disable rule:line-length
+---
+linters-settings:
+  govet:
+    check-shadowing: true
+  maligned:
+    suggest-new: true
+  dupl:
+    threshold: 100
+  goconst:
+    min-len: 2
+    min-occurrences: 2
+
+linters:
+  enable-all: true
+  disable:
+    - misspell  # Messes with package imports
+    - funlen  # We have lots of long functions
+    - gochecknoglobals  # Good practice but not always practical.
+    - gochecknoinits  # init functions required by cobra
+    - gocognit  # We have lots of complex functions
+    - godox  # We use TODO to plan longer-term fixes
+    - interfacer  # Prone to bad suggestions. Check has been deprecated: https://github.com/mvdan/interfacer
+    - lll  # Line-length-linter: restricts lines to 131 characters.
+    - scopelint  # Detects too many false positives in tests: https://github.com/kyoh86/scopelint/issues/4
+    - wsl  # adds to unnessary complexity

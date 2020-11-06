@@ -1,0 +1,91 @@
+package feed
+
+import (
+	"context"
+	"encoding/json"
+	"time"
+
+	"github.com/SafetyCulture/iauditor-exporter/internal/app/api"
+	"github.com/SafetyCulture/iauditor-exporter/internal/app/util"
+)
+
+// User represents a row from the users feed
+type User struct {
+	ID             string    `json:"id" csv:"user_id" gorm:"primarykey;column:user_id"`
+	OrganisationID string    `json:"organisation_id" csv:"organisation_id"`
+	Email          string    `json:"email" csv:"email"`
+	Firstname      string    `json:"firstname" csv:"firstname"`
+	Lastname       string    `json:"lastname" csv:"lastname"`
+	Active         bool      `json:"active" csv:"active"`
+	ExportedAt     time.Time `json:"exported_at" csv:"exported_at" gorm:"autoUpdateTime"`
+}
+
+// UserFeed is a representation of the users feed
+type UserFeed struct{}
+
+// Name is the name of the feed
+func (f *UserFeed) Name() string {
+	return "users"
+}
+
+// Model returns the model of the feed row
+func (f *UserFeed) Model() interface{} {
+	return User{}
+}
+
+// PrimaryKey returns the primary key(s)
+func (f *UserFeed) PrimaryKey() []string {
+	return []string{"user_id"}
+}
+
+// Columns returns the columns of the row
+func (f *UserFeed) Columns() []string {
+	return []string{
+		"organisation_id",
+		"email",
+		"firstname",
+		"lastname",
+		"active",
+		"exported_at",
+	}
+}
+
+// Order returns the ordering when retrieving an export
+func (f *UserFeed) Order() string {
+	return "user_id"
+}
+
+// Export exports the feed to the supplied exporter
+func (f *UserFeed) Export(ctx context.Context, apiClient api.APIClient, exporter Exporter) error {
+	logger := util.GetLogger()
+	feedName := f.Name()
+
+	logger.Infof("%s: exporting", feedName)
+
+	exporter.InitFeed(f, &InitFeedOptions{
+		// Truncate files if upserts aren't supported.
+		// This ensure that the export does not contain duplicate rows
+		Truncate: exporter.SupportsUpsert() == false,
+	})
+
+	err := apiClient.DrainFeed(ctx, &api.GetFeedRequest{
+		InitialURL: "/feed/users",
+		Params:     api.GetFeedParams{},
+	}, func(resp *api.GetFeedResponse) error {
+		rows := []*User{}
+
+		err := json.Unmarshal(resp.Data, &rows)
+		util.Check(err, "Failed to unmarshal data to struct")
+
+		if len(rows) != 0 {
+			err = exporter.WriteRows(f, rows)
+			util.Check(err, "Failed to write data to exporter")
+		}
+
+		logger.Infof("%s: %d remaining", feedName, resp.Metadata.RemainingRecords)
+		return nil
+	})
+	util.Check(err, "Failed to export feed")
+
+	return exporter.FinaliseExport(f, &[]*User{})
+}
