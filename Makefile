@@ -22,6 +22,17 @@ endif
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
+.PHONY: release-snapshot
+release-snapshot:
+	docker run \
+		--rm \
+		--privileged \
+		-v /var/run/docker.sock:/var/run/docker.sock \
+		-v `pwd`:/go/src/$(PACKAGE_NAME) \
+		-w /go/src/$(PACKAGE_NAME) \
+		troian/golang-cross:${GOLANG_CROSS_VERSION} \
+		-f .goreleaser.yml --rm-dist --snapshot --skip-validate --skip-publish
+
 .PHONY: release-dry-run
 release-dry-run:
 	docker run \
