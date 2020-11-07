@@ -1,5 +1,7 @@
 # iAuditor Exporter
 
+[![Maintainability](https://api.codeclimate.com/v1/badges/39eecd9ef3573ecca044/maintainability)](https://codeclimate.com/github/SafetyCulture/iauditor-exporter/maintainability) [![Test Coverage](https://api.codeclimate.com/v1/badges/39eecd9ef3573ecca044/test_coverage)](https://codeclimate.com/github/SafetyCulture/iauditor-exporter/test_coverage)
+
 iAuditor Exporter is a CLI tool for extracting your iAuditor data.
 
 To see the full set of commands available run `iauditor-exporter --help`
