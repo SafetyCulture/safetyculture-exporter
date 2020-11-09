@@ -10,7 +10,7 @@ import (
 )
 
 func getInmemorySQLExporter() (*feed.SQLExporter, error) {
-	return feed.NewSQLExporter("sqlite", "file::memory:")
+	return feed.NewSQLExporter("sqlite", "file::memory:", true)
 }
 
 func TestSQLExporterSupportsUpsert_should_return_true(t *testing.T) {
@@ -231,20 +231,20 @@ func TestSQLExporterLastModifiedAt_should_return_latest_modified_at(t *testing.T
 }
 
 func TestNewSQLExporter_should_create_exporter_for_sqlite(t *testing.T) {
-	sqlExporter, err := feed.NewSQLExporter("sqlite", "file::memory:")
+	sqlExporter, err := feed.NewSQLExporter("sqlite", "file::memory:", true)
 	assert.Nil(t, err)
 
 	assert.NotNil(t, sqlExporter)
 }
 
 func TestNewSQLExporter_should_return_error_for_invalid_dialect(t *testing.T) {
-	sqlExporter, err := feed.NewSQLExporter("not-supported", "file::memory:")
+	sqlExporter, err := feed.NewSQLExporter("not-supported", "file::memory:", true)
 	assert.NotNil(t, err)
 	assert.Nil(t, sqlExporter)
 }
 
 func TestNewSQLExporter_should_return_error_for_connection_errors(t *testing.T) {
-	sqlExporter, err := feed.NewSQLExporter("sqlite", "*$////bad connection string")
+	sqlExporter, err := feed.NewSQLExporter("sqlite", "*$////bad connection string", true)
 	assert.NotNil(t, err)
 	assert.Nil(t, sqlExporter)
 }

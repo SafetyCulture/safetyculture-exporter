@@ -17,8 +17,9 @@ import (
 
 // SQLExporter is an interface to export data feeds to SQL databases
 type SQLExporter struct {
-	DB     *gorm.DB
-	Logger *zap.SugaredLogger
+	DB          *gorm.DB
+	Logger      *zap.SugaredLogger
+	AutoMigrate bool
 }
 
 // SupportsUpsert returns a bool if the exporter supports upserts
@@ -30,17 +31,18 @@ func (e *SQLExporter) SupportsUpsert() bool {
 func (e *SQLExporter) InitFeed(feed Feed, opts *InitFeedOptions) error {
 	model := feed.Model()
 
-	err := e.DB.AutoMigrate(model)
-	if err != nil {
-		return err
+	if e.AutoMigrate {
+		err := e.DB.AutoMigrate(model)
+		if err != nil {
+			return err
+		}
 	}
 
 	if opts.Truncate {
 		e.Logger.Infof("%s: truncating", feed.Name())
 		result := e.DB.Session(&gorm.Session{AllowGlobalUpdate: true}).Unscoped().Delete(model)
-		err = result.Error
-		if err != nil {
-			return errors.Wrap(err, "Unable to truncate table")
+		if result.Error != nil {
+			return errors.Wrap(result.Error, "Unable to truncate table")
 		}
 	}
 
@@ -94,7 +96,7 @@ func (e *SQLExporter) FinaliseExport(feed Feed, rows interface{}) error {
 }
 
 // NewSQLExporter creates a new instance of the SQLExporter
-func NewSQLExporter(dialect, connectionString string) (*SQLExporter, error) {
+func NewSQLExporter(dialect, connectionString string, autoMigrate bool) (*SQLExporter, error) {
 	logger := util.GetLogger()
 	gormLogger := &util.GormLogger{
 		SugaredLogger: logger,
@@ -127,7 +129,8 @@ func NewSQLExporter(dialect, connectionString string) (*SQLExporter, error) {
 	}
 
 	return &SQLExporter{
-		DB:     db,
-		Logger: logger,
+		DB:          db,
+		Logger:      logger,
+		AutoMigrate: autoMigrate,
 	}, nil
 }
