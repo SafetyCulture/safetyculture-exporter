@@ -67,6 +67,6 @@ jobs:
         env:
           CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
           TEST_DB_DIALECT: postgres
-          TEST_DB_CONN_STRING: "postgresql://iauditor_exporter:iauditor_exporter@localhost:5434/iauditor_exporter_db"
+          TEST_DB_CONN_STRING: "postgresql://iauditor_exporter:iauditor_exporter@localhost:5432/iauditor_exporter_db"
         run: |
           go test ./... -tags=sql
