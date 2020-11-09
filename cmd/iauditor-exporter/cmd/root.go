@@ -22,8 +22,8 @@ var cfgFile string
 var RootCmd = &cobra.Command{
 	Version: version.GetVersion(),
 	Use:     "iauditor-exporter",
-	Short:   "CLI for exporting your iAuditor Data",
-	Long:    "CLI for exporting your iAuditor Data",
+	Short:   "A CLI tool for extracting your iAuditor data",
+	Long:    "A CLI tool for extracting your iAuditor data",
 }
 
 var disclaimer = `THIS SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
