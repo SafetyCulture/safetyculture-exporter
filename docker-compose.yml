@@ -3,19 +3,19 @@ services:
   postgres:
     image: postgres
     environment:
-      - POSTGRES_DB=iauditor_exporter_db
-      - POSTGRES_USER=iauditor_exporter
-      - POSTGRES_PASSWORD=iauditor_exporter
+      POSTGRES_DB: iauditor_exporter_db
+      POSTGRES_USER: iauditor_exporter
+      POSTGRES_PASSWORD: iauditor_exporter
     ports:
       - 5434:5432
 
   mysql:
     image: mysql:8
     environment:
-      - MYSQL_ROOT_PASSWORD=iauditor_exporter
-      - MYSQL_DATABASE=iauditor_exporter_db
-      - MYSQL_USER=iauditor_exporter
-      - MYSQL_PASSWORD=iauditor_exporter
+      MYSQL_ROOT_PASSWORD: iauditor_exporter
+      MYSQL_DATABASE: iauditor_exporter_db
+      MYSQL_USER: iauditor_exporter
+      MYSQL_PASSWORD: iauditor_exporter
     ports:
       - 3308:3306
 
