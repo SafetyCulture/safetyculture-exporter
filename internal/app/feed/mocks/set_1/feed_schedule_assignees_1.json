@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "next_page": null,
+    "remaining_records": 43
+  },
+  "data": [
+    {
+      "schedule_id": "scheduleitem_1",
+      "id": "user_1",
+      "type": "user",
+      "name": "Dwight Schrute"
+    },
+    {
+      "schedule_id": "scheduleitem_1",
+      "id": "user_4",
+      "type": "user",
+      "name": "Agnetha Fältskog"
+    },
+    {
+      "schedule_id": "scheduleitem_1",
+      "id": "user_3",
+      "type": "user",
+      "name": "Stefani Joanne Angelina Germanotta"
+    },
+    {
+      "schedule_id": "scheduleitem_2",
+      "id": "user_1",
+      "type": "user",
+      "name": "Dwight Schrute"
+    },
+    {
+      "schedule_id": "scheduleitem_2",
+      "id": "user_4",
+      "type": "user",
+      "name": "Agnetha Fältskog"
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "metadata": {
+    "next_page": null,
+    "remaining_records": 0
+  },
+  "data": [
+    {
+      "id": "scheduleitem_1_occurrence_1641027600000_user_1",
+      "schedule_id": "scheduleitem_1",
+      "occurrence_id": "occurrence_1641027600000",
+      "template_id": "template_1",
+      "miss_time": "2023-01-01T01:00:00.000Z",
+      "occurrence_status": "TODO",
+      "audit_id": null,
+      "completed_at": null,
+      "user_id": "user_1",
+      "assignee_status": "TODO"
+    },
+    {
+      "id": "scheduleitem_2_occurrence_1641027600000_user_2",
+      "schedule_id": "scheduleitem_2",
+      "occurrence_id": "occurrence_1641027600000",
+      "template_id": "template_2",
+      "miss_time": "2023-01-01T01:00:00.000Z",
+      "occurrence_status": "TODO",
+      "audit_id": null,
+      "completed_at": null,
+      "user_id": "user_3",
+      "assignee_status": "TODO"
+    }
+  ]
+}

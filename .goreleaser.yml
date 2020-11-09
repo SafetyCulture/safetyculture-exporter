@@ -1,0 +1,84 @@
+# yamllint disable rule:line-length
+---
+# Make sure to check the documentation at http://goreleaser.com
+project_name: iauditor-exporter
+before:
+  hooks:
+    - go mod download
+env:
+  - GO111MODULE=on
+  - CGO_ENABLED=1
+  - GOPROXY=https://proxy.golang.org
+builds:
+  - id: darwin-amd64
+    main: ./cmd/iauditor-exporter/main.go
+    goos:
+      - darwin
+    goarch:
+      - amd64
+    env:
+      - CC=o64-clang
+      - CXX=o64-clang++
+    flags:
+      - -tags=netgo  # Force using the go network stack
+      - -mod=readonly
+    ldflags:
+      - -s -w -X github.com/SafetyCulture/iauditor-exporter/internal/app/version.version={{.Version}}
+  - id: linux-amd64
+    main: ./cmd/iauditor-exporter/main.go
+    goos:
+      - linux
+    goarch:
+      - amd64
+    env:
+      - CC=gcc
+      - CXX=g++
+    flags:
+      - -tags=netgo  # Force using the go network stack
+      - -trimpath
+      - -mod=readonly
+    ldflags:
+      - -s -w -X github.com/SafetyCulture/iauditor-exporter/internal/app/version.version={{.Version}}
+      - -extldflags "-lc -lrt -lpthread --static"
+  - id: windows-amd64
+    main: ./cmd/iauditor-exporter/main.go
+    goos:
+      - windows
+    goarch:
+      - amd64
+    env:
+      - CC=x86_64-w64-mingw32-gcc
+      - CXX=x86_64-w64-mingw32-g++
+    flags:
+      - -tags=netgo  # Force using the go network stack
+      - -mod=readonly
+      - -buildmode=exe
+    ldflags:
+      - -s -w -X github.com/SafetyCulture/iauditor-exporter/internal/app/version.version={{.Version}}
+archives:
+  - id: iauditor-exporter
+    builds:
+      - darwin-amd64
+      - linux-amd64
+      - windows-amd64
+    replacements:
+      darwin: macOS
+      linux: Linux
+      windows: Windows
+      386: i386
+      amd64: x86_64
+    format_overrides:
+      - goos: windows
+        format: zip
+    files:
+      - README.md
+checksum:
+  name_template: 'checksums.txt'
+snapshot:
+  name_template: "{{ .Tag }}-next"
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'

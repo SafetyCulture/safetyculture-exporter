@@ -1,0 +1,40 @@
+{
+  "metadata": {
+    "next_page": null,
+    "remaining_records": 0
+  },
+  "data": [
+    {
+      "id": "user_1",
+      "organisation_id": "role_1",
+      "email": "tests+dwight.schrute@safetyculture.io",
+      "firstname": "Dwight",
+      "lastname": "Schrute",
+      "active": true
+    },
+    {
+      "id": "user_2",
+      "organisation_id": "role_1",
+      "email": "tests+abraham.lincoln@safetyculture.io",
+      "firstname": "Abraham",
+      "lastname": "Lincoln",
+      "active": true
+    },
+    {
+      "id": "user_3",
+      "organisation_id": "role_1",
+      "email": "tests+stefani.joanne.angelina.germanotta@safetyculture.io",
+      "firstname": "Stefani Joanne Angelina",
+      "lastname": "Germanotta",
+      "active": true
+    },
+    {
+      "id": "user_4",
+      "organisation_id": "role_1",
+      "email": "tests+Agnetha.Fältskog@safetyculture.io",
+      "firstname": "Agnetha",
+      "lastname": "Fältskog",
+      "active": false
+    }
+  ]
+}

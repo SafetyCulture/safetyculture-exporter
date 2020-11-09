@@ -1,0 +1,6 @@
+site_id,name,creator_id,organisation_id,exported_at
+location_1,"42 Wallaby Way, Sydney",user_1,role_1,2020-11-06T08:21:16.399249+11:00
+location_2,Schrute Farms,user_2,role_1,2020-11-06T08:21:16.399249+11:00
+location_3,"Jönköping, Sweden",user_4,role_1,2020-11-06T08:21:16.399249+11:00
+location_4,"Lenox Hill, New York, United States",user_3,role_1,2020-11-06T08:21:16.399249+11:00
+locaton_5,"Kentucky, United States",user_2,role_1,2020-11-06T08:21:16.399249+11:00

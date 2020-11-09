@@ -1,0 +1,36 @@
+{
+  "metadata": {
+    "next_page": null,
+    "remaining_records": 0
+  },
+  "data": [
+    {
+      "name": "Group 1",
+      "id": "role_group1"
+    },
+    {
+      "name": "Group 2",
+      "id": "role_group2"
+    },
+    {
+      "name": "Group 3",
+      "id": "role_group3"
+    },
+    {
+      "name": "Group 4",
+      "id": "role_group4"
+    },
+    {
+      "name": "Group 5",
+      "id": "role_group5"
+    },
+    {
+      "name": "Group 6",
+      "id": "role_group6"
+    },
+    {
+      "name": "Group 7",
+      "id": "role_group7"
+    }
+  ]
+}

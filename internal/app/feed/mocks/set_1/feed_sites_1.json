@@ -1,0 +1,39 @@
+{
+  "metadata": {
+    "next_page": null,
+    "locations_enabled": true,
+    "remaining_records": 0
+  },
+  "data": [
+    {
+      "id": "location_1",
+      "name": "42 Wallaby Way, Sydney",
+      "creator_id": "user_1",
+      "organisation_id": "role_1"
+    },
+    {
+      "id": "location_2",
+      "name": "Schrute Farms",
+      "creator_id": "user_2",
+      "organisation_id": "role_1"
+    },
+    {
+      "id": "location_3",
+      "name": "Jönköping, Sweden",
+      "creator_id": "user_4",
+      "organisation_id": "role_1"
+    },
+    {
+      "id": "location_4",
+      "name": "Lenox Hill, New York, United States",
+      "creator_id": "user_3",
+      "organisation_id": "role_1"
+    },
+    {
+      "id": "locaton_5",
+      "name": "Kentucky, United States",
+      "creator_id": "user_2",
+      "organisation_id": "role_1"
+    }
+  ]
+}
