@@ -11,8 +11,9 @@ import (
 
 // ScheduleAssignee represents a row from the schedule_assignees feed
 type ScheduleAssignee struct {
-	ScheduleID string    `json:"schedule_id" csv:"schedule_id" gorm:"primarykey;column:schedule_id"`
-	AssigneeID string    `json:"id" csv:"assignee_id" gorm:"primarykey;column:assignee_id"`
+	ID         string    `json:"id" csv:"id" gorm:"primarykey"`
+	ScheduleID string    `json:"schedule_id" csv:"schedule_id"`
+	AssigneeID string    `json:"assignee_id" csv:"assignee_id"`
 	Type       string    `json:"type" csv:"type"`
 	Name       string    `json:"name" csv:"name"`
 	ExportedAt time.Time `json:"exported_at" csv:"exported_at" gorm:"autoUpdateTime"`
@@ -35,12 +36,14 @@ func (f *ScheduleAssigneeFeed) Model() interface{} {
 
 // PrimaryKey returns the primary key(s)
 func (f *ScheduleAssigneeFeed) PrimaryKey() []string {
-	return []string{"schedule_id", "assignee_id"}
+	return []string{"id"}
 }
 
 // Columns returns the columns of the row
 func (f *ScheduleAssigneeFeed) Columns() []string {
 	return []string{
+		"schedule_id",
+		"assignee_id",
 		"type",
 		"name",
 	}
