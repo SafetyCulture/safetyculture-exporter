@@ -31,7 +31,14 @@ jobs:
           chmod +x ./cc-test-reporter
           ./cc-test-reporter before-build
           go test -coverprofile c.out ./...
-          ./cc-test-reporter after-build --prefix $(go list -m)
+          ./cc-test-reporter format-coverage -o codeclimate.unit.json --prefix $(go list -m)
+
+      - name: Upload Coverage Result
+        uses: actions/upload-artifact@v2
+        with:
+          name: codeclimate-unit
+          path: codeclimate.unit.json
+          retention-days: 1
 
       - uses: actions/setup-python@v2
       - name: Run pre commit linting
