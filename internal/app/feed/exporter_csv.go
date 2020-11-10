@@ -62,7 +62,7 @@ func (e *CSVExporter) FinaliseExport(feed Feed, rows interface{}) error {
 }
 
 func NewCSVExporter(exportPath string) (*CSVExporter, error) {
-	sqlExporter, err := NewSQLExporter("sqlite", filepath.Join(exportPath, "sqlite.db"))
+	sqlExporter, err := NewSQLExporter("sqlite", filepath.Join(exportPath, "sqlite.db"), true)
 	if err != nil {
 		return nil, err
 	}

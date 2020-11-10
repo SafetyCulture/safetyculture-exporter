@@ -64,6 +64,7 @@ func TestExportFeeds_should_perform_incremental_update_on_second_run(t *testing.
 	assert.Nil(t, err)
 
 	viperConfig := viper.New()
+	viperConfig.Set("export.inspection.incremental", true)
 
 	apiClient := api.NewAPIClient("http://localhost:9999", "token")
 	initMockFeedsSet1(apiClient.HTTPClient())

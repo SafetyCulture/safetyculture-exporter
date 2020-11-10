@@ -61,7 +61,7 @@ func getAPIClient() api.APIClient {
 func runSQL(cmd *cobra.Command, args []string) error {
 	apiClient := getAPIClient()
 
-	exporter, err := feed.NewSQLExporter(viper.GetString("db.dialect"), viper.GetString("db.connection_string"))
+	exporter, err := feed.NewSQLExporter(viper.GetString("db.dialect"), viper.GetString("db.connection_string"), true)
 	util.Check(err, "unable to create exporter")
 
 	return feed.ExportFeeds(viper.GetViper(), apiClient, exporter)
