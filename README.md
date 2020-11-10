@@ -85,3 +85,15 @@ See above for the exact usage and alternative mechanisms to set them.
 ## Exporting
 
 See [docs/iauditor-exporter_sql.md](docs/iauditor-exporter_sql.md) and [docs/iauditor-exporter_csv.md](docs/iauditor-exporter_csv.md) for usage of specific exporters.
+
+## Development
+
+To develop `iauditor-exporter` you just need the latest version of Golang which you can grab here: [https://golang.org/doc/install](https://golang.org/doc/install).
+
+### Testing
+
+Locally you can run `go test ./...`, this will run all of the Unit tests and Integration tests that can be run without an external DB.
+
+SQL Database integration tests can be run by starting the SQL DBs `docker-compose up -d` and then running `make integration-tests`.
+
+Note: these tests will be automatically when pushing or opening a pull request against the repository.
