@@ -31,13 +31,13 @@ jobs:
           chmod +x ./cc-test-reporter
           ./cc-test-reporter before-build
           go test -coverprofile c.out ./...
-          ./cc-test-reporter format-coverage -o codeclimate.unit.json --prefix $(go list -m)
+          ./cc-test-reporter format-coverage -o codeclimate.json --prefix $(go list -m)
 
       - name: Upload Coverage Result Artifact
         uses: actions/upload-artifact@v2
         with:
           name: codeclimate-unit
-          path: codeclimate.unit.json
+          path: codeclimate.json
           retention-days: 1
 
       - uses: actions/setup-python@v2
@@ -80,13 +80,13 @@ jobs:
           chmod +x ./cc-test-reporter
           ./cc-test-reporter before-build
           go test -coverprofile c.out ./... -tags=sql
-          ./cc-test-reporter format-coverage -o codeclimate.intg-postgresql.json --prefix $(go list -m)
+          ./cc-test-reporter format-coverage -o codeclimate.json --prefix $(go list -m)
 
       - name: Upload Coverage Result Artifact
         uses: actions/upload-artifact@v2
         with:
-          name: codeclimate-intg-postgresql
-          path: codeclimate.intg-postgresql.json
+          name: codeclimate-intg-postgres
+          path: codeclimate.json
           retention-days: 1
 
   MySQL-8-Integration-Tests:
@@ -126,13 +126,13 @@ jobs:
           chmod +x ./cc-test-reporter
           ./cc-test-reporter before-build
           go test -coverprofile c.out ./... -tags=sql
-          ./cc-test-reporter format-coverage -o codeclimate.intg-mysql-8.json --prefix $(go list -m)
+          ./cc-test-reporter format-coverage -o codeclimate.json --prefix $(go list -m)
 
       - name: Upload Coverage Result Artifact
         uses: actions/upload-artifact@v2
         with:
-          name: codeclimate-intg-mysql-8
-          path: codeclimate.intg-mysql-8.json
+          name: codeclimate-mysql-8
+          path: codeclimate.json
           retention-days: 1
 
 
@@ -171,13 +171,13 @@ jobs:
           chmod +x ./cc-test-reporter
           ./cc-test-reporter before-build
           go test -coverprofile c.out ./... -tags=sql
-          ./cc-test-reporter format-coverage -o codeclimate.intg-sql-server.json --prefix $(go list -m)
+          ./cc-test-reporter format-coverage -o codeclimate.json --prefix $(go list -m)
 
       - name: Upload Coverage Result Artifact
         uses: actions/upload-artifact@v2
         with:
           name: codeclimate-intg-sql-server
-          path: codeclimate.intg-sql-server.json
+          path: codeclimate.json
           retention-days: 1
 
   Upload-Coverage:
@@ -197,5 +197,5 @@ jobs:
         run: |
           curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
           chmod +x ./cc-test-reporter
-          ./cc-test-reporter sum-coverage */codeclimate.*.json -p 4 -o codeclimate.total.json
+          ./cc-test-reporter sum-coverage */codeclimate.json -p 4 -o codeclimate.total.json
           ./cc-test-reporter upload-coverage -i codeclimate.total.json
