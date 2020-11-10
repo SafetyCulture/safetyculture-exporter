@@ -1,17 +1,12 @@
 package feed_test
 
 import (
-	"fmt"
 	"testing"
 	"time"
 
 	"github.com/SafetyCulture/iauditor-exporter/internal/app/feed"
 	"github.com/stretchr/testify/assert"
 )
-
-func getInmemorySQLExporter() (*feed.SQLExporter, error) {
-	return feed.NewSQLExporter("sqlite", "file::memory:", true)
-}
 
 func TestSQLExporterSupportsUpsert_should_return_true(t *testing.T) {
 	exporter, err := getInmemorySQLExporter()
@@ -181,8 +176,6 @@ func TestSQLExporterWriteRows_should_update_rows(t *testing.T) {
 	rows := []feed.User{}
 	resp := exporter.DB.Table("users").Scan(&rows)
 	assert.Nil(t, resp.Error)
-
-	fmt.Println(rows)
 
 	assert.Equal(t, 1, len(rows))
 	assert.Equal(t, "user_1", rows[0].ID)

@@ -1,11 +1,8 @@
 package feed_test
 
 import (
-	"fmt"
 	"io/ioutil"
-	"log"
 	"path/filepath"
-	"regexp"
 	"strings"
 	"testing"
 	"time"
@@ -13,17 +10,6 @@ import (
 	"github.com/SafetyCulture/iauditor-exporter/internal/app/feed"
 	"github.com/stretchr/testify/assert"
 )
-
-var dateRegex = regexp.MustCompile(`(?m)(-?(?:[1-9][0-9]*)?[0-9]{4})-(1[0-2]|0[1-9])-(3[01]|0[1-9]|[12][0-9])T(2[0-3]|[01][0-9]):([0-5][0-9]):([0-5][0-9])(\.[0-9]+)?(\+|Z)(2[0-3]|[01][0-9])?:?([0-5][0-9])?`)
-
-func getTemporaryCSVExporter() (*feed.CSVExporter, error) {
-	dir, err := ioutil.TempDir("", "export")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	return feed.NewCSVExporter(dir)
-}
 
 func TestCSVExporterSupportsUpsert_should_return_true(t *testing.T) {
 	exporter, err := getTemporaryCSVExporter()
@@ -193,8 +179,6 @@ func TestCSVExporterWriteRows_should_update_rows(t *testing.T) {
 	rows := []feed.User{}
 	resp := exporter.DB.Table("users").Scan(&rows)
 	assert.Nil(t, resp.Error)
-
-	fmt.Println(rows)
 
 	assert.Equal(t, 1, len(rows))
 	assert.Equal(t, "user_1", rows[0].ID)

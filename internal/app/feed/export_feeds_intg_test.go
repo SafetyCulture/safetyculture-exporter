@@ -1,3 +1,5 @@
+// +build sql
+
 package feed_test
 
 import (
@@ -11,8 +13,15 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestExportFeeds_should_export_all_feeds_to_file(t *testing.T) {
-	exporter, err := getTemporaryCSVExporter()
+/*
+	For these tests we use the CSV Exporter, but instead of using a SQLite DB as an intermediary layer
+	we write the data to a real DB. So we get to test the SQL exporting logic, and compare the results easily.
+*/
+
+func TestIntegrationDbExportFeeds_should_export_all_feeds_to_file(t *testing.T) {
+	sqlExporter, err := getTestingSQLExporter()
+	assert.Nil(t, err)
+	exporter, err := getTemporaryCSVExporterWithRealSQLExporter(sqlExporter)
 	assert.Nil(t, err)
 
 	viperConfig := viper.New()
@@ -36,12 +45,15 @@ func TestExportFeeds_should_export_all_feeds_to_file(t *testing.T) {
 	filesEqualish(t, "mocks/set_1/outputs/schedules.csv", filepath.Join(exporter.ExportPath, "schedules.csv"))
 	filesEqualish(t, "mocks/set_1/outputs/schedule_assignees.csv", filepath.Join(exporter.ExportPath, "schedule_assignees.csv"))
 	filesEqualish(t, "mocks/set_1/outputs/schedule_occurrences.csv", filepath.Join(exporter.ExportPath, "schedule_occurrences.csv"))
+
 }
 
 // Expectation of this test is that group_users and schedule_assignees are truncated and refreshed
 // and that other tables are incrementally updated
-func TestExportFeeds_should_perform_incremental_update_on_second_run(t *testing.T) {
-	exporter, err := getTemporaryCSVExporter()
+func TestIntegrationDbExportFeeds_should_perform_incremental_update_on_second_run(t *testing.T) {
+	sqlExporter, err := getTestingSQLExporter()
+	assert.Nil(t, err)
+	exporter, err := getTemporaryCSVExporterWithRealSQLExporter(sqlExporter)
 	assert.Nil(t, err)
 
 	viperConfig := viper.New()
