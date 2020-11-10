@@ -5,32 +5,37 @@
   },
   "data": [
     {
+      "id": "scheduleitem_3_user_1",
       "schedule_id": "scheduleitem_3",
-      "id": "user_1",
+      "assignee_id": "user_1",
       "type": "user",
       "name": "Dwight Schrute"
     },
     {
+      "id": "scheduleitem_3_user_4",
       "schedule_id": "scheduleitem_3",
-      "id": "user_4",
+      "assignee_id": "user_4",
       "type": "user",
       "name": "Agnetha Fältskog"
     },
     {
+      "id": "scheduleitem_3_user_3",
       "schedule_id": "scheduleitem_3",
-      "id": "user_3",
+      "assignee_id": "user_3",
       "type": "user",
       "name": "Stefani Joanne Angelina Germanotta"
     },
     {
+      "id": "scheduleitem_4_user_1",
       "schedule_id": "scheduleitem_4",
-      "id": "user_1",
+      "assignee_id": "user_1",
       "type": "user",
       "name": "Dwight Schrute"
     },
     {
+      "id": "scheduleitem_4_user_4",
       "schedule_id": "scheduleitem_4",
-      "id": "user_4",
+      "assignee_id": "user_4",
       "type": "user",
       "name": "Agnetha Fältskog"
     }
