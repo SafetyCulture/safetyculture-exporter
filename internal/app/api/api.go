@@ -5,7 +5,6 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"net"
@@ -87,7 +86,6 @@ func OptSetTimeout(t time.Duration) Opt {
 func OptSetProxy(proxyURL *url.URL) Opt {
 	return func(a *apiClient) {
 		a.httpTransport.Proxy = http.ProxyURL(proxyURL)
-		fmt.Println(a.httpTransport)
 	}
 }
 

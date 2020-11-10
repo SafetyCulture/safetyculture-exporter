@@ -2,7 +2,6 @@ package feed_test
 
 import (
 	"context"
-	"fmt"
 	"testing"
 
 	"github.com/SafetyCulture/iauditor-exporter/internal/app/feed"
@@ -28,14 +27,11 @@ func TestInspectionFeedExport_should_export_rows_to_sql_db(t *testing.T) {
 	}
 
 	err = inspectionsFeed.Export(context.Background(), apiClient, exporter)
-	fmt.Println(err)
 	assert.Nil(t, err)
 
 	rows := []feed.Inspection{}
 	resp := exporter.DB.Table("inspections").Scan(&rows)
 	assert.Nil(t, resp.Error)
-
-	fmt.Println(rows)
 
 	assert.Equal(t, 3, len(rows))
 	assert.Equal(t, "audit_1", rows[0].ID)
