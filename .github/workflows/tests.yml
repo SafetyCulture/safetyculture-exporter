@@ -33,7 +33,7 @@ jobs:
           go test -coverprofile c.out ./...
           ./cc-test-reporter format-coverage -o codeclimate.unit.json --prefix $(go list -m)
 
-      - name: Upload Coverage Result
+      - name: Upload Coverage Result Artifact
         uses: actions/upload-artifact@v2
         with:
           name: codeclimate-unit
@@ -76,7 +76,18 @@ jobs:
           TEST_DB_DIALECT: postgres
           TEST_DB_CONN_STRING: "postgresql://iauditor_exporter:iauditor_exporter@localhost:5432/iauditor_exporter_db"
         run: |
-          go test ./... -tags=sql
+          curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+          chmod +x ./cc-test-reporter
+          ./cc-test-reporter before-build
+          go test -coverprofile c.out ./... -tags=sql
+          ./cc-test-reporter format-coverage -o codeclimate.intg-postgresql.json --prefix $(go list -m)
+
+      - name: Upload Coverage Result Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: codeclimate-intg-postgresql
+          path: codeclimate.intg-postgresql.json
+          retention-days: 1
 
   MySQL-8-Integration-Tests:
     runs-on: ubuntu-latest
@@ -111,7 +122,18 @@ jobs:
           TEST_DB_DIALECT: mysql
           TEST_DB_CONN_STRING: "root:iauditor_exporter@tcp(localhost:3306)/iauditor_exporter_db?charset=utf8mb4&parseTime=True&loc=Local"
         run: |
-          go test ./... -tags=sql
+          curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+          chmod +x ./cc-test-reporter
+          ./cc-test-reporter before-build
+          go test -coverprofile c.out ./... -tags=sql
+          ./cc-test-reporter format-coverage -o codeclimate.intg-mysql-8.json --prefix $(go list -m)
+
+      - name: Upload Coverage Result Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: codeclimate-intg-mysql-8
+          path: codeclimate.intg-mysql-8.json
+          retention-days: 1
 
 
   SQL-Server-Integration-Tests:
@@ -145,4 +167,34 @@ jobs:
           TEST_DB_DIALECT: sqlserver
           TEST_DB_CONN_STRING: "sqlserver://sa:iAuditorExporter12345@localhost:1433?database=master"
         run: |
-          go test ./... -tags=sql
+          curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+          chmod +x ./cc-test-reporter
+          ./cc-test-reporter before-build
+          go test -coverprofile c.out ./... -tags=sql
+          ./cc-test-reporter format-coverage -o codeclimate.intg-sql-server.json --prefix $(go list -m)
+
+      - name: Upload Coverage Result Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: codeclimate-intg-sql-server
+          path: codeclimate.intg-sql-server.json
+          retention-days: 1
+
+  Upload-Coverage:
+    runs-on: ubuntu-latest
+    needs:
+      - Unit-Tests
+      - PostgreSQL-Integration-Tests
+      - MySQL-8-Integration-Tests
+      - SQL-Server-Integration-Tests
+    steps:
+      - name: Download all coverage results
+        uses: actions/download-artifact@v2
+
+
+      - name: Upload Coverage to Code Climate
+        run: |
+          curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+          chmod +x ./cc-test-reporter
+          ./cc-test-reporter sum-coverage codeclimate.*.json -p 4 -o codeclimate.total.json
+          ./cc-test-reporter upload-coverage -i codeclimate.total.json
