@@ -3,13 +3,7 @@
 name: Tests
 
 # yamllint disable-line rule:truthy
-on:
-  push:
-    branches:
-      - "*"
-  pull_request:
-    branches:
-      - "*"
+on: [push, pull_request]
 
 jobs:
   Unit-Tests:
