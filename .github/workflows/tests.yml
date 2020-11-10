@@ -105,3 +105,37 @@ jobs:
           TEST_DB_CONN_STRING: "root:iauditor_exporter@tcp(localhost:3306)/iauditor_exporter_db?charset=utf8mb4&parseTime=True&loc=Local"
         run: |
           go test ./... -tags=sql
+
+
+  SQL-Server-Integration-Tests:
+    runs-on: ubuntu-latest
+    services:
+      sqlserver:
+        image: mcr.microsoft.com/mssql/server
+        env:
+          SA_PASSWORD: "iAuditorExporter12345"
+          ACCEPT_EULA: "Y"
+        options: >-
+          --health-cmd "sqlcmd -S localhost -U sa -P iAuditorExporter12345 -Q \"SELECT 1\" || exit 1"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 3306:3306
+
+    steps:
+      - name: Set up Go 1.x
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.15
+
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v2
+
+      - name: Test & Coverage
+        env:
+          CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
+          TEST_DB_DIALECT: sqlserver
+          TEST_DB_CONN_STRING: "sqlserver://sa:iAuditorExporter12345@localhost:1433?database=master"
+        run: |
+          go test ./... -tags=sql
