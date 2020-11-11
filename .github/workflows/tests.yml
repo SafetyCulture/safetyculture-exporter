@@ -48,12 +48,11 @@ jobs:
         image: mitmproxy/mitmproxy
         options: >-
           mitmproxy/mitmproxy mitmdump
+          -v /data/.mitmproxy:/home/mitmproxy/.mitmproxy
           --health-cmd curl http://localhost:8080
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
-        volumes:
-          - /data/.mitmproxy:/home/mitmproxy/.mitmproxy
         ports:
           - 8080:8080
 
