@@ -48,7 +48,7 @@ jobs:
         image: mitmproxy/mitmproxy
         options: mitmproxy/mitmproxy mitmdump
         volumes:
-          - /.mitmproxy:/home/mitmproxy/.mitmproxy
+          - ${{ github.workspace }}/.mitmproxy:/home/mitmproxy/.mitmproxy
         ports:
           - 8080:8080
 
@@ -65,7 +65,7 @@ jobs:
         env:
           CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
           TEST_PROXY_URL: http://localhost:8080
-          TEST_TLS_CERT_PATH: "/.mitmproxy/mitmproxy-ca-cert.pem"
+          TEST_TLS_CERT_PATH: "${{ github.workspace }}/.mitmproxy/mitmproxy-ca-cert.pem"
         run: |
           curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
           chmod +x ./cc-test-reporter
