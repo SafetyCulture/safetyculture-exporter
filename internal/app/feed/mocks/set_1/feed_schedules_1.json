@@ -18,6 +18,7 @@
       "status": "FINISHED",
       "timezone": "Australia/Sydney",
       "can_late_submit": false,
+      "site_id": "site_1",
       "template_id": "template_1",
       "creator_user_id": "user_3"
     },
@@ -35,6 +36,7 @@
       "status": "FINISHED",
       "timezone": "Australia/Sydney",
       "can_late_submit": false,
+      "site_id": null,
       "template_id": "template_2",
       "creator_user_id": "user_2"
     }
