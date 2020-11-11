@@ -46,7 +46,7 @@ jobs:
     services:
       mitmproxy:
         image: mitmproxy/mitmproxy
-        options: mitmdump
+        options: mitmproxy/mitmproxy mitmdump
         volumes:
           - /.mitmproxy:/home/mitmproxy/.mitmproxy
         ports:
