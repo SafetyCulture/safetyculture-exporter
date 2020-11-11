@@ -25,6 +25,7 @@ type Schedule struct {
 	Status          string     `json:"status" csv:"status"`
 	Timezone        string     `json:"timezone" csv:"timezone"`
 	CanLateSubmit   bool       `json:"can_late_submit" csv:"can_late_submit"`
+	SiteID          string     `json:"site_id" csv:"site_id"`
 	TemplateID      string     `json:"template_id" csv:"template_id"`
 	CreatorUserID   string     `json:"creator_user_id" csv:"creator_user_id"`
 }
@@ -65,6 +66,7 @@ func (f *ScheduleFeed) Columns() []string {
 		"status",
 		"timezone",
 		"can_late_submit",
+		"site_id",
 		"template_id",
 		"creator_user_id",
 	}
