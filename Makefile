@@ -8,6 +8,7 @@ help:
 
 .PHONY: integration-tests
 integration-tests:
+	TEST_PROXY_URL="https://localhost:8080" TEST_TLS_CERT_PATH="$(PWD)/.mitmproxy/mitmproxy-ca-cert.pem" go test ./... -tags=mitmproxy
 	TEST_DB_DIALECT="postgres" TEST_DB_CONN_STRING="postgresql://iauditor_exporter:iauditor_exporter@localhost:5434/iauditor_exporter_db" go test ./... -tags=sql
 	TEST_DB_DIALECT="mysql" TEST_DB_CONN_STRING="root:iauditor_exporter@tcp(localhost:3308)/iauditor_exporter_db?charset=utf8mb4&parseTime=True&loc=Local" go test ./... -tags=sql
 	TEST_DB_DIALECT="sqlserver" TEST_DB_CONN_STRING="sqlserver://sa:iAuditorExporter12345@localhost:1433?database=master" go test ./... -tags=sql

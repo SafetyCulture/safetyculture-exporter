@@ -1,6 +1,14 @@
 ---
 version: "3.8"
 services:
+  mitmproxy:
+    image: mitmproxy/mitmproxy
+    command: mitmdump
+    ports:
+      - 8080:8080
+    volumes:
+      - ./.mitmproxy:/home/mitmproxy/.mitmproxy
+
   postgres:
     image: postgres
     environment:

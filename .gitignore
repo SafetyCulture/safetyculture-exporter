@@ -23,3 +23,5 @@ dist/
 .iauditor-exporter.yaml
 *.log
 perf.md
+__pycache__
+.mitmproxy
