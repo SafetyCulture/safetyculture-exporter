@@ -46,6 +46,8 @@ jobs:
     services:
       mitmproxy:
         image: mitmproxy/mitmproxy
+        env:
+          MITMPROXY_PATH: "/home/mitmproxy/.mitmproxy"
         options: >-
           --entrypoint "docker-entrypoint.sh"
           --entrypoint "mitmdump"
