@@ -46,7 +46,12 @@ jobs:
     services:
       mitmproxy:
         image: mitmproxy/mitmproxy
-        options: mitmproxy/mitmproxy mitmdump
+        options: >-
+          mitmproxy/mitmproxy mitmdump
+          --health-cmd curl http://localhost:8080
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
         volumes:
           - ${{ github.workspace }}/.mitmproxy:/home/mitmproxy/.mitmproxy
         ports:
