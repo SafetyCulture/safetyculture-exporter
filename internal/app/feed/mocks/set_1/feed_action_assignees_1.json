@@ -1,0 +1,22 @@
+{
+    "metadata": {
+        "next_page": null,
+        "remaining_records": 12
+    },
+    "data": [
+        {
+            "id": "123",
+            "action_id": "abc",
+            "assignee_id": "email@domain.com",
+            "name": "email@domain.com",
+            "type": "email"
+        },
+        {
+            "id": "456",
+            "action_id": "def",
+            "assignee_id": "user_123",
+            "name": "User A",
+            "type": "user"
+        }
+    ]
+}

@@ -155,6 +155,28 @@ func ExportFeeds(v *viper.Viper, apiClient api.APIClient, exporter Exporter) err
 		}()
 	}
 
+	if tablesMap["actions"] || len(tables) == 0 {
+		wg.Add(1)
+
+		go func() {
+			defer wg.Done()
+
+			err := (&ActionFeed{}).Export(ctx, apiClient, exporter)
+			util.Check(err, "failed to export")
+		}()
+	}
+
+	if tablesMap["action_assignees"] || len(tables) == 0 {
+		wg.Add(1)
+
+		go func() {
+			defer wg.Done()
+
+			err := (&ActionAssigneeFeed{}).Export(ctx, apiClient, exporter)
+			util.Check(err, "failed to export")
+		}()
+	}
+
 	wg.Wait()
 
 	logger.Info("Export finished")
