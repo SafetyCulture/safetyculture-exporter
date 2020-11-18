@@ -63,8 +63,6 @@ func runSQL(cmd *cobra.Command, args []string) error {
 	exporter, err := feed.NewSQLExporter(viper.GetString("db.dialect"), viper.GetString("db.connection_string"), true)
 	util.Check(err, "unable to create exporter")
 
-	schemaOnly := viper.GetBool("export.schema_only")
-
 	if viper.GetBool("export.schema_only") {
 		return feed.CreateSchemas(exporter)
 	}
@@ -81,8 +79,6 @@ func runCSV(cmd *cobra.Command, args []string) error {
 
 	exporter, err := feed.NewCSVExporter(exportPath)
 	util.Check(err, "unable to create exporter")
-
-	schemaOnly := viper.GetBool("export.schema_only")
 
 	if viper.GetBool("export.schema_only") {
 		return feed.CreateSchemas(exporter)
