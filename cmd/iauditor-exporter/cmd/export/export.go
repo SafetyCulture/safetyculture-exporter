@@ -84,7 +84,7 @@ func runCSV(cmd *cobra.Command, args []string) error {
 
 	schemaOnly := viper.GetBool("export.schema_only")
 
-	if schemaOnly {
+	if viper.GetBool("export.schema_only") {
 		return feed.CreateSchemas(exporter)
 	}
 
