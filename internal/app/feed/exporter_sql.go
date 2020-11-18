@@ -27,6 +27,12 @@ func (e *SQLExporter) SupportsUpsert() bool {
 	return true
 }
 
+func (e *SQLExporter) CreateSchema(feed Feed, rows interface{}) error {
+	return e.InitFeed(feed, &InitFeedOptions{
+		Truncate: false,
+	})
+}
+
 // InitFeed initialises any tables required to export
 func (e *SQLExporter) InitFeed(feed Feed, opts *InitFeedOptions) error {
 	model := feed.Model()

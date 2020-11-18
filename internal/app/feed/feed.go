@@ -16,6 +16,7 @@ type Feed interface {
 	Columns() []string
 	Order() string
 
+	CreateSchema(exporter Exporter) error
 	Export(ctx context.Context, apiClient api.APIClient, exporter Exporter) error
 }
 
@@ -30,6 +31,8 @@ type Exporter interface {
 	WriteRows(feed Feed, rows interface{}) error
 
 	FinaliseExport(feed Feed, rows interface{}) error
+
+	CreateSchema(feed Feed, rows interface{}) error
 
 	SetLastModifiedAt(feed Feed, ts time.Time) error
 	LastModifiedAt(feed Feed) (*time.Time, error)

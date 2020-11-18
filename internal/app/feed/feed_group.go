@@ -47,6 +47,11 @@ func (f *GroupFeed) Order() string {
 	return "group_id"
 }
 
+// Create schema of the feed for the supplied exporter
+func (f *GroupFeed) CreateSchema(exporter Exporter) error {
+	return exporter.CreateSchema(f, &[]*Group{})
+}
+
 // Export exports the feed to the supplied exporter
 func (f *GroupFeed) Export(ctx context.Context, apiClient api.APIClient, exporter Exporter) error {
 	logger := util.GetLogger()

@@ -54,6 +54,11 @@ func (f *ScheduleAssigneeFeed) Order() string {
 	return "schedule_id, assignee_id"
 }
 
+// Create schema of the feed for the supplied exporter
+func (f *ScheduleAssigneeFeed) CreateSchema(exporter Exporter) error {
+	return exporter.CreateSchema(f, &[]*ScheduleAssignee{})
+}
+
 // Export exports the feed to the supplied exporter
 func (f *ScheduleAssigneeFeed) Export(ctx context.Context, apiClient api.APIClient, exporter Exporter) error {
 	logger := util.GetLogger()

@@ -19,6 +19,26 @@ type CSVExporter struct {
 	Logger *zap.SugaredLogger
 }
 
+func (e *CSVExporter) CreateSchema(feed Feed, rows interface{}) error {
+	e.Logger.Infof("%s: writing out CSV schema file", feed.Name())
+
+	exportFilePath := filepath.Join(e.ExportPath, fmt.Sprintf("%s.csv", feed.Name()))
+	_, err := os.Stat(exportFilePath)
+
+	if os.IsNotExist(err) {
+		file, err := os.OpenFile(exportFilePath, os.O_RDWR|os.O_CREATE, 0666)
+		if err != nil {
+			return err
+		}
+
+		return gocsv.Marshal(rows, file)
+	}
+
+	e.Logger.Infof("%s: skipping. CSV file already exists.", feed.Name())
+
+	return nil
+}
+
 // FinaliseExport closes out an export
 func (e *CSVExporter) FinaliseExport(feed Feed, rows interface{}) error {
 	e.Logger.Infof("%s: writing out CSV file", feed.Name())
