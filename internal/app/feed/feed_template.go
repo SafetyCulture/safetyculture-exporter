@@ -66,6 +66,11 @@ func (f *TemplateFeed) Order() string {
 	return "modified_at ASC, template_id"
 }
 
+// Create schema of the feed for the supplied exporter
+func (f *TemplateFeed) CreateSchema(exporter Exporter) error {
+	return exporter.CreateSchema(f, &[]*Template{})
+}
+
 // Export exports the feed to the supplied exporter
 func (f *TemplateFeed) Export(ctx context.Context, apiClient api.APIClient, exporter Exporter) error {
 	logger := util.GetLogger()

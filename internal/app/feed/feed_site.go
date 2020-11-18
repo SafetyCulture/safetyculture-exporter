@@ -51,6 +51,11 @@ func (f *SiteFeed) Order() string {
 	return "site_id"
 }
 
+// Create schema of the feed for the supplied exporter
+func (f *SiteFeed) CreateSchema(exporter Exporter) error {
+	return exporter.CreateSchema(f, &[]*Site{})
+}
+
 // Export exports the feed to the supplied exporter
 func (f *SiteFeed) Export(ctx context.Context, apiClient api.APIClient, exporter Exporter) error {
 	logger := util.GetLogger()

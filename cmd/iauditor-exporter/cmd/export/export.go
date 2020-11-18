@@ -59,22 +59,32 @@ func getAPIClient() api.APIClient {
 }
 
 func runSQL(cmd *cobra.Command, args []string) error {
-	apiClient := getAPIClient()
 
 	exporter, err := feed.NewSQLExporter(viper.GetString("db.dialect"), viper.GetString("db.connection_string"), true)
 	util.Check(err, "unable to create exporter")
+
+	if viper.GetBool("export.schema_only") {
+		return feed.CreateSchemas(exporter)
+	}
+
+	apiClient := getAPIClient()
 
 	return feed.ExportFeeds(viper.GetViper(), apiClient, exporter)
 }
 
 func runCSV(cmd *cobra.Command, args []string) error {
-	apiClient := getAPIClient()
 
 	exportPath := viper.GetString("export.path")
 	os.MkdirAll(exportPath, os.ModePerm)
 
 	exporter, err := feed.NewCSVExporter(exportPath)
 	util.Check(err, "unable to create exporter")
+
+	if viper.GetBool("export.schema_only") {
+		return feed.CreateSchemas(exporter)
+	}
+
+	apiClient := getAPIClient()
 
 	return feed.ExportFeeds(viper.GetViper(), apiClient, exporter)
 }

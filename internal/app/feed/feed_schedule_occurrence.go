@@ -64,6 +64,11 @@ func (f *ScheduleOccurrenceFeed) Order() string {
 	return "occurrence_id ASC, schedule_id"
 }
 
+// Create schema of the feed for the supplied exporter
+func (f *ScheduleOccurrenceFeed) CreateSchema(exporter Exporter) error {
+	return exporter.CreateSchema(f, &[]*ScheduleOccurrence{})
+}
+
 func (f *ScheduleOccurrenceFeed) writeRows(exporter Exporter, rows []*ScheduleOccurrence) error {
 	// DB parameters are limited to 1000 params per query.
 	// Limit the batch size to prevent queries from failing

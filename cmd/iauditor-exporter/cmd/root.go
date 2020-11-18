@@ -87,6 +87,8 @@ func init() {
 	RootCmd.PersistentFlags().String("inspection-completed", "both", "Return completed inspections, false, true or both")
 	RootCmd.PersistentFlags().StringSlice("tables", []string{}, "Tables to export (default all)")
 
+	RootCmd.PersistentFlags().Bool("create-schema-only", false, "Create schema only (default false)")
+
 	util.Check(viper.BindPFlag("access_token", RootCmd.PersistentFlags().Lookup("access-token")), "while binding flag")
 
 	util.Check(viper.BindPFlag("api.url", RootCmd.PersistentFlags().Lookup("api-url")), "while binding flag")
@@ -106,6 +108,8 @@ func init() {
 	util.Check(viper.BindPFlag("export.inspection.archived", RootCmd.PersistentFlags().Lookup("inspection-archived")), "while binding flag")
 	util.Check(viper.BindPFlag("export.inspection.completed", RootCmd.PersistentFlags().Lookup("inspection-completed")), "while binding flag")
 	util.Check(viper.BindPFlag("export.inspection.skip_ids", RootCmd.PersistentFlags().Lookup("inspection-skip-ids")), "while binding flag")
+
+	util.Check(viper.BindPFlag("export.schema_only", RootCmd.PersistentFlags().Lookup("create-schema-only")), "while binding flag")
 
 	// Add sub-commands
 	RootCmd.AddCommand(export.Cmds()...)

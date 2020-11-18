@@ -9,6 +9,33 @@ import (
 	"github.com/spf13/viper"
 )
 
+func CreateSchemas(exporter Exporter) error {
+	logger := util.GetLogger()
+	logger.Info("Creating schemas started")
+
+	feeds := []Feed{
+		&InspectionFeed{},
+		&UserFeed{},
+		&InspectionItemFeed{},
+		&TemplateFeed{},
+		&SiteFeed{},
+		&UserFeed{},
+		&GroupFeed{},
+		&GroupUserFeed{},
+		&ScheduleFeed{},
+		&ScheduleAssigneeFeed{},
+		&ScheduleOccurrenceFeed{},
+	}
+
+	for _, feed := range feeds {
+		err := feed.CreateSchema(exporter)
+		util.Check(err, "failed to create schema")
+	}
+
+	logger.Info("Creating schemas finished")
+	return nil
+}
+
 func ExportFeeds(v *viper.Viper, apiClient api.APIClient, exporter Exporter) error {
 	logger := util.GetLogger()
 	ctx := context.Background()

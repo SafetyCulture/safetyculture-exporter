@@ -119,6 +119,11 @@ func (f *InspectionFeed) writeRows(exporter Exporter, rows []*Inspection) error 
 	return exporter.WriteRows(f, rowsToInsert)
 }
 
+// Create schema of the feed for the supplied exporter
+func (f *InspectionFeed) CreateSchema(exporter Exporter) error {
+	return exporter.CreateSchema(f, &[]*Inspection{})
+}
+
 // Export exports the feed to the supplied exporter
 func (f *InspectionFeed) Export(ctx context.Context, apiClient api.APIClient, exporter Exporter) error {
 	logger := util.GetLogger()

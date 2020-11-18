@@ -55,6 +55,11 @@ func (f *UserFeed) Order() string {
 	return "user_id"
 }
 
+// Create schema of the feed for the supplied exporter
+func (f *UserFeed) CreateSchema(exporter Exporter) error {
+	return exporter.CreateSchema(f, &[]*User{})
+}
+
 // Export exports the feed to the supplied exporter
 func (f *UserFeed) Export(ctx context.Context, apiClient api.APIClient, exporter Exporter) error {
 	logger := util.GetLogger()

@@ -132,6 +132,11 @@ func (f *InspectionItemFeed) writeRows(exporter Exporter, rows []*InspectionItem
 	return nil
 }
 
+// Create schema of the feed for the supplied exporter
+func (f *InspectionItemFeed) CreateSchema(exporter Exporter) error {
+	return exporter.CreateSchema(f, &[]*InspectionItem{})
+}
+
 // Export exports the feed to the supplied exporter
 func (f *InspectionItemFeed) Export(ctx context.Context, apiClient api.APIClient, exporter Exporter) error {
 	logger := util.GetLogger()
