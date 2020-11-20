@@ -12,5 +12,12 @@ jobs:
   Trufflehog:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
       - name: Trufflehog Actions Scan
         uses: edplato/trufflehog-actions-scan@v0.9i-beta
+        with:
+          scanArguments: "--regex --entropy=False --max_depth=50 --rules $GITHUB_WORKSPACE/.github/trufflehog.json" # Add custom options here*
