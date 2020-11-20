@@ -1,0 +1,16 @@
+# yamllint disable rule:line-length
+---
+name: Security Scan
+
+# yamllint disable-line rule:truthy
+on:
+  pull_request:
+    types: [opened]
+  push:
+
+jobs:
+  Trufflehog:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trufflehog Actions Scan
+        uses: edplato/trufflehog-actions-scan@v0.9i-beta
