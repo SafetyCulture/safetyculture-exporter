@@ -27,15 +27,12 @@ type InitFeedOptions struct {
 // Exporter is an interface to a Feed exporter. It provides methods to write rows out to a implemented format
 type Exporter interface {
 	InitFeed(feed Feed, opts *InitFeedOptions) error
-
-	WriteRows(feed Feed, rows interface{}) error
-
-	FinaliseExport(feed Feed, rows interface{}) error
-
 	CreateSchema(feed Feed, rows interface{}) error
 
-	SetLastModifiedAt(feed Feed, ts time.Time) error
+	WriteRows(feed Feed, rows interface{}) error
+	FinaliseExport(feed Feed, rows interface{}) error
 	LastModifiedAt(feed Feed) (*time.Time, error)
 
 	SupportsUpsert() bool
+	ParameterLimit() int
 }

@@ -25,6 +25,18 @@
       "occurrence_status": "TODO",
       "audit_id": null,
       "completed_at": null,
+      "user_id": "user_2",
+      "assignee_status": "TODO"
+    },
+    {
+      "id": "scheduleitem_2_occurrence_1641027600000_user_3",
+      "schedule_id": "scheduleitem_2",
+      "occurrence_id": "occurrence_1641027600000",
+      "template_id": "template_2",
+      "miss_time": null,
+      "occurrence_status": "TODO",
+      "audit_id": null,
+      "completed_at": null,
       "user_id": "user_3",
       "assignee_status": "TODO"
     }

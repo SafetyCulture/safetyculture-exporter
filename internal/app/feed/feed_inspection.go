@@ -35,7 +35,7 @@ type Inspection struct {
 	DocumentNo      string     `json:"document_no" csv:"document_no"`
 	PreparedBy      string     `json:"prepared_by" csv:"prepared_by"`
 	Location        string     `json:"location" csv:"location"`
-	ConductedOn     time.Time  `json:"conducted_on" csv:"conducted_on"`
+	ConductedOn     *time.Time `json:"conducted_on" csv:"conducted_on"`
 	Personnel       string     `json:"personnel" csv:"personnel"`
 	ClientSite      string     `json:"client_site" csv:"client_site"`
 }
@@ -109,17 +109,31 @@ func (f *InspectionFeed) writeRows(exporter Exporter, rows []*Inspection) error 
 		skipIDs[id] = true
 	}
 
-	rowsToInsert := []*Inspection{}
-	for _, row := range rows {
-		if !skipIDs[row.ID] {
-			rowsToInsert = append(rowsToInsert, row)
+	// Calculate the size of the batch we can insert into the DB at once. Column count + buffer
+	batchSize := exporter.ParameterLimit() / (len(f.Columns()) + 4)
+	for i := 0; i < len(rows); i += batchSize {
+		j := i + batchSize
+		if j > len(rows) {
+			j = len(rows)
 		}
+
+		// Some audits in production have the same item ID multiple times
+		// We can't insert them simultaneously. This means we are dropping data, which sucks.
+		rowsToInsert := []*Inspection{}
+		for _, row := range rows[i:j] {
+			skip := skipIDs[row.ID]
+			if !skip {
+				rowsToInsert = append(rowsToInsert, row)
+			}
+		}
+
+		return exporter.WriteRows(f, rowsToInsert)
 	}
 
-	return exporter.WriteRows(f, rowsToInsert)
+	return nil
 }
 
-// Create schema of the feed for the supplied exporter
+// CreateSchema creates the schema of the feed for the supplied exporter
 func (f *InspectionFeed) CreateSchema(exporter Exporter) error {
 	return exporter.CreateSchema(f, &[]*Inspection{})
 }
@@ -159,9 +173,6 @@ func (f *InspectionFeed) Export(ctx context.Context, apiClient api.APIClient, ex
 		if len(rows) != 0 {
 			err = f.writeRows(exporter, rows)
 			util.Check(err, "Failed to write data to exporter")
-
-			err = exporter.SetLastModifiedAt(f, rows[len(rows)-1].ModifiedAt)
-			util.Check(err, "Failed to write last modified at time")
 		}
 
 		logger.Infof("%s: %d remaining", feedName, resp.Metadata.RemainingRecords)
