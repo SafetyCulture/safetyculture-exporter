@@ -63,17 +63,13 @@ func getTestingSQLExporter() (*feed.SQLExporter, error) {
 
 	switch dialect {
 	case "postgres":
-		dbResp := exporter.DB.Exec(fmt.Sprintf("CREATE DATABASE %s", dbName))
-		err = dbResp.Error
-		break
 	case "mysql":
-		dbResp := exporter.DB.Exec(fmt.Sprintf(`CREATE DATABASE %s;`, dbName))
-		err = dbResp.Error
-		break
 	case "sqlserver":
 		dbResp := exporter.DB.Exec(fmt.Sprintf(`CREATE DATABASE %s;`, dbName))
 		err = dbResp.Error
 		break
+	case "sqlite":
+		return exporter, nil
 	default:
 		return nil, fmt.Errorf("Invalid DB dialect %s", dialect)
 	}

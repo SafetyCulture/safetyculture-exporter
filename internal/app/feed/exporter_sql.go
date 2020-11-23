@@ -27,6 +27,19 @@ func (e *SQLExporter) SupportsUpsert() bool {
 	return true
 }
 
+// ParameterLimit returns the number of parameters supported by the target DB
+func (e *SQLExporter) ParameterLimit() int {
+	switch e.DB.Dialector.Name() {
+	case "sqlserver":
+		return 2100
+	case "sqlite":
+		return 32768
+	}
+
+	return 65536
+}
+
+// CreateSchema creates the schema on the DB for the supplied feed
 func (e *SQLExporter) CreateSchema(feed Feed, rows interface{}) error {
 	return e.InitFeed(feed, &InitFeedOptions{
 		Truncate: false,
@@ -52,11 +65,6 @@ func (e *SQLExporter) InitFeed(feed Feed, opts *InitFeedOptions) error {
 		}
 	}
 
-	return nil
-}
-
-// SetLastModifiedAt updates the last modified at for the feed. No op for SQL as this is managed automatically.
-func (e *SQLExporter) SetLastModifiedAt(feed Feed, ts time.Time) error {
 	return nil
 }
 
