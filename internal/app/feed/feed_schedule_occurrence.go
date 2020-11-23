@@ -15,7 +15,7 @@ type ScheduleOccurrence struct {
 	ScheduleID       string     `json:"schedule_id" csv:"schedule_id"`
 	OccurrenceID     string     `json:"occurrence_id" csv:"occurrence_id"`
 	TemplateID       string     `json:"template_id" csv:"template_id"`
-	MissTime         time.Time  `json:"miss_time" csv:"miss_time"`
+	MissTime         *time.Time `json:"miss_time" csv:"miss_time"`
 	OccurrenceStatus string     `json:"occurrence_status" csv:"occurrence_status"`
 	AuditID          *string    `json:"audit_id" csv:"audit_id"`
 	CompletedAt      *time.Time `json:"completed_at" csv:"completed_at"`

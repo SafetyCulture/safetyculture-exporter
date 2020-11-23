@@ -35,7 +35,7 @@ type Inspection struct {
 	DocumentNo      string     `json:"document_no" csv:"document_no"`
 	PreparedBy      string     `json:"prepared_by" csv:"prepared_by"`
 	Location        string     `json:"location" csv:"location"`
-	ConductedOn     time.Time  `json:"conducted_on" csv:"conducted_on"`
+	ConductedOn     *time.Time `json:"conducted_on" csv:"conducted_on"`
 	Personnel       string     `json:"personnel" csv:"personnel"`
 	ClientSite      string     `json:"client_site" csv:"client_site"`
 }

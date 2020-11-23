@@ -62,9 +62,7 @@ func getTestingSQLExporter() (*feed.SQLExporter, error) {
 	dbName := strings.ReplaceAll(fmt.Sprintf("iaud_exporter_%s", uuid.Must(uuid.NewV4()).String()), "-", "")
 
 	switch dialect {
-	case "postgres":
-	case "mysql":
-	case "sqlserver":
+	case "postgres", "mysql", "sqlserver":
 		dbResp := exporter.DB.Exec(fmt.Sprintf(`CREATE DATABASE %s;`, dbName))
 		err = dbResp.Error
 		break
