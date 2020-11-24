@@ -34,6 +34,14 @@ iauditor-exporter sql --template-ids template_F492E54D87F2419E9398F7BDCA0FA5D9,t
 iauditor-exporter sql --export-path /path/to/export/to`,
 			RunE: runSQL,
 		},
+		&cobra.Command{
+			Use:       "schema",
+			Short:     "Print iAuditor table schemas",
+			Example:   `iauditor-exporter schema`,
+			ValidArgs: []string{},
+			Args:      cobra.OnlyValidArgs,
+			RunE:      printSchema,
+		},
 	}
 }
 
@@ -87,4 +95,11 @@ func runCSV(cmd *cobra.Command, args []string) error {
 	apiClient := getAPIClient()
 
 	return feed.ExportFeeds(viper.GetViper(), apiClient, exporter)
+}
+
+func printSchema(cmd *cobra.Command, args []string) error {
+	exporter, err := feed.NewSchemaExporter(os.Stdout)
+	util.Check(err, "unable to create exporter")
+
+	return feed.WriteSchemas(exporter)
 }

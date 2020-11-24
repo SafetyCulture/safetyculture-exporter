@@ -13,6 +13,7 @@ require (
 	github.com/hashicorp/go-version v1.2.0
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/newrelic/go-agent/v3 v3.9.0
+	github.com/olekukonko/tablewriter v0.0.4
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/afero v1.2.2 // indirect
 	github.com/spf13/cobra v0.0.3

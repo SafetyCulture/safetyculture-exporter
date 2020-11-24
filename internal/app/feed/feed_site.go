@@ -31,6 +31,11 @@ func (f *SiteFeed) Model() interface{} {
 	return Site{}
 }
 
+// Model returns the model of feed rows
+func (f *SiteFeed) RowsModel() interface{} {
+	return &[]*Site{}
+}
+
 // PrimaryKey returns the primary key(s)
 func (f *SiteFeed) PrimaryKey() []string {
 	return []string{"site_id"}

@@ -29,6 +29,11 @@ func (f *GroupFeed) Model() interface{} {
 	return Group{}
 }
 
+// Model returns the model of feed rows
+func (f *GroupFeed) RowsModel() interface{} {
+	return &[]*Group{}
+}
+
 // PrimaryKey returns the primary key(s)
 func (f *GroupFeed) PrimaryKey() []string {
 	return []string{"group_id"}

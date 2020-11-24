@@ -9,23 +9,26 @@ import (
 	"github.com/spf13/viper"
 )
 
+var feeds = []Feed{
+	&InspectionFeed{},
+	&InspectionItemFeed{},
+	&TemplateFeed{},
+	&SiteFeed{},
+	&UserFeed{},
+	&GroupFeed{},
+	&GroupUserFeed{},
+	&ScheduleFeed{},
+	&ScheduleAssigneeFeed{},
+	&ScheduleOccurrenceFeed{},
+}
+
+func GetFeeds() []Feed {
+	return feeds
+}
+
 func CreateSchemas(exporter Exporter) error {
 	logger := util.GetLogger()
 	logger.Info("Creating schemas started")
-
-	feeds := []Feed{
-		&InspectionFeed{},
-		&UserFeed{},
-		&InspectionItemFeed{},
-		&TemplateFeed{},
-		&SiteFeed{},
-		&UserFeed{},
-		&GroupFeed{},
-		&GroupUserFeed{},
-		&ScheduleFeed{},
-		&ScheduleAssigneeFeed{},
-		&ScheduleOccurrenceFeed{},
-	}
 
 	for _, feed := range feeds {
 		err := feed.CreateSchema(exporter)
@@ -33,6 +36,24 @@ func CreateSchemas(exporter Exporter) error {
 	}
 
 	logger.Info("Creating schemas finished")
+	return nil
+}
+
+func WriteSchemas(exporter *SchemaExporter) error {
+	logger := util.GetLogger()
+	logger.Info("Writing schemas started")
+
+	for _, feed := range feeds {
+		err := exporter.CreateSchema(feed, feed.RowsModel())
+		util.Check(err, "failed to create schema")
+
+		if err == nil {
+			err = exporter.WriteSchema(feed)
+			util.Check(err, "failed to write schema")
+		}
+	}
+
+	logger.Info("Writing schemas finished")
 	return nil
 }
 

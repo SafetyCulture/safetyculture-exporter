@@ -33,6 +33,11 @@ func (f *UserFeed) Model() interface{} {
 	return User{}
 }
 
+// Model returns the model of feed rows
+func (f *UserFeed) RowsModel() interface{} {
+	return &[]*User{}
+}
+
 // PrimaryKey returns the primary key(s)
 func (f *UserFeed) PrimaryKey() []string {
 	return []string{"user_id"}

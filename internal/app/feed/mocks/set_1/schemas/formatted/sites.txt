@@ -1,0 +1,9 @@
++-----------------+----------+-------------+
+|      NAME       |   TYPE   | PRIMARY KEY |
++-----------------+----------+-------------+
+| site_id         | text     | true        |
+| name            | text     |             |
+| creator_id      | text     |             |
+| organisation_id | text     |             |
+| exported_at     | datetime |             |
++-----------------+----------+-------------+

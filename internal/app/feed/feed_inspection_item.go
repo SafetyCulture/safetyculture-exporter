@@ -60,6 +60,11 @@ func (f *InspectionItemFeed) Model() interface{} {
 	return InspectionItem{}
 }
 
+// Model returns the model of feed rows
+func (f *InspectionItemFeed) RowsModel() interface{} {
+	return &[]*InspectionItem{}
+}
+
 // PrimaryKey returns the primary key(s)
 func (f *InspectionItemFeed) PrimaryKey() []string {
 	return []string{"id"}
