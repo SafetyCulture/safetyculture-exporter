@@ -30,3 +30,14 @@ func TestSchemaWriter_should_write_schema(t *testing.T) {
 		testSchema(feed)
 	}
 }
+
+func TestSchemaWriter_should_write_all_schemas(t *testing.T) {
+	var buf bytes.Buffer
+	exporter, err := feed.NewSchemaExporter(&buf)
+	assert.Nil(t, err)
+
+	err = feed.WriteSchemas(exporter)
+	assert.Nil(t, err)
+
+	assert.NotNil(t, buf.String())
+}
