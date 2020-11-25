@@ -45,6 +45,11 @@ func (f *ScheduleFeed) Model() interface{} {
 	return Schedule{}
 }
 
+// RowsModel returns the model of feed rows
+func (f *ScheduleFeed) RowsModel() interface{} {
+	return &[]*Schedule{}
+}
+
 // PrimaryKey returns the primary key(s)
 func (f *ScheduleFeed) PrimaryKey() []string {
 	return []string{"schedule_id"}

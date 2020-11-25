@@ -40,6 +40,11 @@ func (f *TemplateFeed) Model() interface{} {
 	return Template{}
 }
 
+// RowsModel returns the model of feed rows
+func (f *TemplateFeed) RowsModel() interface{} {
+	return &[]*Template{}
+}
+
 // PrimaryKey returns the primary key(s)
 func (f *TemplateFeed) PrimaryKey() []string {
 	return []string{"template_id"}

@@ -24,7 +24,9 @@ func TestIntegrationDbCreateSchema_should_create_all_schemas(t *testing.T) {
 	exporter, err := getTemporaryCSVExporterWithRealSQLExporter(sqlExporter)
 	assert.Nil(t, err)
 
-	err = feed.CreateSchemas(exporter)
+	viperConfig := viper.New()
+
+	err = feed.CreateSchemas(viperConfig, exporter)
 	assert.Nil(t, err)
 
 	filesEqualish(t, "mocks/set_1/schemas/inspections.csv", filepath.Join(exporter.ExportPath, "inspections.csv"))

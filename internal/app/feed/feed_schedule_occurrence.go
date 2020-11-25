@@ -34,6 +34,11 @@ func (f *ScheduleOccurrenceFeed) Name() string {
 	return "schedule_occurrences"
 }
 
+// RowsModel returns the model of feed rows
+func (f *ScheduleOccurrenceFeed) RowsModel() interface{} {
+	return &[]*ScheduleOccurrence{}
+}
+
 // Model returns the model of the feed row
 func (f *ScheduleOccurrenceFeed) Model() interface{} {
 	return ScheduleOccurrence{}

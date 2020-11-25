@@ -11,6 +11,7 @@ import (
 type Feed interface {
 	Name() string
 	Model() interface{}
+	RowsModel() interface{}
 
 	PrimaryKey() []string
 	Columns() []string

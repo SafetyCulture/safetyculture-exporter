@@ -1,0 +1,11 @@
++-----------------+----------+-------------+
+|      NAME       |   TYPE   | PRIMARY KEY |
++-----------------+----------+-------------+
+| user_id         | text     | true        |
+| organisation_id | text     |             |
+| email           | text     |             |
+| firstname       | text     |             |
+| lastname        | text     |             |
+| active          | numeric  |             |
+| exported_at     | datetime |             |
++-----------------+----------+-------------+

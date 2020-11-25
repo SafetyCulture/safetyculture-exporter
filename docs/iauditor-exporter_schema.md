@@ -1,29 +1,25 @@
-## iauditor-exporter csv
+## iauditor-exporter schema
 
-Export iAuditor data to CSV files
+Print iAuditor table schemas
 
 ### Synopsis
 
-Export iAuditor data to CSV files
+Print iAuditor table schemas
 
 ```
-iauditor-exporter csv [flags]
+iauditor-exporter schema [flags]
 ```
 
 ### Examples
 
 ```
-// Limit inspections and schedules to these templates
-iauditor-exporter csv --template-ids template_F492E54D87F2419E9398F7BDCA0FA5D9,template_d54e06808d2f11e2893e83a731dba0ca
-
-// Customise export location
-iauditor-exporter csv --export-path /path/to/export/to
+iauditor-exporter schema
 ```
 
 ### Options
 
 ```
-  -h, --help   help for csv
+  -h, --help   help for schema
 ```
 
 ### Options inherited from parent commands

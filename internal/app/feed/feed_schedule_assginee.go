@@ -34,6 +34,11 @@ func (f *ScheduleAssigneeFeed) Model() interface{} {
 	return ScheduleAssignee{}
 }
 
+// RowsModel returns the model of feed rows
+func (f *ScheduleAssigneeFeed) RowsModel() interface{} {
+	return &[]*ScheduleAssignee{}
+}
+
 // PrimaryKey returns the primary key(s)
 func (f *ScheduleAssigneeFeed) PrimaryKey() []string {
 	return []string{"id"}
