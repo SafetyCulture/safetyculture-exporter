@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/SafetyCulture/iauditor-exporter/internal/app/feed"
+	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -15,6 +16,8 @@ func TestSchemaWriter_should_write_schema(t *testing.T) {
 	var buf bytes.Buffer
 	exporter, err := feed.NewSchemaExporter(&buf)
 	assert.Nil(t, err)
+
+	viperConfig := viper.New()
 
 	testSchema := func(f feed.Feed) {
 		exporter.CreateSchema(f, f.RowsModel())
@@ -26,7 +29,7 @@ func TestSchemaWriter_should_write_schema(t *testing.T) {
 		buf.Reset()
 	}
 
-	for _, feed := range feed.GetFeeds() {
+	for _, feed := range feed.GetFeeds(viperConfig) {
 		testSchema(feed)
 	}
 }
@@ -36,7 +39,9 @@ func TestSchemaWriter_should_write_all_schemas(t *testing.T) {
 	exporter, err := feed.NewSchemaExporter(&buf)
 	assert.Nil(t, err)
 
-	err = feed.WriteSchemas(exporter)
+	viperConfig := viper.New()
+
+	err = feed.WriteSchemas(viperConfig, exporter)
 	assert.Nil(t, err)
 
 	assert.NotNil(t, buf.String())

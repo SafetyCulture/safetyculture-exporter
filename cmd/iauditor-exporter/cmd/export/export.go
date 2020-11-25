@@ -72,7 +72,7 @@ func runSQL(cmd *cobra.Command, args []string) error {
 	util.Check(err, "unable to create exporter")
 
 	if viper.GetBool("export.schema_only") {
-		return feed.CreateSchemas(exporter)
+		return feed.CreateSchemas(viper.GetViper(), exporter)
 	}
 
 	apiClient := getAPIClient()
@@ -89,7 +89,7 @@ func runCSV(cmd *cobra.Command, args []string) error {
 	util.Check(err, "unable to create exporter")
 
 	if viper.GetBool("export.schema_only") {
-		return feed.CreateSchemas(exporter)
+		return feed.CreateSchemas(viper.GetViper(), exporter)
 	}
 
 	apiClient := getAPIClient()
@@ -101,5 +101,5 @@ func printSchema(cmd *cobra.Command, args []string) error {
 	exporter, err := feed.NewSchemaExporter(os.Stdout)
 	util.Check(err, "unable to create exporter")
 
-	return feed.WriteSchemas(exporter)
+	return feed.WriteSchemas(viper.GetViper(), exporter)
 }
