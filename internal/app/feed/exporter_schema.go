@@ -12,9 +12,7 @@ import (
 // SchemaExporter is an interface to export data feeds to CSV files
 type SchemaExporter struct {
 	*SQLExporter
-
 	Logger *zap.SugaredLogger
-
 	Output io.Writer
 }
 

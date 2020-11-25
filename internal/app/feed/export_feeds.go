@@ -47,10 +47,8 @@ func WriteSchemas(exporter *SchemaExporter) error {
 		err := exporter.CreateSchema(feed, feed.RowsModel())
 		util.Check(err, "failed to create schema")
 
-		if err == nil {
-			err = exporter.WriteSchema(feed)
-			util.Check(err, "failed to write schema")
-		}
+		err = exporter.WriteSchema(feed)
+		util.Check(err, "failed to write schema")
 	}
 
 	logger.Info("Writing schemas finished")
