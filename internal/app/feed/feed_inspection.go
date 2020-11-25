@@ -132,7 +132,10 @@ func (f *InspectionFeed) writeRows(exporter Exporter, rows []*Inspection) error 
 			}
 		}
 
-		return exporter.WriteRows(f, rowsToInsert)
+		err := exporter.WriteRows(f, rowsToInsert)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
