@@ -40,7 +40,7 @@ func (f *TemplateFeed) Model() interface{} {
 	return Template{}
 }
 
-// Model returns the model of feed rows
+// RowsModel returns the model of feed rows
 func (f *TemplateFeed) RowsModel() interface{} {
 	return &[]*Template{}
 }

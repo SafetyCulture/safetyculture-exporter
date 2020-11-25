@@ -45,7 +45,7 @@ func (f *ScheduleFeed) Model() interface{} {
 	return Schedule{}
 }
 
-// Model returns the model of feed rows
+// RowsModel returns the model of feed rows
 func (f *ScheduleFeed) RowsModel() interface{} {
 	return &[]*Schedule{}
 }

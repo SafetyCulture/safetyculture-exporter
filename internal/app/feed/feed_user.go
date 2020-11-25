@@ -33,7 +33,7 @@ func (f *UserFeed) Model() interface{} {
 	return User{}
 }
 
-// Model returns the model of feed rows
+// RowsModel returns the model of feed rows
 func (f *UserFeed) RowsModel() interface{} {
 	return &[]*User{}
 }

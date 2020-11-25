@@ -31,7 +31,7 @@ func (f *SiteFeed) Model() interface{} {
 	return Site{}
 }
 
-// Model returns the model of feed rows
+// RowsModel returns the model of feed rows
 func (f *SiteFeed) RowsModel() interface{} {
 	return &[]*Site{}
 }

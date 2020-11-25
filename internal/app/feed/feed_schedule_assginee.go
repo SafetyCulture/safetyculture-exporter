@@ -34,7 +34,7 @@ func (f *ScheduleAssigneeFeed) Model() interface{} {
 	return ScheduleAssignee{}
 }
 
-// Model returns the model of feed rows
+// RowsModel returns the model of feed rows
 func (f *ScheduleAssigneeFeed) RowsModel() interface{} {
 	return &[]*ScheduleAssignee{}
 }

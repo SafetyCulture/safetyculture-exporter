@@ -60,7 +60,7 @@ func (f *InspectionItemFeed) Model() interface{} {
 	return InspectionItem{}
 }
 
-// Model returns the model of feed rows
+// RowsModel returns the model of feed rows
 func (f *InspectionItemFeed) RowsModel() interface{} {
 	return &[]*InspectionItem{}
 }
