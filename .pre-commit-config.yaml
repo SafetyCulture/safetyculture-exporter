@@ -14,7 +14,7 @@ repos:
       - id: check-json
       - id: end-of-file-fixer
       - id: trailing-whitespace
-        exlcude_types: [md]
+        exclude_types: [markdown]
   - repo: https://github.com/jumanjihouse/pre-commit-hooks
     rev: 1.11.2
     hooks:
