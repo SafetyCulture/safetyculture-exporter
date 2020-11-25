@@ -97,3 +97,15 @@ Locally you can run `go test ./...`, this will run all of the Unit tests and Int
 SQL Database integration tests can be run by starting the SQL DBs `docker-compose up -d` and then running `make integration-tests`.
 
 Note: these tests will be automatically when pushing or opening a pull request against the repository.
+
+### Releasing
+
+To release a new version you need just need to push a new tag to GitHub and [goreleaser](https://goreleaser.com) will do most of the work.
+
+1. Checkout the `main` branch and pull the latest changes. If you don't you'll tag the wrong commit for release!
+2. Create your tag, make sure it follows [Semantic Versioning](https://semver.org) and increments on the [latest release](https://github.com/SafetyCulture/iauditor-exporter/releases)  
+`git tag -a v3.0.0 -m "Initial Public Release"`.  
+Acceptable versions include `v3.0.0`, `v3.0.0-alpha.22`, `v3.0.0-prealpha.22`, `v3.0.0-beta.22`.
+3. Push your tag to GitHub  
+`git push origin v3.0.0`
+4. Update the [release draft](https://github.com/SafetyCulture/iauditor-exporter/releases) and publish it!
