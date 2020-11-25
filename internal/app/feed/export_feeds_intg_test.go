@@ -108,3 +108,27 @@ func TestIntegrationDbExportFeeds_should_perform_incremental_update_on_second_ru
 	filesEqualish(t, "mocks/set_2/outputs/schedule_assignees.csv", filepath.Join(exporter.ExportPath, "schedule_assignees.csv"))
 	filesEqualish(t, "mocks/set_2/outputs/schedule_occurrences.csv", filepath.Join(exporter.ExportPath, "schedule_occurrences.csv"))
 }
+
+func TestIntegrationDbExportFeeds_should_handle_lots_of_rows_ok(t *testing.T) {
+	sqlExporter, err := getTestingSQLExporter()
+	assert.Nil(t, err)
+	exporter, err := getTemporaryCSVExporterWithRealSQLExporter(sqlExporter)
+	assert.Nil(t, err)
+
+	viperConfig := viper.New()
+	viperConfig.Set("export.inspection.incremental", true)
+
+	apiClient := api.NewAPIClient("http://localhost:9999", "token")
+	initMockFeedsSet3(apiClient.HTTPClient())
+
+	err = feed.ExportFeeds(viperConfig, apiClient, exporter)
+	assert.Nil(t, err)
+
+	inspectionsLines, err := countFileLines(filepath.Join(exporter.ExportPath, "inspections.csv"))
+	assert.Nil(t, err)
+	assert.Equal(t, 97, inspectionsLines)
+
+	inspectionItemsLines, err := countFileLines(filepath.Join(exporter.ExportPath, "inspection_items.csv"))
+	assert.Nil(t, err)
+	assert.Equal(t, 501, inspectionItemsLines)
+}
