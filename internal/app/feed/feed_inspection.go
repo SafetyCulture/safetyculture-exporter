@@ -38,6 +38,7 @@ type Inspection struct {
 	ConductedOn     *time.Time `json:"conducted_on" csv:"conducted_on"`
 	Personnel       string     `json:"personnel" csv:"personnel"`
 	ClientSite      string     `json:"client_site" csv:"client_site"`
+	WebReportLink   string     `json:"web_report_link" csv:"web_report_link"`
 }
 
 // InspectionFeed is a representation of the inspections feed
@@ -100,6 +101,7 @@ func (f *InspectionFeed) Columns() []string {
 		"conducted_on",
 		"personnel",
 		"client_site",
+		"web_report_link",
 	}
 }
 
