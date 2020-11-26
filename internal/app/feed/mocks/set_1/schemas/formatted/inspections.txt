@@ -28,4 +28,5 @@
 | conducted_on     | datetime |             |
 | personnel        | text     |             |
 | client_site      | text     |             |
+| web_report_link  | text     |             |
 +------------------+----------+-------------+
