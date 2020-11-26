@@ -112,6 +112,14 @@ iauditor-exporter sql --db-dialect sqlserver --db-connection-string sqlserver://
 
 Please refer to [this page](https://github.com/denisenkom/go-mssqldb#connection-parameters-and-dsn) for supported formats for the connection string.
 
+## Listing Schemas
+
+You can list all available tables with their schemas using following command.
+
+```
+iauditor-exporter schema
+```
+
 ## Development
 
 To develop `iauditor-exporter` you just need the latest version of Golang which you can grab here: [https://golang.org/doc/install](https://golang.org/doc/install).
