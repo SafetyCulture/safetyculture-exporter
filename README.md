@@ -82,9 +82,43 @@ See above for the exact usage and alternative mechanisms to set them.
 - `--tls-cert "/path/to/my/root-ca.pem"`
 - `--tls-skip-verify true`
 
-## Exporting
+## Exporting to CSV
 
-See [docs/iauditor-exporter_sql.md](docs/iauditor-exporter_sql.md) and [docs/iauditor-exporter_csv.md](docs/iauditor-exporter_csv.md) for usage of specific exporters.
+See [docs/iauditor-exporter_csv.md](docs/iauditor-exporter_csv.md) for usage and options.
+
+## Exporting to SQL DBs
+
+iAuditor Exporter supports exporting data to MySQL, PostgreSQL and SQL Server databases. See [docs/iauditor-exporter_sql.md](docs/iauditor-exporter_sql.md) for usage and options.
+
+### MySQL
+
+```
+iauditor-exporter sql --db-dialect mysql --db-connection-string user:pass@tcp(127.0.0.1:3306)/dbname?charset=utf8mb4&parseTime=True&loc=Local
+```
+
+Please refer to [this page](https://github.com/go-sql-driver/mysql#dsn-data-source-name) for supported formats for the connection string.
+
+### PostgreSQL
+
+```
+iauditor-exporter sql --db-dialect postgres --db-connection-string postgresql://user:pass@localhost:5434/dbname
+```
+
+### SQL Server
+
+```
+iauditor-exporter sql --db-dialect sqlserver --db-connection-string sqlserver://user:pass@localhost:1433?database=dbname
+```
+
+Please refer to [this page](https://github.com/denisenkom/go-mssqldb#connection-parameters-and-dsn) for supported formats for the connection string.
+
+## Listing Schemas
+
+You can list all available tables with their schemas using following command.
+
+```
+iauditor-exporter schema
+```
 
 ## Development
 
