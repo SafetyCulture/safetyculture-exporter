@@ -65,7 +65,7 @@ func init() {
 	// Here you will define your flags and configuration settings.
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.
-	RootCmd.PersistentFlags().StringVar(&cfgFile, "config-path", "./.iauditor-exporter.yaml", "config file")
+	RootCmd.PersistentFlags().StringVar(&cfgFile, "config-path", "./iauditor-exporter.yaml", "config file")
 
 	// TODO - Can we validate these tokens and throw error if they are wrong?
 	RootCmd.PersistentFlags().StringP("access-token", "t", "", "API Access Token")
@@ -129,7 +129,7 @@ func initConfig() {
 		// Use config file from the flag.
 		viper.SetConfigFile(cfgFile)
 	} else {
-		viper.SetConfigFile(".iauditor-exporter.yaml")
+		viper.SetConfigFile("iauditor-exporter.yaml")
 	}
 
 	viper.SetEnvPrefix("IAUD")
