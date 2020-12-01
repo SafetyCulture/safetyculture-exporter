@@ -16,7 +16,7 @@ To get up and running quickly run the `configure` command to create a stub confi
 
 `./iauditor-exporter configure`
 
-This will create a config file `.iauditor-exporter.yaml` in the same directory. Use `--config-path "/my/path/.iauditor-exporter.yaml"` to set a custom path.
+This will create a config file `iauditor-exporter.yaml` in the same directory. Use `--config-path "/my/path/iauditor-exporter.yaml"` to set a custom path.
 
 Modify this file adding an `access-token` and modifying the `export` options to customise the data exported by the tool.
 
@@ -60,7 +60,7 @@ All of the available configuration options can be found below.
 | `--proxy-url`                         | `IAUD_API_PROXY_URL`                            | `api.proxy_url`                            | Proxy URL for making API requests through                                                     |
 | `--tls-cert`                          | `IAUD_API_TLS_CERT`                             | `api.tls_certs`                            | Custom root CA certificate to use when making API requests                                    |
 | `--tls-skip-verify`                   | `IAUD_API_TLS_SKIP_VERIFY`                      | `api.tls_skip_verify`                      | Skip verification of API TLS certificates                                                     |
-| `--config-path`                       | `-`                                             | `-`                                        | config file path (default "./.iauditor-exporter.yaml")                                        |
+| `--config-path`                       | `-`                                             | `-`                                        | config file path (default "./iauditor-exporter.yaml")                                        |
 | `--db-connection-string`              | `IAUD_DB_CONNECTION_STRING`                     | `db.connection_string`                     | Database connection string                                                                    |
 | `--db-dialect`                        | `IAUD_DB_DIALECT`                               | `db.dialect`                               | Database dialect. mysql, postgres and sqlserver are the only valid options. (default "mysql") |
 | `--export-path`                       | `IAUD_EXPORT_PATH`                              | `export.path`                              | CSV Export Path (default "./export/")                                                         |

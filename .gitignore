@@ -20,6 +20,6 @@ dist/
 .release-env
 
 /export/
-.iauditor-exporter.yaml
+iauditor-exporter.yaml
 *.log
 perf.md
