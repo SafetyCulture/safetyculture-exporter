@@ -12,11 +12,10 @@ import (
 )
 
 func TestExportReports_should_export_all_reports(t *testing.T) {
-	exporter, err := getTemporaryReportExporter()
+	exporter, err := getTemporaryReportExporter([]string{"PDF", "WORD"}, "")
 	assert.Nil(t, err)
 
 	viperConfig := viper.New()
-	viperConfig.Set("report.format", []string{"PDF", "WORD"})
 
 	apiClient := api.NewAPIClient("http://localhost:9999", "token")
 	initMockFeedsSet1(apiClient.HTTPClient())
@@ -34,11 +33,10 @@ func TestExportReports_should_export_all_reports(t *testing.T) {
 }
 
 func TestExportReports_should_return_error_for_unsupported_format(t *testing.T) {
-	exporter, err := getTemporaryReportExporter()
+	exporter, err := getTemporaryReportExporter([]string{"PNG"}, "")
 	assert.Nil(t, err)
 
 	viperConfig := viper.New()
-	viperConfig.Set("report.format", []string{"PNG"})
 
 	apiClient := api.NewAPIClient("http://localhost:9999", "token")
 	initMockFeedsSet1(apiClient.HTTPClient())

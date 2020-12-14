@@ -107,7 +107,10 @@ func ExportReports(cmd *cobra.Command, args []string) error {
 	exportPath := viper.GetString("export.path")
 	os.MkdirAll(exportPath, os.ModePerm)
 
-	exporter, err := feed.NewReportExporter(exportPath)
+	format := viper.GetStringSlice("report.format")
+	preferenceID := viper.GetString("preference_id")
+
+	exporter, err := feed.NewReportExporter(exportPath, format, preferenceID)
 	util.Check(err, "unable to create exporter")
 
 	apiClient := getAPIClient()

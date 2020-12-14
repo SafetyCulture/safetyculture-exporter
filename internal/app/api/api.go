@@ -26,7 +26,7 @@ type APIClient interface {
 	HTTPClient() *http.Client
 	GetFeed(ctx context.Context, request *GetFeedRequest) (*GetFeedResponse, error)
 	DrainFeed(ctx context.Context, request *GetFeedRequest, feedFn func(*GetFeedResponse) error) error
-	InitiateInspectionReportExport(ctx context.Context, auditId string, format string) (string, error)
+	InitiateInspectionReportExport(ctx context.Context, auditId string, format string, preferenceID string) (string, error)
 	CheckInspectionReportExportCompletion(ctx context.Context, auditId string, messageId string) (*InspectionReportExportCompletionResponse, error)
 	DownloadInspectionReportFile(ctx context.Context, url string) (io.ReadCloser, error)
 }
@@ -238,7 +238,7 @@ type InitiateInspectionReportExportResponse struct {
 	MessageID string `json:"messageId"`
 }
 
-func (a *apiClient) InitiateInspectionReportExport(ctx context.Context, auditId string, format string) (string, error) {
+func (a *apiClient) InitiateInspectionReportExport(ctx context.Context, auditId string, format string, preferenceID string) (string, error) {
 	logger := util.GetLogger()
 
 	var (
@@ -250,7 +250,8 @@ func (a *apiClient) InitiateInspectionReportExport(ctx context.Context, auditId 
 
 	url := fmt.Sprintf("audits/%s/report", auditId)
 	body := &InitiateInspectionReportExportRequest{
-		Format: format,
+		Format:       format,
+		PreferenceID: preferenceID,
 	}
 
 	sl := a.sling.New().Post(url).

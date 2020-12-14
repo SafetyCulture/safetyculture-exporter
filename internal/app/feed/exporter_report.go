@@ -20,9 +20,11 @@ import (
 // ReportExporter is an interface to export data feeds to CSV files
 type ReportExporter struct {
 	*SQLExporter
-	Logger     *zap.SugaredLogger
-	ExportPath string
-	Mu         sync.Mutex
+	Logger       *zap.SugaredLogger
+	ExportPath   string
+	PreferenceID string
+	Format       []string
+	Mu           sync.Mutex
 }
 
 type Report struct {
@@ -40,11 +42,11 @@ type SaveReportsResult struct {
 	WORDErrors  int
 }
 
-func (e *ReportExporter) SaveReports(ctx context.Context, apiClient api.APIClient, feed *InspectionFeed, formats []string) error {
+func (e *ReportExporter) SaveReports(ctx context.Context, apiClient api.APIClient, feed *InspectionFeed) error {
 	e.Logger.Info("Generating inspection reports")
 
 	exportPDF, exportWORD := false, false
-	for _, f := range formats {
+	for _, f := range e.Format {
 		switch f {
 		case "PDF":
 			exportPDF = true
@@ -204,7 +206,7 @@ func (e *ReportExporter) exportInspection(ctx context.Context, apiClient api.API
 	fn := fmt.Sprintf("%s (%s)", inspection.Name, inspection.ID)
 	e.Logger.Infof("Exporting %s report for %s", format, fn)
 
-	mId, err := apiClient.InitiateInspectionReportExport(ctx, inspection.ID, format)
+	mId, err := apiClient.InitiateInspectionReportExport(ctx, inspection.ID, format, e.PreferenceID)
 
 	if err != nil {
 		return err
@@ -313,15 +315,17 @@ func updateReportResult(rep *Report, res *SaveReportsResult) {
 	}
 }
 
-func NewReportExporter(exportPath string) (*ReportExporter, error) {
+func NewReportExporter(exportPath string, format []string, preferenceID string) (*ReportExporter, error) {
 	sqlExporter, err := NewSQLExporter("sqlite", filepath.Join(exportPath, "reports.db"), true)
 	if err != nil {
 		return nil, err
 	}
 
 	return &ReportExporter{
-		SQLExporter: sqlExporter,
-		Logger:      sqlExporter.Logger,
-		ExportPath:  exportPath,
+		SQLExporter:  sqlExporter,
+		Logger:       sqlExporter.Logger,
+		ExportPath:   exportPath,
+		Format:       format,
+		PreferenceID: preferenceID,
 	}, nil
 }

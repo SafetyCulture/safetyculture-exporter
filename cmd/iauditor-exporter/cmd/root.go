@@ -127,7 +127,9 @@ func init() {
 		RunE:    export.ExportReports,
 	}
 	reportCmd.PersistentFlags().StringSlice("format", []string{}, "Export format (PDF,WORD)")
+	reportCmd.PersistentFlags().String("preference-id", "", "The report preference to apply to the document")
 	util.Check(viper.BindPFlag("report.format", reportCmd.PersistentFlags().Lookup("format")), "while binding flag")
+	util.Check(viper.BindPFlag("report.preference_id", reportCmd.PersistentFlags().Lookup("preference-id")), "while binding flag")
 	RootCmd.AddCommand(reportCmd)
 
 	initConfig()

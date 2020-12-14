@@ -131,7 +131,7 @@ func TestAPIClientInitiateInspectionReportExport_should_return_messageID(t *test
 	apiClient := api.NewAPIClient("http://localhost:9999", "abc123")
 	gock.InterceptClient(apiClient.HTTPClient())
 
-	mId, err := apiClient.InitiateInspectionReportExport(context.Background(), "audit_123", "PDF")
+	mId, err := apiClient.InitiateInspectionReportExport(context.Background(), "audit_123", "PDF", "")
 
 	assert.Nil(t, err)
 	assert.Equal(t, "abc", mId)
