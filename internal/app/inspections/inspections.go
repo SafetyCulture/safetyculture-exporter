@@ -2,6 +2,7 @@ package inspections
 
 import (
 	"context"
+	"fmt"
 	"sync"
 
 	"github.com/SafetyCulture/iauditor-exporter/internal/app/api"
@@ -81,7 +82,7 @@ func (client *inspectionClient) Export(ctx context.Context) error {
 
 	operation := func(row api.Inspection) {
 		inspection, err := client.apiClient.GetInspection(ctx, row.ID)
-		util.Check(err, "Failed to get inspection")
+		util.Check(err, fmt.Sprintf("Failed to get inspection with id: %s", row.ID))
 
 		client.exporter.WriteRow(row.ID, inspection)
 	}

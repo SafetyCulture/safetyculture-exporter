@@ -1,0 +1,1015 @@
+{
+    "template_id": "template_b90912bcb3354061b4385c4218328ac0",
+    "audit_id": "audit_7f1ecd2e66474418b1e062657aeb1389",
+    "archived": false,
+    "created_at": "2020-02-12T00:49:47.760Z",
+    "modified_at": "2020-02-13T04:15:15.577Z",
+    "audit_data": {
+        "score": 1,
+        "total_score": 14,
+        "score_percentage": 7.143,
+        "name": "",
+        "duration": 0,
+        "authorship": {
+            "device_id": "user_623d74253aae4857aefb995d157e70e4",
+            "owner": "Chris Barrington",
+            "owner_id": "user_623d74253aae4857aefb995d157e70e4",
+            "author": "Chris Barrington",
+            "author_id": "user_623d74253aae4857aefb995d157e70e4"
+        },
+        "date_completed": null,
+        "date_modified": "2020-02-12T00:49:47.760Z",
+        "date_started": "2020-02-12T00:49:47.760Z"
+    },
+    "template_data": {
+        "authorship": {
+            "device_id": "",
+            "owner": "Alexandria Petigna",
+            "owner_id": "user_e100804c5f754593aa5c35b20a8877d0",
+            "author": "Alexandria Petigna",
+            "author_id": "user_e100804c5f754593aa5c35b20a8877d0"
+        },
+        "metadata": {
+            "description": "Comprehensive Property Inspection Audit. ",
+            "name": "Property Inspection ",
+            "image": {
+                "date_created": "2017-06-26T17:04:00.000Z",
+                "file_ext": "png",
+                "label": "",
+                "media_id": "c7a2d8c4-3a17-4107-b446-cc9bc41596cc",
+                "href": "https://api.safetyculture.io/audits/audit_7f1ecd2e66474418b1e062657aeb1389/media/c7a2d8c4-3a17-4107-b446-cc9bc41596cc"
+            }
+        },
+        "response_sets": {
+            "0918ba36-b79f-486a-89c9-0d4d6c675e3f": {
+                "id": "0918ba36-b79f-486a-89c9-0d4d6c675e3f",
+                "type": "question",
+                "responses": [
+                    {
+                        "id": "607910c7-392b-448c-b19f-a0bf71b3ebac",
+                        "label": "Region A",
+                        "colour": "250,250,250",
+                        "score": 1,
+                        "enable_score": false
+                    },
+                    {
+                        "id": "2fd6b12a-4f70-4b6f-97f1-a0beaa2ed229",
+                        "label": "Region B",
+                        "colour": "250,250,250",
+                        "score": 0,
+                        "enable_score": false
+                    },
+                    {
+                        "id": "86c66368-bc08-45f9-bb4e-48217bee332d",
+                        "label": "Region C",
+                        "colour": "250,250,250",
+                        "score": 0,
+                        "enable_score": false
+                    },
+                    {
+                        "id": "b15faa5e-74d9-4fcd-b177-073b0159bad2",
+                        "label": "Region D",
+                        "colour": "250,250,250",
+                        "score": 0,
+                        "enable_score": false
+                    },
+                    {
+                        "id": "5f878c1f-1e40-4a64-8884-1d0c02e2a330",
+                        "label": "Region E",
+                        "colour": "250,250,250",
+                        "score": 0,
+                        "enable_score": false
+                    }
+                ]
+            },
+            "5a092ce3-bb27-4030-9f8b-f5e5e60b844d": {
+                "id": "5a092ce3-bb27-4030-9f8b-f5e5e60b844d",
+                "type": "question",
+                "responses": [
+                    {
+                        "id": "8929ab93-63bf-4664-a7fd-787d027617dc",
+                        "label": "Modern Trip Fuse",
+                        "colour": "147,156,160",
+                        "score": 1,
+                        "enable_score": false
+                    },
+                    {
+                        "id": "d0015faf-a3d0-485f-85db-d23b1975cc0d",
+                        "label": "Older Trip Fuse",
+                        "colour": "147,156,160",
+                        "score": 0,
+                        "enable_score": false
+                    },
+                    {
+                        "id": "24c83be0-3c64-4da7-b854-9813553ba41e",
+                        "label": "Old Wired Fuse",
+                        "colour": "147,156,160",
+                        "score": 1,
+                        "enable_score": false
+                    },
+                    {
+                        "id": "d562f0ab-da0a-4e69-9cc4-57e9737b6e13",
+                        "label": "Unable to View",
+                        "colour": "147,156,160",
+                        "score": 1,
+                        "enable_score": false
+                    }
+                ]
+            },
+            "5b69aee5-0532-46a4-b2f5-d020d4d5381d": {
+                "id": "5b69aee5-0532-46a4-b2f5-d020d4d5381d",
+                "type": "question",
+                "responses": [
+                    {
+                        "id": "ef4abf51-3361-46f5-ba04-70c23c85ca20",
+                        "label": "Good",
+                        "colour": "0,159,105",
+                        "score": 1,
+                        "enable_score": true
+                    },
+                    {
+                        "id": "ef4abf51-3361-46f5-ba04-70c23c85ca21",
+                        "label": "Fair",
+                        "colour": "255,176,0",
+                        "score": 1,
+                        "enable_score": true
+                    },
+                    {
+                        "id": "ef4abf51-3361-46f5-ba04-70c23c85ca22",
+                        "label": "Poor",
+                        "colour": "198,0,34",
+                        "score": 0,
+                        "failed": true,
+                        "enable_score": true
+                    },
+                    {
+                        "id": "ef4abf51-3361-46f5-ba04-70c23c85ca23",
+                        "label": "N/A",
+                        "colour": "112,112,112",
+                        "score": 1,
+                        "enable_score": true
+                    }
+                ]
+            },
+            "7601fb75-80ae-4409-b31a-9acd58d45445": {
+                "id": "7601fb75-80ae-4409-b31a-9acd58d45445",
+                "type": "question",
+                "responses": [
+                    {
+                        "id": "af89ffa0-5db2-4a49-93e5-7dd392ab8f10",
+                        "label": "Safe",
+                        "colour": "0,159,105",
+                        "score": 1,
+                        "enable_score": true
+                    },
+                    {
+                        "id": "af89ffa1-5db2-4a49-93e5-7dd392ab8f10",
+                        "label": "At Risk",
+                        "colour": "198,0,34",
+                        "score": 0,
+                        "failed": true,
+                        "enable_score": true
+                    },
+                    {
+                        "id": "af89ffa2-5db2-4a49-93e5-7dd392ab8f10",
+                        "label": "N/A",
+                        "colour": "112,112,112",
+                        "score": 1,
+                        "enable_score": true
+                    }
+                ]
+            },
+            "77a59178-61cb-4319-a5aa-136aaaf17d6f": {
+                "id": "77a59178-61cb-4319-a5aa-136aaaf17d6f",
+                "type": "question",
+                "responses": [
+                    {
+                        "id": "b5935f54-fd15-45ea-a6e7-4b7cddce81b3",
+                        "label": "Yes",
+                        "colour": "162,182,58",
+                        "score": 1,
+                        "enable_score": true
+                    },
+                    {
+                        "id": "d6938b8b-286c-4f25-8e2e-c0faf0302ecd",
+                        "label": "No",
+                        "colour": "223,77,77",
+                        "score": 0,
+                        "enable_score": true
+                    },
+                    {
+                        "id": "27f3bccf-d4da-4548-bac6-7f371f524889",
+                        "label": "N/A",
+                        "colour": "42,134,176",
+                        "score": 0,
+                        "enable_score": false
+                    }
+                ]
+            },
+            "a40516bc-a88b-4ab1-9d0e-94f675f772d1": {
+                "id": "a40516bc-a88b-4ab1-9d0e-94f675f772d1",
+                "type": "question",
+                "responses": [
+                    {
+                        "id": "d4d422f6-2801-4061-9607-942dd630abe8",
+                        "label": "Excellent",
+                        "colour": "147,156,160",
+                        "score": 1,
+                        "enable_score": false
+                    },
+                    {
+                        "id": "2d35465e-a0f4-46c7-84c0-830fdb42778f",
+                        "label": "Good",
+                        "colour": "147,156,160",
+                        "score": 0,
+                        "enable_score": false
+                    },
+                    {
+                        "id": "e2378185-332b-4696-9963-3ccc4ad60c16",
+                        "label": "Poor",
+                        "colour": "147,156,160",
+                        "score": 0,
+                        "enable_score": false
+                    },
+                    {
+                        "id": "7c8c8410-6372-4aac-ac09-6cadc78f4300",
+                        "label": "Very Poor",
+                        "colour": "147,156,160",
+                        "score": 0,
+                        "enable_score": false
+                    }
+                ]
+            },
+            "a81e5ff4-f029-4ccb-acfa-4a2aa6d4fc03": {
+                "id": "a81e5ff4-f029-4ccb-acfa-4a2aa6d4fc03",
+                "type": "question",
+                "responses": [
+                    {
+                        "id": "0d0a891b-78d3-46b9-879a-1618549d578f",
+                        "label": "Wired Smoke Alarm",
+                        "colour": "61,192,139",
+                        "score": 1,
+                        "enable_score": false
+                    },
+                    {
+                        "id": "bf3d8afb-65f1-4576-9307-d0d8fc0dc51e",
+                        "label": "Battery Smoke Alarm",
+                        "colour": "61,192,139",
+                        "score": 0,
+                        "enable_score": false
+                    },
+                    {
+                        "id": "538b5b67-504a-429d-b31c-92c731add107",
+                        "label": "Few Smoke Alarms",
+                        "colour": "217,91,93",
+                        "score": 1,
+                        "enable_score": false
+                    }
+                ]
+            },
+            "b52a8b4c-048b-4f7d-99b9-c6b9680be5ed": {
+                "id": "b52a8b4c-048b-4f7d-99b9-c6b9680be5ed",
+                "type": "question",
+                "responses": [
+                    {
+                        "id": "2a2b8507-c53d-4d0e-83ec-164cb179b6a0",
+                        "label": "Pass",
+                        "colour": "0,159,105",
+                        "score": 1,
+                        "enable_score": true
+                    },
+                    {
+                        "id": "2a2b8507-c53d-4d0e-83ec-164cb179b6a1",
+                        "label": "Fail",
+                        "colour": "198,0,34",
+                        "score": 0,
+                        "failed": true,
+                        "enable_score": true
+                    },
+                    {
+                        "id": "2a2b8507-c53d-4d0e-83ec-164cb179b6a2",
+                        "label": "N/A",
+                        "colour": "112,112,112",
+                        "score": 1,
+                        "enable_score": true
+                    }
+                ]
+            },
+            "c6c011ed-4ade-460d-a04b-da730834b667": {
+                "id": "c6c011ed-4ade-460d-a04b-da730834b667",
+                "type": "question",
+                "responses": [
+                    {
+                        "id": "060ace00-1f61-468e-9c42-918fa93badcf",
+                        "label": "Yes",
+                        "colour": "0,159,105",
+                        "score": 1,
+                        "enable_score": true
+                    },
+                    {
+                        "id": "060ace01-1f61-468e-9c42-918fa93badcf",
+                        "label": "No",
+                        "colour": "198,0,34",
+                        "score": 0,
+                        "failed": true,
+                        "enable_score": true
+                    },
+                    {
+                        "id": "060ace02-1f61-468e-9c42-918fa93badcf",
+                        "label": "N/A",
+                        "colour": "112,112,112",
+                        "score": 1,
+                        "enable_score": true
+                    }
+                ]
+            },
+            "d743f356-a147-472c-a790-0c46a187de92": {
+                "id": "d743f356-a147-472c-a790-0c46a187de92",
+                "type": "question",
+                "responses": [
+                    {
+                        "id": "6bb1beb4-494e-4a17-bff7-bed8a6fcd3d0",
+                        "label": "Compliant",
+                        "colour": "0,159,105",
+                        "score": 1,
+                        "enable_score": true
+                    },
+                    {
+                        "id": "6bb1beb4-494e-4a17-bff7-bed8a6fcd3d1",
+                        "label": "Non-Compliant",
+                        "colour": "198,0,34",
+                        "score": 0,
+                        "failed": true,
+                        "enable_score": true
+                    },
+                    {
+                        "id": "6bb1beb4-494e-4a17-bff7-bed8a6fcd3d2",
+                        "label": "N/A",
+                        "colour": "112,112,112",
+                        "score": 1,
+                        "enable_score": true
+                    }
+                ]
+            }
+        }
+    },
+    "header_items": [
+        {
+            "item_id": "4D8E4B69-7B1F-43B9-A44E-42168BA6B718",
+            "label": "Information",
+            "type": "section",
+            "scoring": {
+                "combined_score": 0,
+                "combined_max_score": 0,
+                "combined_score_percentage": 0
+            },
+            "children": [
+                "f3245d42-ea77-11e1-aff1-0800200c9a66",
+                "f3245d43-ea77-11e1-aff1-0800200c9a66",
+                "680101fb-97db-47ff-a06f-6c0e2642b017",
+                "f3245d41-ea77-11e1-aff1-0800200c9a66",
+                "f3245d44-ea77-11e1-aff1-0800200c9a66"
+            ]
+        },
+        {
+            "parent_id": "4D8E4B69-7B1F-43B9-A44E-42168BA6B718",
+            "item_id": "f3245d42-ea77-11e1-aff1-0800200c9a66",
+            "label": "Conducted on",
+            "type": "datetime",
+            "options": {
+                "is_mandatory": false,
+                "enable_date": true,
+                "enable_time": true
+            },
+            "responses": {
+                "datetime": "2020-02-12T00:49:51.000Z"
+            }
+        },
+        {
+            "parent_id": "4D8E4B69-7B1F-43B9-A44E-42168BA6B718",
+            "item_id": "f3245d43-ea77-11e1-aff1-0800200c9a66",
+            "label": "Prepared by",
+            "type": "textsingle",
+            "responses": {
+                "text": "Chris Barrington"
+            }
+        },
+        {
+            "parent_id": "4D8E4B69-7B1F-43B9-A44E-42168BA6B718",
+            "item_id": "680101fb-97db-47ff-a06f-6c0e2642b017",
+            "label": "Property Region",
+            "type": "question",
+            "scoring": {
+                "score": 0,
+                "max_score": 0,
+                "score_percentage": 0
+            },
+            "options": {
+                "response_set": "0918ba36-b79f-486a-89c9-0d4d6c675e3f",
+                "failed_responses": [],
+                "is_mandatory": false
+            }
+        },
+        {
+            "parent_id": "4D8E4B69-7B1F-43B9-A44E-42168BA6B718",
+            "item_id": "f3245d41-ea77-11e1-aff1-0800200c9a66",
+            "label": "Property Number",
+            "type": "text"
+        },
+        {
+            "parent_id": "4D8E4B69-7B1F-43B9-A44E-42168BA6B718",
+            "item_id": "f3245d44-ea77-11e1-aff1-0800200c9a66",
+            "label": "Location",
+            "type": "address",
+            "options": {
+                "is_mandatory": false
+            }
+        }
+    ],
+    "items": [
+        {
+            "item_id": "877247D8-BB42-4379-AA67-1BA0228A585F",
+            "label": "Audit",
+            "type": "section",
+            "scoring": {
+                "combined_score": 1,
+                "combined_max_score": 14,
+                "combined_score_percentage": 7.143
+            },
+            "children": [
+                "4C21F5AC-9672-42E3-BB63-4113B21F6F26",
+                "E0050504-0281-4A35-A29D-B0B2676ED47D",
+                "102da68d-1178-41f9-bb48-47d0c3be8a38",
+                "645D8058-37A1-44C5-BD7D-FAA06F5F0917",
+                "F33EACBB-F385-459B-B78E-7F2FB394FB0E"
+            ]
+        },
+        {
+            "parent_id": "877247D8-BB42-4379-AA67-1BA0228A585F",
+            "item_id": "4C21F5AC-9672-42E3-BB63-4113B21F6F26",
+            "label": "Property Exterior",
+            "type": "category",
+            "scoring": {
+                "combined_score": 1,
+                "combined_max_score": 4,
+                "combined_score_percentage": 25
+            },
+            "options": {
+                "is_mandatory": false
+            },
+            "children": [
+                "6d0b4979-3273-43c2-a9c8-de98caff23cc",
+                "ABD4D5C6-193A-4950-BFB0-769A2CF2D7A9",
+                "5A0FAAD8-46CC-4F94-A55E-395D7FF6F522",
+                "7C26BA9C-3202-4BE7-9D8E-E14D8FBB08BD",
+                "2C3B452C-9123-46D8-A050-7576993D2A15",
+                "F6F426DA-7D25-42A2-92CF-214AABC85708"
+            ]
+        },
+        {
+            "parent_id": "4C21F5AC-9672-42E3-BB63-4113B21F6F26",
+            "item_id": "6d0b4979-3273-43c2-a9c8-de98caff23cc",
+            "label": "Photograph the building exterior",
+            "type": "media",
+            "options": {
+                "is_mandatory": false
+            }
+        },
+        {
+            "parent_id": "4C21F5AC-9672-42E3-BB63-4113B21F6F26",
+            "item_id": "ABD4D5C6-193A-4950-BFB0-769A2CF2D7A9",
+            "label": "The condition of the external decor over all is",
+            "type": "question",
+            "scoring": {
+                "score": 0,
+                "max_score": 0,
+                "score_percentage": 0
+            },
+            "options": {
+                "weighting": 0,
+                "response_set": "a40516bc-a88b-4ab1-9d0e-94f675f772d1",
+                "failed_responses": [],
+                "is_mandatory": false
+            }
+        },
+        {
+            "parent_id": "4C21F5AC-9672-42E3-BB63-4113B21F6F26",
+            "item_id": "5A0FAAD8-46CC-4F94-A55E-395D7FF6F522",
+            "label": "Is the roof in acceptable condition?",
+            "type": "question",
+            "scoring": {
+                "score": 1,
+                "max_score": 1,
+                "score_percentage": 100
+            },
+            "options": {
+                "response_set": "7601fb75-80ae-4409-b31a-9acd58d45445",
+                "failed_responses": [
+                    "af89ffa1-5db2-4a49-93e5-7dd392ab8f10"
+                ],
+                "is_mandatory": false
+            },
+            "responses": {
+                "selected": [
+                    {
+                        "id": "af89ffa0-5db2-4a49-93e5-7dd392ab8f10",
+                        "label": "Safe",
+                        "colour": "0,159,105",
+                        "score": 1,
+                        "enable_score": true
+                    }
+                ],
+                "failed": false
+            }
+        },
+        {
+            "parent_id": "4C21F5AC-9672-42E3-BB63-4113B21F6F26",
+            "item_id": "7C26BA9C-3202-4BE7-9D8E-E14D8FBB08BD",
+            "label": "Windows in acceptable condition?",
+            "type": "question",
+            "scoring": {
+                "score": 0,
+                "max_score": 1,
+                "score_percentage": 0
+            },
+            "options": {
+                "response_set": "c6c011ed-4ade-460d-a04b-da730834b667",
+                "failed_responses": [
+                    "060ace01-1f61-468e-9c42-918fa93badcf"
+                ],
+                "is_mandatory": false
+            }
+        },
+        {
+            "parent_id": "4C21F5AC-9672-42E3-BB63-4113B21F6F26",
+            "item_id": "2C3B452C-9123-46D8-A050-7576993D2A15",
+            "label": "Are the grounds in acceptable condition?",
+            "type": "question",
+            "scoring": {
+                "score": 0,
+                "max_score": 1,
+                "score_percentage": 0
+            },
+            "options": {
+                "response_set": "c6c011ed-4ade-460d-a04b-da730834b667",
+                "failed_responses": [
+                    "060ace01-1f61-468e-9c42-918fa93badcf"
+                ],
+                "is_mandatory": false
+            }
+        },
+        {
+            "parent_id": "4C21F5AC-9672-42E3-BB63-4113B21F6F26",
+            "item_id": "F6F426DA-7D25-42A2-92CF-214AABC85708",
+            "label": "Risks related to the exterior of the property all properly managed? ",
+            "type": "question",
+            "scoring": {
+                "score": 0,
+                "max_score": 1,
+                "score_percentage": 0
+            },
+            "options": {
+                "response_set": "c6c011ed-4ade-460d-a04b-da730834b667",
+                "failed_responses": [
+                    "060ace01-1f61-468e-9c42-918fa93badcf"
+                ],
+                "is_mandatory": false
+            }
+        },
+        {
+            "parent_id": "877247D8-BB42-4379-AA67-1BA0228A585F",
+            "item_id": "E0050504-0281-4A35-A29D-B0B2676ED47D",
+            "label": "Property Interior",
+            "type": "category",
+            "scoring": {
+                "combined_score": 0,
+                "combined_max_score": 1,
+                "combined_score_percentage": 0
+            },
+            "options": {
+                "is_mandatory": false
+            },
+            "children": [
+                "A6AC6BD9-B893-4D79-B573-63D8855B81DD",
+                "2538d0e4-548c-4de1-9c7a-cd858f04e952",
+                "afee6f7b-9ffb-4367-bc51-c403361f2307",
+                "C5758A2B-458B-4DC2-A90F-2E9F1FCD24F5"
+            ]
+        },
+        {
+            "parent_id": "E0050504-0281-4A35-A29D-B0B2676ED47D",
+            "item_id": "A6AC6BD9-B893-4D79-B573-63D8855B81DD",
+            "label": "Inside the property the tenants are maintaining their home in a",
+            "type": "question",
+            "scoring": {
+                "score": 0,
+                "max_score": 0,
+                "score_percentage": 0
+            },
+            "options": {
+                "response_set": "a40516bc-a88b-4ab1-9d0e-94f675f772d1",
+                "failed_responses": [],
+                "is_mandatory": false
+            }
+        },
+        {
+            "parent_id": "E0050504-0281-4A35-A29D-B0B2676ED47D",
+            "item_id": "2538d0e4-548c-4de1-9c7a-cd858f04e952",
+            "label": "Assess the following items for each room present on the property.",
+            "type": "information",
+            "options": {
+                "type": "text"
+            }
+        },
+        {
+            "parent_id": "E0050504-0281-4A35-A29D-B0B2676ED47D",
+            "item_id": "afee6f7b-9ffb-4367-bc51-c403361f2307",
+            "label": "Room",
+            "type": "dynamicfield",
+            "options": {
+                "element": "Room",
+                "is_mandatory": false
+            },
+            "children": [
+                "e6ea5f8c-4d5e-48a4-a374-72aa2302f080"
+            ]
+        },
+        {
+            "parent_id": "afee6f7b-9ffb-4367-bc51-c403361f2307",
+            "item_id": "e6ea5f8c-4d5e-48a4-a374-72aa2302f080",
+            "label": "",
+            "type": "primeelement",
+            "inactive": true,
+            "children": [
+                "153B8867-2537-45EB-A515-62AF25E3D9DB",
+                "C1E26F7B-692B-4045-8FED-5471B6999FB4",
+                "99A4310A-7407-4ED8-B0E2-6B81EEBC417E"
+            ]
+        },
+        {
+            "parent_id": "e6ea5f8c-4d5e-48a4-a374-72aa2302f080",
+            "item_id": "153B8867-2537-45EB-A515-62AF25E3D9DB",
+            "label": "Decor in acceptable condition?",
+            "type": "question",
+            "inactive": true,
+            "options": {
+                "response_set": "77a59178-61cb-4319-a5aa-136aaaf17d6f",
+                "failed_responses": [],
+                "is_mandatory": false
+            }
+        },
+        {
+            "parent_id": "e6ea5f8c-4d5e-48a4-a374-72aa2302f080",
+            "item_id": "C1E26F7B-692B-4045-8FED-5471B6999FB4",
+            "label": "Is the condition and cleanliness of the bathroom in acceptable condition?",
+            "type": "question",
+            "inactive": true,
+            "options": {
+                "response_set": "77a59178-61cb-4319-a5aa-136aaaf17d6f",
+                "failed_responses": [],
+                "is_mandatory": false
+            }
+        },
+        {
+            "parent_id": "e6ea5f8c-4d5e-48a4-a374-72aa2302f080",
+            "item_id": "99A4310A-7407-4ED8-B0E2-6B81EEBC417E",
+            "label": "Are the floor coverings in acceptable condition?",
+            "type": "question",
+            "inactive": true,
+            "options": {
+                "response_set": "77a59178-61cb-4319-a5aa-136aaaf17d6f",
+                "failed_responses": [],
+                "is_mandatory": false
+            }
+        },
+        {
+            "parent_id": "E0050504-0281-4A35-A29D-B0B2676ED47D",
+            "item_id": "C5758A2B-458B-4DC2-A90F-2E9F1FCD24F5",
+            "label": "Risks related to the interior of the property are properly managed? ",
+            "type": "question",
+            "scoring": {
+                "score": 0,
+                "max_score": 1,
+                "score_percentage": 0
+            },
+            "options": {
+                "response_set": "77a59178-61cb-4319-a5aa-136aaaf17d6f",
+                "failed_responses": [],
+                "is_mandatory": false
+            }
+        },
+        {
+            "parent_id": "877247D8-BB42-4379-AA67-1BA0228A585F",
+            "item_id": "102da68d-1178-41f9-bb48-47d0c3be8a38",
+            "label": "Risk Reduction",
+            "type": "category",
+            "scoring": {
+                "combined_score": 0,
+                "combined_max_score": 2,
+                "combined_score_percentage": 0
+            },
+            "options": {
+                "is_mandatory": false
+            },
+            "children": [
+                "166F83ED-0D61-48FE-B3E6-255874CABF2C",
+                "E2A01759-3D0F-49B4-9853-D16842210C5E",
+                "6AA1D6B1-5D14-4EEC-87D0-28FF2F3485EE",
+                "E695B497-6EC5-40CA-87D3-8F38CCE5BFCA"
+            ]
+        },
+        {
+            "parent_id": "102da68d-1178-41f9-bb48-47d0c3be8a38",
+            "item_id": "166F83ED-0D61-48FE-B3E6-255874CABF2C",
+            "label": "Electrical installation",
+            "type": "question",
+            "scoring": {
+                "score": 0,
+                "max_score": 0,
+                "score_percentage": 0
+            },
+            "options": {
+                "response_set": "5a092ce3-bb27-4030-9f8b-f5e5e60b844d",
+                "failed_responses": [],
+                "is_mandatory": false
+            }
+        },
+        {
+            "parent_id": "102da68d-1178-41f9-bb48-47d0c3be8a38",
+            "item_id": "E2A01759-3D0F-49B4-9853-D16842210C5E",
+            "label": "Fire protection",
+            "type": "question",
+            "scoring": {
+                "score": 0,
+                "max_score": 0,
+                "score_percentage": 0
+            },
+            "options": {
+                "response_set": "a81e5ff4-f029-4ccb-acfa-4a2aa6d4fc03",
+                "failed_responses": [],
+                "is_mandatory": false
+            }
+        },
+        {
+            "parent_id": "102da68d-1178-41f9-bb48-47d0c3be8a38",
+            "item_id": "6AA1D6B1-5D14-4EEC-87D0-28FF2F3485EE",
+            "label": "**Is there a stove or fuel burning appliance that we recommend be serviced on an annual basis?",
+            "type": "question",
+            "scoring": {
+                "score": 0,
+                "max_score": 1,
+                "score_percentage": 0
+            },
+            "options": {
+                "response_set": "77a59178-61cb-4319-a5aa-136aaaf17d6f",
+                "failed_responses": [],
+                "is_mandatory": false
+            },
+            "children": [
+                "1758DDFB-FFAD-4562-BECD-94CB8A57379B"
+            ]
+        },
+        {
+            "parent_id": "6AA1D6B1-5D14-4EEC-87D0-28FF2F3485EE",
+            "item_id": "1758DDFB-FFAD-4562-BECD-94CB8A57379B",
+            "label": "",
+            "type": "smartfield",
+            "evaluation": false,
+            "options": {
+                "values": [
+                    "b5935f54-fd15-45ea-a6e7-4b7cddce81b3"
+                ],
+                "condition": "3f206182-e4f6-11e1-aff1-0800200c9a66",
+                "is_mandatory": false
+            },
+            "children": [
+                "B28D1B91-C77C-4940-8FD5-0B6C8B2F0E65"
+            ]
+        },
+        {
+            "parent_id": "1758DDFB-FFAD-4562-BECD-94CB8A57379B",
+            "item_id": "B28D1B91-C77C-4940-8FD5-0B6C8B2F0E65",
+            "label": "In addition to undertaking an annual service we also recommend that a carbon monoxide alarm be provided. We would ask that you please consider this and instruct us accordingly, unless you have already provided one. ",
+            "type": "information",
+            "inactive": true,
+            "options": {
+                "type": "text",
+                "is_mandatory": false
+            }
+        },
+        {
+            "parent_id": "102da68d-1178-41f9-bb48-47d0c3be8a38",
+            "item_id": "E695B497-6EC5-40CA-87D3-8F38CCE5BFCA",
+            "label": "Is there oil central heating that we recommend be serviced on an annual basis?",
+            "type": "question",
+            "scoring": {
+                "score": 0,
+                "max_score": 1,
+                "score_percentage": 0
+            },
+            "options": {
+                "response_set": "77a59178-61cb-4319-a5aa-136aaaf17d6f",
+                "failed_responses": [],
+                "is_mandatory": false
+            },
+            "children": [
+                "118BE8B9-ACB6-44B3-BA53-E8728700FC04"
+            ]
+        },
+        {
+            "parent_id": "E695B497-6EC5-40CA-87D3-8F38CCE5BFCA",
+            "item_id": "118BE8B9-ACB6-44B3-BA53-E8728700FC04",
+            "label": "",
+            "type": "smartfield",
+            "evaluation": false,
+            "options": {
+                "values": [
+                    "b5935f54-fd15-45ea-a6e7-4b7cddce81b3"
+                ],
+                "condition": "3f206182-e4f6-11e1-aff1-0800200c9a66",
+                "is_mandatory": false
+            },
+            "children": [
+                "9E8D532A-20A1-4873-AA1D-62A3E046D00A"
+            ]
+        },
+        {
+            "parent_id": "118BE8B9-ACB6-44B3-BA53-E8728700FC04",
+            "item_id": "9E8D532A-20A1-4873-AA1D-62A3E046D00A",
+            "label": "In addition to undertaking an annual service we also recommend that a carbon monoxide alarm be provided. We would ask that you please consider this and instruct us accordingly, unless you have already provided one.",
+            "type": "information",
+            "inactive": true,
+            "options": {
+                "type": "text",
+                "is_mandatory": false
+            }
+        },
+        {
+            "parent_id": "877247D8-BB42-4379-AA67-1BA0228A585F",
+            "item_id": "645D8058-37A1-44C5-BD7D-FAA06F5F0917",
+            "label": "Potential risks",
+            "type": "category",
+            "scoring": {
+                "combined_score": 0,
+                "combined_max_score": 7,
+                "combined_score_percentage": 0
+            },
+            "options": {
+                "is_mandatory": false
+            },
+            "children": [
+                "72416695-CB54-4F06-B90B-0C853B566486",
+                "75A88059-FBCB-4F5D-B535-4567FDE4023A",
+                "AE81B10E-2AE3-4E55-8DEA-5F9A728D53C0",
+                "14AD2E3C-7D9C-4D32-AB91-8D07D434FA9F",
+                "61337629-D079-4876-9F92-4C8FFAF313BF",
+                "ABB715BB-8D42-4FD3-9958-A6947E2C9B25",
+                "44CFFE27-DB93-4EBD-99A3-C30BCE23ABBE"
+            ]
+        },
+        {
+            "parent_id": "645D8058-37A1-44C5-BD7D-FAA06F5F0917",
+            "item_id": "72416695-CB54-4F06-B90B-0C853B566486",
+            "label": "Is there any current risk of rent issues?",
+            "type": "question",
+            "scoring": {
+                "score": 0,
+                "max_score": 1,
+                "score_percentage": 0
+            },
+            "options": {
+                "response_set": "77a59178-61cb-4319-a5aa-136aaaf17d6f",
+                "failed_responses": [],
+                "is_mandatory": false
+            }
+        },
+        {
+            "parent_id": "645D8058-37A1-44C5-BD7D-FAA06F5F0917",
+            "item_id": "75A88059-FBCB-4F5D-B535-4567FDE4023A",
+            "label": "Is there a risk to the  property, tenancy or tenants due to issues with the Heating, Insulation and draught proofing?",
+            "type": "question",
+            "scoring": {
+                "score": 0,
+                "max_score": 1,
+                "score_percentage": 0
+            },
+            "options": {
+                "response_set": "77a59178-61cb-4319-a5aa-136aaaf17d6f",
+                "failed_responses": [],
+                "is_mandatory": false
+            }
+        },
+        {
+            "parent_id": "645D8058-37A1-44C5-BD7D-FAA06F5F0917",
+            "item_id": "AE81B10E-2AE3-4E55-8DEA-5F9A728D53C0",
+            "label": "The property is free from signs of unauthorised habitants living in the property?",
+            "type": "question",
+            "scoring": {
+                "score": 0,
+                "max_score": 1,
+                "score_percentage": 0
+            },
+            "options": {
+                "response_set": "77a59178-61cb-4319-a5aa-136aaaf17d6f",
+                "failed_responses": [],
+                "is_mandatory": false
+            }
+        },
+        {
+            "parent_id": "645D8058-37A1-44C5-BD7D-FAA06F5F0917",
+            "item_id": "14AD2E3C-7D9C-4D32-AB91-8D07D434FA9F",
+            "label": "Is there any risk to the property resulting from a lack of extraction or of the extractor fans being turned off?",
+            "type": "question",
+            "scoring": {
+                "score": 0,
+                "max_score": 1,
+                "score_percentage": 0
+            },
+            "options": {
+                "response_set": "77a59178-61cb-4319-a5aa-136aaaf17d6f",
+                "failed_responses": [],
+                "is_mandatory": false
+            }
+        },
+        {
+            "parent_id": "645D8058-37A1-44C5-BD7D-FAA06F5F0917",
+            "item_id": "61337629-D079-4876-9F92-4C8FFAF313BF",
+            "label": "The property Is free from the signs of unauthorised pets being kept at the property?",
+            "type": "question",
+            "scoring": {
+                "score": 0,
+                "max_score": 1,
+                "score_percentage": 0
+            },
+            "options": {
+                "response_set": "77a59178-61cb-4319-a5aa-136aaaf17d6f",
+                "failed_responses": [],
+                "is_mandatory": false
+            }
+        },
+        {
+            "parent_id": "645D8058-37A1-44C5-BD7D-FAA06F5F0917",
+            "item_id": "ABB715BB-8D42-4FD3-9958-A6947E2C9B25",
+            "label": "Is there any sign of malicious damage, negligence, misuse to property and furniture (if any)?",
+            "type": "question",
+            "scoring": {
+                "score": 0,
+                "max_score": 1,
+                "score_percentage": 0
+            },
+            "options": {
+                "response_set": "77a59178-61cb-4319-a5aa-136aaaf17d6f",
+                "failed_responses": [],
+                "is_mandatory": false
+            }
+        },
+        {
+            "parent_id": "645D8058-37A1-44C5-BD7D-FAA06F5F0917",
+            "item_id": "44CFFE27-DB93-4EBD-99A3-C30BCE23ABBE",
+            "label": "Are there any further risks?",
+            "type": "question",
+            "scoring": {
+                "score": 0,
+                "max_score": 1,
+                "score_percentage": 0
+            },
+            "options": {
+                "response_set": "77a59178-61cb-4319-a5aa-136aaaf17d6f",
+                "failed_responses": [],
+                "is_mandatory": false
+            }
+        },
+        {
+            "parent_id": "877247D8-BB42-4379-AA67-1BA0228A585F",
+            "item_id": "F33EACBB-F385-459B-B78E-7F2FB394FB0E",
+            "label": "Further action",
+            "type": "category",
+            "options": {
+                "is_mandatory": false
+            },
+            "children": [
+                "D7BB8079-E450-4301-BD4D-0353A7F6AC30",
+                "BF4D32FA-68C6-42D2-8C92-94403A647703"
+            ]
+        },
+        {
+            "parent_id": "F33EACBB-F385-459B-B78E-7F2FB394FB0E",
+            "item_id": "D7BB8079-E450-4301-BD4D-0353A7F6AC30",
+            "label": "Inspectors signature",
+            "type": "signature",
+            "options": {
+                "is_mandatory": false
+            }
+        },
+        {
+            "parent_id": "F33EACBB-F385-459B-B78E-7F2FB394FB0E",
+            "item_id": "BF4D32FA-68C6-42D2-8C92-94403A647703",
+            "label": "Disclaimer Statement: This report was completed ",
+            "type": "information",
+            "options": {
+                "type": "text",
+                "is_mandatory": false
+            }
+        }
+    ]
+}

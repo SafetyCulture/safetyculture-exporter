@@ -99,11 +99,10 @@ func runInspectionJSON(cmd *cobra.Command, args []string) error {
 	exportPath := fmt.Sprintf("%s/json/", viper.GetString("export.path"))
 	os.MkdirAll(exportPath, os.ModePerm)
 
-	jsonExporter := exporter.NewJSONExporter(exportPath)
 	inspectionsClient := inspections.NewInspectionClient(
 		viper.GetViper(),
 		getAPIClient(),
-		jsonExporter,
+		exporter.NewJSONExporter(exportPath),
 	)
 
 	return inspectionsClient.Export(context.Background())

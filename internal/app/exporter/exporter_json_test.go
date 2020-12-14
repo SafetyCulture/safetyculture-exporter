@@ -31,7 +31,5 @@ func TestWriteRow(t *testing.T) {
 	str := "sample-string"
 	var tmp json.RawMessage
 	tmp = []byte(str)
-
-	tmpFile := "tmp-file"
-	tmpExporter.WriteRow(tmpFile, &tmp)
+	tmpExporter.WriteRow("tmp-file", &tmp)
 }
