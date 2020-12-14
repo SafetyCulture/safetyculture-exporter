@@ -27,6 +27,11 @@ type ReportExporter struct {
 	Mu           sync.Mutex
 }
 
+type ReportExportFormat struct {
+	PDF  bool
+	WORD bool
+}
+
 type Report struct {
 	AuditID         string    `gorm:"primarykey;column:audit_id"`
 	AuditModifiedAt time.Time `gorm:"column:modified_at"`
@@ -45,19 +50,19 @@ type SaveReportsResult struct {
 func (e *ReportExporter) SaveReports(ctx context.Context, apiClient api.APIClient, feed *InspectionFeed) error {
 	e.Logger.Info("Generating inspection reports")
 
-	exportPDF, exportWORD := false, false
+	format := &ReportExportFormat{}
 	for _, f := range e.Format {
 		switch f {
 		case "PDF":
-			exportPDF = true
+			format.PDF = true
 		case "WORD":
-			exportWORD = true
+			format.WORD = true
 		default:
 			e.Logger.Infof("%s is not a valid report format", f)
 		}
 	}
 
-	if !exportPDF && !exportWORD {
+	if !format.PDF && !format.WORD {
 		return fmt.Errorf("No valid export format specified")
 	}
 
@@ -108,7 +113,7 @@ func (e *ReportExporter) SaveReports(ctx context.Context, apiClient api.APIClien
 				defer wg.Done()
 				buffers <- true
 
-				rep := e.saveReport(ctx, apiClient, inspection, exportPDF, exportWORD)
+				rep := e.saveReport(ctx, apiClient, inspection, format)
 				updateReportResult(rep, res)
 
 				<-buffers
@@ -131,20 +136,18 @@ func (e *ReportExporter) SaveReports(ctx context.Context, apiClient api.APIClien
 	return err
 }
 
-func (e *ReportExporter) saveReport(ctx context.Context, apiClient api.APIClient, inspection *Inspection, pdf bool, word bool) *Report {
-	auditID := inspection.ID
-	exportPDF := pdf
-	exportWORD := word
+func (e *ReportExporter) saveReport(ctx context.Context, apiClient api.APIClient, inspection *Inspection, format *ReportExportFormat) *Report {
+	exportPDF, exportWORD := format.PDF, format.WORD
 
 	report := &Report{}
-	err := e.DB.First(&report, "audit_id = ?", auditID).Error
+	err := e.DB.First(&report, "audit_id = ?", inspection.ID).Error
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		e.Logger.Errorf("Error during loading report from reports db: %s", err)
 		return report
 	}
 
 	if report.AuditModifiedAt != inspection.ModifiedAt {
-		report.AuditID = auditID
+		report.AuditID = inspection.ID
 		report.AuditModifiedAt = inspection.ModifiedAt
 	} else {
 		exportPDF = exportPDF && report.PDF == 0
@@ -154,41 +157,13 @@ func (e *ReportExporter) saveReport(ctx context.Context, apiClient api.APIClient
 		}
 	}
 
-	var wg sync.WaitGroup
-
 	if exportPDF {
-		wg.Add(1)
-
-		go func() {
-			defer wg.Done()
-
-			err = e.exportInspection(ctx, apiClient, inspection, "PDF")
-			if err != nil {
-				e.Logger.Errorf("PDF export failed for '%s'. Error: %s", inspection.Name, err)
-				report.PDF = -1
-			} else {
-				report.PDF = 1
-			}
-		}()
+		e.exportPDFInspection(ctx, apiClient, inspection, report)
 	}
 
 	if exportWORD {
-		wg.Add(1)
-
-		go func() {
-			defer wg.Done()
-
-			err = e.exportInspection(ctx, apiClient, inspection, "WORD")
-			if err != nil {
-				e.Logger.Errorf("WORD export failed for '%s'. Error: %s", inspection.Name, err)
-				report.WORD = -1
-			} else {
-				report.WORD = 1
-			}
-		}()
+		e.exportWordInspection(ctx, apiClient, inspection, report)
 	}
-
-	wg.Wait()
 
 	result := e.DB.Clauses(clause.OnConflict{
 		Columns:   []clause.Column{{Name: "audit_id"}},
@@ -200,6 +175,26 @@ func (e *ReportExporter) saveReport(ctx context.Context, apiClient api.APIClient
 	}
 
 	return report
+}
+
+func (e *ReportExporter) exportPDFInspection(ctx context.Context, apiClient api.APIClient, inspection *Inspection, report *Report) {
+	err := e.exportInspection(ctx, apiClient, inspection, "PDF")
+	if err != nil {
+		e.Logger.Errorf("PDF export failed for '%s'. Error: %s", inspection.Name, err)
+		report.PDF = -1
+	} else {
+		report.PDF = 1
+	}
+}
+
+func (e *ReportExporter) exportWordInspection(ctx context.Context, apiClient api.APIClient, inspection *Inspection, report *Report) {
+	err := e.exportInspection(ctx, apiClient, inspection, "WORD")
+	if err != nil {
+		e.Logger.Errorf("WORD export failed for '%s'. Error: %s", inspection.Name, err)
+		report.WORD = -1
+	} else {
+		report.WORD = 1
+	}
 }
 
 func (e *ReportExporter) exportInspection(ctx context.Context, apiClient api.APIClient, inspection *Inspection, format string) error {
