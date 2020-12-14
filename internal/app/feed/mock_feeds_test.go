@@ -68,16 +68,19 @@ func initMockFeedsSet1(httpClient *http.Client) {
 	// mocking report export endpoints
 	gock.New("http://localhost:9999").
 		Post("/audits/.*/report").
+		Persist().
 		Reply(200).
 		JSON(map[string]string{"messageId": "b70f5357-4ba7-45a6-a801-706a0f57f2af"})
 
 	gock.New("http://localhost:9999").
 		Get("/audits/.*/report/.*").
+		Persist().
 		Reply(200).
 		JSON(map[string]string{"status": "SUCCESS", "url": "http://localhost:9999/report-exports/abc"})
 
 	gock.New("http://localhost:9999").
 		Get("/report-exports/abc").
+		Persist().
 		Reply(200).
 		Body(bytes.NewBuffer([]byte(`file content`)))
 }

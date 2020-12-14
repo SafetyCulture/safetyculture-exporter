@@ -16,7 +16,7 @@ func TestExportReports_should_export_all_reports(t *testing.T) {
 	assert.Nil(t, err)
 
 	viperConfig := viper.New()
-	viperConfig.Set("report.format", []string{"PDF,WORD"})
+	viperConfig.Set("report.format", []string{"PDF", "WORD"})
 
 	apiClient := api.NewAPIClient("http://localhost:9999", "token")
 	initMockFeedsSet1(apiClient.HTTPClient())
