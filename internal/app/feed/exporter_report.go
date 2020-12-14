@@ -32,6 +32,14 @@ type Report struct {
 	WORD            int       `gorm:"column:word"`
 }
 
+type SaveReportsResult struct {
+	NoChange    int
+	PDFReports  int
+	PDFErrors   int
+	WORDReports int
+	WORDErrors  int
+}
+
 func (e *ReportExporter) SaveReports(ctx context.Context, apiClient api.APIClient, feed *InspectionFeed, formats []string) error {
 	e.Logger.Info("Generating inspection reports")
 
@@ -64,13 +72,7 @@ func (e *ReportExporter) SaveReports(ctx context.Context, apiClient api.APIClien
 		}
 	}
 
-	var (
-		noChange   int
-		pdfReports int
-		pdfErrors  int
-		wrdReports int
-		wrdErrors  int
-	)
+	res := &SaveReportsResult{}
 
 	// you can specify level of concurrency by increasing channel size
 	buffers := make(chan bool, 3)
@@ -78,7 +80,7 @@ func (e *ReportExporter) SaveReports(ctx context.Context, apiClient api.APIClien
 
 	limit := 1
 	offset := 0
-	for true {
+	for {
 		rows := &[]*Inspection{}
 		resp := e.DB.
 			Order(feed.Order()).
@@ -87,7 +89,8 @@ func (e *ReportExporter) SaveReports(ctx context.Context, apiClient api.APIClien
 			Find(rows)
 
 		if resp.Error != nil {
-			return resp.Error
+			err = resp.Error
+			break
 		}
 
 		if resp.RowsAffected == 0 || resp.RowsAffected == -1 {
@@ -104,21 +107,7 @@ func (e *ReportExporter) SaveReports(ctx context.Context, apiClient api.APIClien
 				buffers <- true
 
 				rep := e.saveReport(ctx, apiClient, inspection, exportPDF, exportWORD)
-				if rep == nil {
-					noChange += 1
-				} else {
-					if rep.PDF == 1 {
-						pdfReports += 1
-					} else if rep.PDF == -1 {
-						pdfErrors += 1
-					}
-
-					if rep.WORD == 1 {
-						wrdReports += 1
-					} else if rep.WORD == -1 {
-						wrdErrors += 1
-					}
-				}
+				updateReportResult(rep, res)
 
 				<-buffers
 			}(r)
@@ -127,17 +116,17 @@ func (e *ReportExporter) SaveReports(ctx context.Context, apiClient api.APIClien
 
 	wg.Wait()
 
-	e.Logger.Infof("There were no changes made to %d inspections and no reports downloaded", noChange)
+	e.Logger.Infof("There were no changes made to %d inspections and no reports downloaded", res.NoChange)
 
-	if pdfReports > 0 || wrdReports > 0 {
-		e.Logger.Infof("Successfully generate %d PDF reports and %d WORD reports", pdfReports, wrdReports)
+	if res.PDFReports > 0 || res.WORDReports > 0 {
+		e.Logger.Infof("Successfully generate %d PDF reports and %d WORD reports", res.PDFReports, res.WORDReports)
 	}
 
-	if pdfErrors > 0 || wrdErrors > 0 {
-		return fmt.Errorf("Failed to generate %d PDF reports and %d WORD reports", pdfErrors, wrdErrors)
+	if res.PDFErrors > 0 || res.WORDErrors > 0 {
+		return fmt.Errorf("Failed to generate %d PDF reports and %d WORD reports", res.PDFErrors, res.WORDErrors)
 	}
 
-	return nil
+	return err
 }
 
 func (e *ReportExporter) saveReport(ctx context.Context, apiClient api.APIClient, inspection *Inspection, pdf bool, word bool) *Report {
@@ -190,7 +179,7 @@ func (e *ReportExporter) saveReport(ctx context.Context, apiClient api.APIClient
 			err = e.exportInspection(ctx, apiClient, inspection, "WORD")
 			if err != nil {
 				e.Logger.Errorf("WORD export failed for '%s'. Error: %s", inspection.Name, err)
-				report.PDF = -1
+				report.WORD = -1
 			} else {
 				report.WORD = 1
 			}
@@ -223,40 +212,51 @@ func (e *ReportExporter) exportInspection(ctx context.Context, apiClient api.API
 
 	tries := 0
 
-	for true {
+	for {
+		// wait for a second before checking for report completion
 		time.Sleep(1 * time.Second)
 		du, err := apiClient.CheckInspectionReportExportCompletion(ctx, inspection.ID, mId)
 		if err != nil {
-			return err
+			break
 		} else if du.Status == "SUCCESS" {
 			resp, err := apiClient.DownloadFile(ctx, du.URL)
 			if err != nil {
-				return err
-			}
-			e.Mu.Lock()
-			filePath := getFilePath(e.ExportPath, inspection, format)
-			out, err := os.Create(filePath)
-			if err != nil {
-				return err
+				break
 			}
 
-			_, err = io.Copy(out, resp)
-			resp.Close()
-			out.Close()
+			// only allow one process to access disk at the same time
+			// this way we won't allow process to overwrite reports with the same name
+			e.Mu.Lock()
+			err = saveReportResponse(resp, inspection, e.ExportPath, format)
 			e.Mu.Unlock()
-			return err
+			break
 		} else if du.Status == "FAILED" {
-			return fmt.Errorf("%s report generation failed on server for %s", format, fn)
+			err = fmt.Errorf("%s report generation failed on server for %s", format, fn)
+			break
 		}
 
 		// make sure we stop checking after a while
 		tries += 1
 		if tries == 20 {
-			return fmt.Errorf("%s report generation for %s terminated after %d tries", format, inspection.Name, tries)
+			err = fmt.Errorf("%s report generation for %s terminated after %d tries", format, inspection.Name, tries)
+			break
 		}
 	}
 
-	return nil
+	return err
+}
+
+func saveReportResponse(resp io.ReadCloser, inspection *Inspection, path string, format string) error {
+	filePath := getFilePath(path, inspection, format)
+	out, err := os.Create(filePath)
+	if err != nil {
+		return err
+	}
+
+	_, err = io.Copy(out, resp)
+	resp.Close()
+	out.Close()
+	return err
 }
 
 func sanitizeName(name string) string {
@@ -293,6 +293,24 @@ func getFilePath(exportPath string, inspection *Inspection, format string) strin
 		}
 	}
 	return ""
+}
+
+func updateReportResult(rep *Report, res *SaveReportsResult) {
+	if rep == nil {
+		res.NoChange += 1
+	} else {
+		if rep.PDF == 1 {
+			res.PDFReports += 1
+		} else if rep.PDF == -1 {
+			res.PDFErrors += 1
+		}
+
+		if rep.WORD == 1 {
+			res.WORDReports += 1
+		} else if rep.WORD == -1 {
+			res.WORDErrors += 1
+		}
+	}
 }
 
 func NewReportExporter(exportPath string) (*ReportExporter, error) {

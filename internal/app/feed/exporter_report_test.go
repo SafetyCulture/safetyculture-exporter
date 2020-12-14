@@ -16,7 +16,7 @@ func TestExportReports_should_export_all_reports(t *testing.T) {
 	assert.Nil(t, err)
 
 	viperConfig := viper.New()
-	viperConfig.Set("report.format", []string{"PDF"})
+	viperConfig.Set("report.format", []string{"PDF,WORD"})
 
 	apiClient := api.NewAPIClient("http://localhost:9999", "token")
 	initMockFeedsSet1(apiClient.HTTPClient())
@@ -27,6 +27,10 @@ func TestExportReports_should_export_all_reports(t *testing.T) {
 	fileExists(t, filepath.Join(exporter.ExportPath, "My-Audit.pdf"))
 	fileExists(t, filepath.Join(exporter.ExportPath, "audit_2.pdf"))
 	fileExists(t, filepath.Join(exporter.ExportPath, "audit_3.pdf"))
+
+	fileExists(t, filepath.Join(exporter.ExportPath, "My-Audit.docx"))
+	fileExists(t, filepath.Join(exporter.ExportPath, "audit_2.docx"))
+	fileExists(t, filepath.Join(exporter.ExportPath, "audit_3.docx"))
 }
 
 func TestExportReports_should_return_error_for_unsupported_format(t *testing.T) {
