@@ -87,7 +87,7 @@ func (e *JSONExporter) WriteRow(name string, row *json.RawMessage) {
 	}
 	defer file.Close()
 
-	if _, err := file.Write([]byte(str)); err != nil {
+	if _, err := file.WriteAt([]byte(str), 0); err != nil {
 		util.Check(err, "Failed to write inspection to a file")
 	}
 
