@@ -28,7 +28,7 @@ type APIClient interface {
 	DrainFeed(ctx context.Context, request *GetFeedRequest, feedFn func(*GetFeedResponse) error) error
 	InitiateInspectionReportExport(ctx context.Context, auditId string, format string) (string, error)
 	CheckInspectionReportExportCompletion(ctx context.Context, auditId string, messageId string) (*InspectionReportExportCompletionResponse, error)
-	DownloadFile(ctx context.Context, url string) (io.ReadCloser, error)
+	DownloadInspectionReportFile(ctx context.Context, url string) (io.ReadCloser, error)
 }
 
 type apiClient struct {
@@ -319,7 +319,7 @@ func (a *apiClient) CheckInspectionReportExportCompletion(ctx context.Context, a
 	return result, nil
 }
 
-func (a *apiClient) DownloadFile(ctx context.Context, url string) (io.ReadCloser, error) {
+func (a *apiClient) DownloadInspectionReportFile(ctx context.Context, url string) (io.ReadCloser, error) {
 	logger := util.GetLogger()
 
 	var (
@@ -340,7 +340,6 @@ func (a *apiClient) DownloadFile(ctx context.Context, url string) (io.ReadCloser
 	if err != nil {
 		return nil, errors.Wrap(err, "Failed request to API")
 	}
-	// defer res.Body.Close()
 
 	logger.Debugw("http request",
 		"url", req.URL.String(),

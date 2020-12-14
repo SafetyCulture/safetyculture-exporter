@@ -70,7 +70,7 @@ func initMockFeedsSet1(httpClient *http.Client) {
 		Post("/audits/.*/report").
 		Persist().
 		Reply(200).
-		JSON(map[string]string{"messageId": "b70f5357-4ba7-45a6-a801-706a0f57f2af"})
+		JSON(map[string]string{"messageId": "abc"})
 
 	gock.New("http://localhost:9999").
 		Get("/audits/.*/report/.*").

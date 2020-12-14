@@ -219,7 +219,7 @@ func (e *ReportExporter) exportInspection(ctx context.Context, apiClient api.API
 		if err != nil {
 			break
 		} else if du.Status == "SUCCESS" {
-			resp, err := apiClient.DownloadFile(ctx, du.URL)
+			resp, err := apiClient.DownloadInspectionReportFile(ctx, du.URL)
 			if err != nil {
 				break
 			}
