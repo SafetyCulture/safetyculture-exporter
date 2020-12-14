@@ -50,24 +50,13 @@ type SaveReportsResult struct {
 func (e *ReportExporter) SaveReports(ctx context.Context, apiClient api.APIClient, feed *InspectionFeed) error {
 	e.Logger.Info("Generating inspection reports")
 
-	format := &ReportExportFormat{}
-	for _, f := range e.Format {
-		switch f {
-		case "PDF":
-			format.PDF = true
-		case "WORD":
-			format.WORD = true
-		default:
-			e.Logger.Infof("%s is not a valid report format", f)
-		}
-	}
-
-	if !format.PDF && !format.WORD {
+	format, err := e.getFormats()
+	if err != nil {
 		return fmt.Errorf("No valid export format specified")
 	}
 
 	report := &Report{}
-	err := e.DB.AutoMigrate(&Report{})
+	err = e.DB.AutoMigrate(&Report{})
 	if err != nil {
 		return err
 	}
@@ -130,10 +119,30 @@ func (e *ReportExporter) SaveReports(ctx context.Context, apiClient api.APIClien
 	}
 
 	if res.PDFErrors > 0 || res.WORDErrors > 0 {
-		return fmt.Errorf("Failed to generate %d PDF reports and %d WORD reports", res.PDFErrors, res.WORDErrors)
+		err = fmt.Errorf("Failed to generate %d PDF reports and %d WORD reports", res.PDFErrors, res.WORDErrors)
 	}
 
 	return err
+}
+
+func (e *ReportExporter) getFormats() (*ReportExportFormat, error) {
+	format := &ReportExportFormat{}
+	for _, f := range e.Format {
+		switch f {
+		case "PDF":
+			format.PDF = true
+		case "WORD":
+			format.WORD = true
+		default:
+			e.Logger.Infof("%s is not a valid report format", f)
+		}
+	}
+
+	if !format.PDF && !format.WORD {
+		return nil, fmt.Errorf("No valid export format specified")
+	}
+
+	return format, nil
 }
 
 func (e *ReportExporter) saveReport(ctx context.Context, apiClient api.APIClient, inspection *Inspection, format *ReportExportFormat) *Report {

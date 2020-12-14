@@ -120,6 +120,12 @@ func init() {
 		RunE:   writeDocs,
 	})
 
+	addReportCmd()
+
+	initConfig()
+}
+
+func addReportCmd() {
 	reportCmd := &cobra.Command{
 		Use:     "report",
 		Short:   "Export inspection reports",
@@ -131,8 +137,6 @@ func init() {
 	util.Check(viper.BindPFlag("report.format", reportCmd.PersistentFlags().Lookup("format")), "while binding flag")
 	util.Check(viper.BindPFlag("report.preference_id", reportCmd.PersistentFlags().Lookup("preference-id")), "while binding flag")
 	RootCmd.AddCommand(reportCmd)
-
-	initConfig()
 }
 
 // initConfig reads in config file and ENV variables if set.
