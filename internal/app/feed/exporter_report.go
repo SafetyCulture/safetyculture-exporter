@@ -221,12 +221,14 @@ func (e *ReportExporter) exportInspection(ctx context.Context, apiClient api.API
 	for {
 		// wait for a second before checking for report completion
 		time.Sleep(1 * time.Second)
-		du, err := apiClient.CheckInspectionReportExportCompletion(ctx, inspection.ID, mId)
-		if err != nil {
+		rec, cErr := apiClient.CheckInspectionReportExportCompletion(ctx, inspection.ID, mId)
+		if cErr != nil {
+			err = cErr
 			break
-		} else if du.Status == "SUCCESS" {
-			resp, err := apiClient.DownloadInspectionReportFile(ctx, du.URL)
-			if err != nil {
+		} else if rec.Status == "SUCCESS" {
+			resp, dErr := apiClient.DownloadInspectionReportFile(ctx, rec.URL)
+			if dErr != nil {
+				err = dErr
 				break
 			}
 
@@ -236,14 +238,14 @@ func (e *ReportExporter) exportInspection(ctx context.Context, apiClient api.API
 			err = saveReportResponse(resp, inspection, e.ExportPath, format)
 			e.Mu.Unlock()
 			break
-		} else if du.Status == "FAILED" {
+		} else if rec.Status == "FAILED" {
 			err = fmt.Errorf("%s report generation failed on server for %s", format, fn)
 			break
 		}
 
 		// make sure we stop checking after a while
 		tries += 1
-		if tries == 20 {
+		if tries == 15 {
 			err = fmt.Errorf("%s report generation for %s terminated after %d tries", format, inspection.Name, tries)
 			break
 		}

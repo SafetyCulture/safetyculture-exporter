@@ -121,7 +121,8 @@ func TestAPIClientInitiateInspectionReportExport_should_return_messageID(t *test
 	gock.New("http://localhost:9999").
 		Post("/audits/audit_123/report").
 		JSON(`{
-			"format": "PDF"
+			"format": "PDF",
+			"preference_id": "p123"
 		}`).
 		Reply(200).
 		JSON(`{
@@ -131,7 +132,7 @@ func TestAPIClientInitiateInspectionReportExport_should_return_messageID(t *test
 	apiClient := api.NewAPIClient("http://localhost:9999", "abc123")
 	gock.InterceptClient(apiClient.HTTPClient())
 
-	mId, err := apiClient.InitiateInspectionReportExport(context.Background(), "audit_123", "PDF", "")
+	mId, err := apiClient.InitiateInspectionReportExport(context.Background(), "audit_123", "PDF", "p123")
 
 	assert.Nil(t, err)
 	assert.Equal(t, "abc", mId)

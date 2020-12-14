@@ -64,25 +64,6 @@ func initMockFeedsSet1(httpClient *http.Client) {
 		Get("/feed/schedule_occurrences").
 		Reply(200).
 		File("mocks/set_1/feed_schedule_occurrences_1.json")
-
-	// mocking report export endpoints
-	gock.New("http://localhost:9999").
-		Post("/audits/.*/report").
-		Persist().
-		Reply(200).
-		JSON(map[string]string{"messageId": "abc"})
-
-	gock.New("http://localhost:9999").
-		Get("/audits/.*/report/.*").
-		Persist().
-		Reply(200).
-		JSON(map[string]string{"status": "SUCCESS", "url": "http://localhost:9999/report-exports/abc"})
-
-	gock.New("http://localhost:9999").
-		Get("/report-exports/abc").
-		Persist().
-		Reply(200).
-		Body(bytes.NewBuffer([]byte(`file content`)))
 }
 
 func initMockFeedsSet2(httpClient *http.Client) {
@@ -197,4 +178,32 @@ func initMockFeedsSet3(httpClient *http.Client) {
 		Get("/feed/schedule_occurrences").
 		Reply(200).
 		File("mocks/set_1/feed_schedule_occurrences_1.json")
+}
+
+func initMockReportExport(httpClient *http.Client, status string) {
+	gock.InterceptClient(httpClient)
+
+	gock.New("http://localhost:9999").
+		Post("/audits/.*/report").
+		Persist().
+		Reply(200).
+		JSON(map[string]string{"messageId": "abc"})
+
+	gock.New("http://localhost:9999").
+		Get("/audits/.*/report/.*").
+		Persist().
+		Reply(200).
+		JSON(map[string]string{"status": status, "url": "http://localhost:9999/report-exports/abc"})
+
+	gock.New("http://localhost:9999").
+		Get("/report-exports/abc").
+		Persist().
+		Reply(200).
+		Body(bytes.NewBuffer([]byte(`file content`)))
+}
+
+func resetMocks(httpClient *http.Client) {
+	gock.Off()
+	gock.Clean()
+	gock.RestoreClient(httpClient)
 }

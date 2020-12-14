@@ -18,7 +18,9 @@ func TestExportReports_should_export_all_reports(t *testing.T) {
 	viperConfig := viper.New()
 
 	apiClient := api.NewAPIClient("http://localhost:9999", "token")
+	defer resetMocks(apiClient.HTTPClient())
 	initMockFeedsSet1(apiClient.HTTPClient())
+	initMockReportExport(apiClient.HTTPClient(), "SUCCESS")
 
 	err = feed.ExportInspectionReports(viperConfig, apiClient, exporter)
 	assert.Nil(t, err)
@@ -30,6 +32,36 @@ func TestExportReports_should_export_all_reports(t *testing.T) {
 	fileExists(t, filepath.Join(exporter.ExportPath, "My-Audit.docx"))
 	fileExists(t, filepath.Join(exporter.ExportPath, "audit_2.docx"))
 	fileExists(t, filepath.Join(exporter.ExportPath, "audit_3.docx"))
+}
+
+func TestExportReports_should_fail_after_retries(t *testing.T) {
+	exporter, err := getTemporaryReportExporter([]string{"PDF"}, "")
+	assert.Nil(t, err)
+
+	viperConfig := viper.New()
+
+	apiClient := api.NewAPIClient("http://localhost:9999", "token")
+	defer resetMocks(apiClient.HTTPClient())
+	initMockFeedsSet1(apiClient.HTTPClient())
+	initMockReportExport(apiClient.HTTPClient(), "IN_PROGRESS")
+
+	err = feed.ExportInspectionReports(viperConfig, apiClient, exporter)
+	assert.NotNil(t, err)
+}
+
+func TestExportReports_should_fail_if_report_status_fails(t *testing.T) {
+	exporter, err := getTemporaryReportExporter([]string{"WORD"}, "")
+	assert.Nil(t, err)
+
+	viperConfig := viper.New()
+
+	apiClient := api.NewAPIClient("http://localhost:9999", "token")
+	defer resetMocks(apiClient.HTTPClient())
+	initMockFeedsSet1(apiClient.HTTPClient())
+	initMockReportExport(apiClient.HTTPClient(), "FAILED")
+
+	err = feed.ExportInspectionReports(viperConfig, apiClient, exporter)
+	assert.NotNil(t, err)
 }
 
 func TestExportReports_should_return_error_for_unsupported_format(t *testing.T) {
