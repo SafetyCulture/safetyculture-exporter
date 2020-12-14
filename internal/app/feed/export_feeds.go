@@ -116,3 +116,22 @@ func ExportFeeds(v *viper.Viper, apiClient api.APIClient, exporter Exporter) err
 
 	return nil
 }
+
+func ExportInspectionReports(v *viper.Viper, apiClient api.APIClient, exporter *ReportExporter) error {
+	logger := util.GetLogger()
+	ctx := context.Background()
+
+	feed := GetFeeds(v)[0]
+	err := feed.Export(ctx, apiClient, exporter)
+	util.Check(err, "failed to export inspection feed")
+
+	formats := v.GetStringSlice("report.format")
+
+	err = exporter.SaveReports(ctx, apiClient, feed.(*InspectionFeed), formats)
+
+	if err != nil {
+		logger.Info("Export finished")
+	}
+
+	return err
+}

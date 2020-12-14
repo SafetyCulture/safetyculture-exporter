@@ -120,6 +120,16 @@ func init() {
 		RunE:   writeDocs,
 	})
 
+	reportCmd := &cobra.Command{
+		Use:     "report",
+		Short:   "Export inspection reports",
+		Example: `iauditor-exporter reports`,
+		RunE:    export.ExportReports,
+	}
+	reportCmd.PersistentFlags().StringSlice("format", []string{}, "Export format (PDF,WORD)")
+	util.Check(viper.BindPFlag("report.format", reportCmd.PersistentFlags().Lookup("format")), "while binding flag")
+	RootCmd.AddCommand(reportCmd)
+
 	initConfig()
 }
 

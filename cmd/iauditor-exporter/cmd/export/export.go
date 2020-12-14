@@ -35,12 +35,10 @@ iauditor-exporter sql --export-path /path/to/export/to`,
 			RunE: runSQL,
 		},
 		&cobra.Command{
-			Use:       "schema",
-			Short:     "Print iAuditor table schemas",
-			Example:   `iauditor-exporter schema`,
-			ValidArgs: []string{},
-			Args:      cobra.OnlyValidArgs,
-			RunE:      printSchema,
+			Use:     "schema",
+			Short:   "Print iAuditor table schemas",
+			Example: `iauditor-exporter schema`,
+			RunE:    printSchema,
 		},
 	}
 }
@@ -102,4 +100,20 @@ func printSchema(cmd *cobra.Command, args []string) error {
 	util.Check(err, "unable to create exporter")
 
 	return feed.WriteSchemas(viper.GetViper(), exporter)
+}
+
+func ExportReports(cmd *cobra.Command, args []string) error {
+
+	exportPath := viper.GetString("export.path")
+	os.MkdirAll(exportPath, os.ModePerm)
+
+	exporter, err := feed.NewReportExporter(exportPath)
+	util.Check(err, "unable to create exporter")
+
+	apiClient := getAPIClient()
+
+	err = feed.ExportInspectionReports(viper.GetViper(), apiClient, exporter)
+	util.Check(err, "failed to generate reports")
+
+	return nil
 }

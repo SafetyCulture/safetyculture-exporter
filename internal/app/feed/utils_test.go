@@ -33,6 +33,16 @@ func getTemporaryCSVExporter() (*feed.CSVExporter, error) {
 	return feed.NewCSVExporter(dir)
 }
 
+// getTemporaryReportExporter creates a ReportExporter that writes to a temp folder
+func getTemporaryReportExporter() (*feed.ReportExporter, error) {
+	dir, err := ioutil.TempDir("", "export")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return feed.NewReportExporter(dir)
+}
+
 // getTemporaryCSVExporterWithRealSQLExporter creates a CSV exporter that writes a temporary folder
 // but also uses a real DB as an intermediary
 func getTemporaryCSVExporterWithRealSQLExporter(sqlExporter *feed.SQLExporter) (*feed.CSVExporter, error) {
@@ -95,6 +105,11 @@ func filesEqualish(t *testing.T, expectedPath, actualPath string) {
 		dateRegex.ReplaceAllLiteralString(strings.TrimSpace(string(expectedFile)), "--date--"),
 		dateRegex.ReplaceAllLiteralString(strings.TrimSpace(string(actualFile)), "--date--"),
 	)
+}
+
+func fileExists(t *testing.T, expectedPath string) {
+	_, err := os.Stat(expectedPath)
+	assert.Nil(t, err)
 }
 
 func countFileLines(filePath string) (int, error) {

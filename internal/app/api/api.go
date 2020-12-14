@@ -5,6 +5,8 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/json"
+	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"net"
@@ -24,6 +26,9 @@ type APIClient interface {
 	HTTPClient() *http.Client
 	GetFeed(ctx context.Context, request *GetFeedRequest) (*GetFeedResponse, error)
 	DrainFeed(ctx context.Context, request *GetFeedRequest, feedFn func(*GetFeedResponse) error) error
+	InitiateInspectionReportExport(ctx context.Context, auditId string, format string) (string, error)
+	CheckInspectionReportExportCompletion(ctx context.Context, auditId string, messageId string) (*InspectionReportExportCompletionResponse, error)
+	DownloadFile(ctx context.Context, url string) (io.ReadCloser, error)
 }
 
 type apiClient struct {
@@ -222,4 +227,125 @@ func (a *apiClient) DrainFeed(ctx context.Context, request *GetFeedRequest, feed
 	}
 
 	return nil
+}
+
+type InitiateInspectionReportExportRequest struct {
+	Format       string `json:"format"`
+	PreferenceID string `json:"preference_id,omitempty"`
+}
+
+type InitiateInspectionReportExportResponse struct {
+	MessageID string `json:"messageId"`
+}
+
+func (a *apiClient) InitiateInspectionReportExport(ctx context.Context, auditId string, format string) (string, error) {
+	logger := util.GetLogger()
+
+	var (
+		result *InitiateInspectionReportExportResponse
+		errMsg json.RawMessage
+		res    *http.Response
+		err    error
+	)
+
+	url := fmt.Sprintf("audits/%s/report", auditId)
+	body := &InitiateInspectionReportExportRequest{
+		Format: format,
+	}
+
+	sl := a.sling.New().Post(url).
+		Set(string(Authorization), "Bearer "+a.accessToken).
+		Set(string(IntegrationID), "iauditor-exporter").
+		Set(string(IntegrationVersion), version.GetVersion()).
+		Set(string(XRequestID), util.RequestIDFromContext(ctx)).
+		BodyJSON(body)
+
+	req, _ := sl.Request()
+	req = req.WithContext(ctx)
+
+	res, err = sl.Do(req, &result, &errMsg)
+	if err != nil {
+		return "", errors.Wrap(err, "Failed request to API")
+	}
+	if errMsg != nil {
+		return "", errors.Errorf("%s", errMsg)
+	}
+	logger.Debugw("http request",
+		"url", req.URL.String(),
+		"status", res.Status,
+	)
+
+	return result.MessageID, nil
+}
+
+type InspectionReportExportCompletionResponse struct {
+	Status string `json:"status"`
+	URL    string `json:"url,omitempty"`
+}
+
+func (a *apiClient) CheckInspectionReportExportCompletion(ctx context.Context, auditId string, messageId string) (*InspectionReportExportCompletionResponse, error) {
+	logger := util.GetLogger()
+
+	var (
+		result *InspectionReportExportCompletionResponse
+		errMsg json.RawMessage
+		res    *http.Response
+		err    error
+	)
+
+	url := fmt.Sprintf("audits/%s/report/%s", auditId, messageId)
+
+	sl := a.sling.New().Get(url).
+		Set(string(Authorization), "Bearer "+a.accessToken).
+		Set(string(IntegrationID), "iauditor-exporter").
+		Set(string(IntegrationVersion), version.GetVersion()).
+		Set(string(XRequestID), util.RequestIDFromContext(ctx))
+
+	req, _ := sl.Request()
+	req = req.WithContext(ctx)
+
+	res, err = sl.Do(req, &result, &errMsg)
+	if err != nil {
+		return nil, errors.Wrap(err, "Failed request to API")
+	}
+	if errMsg != nil {
+		return nil, errors.Errorf("%s", errMsg)
+	}
+	logger.Debugw("http request",
+		"url", req.URL.String(),
+		"status", res.Status,
+	)
+
+	return result, nil
+}
+
+func (a *apiClient) DownloadFile(ctx context.Context, url string) (io.ReadCloser, error) {
+	logger := util.GetLogger()
+
+	var (
+		res *http.Response
+		err error
+	)
+
+	sl := a.sling.New().Get(url).
+		Set(string(Authorization), "Bearer "+a.accessToken).
+		Set(string(IntegrationID), "iauditor-exporter").
+		Set(string(IntegrationVersion), version.GetVersion()).
+		Set(string(XRequestID), util.RequestIDFromContext(ctx))
+
+	req, _ := sl.Request()
+	req = req.WithContext(ctx)
+
+	res, err = a.httpClient.Do(req)
+	if err != nil {
+		return nil, errors.Wrap(err, "Failed request to API")
+	}
+	// defer res.Body.Close()
+
+	logger.Debugw("http request",
+		"url", req.URL.String(),
+		"status", res.Status,
+	)
+
+	return res.Body, err
 }

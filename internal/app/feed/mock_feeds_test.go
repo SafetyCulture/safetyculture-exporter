@@ -1,6 +1,7 @@
 package feed_test
 
 import (
+	"bytes"
 	"net/http"
 
 	"gopkg.in/h2non/gock.v1"
@@ -63,6 +64,22 @@ func initMockFeedsSet1(httpClient *http.Client) {
 		Get("/feed/schedule_occurrences").
 		Reply(200).
 		File("mocks/set_1/feed_schedule_occurrences_1.json")
+
+	// mocking report export endpoints
+	gock.New("http://localhost:9999").
+		Post("/audits/.*/report").
+		Reply(200).
+		JSON(map[string]string{"messageId": "b70f5357-4ba7-45a6-a801-706a0f57f2af"})
+
+	gock.New("http://localhost:9999").
+		Get("/audits/.*/report/.*").
+		Reply(200).
+		JSON(map[string]string{"status": "SUCCESS", "url": "http://localhost:9999/report-exports/abc"})
+
+	gock.New("http://localhost:9999").
+		Get("/report-exports/abc").
+		Reply(200).
+		Body(bytes.NewBuffer([]byte(`file content`)))
 }
 
 func initMockFeedsSet2(httpClient *http.Client) {
