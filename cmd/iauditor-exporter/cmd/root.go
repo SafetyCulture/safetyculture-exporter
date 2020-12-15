@@ -127,10 +127,13 @@ func init() {
 
 func addReportCmd() {
 	reportCmd := &cobra.Command{
-		Use:     "report",
-		Short:   "Export inspection reports",
-		Example: `iauditor-exporter reports`,
-		RunE:    export.ExportReports,
+		Use:   "report",
+		Short: "Export inspection report",
+		Example: `// Export PDF and Word inspection reports
+		iauditor-exporter report --export-path /path/to/export/to --format PDF,WORD
+		// Export PDF inspection reports with a custom report preference
+		iauditor-exporter report --export-path /path/to/export/to --format PDF --preference-id abc`,
+		RunE: export.ExportReports,
 	}
 	reportCmd.PersistentFlags().StringSlice("format", []string{}, "Export format (PDF,WORD)")
 	reportCmd.PersistentFlags().String("preference-id", "", "The report preference to apply to the document")
