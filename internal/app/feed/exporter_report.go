@@ -74,6 +74,12 @@ func (e *ReportExporter) SaveReports(ctx context.Context, apiClient api.APIClien
 	buffers := make(chan bool, 3)
 	var wg sync.WaitGroup
 
+	var totalInspections int64 = 0
+	cntRsp := e.DB.Model(&Inspection{}).Count(&totalInspections)
+	if cntRsp.Error != nil {
+		return cntRsp.Error
+	}
+
 	limit := 1
 	offset := 0
 	for {
@@ -98,21 +104,23 @@ func (e *ReportExporter) SaveReports(ctx context.Context, apiClient api.APIClien
 		for _, r := range *rows {
 			wg.Add(1)
 
-			go func(inspection *Inspection) {
+			go func(inspection *Inspection, remaining int64) {
 				defer wg.Done()
 				buffers <- true
 
 				rep := e.saveReport(ctx, apiClient, inspection, format)
-				updateReportResult(rep, res)
+				e.updateReportResult(rep, res, inspection, remaining)
 
 				<-buffers
-			}(r)
+			}(r, totalInspections-int64(offset))
 		}
 	}
 
 	wg.Wait()
 
-	e.Logger.Infof("There were no changes made to %d inspections and no reports downloaded", res.NoChange)
+	if res.NoChange > 0 {
+		e.Logger.Infof("There were no changes made to %d inspections and no reports downloaded", res.NoChange)
+	}
 
 	if res.PDFReports > 0 || res.WORDReports > 0 {
 		e.Logger.Infof("Successfully generate %d PDF reports and %d WORD reports", res.PDFReports, res.WORDReports)
@@ -159,19 +167,31 @@ func (e *ReportExporter) saveReport(ctx context.Context, apiClient api.APIClient
 		report.AuditID = inspection.ID
 		report.AuditModifiedAt = inspection.ModifiedAt
 	} else {
-		exportPDF = exportPDF && report.PDF == 0
-		exportWORD = exportWORD && report.WORD == 0
+		exportPDF = exportPDF && report.PDF != 1
+		exportWORD = exportWORD && report.WORD != 1
 		if !exportPDF && !exportWORD {
 			return nil
 		}
 	}
 
 	if exportPDF {
-		e.exportPDFInspection(ctx, apiClient, inspection, report)
+		err = e.exportInspection(ctx, apiClient, inspection, "PDF")
+		if err != nil {
+			e.Logger.Errorf("PDF export failed for '%s'. Error: %s", inspection.Name, err)
+			report.PDF = -1
+		} else {
+			report.PDF = 1
+		}
 	}
 
 	if exportWORD {
-		e.exportWordInspection(ctx, apiClient, inspection, report)
+		err = e.exportInspection(ctx, apiClient, inspection, "WORD")
+		if err != nil {
+			e.Logger.Errorf("WORD export failed for '%s'. Error: %s", inspection.Name, err)
+			report.WORD = -1
+		} else {
+			report.WORD = 1
+		}
 	}
 
 	result := e.DB.Clauses(clause.OnConflict{
@@ -186,30 +206,7 @@ func (e *ReportExporter) saveReport(ctx context.Context, apiClient api.APIClient
 	return report
 }
 
-func (e *ReportExporter) exportPDFInspection(ctx context.Context, apiClient api.APIClient, inspection *Inspection, report *Report) {
-	err := e.exportInspection(ctx, apiClient, inspection, "PDF")
-	if err != nil {
-		e.Logger.Errorf("PDF export failed for '%s'. Error: %s", inspection.Name, err)
-		report.PDF = -1
-	} else {
-		report.PDF = 1
-	}
-}
-
-func (e *ReportExporter) exportWordInspection(ctx context.Context, apiClient api.APIClient, inspection *Inspection, report *Report) {
-	err := e.exportInspection(ctx, apiClient, inspection, "WORD")
-	if err != nil {
-		e.Logger.Errorf("WORD export failed for '%s'. Error: %s", inspection.Name, err)
-		report.WORD = -1
-	} else {
-		report.WORD = 1
-	}
-}
-
 func (e *ReportExporter) exportInspection(ctx context.Context, apiClient api.APIClient, inspection *Inspection, format string) error {
-	fn := fmt.Sprintf("%s (%s)", inspection.Name, inspection.ID)
-	e.Logger.Infof("Exporting %s report for %s", format, fn)
-
 	mId, err := apiClient.InitiateInspectionReportExport(ctx, inspection.ID, format, e.PreferenceID)
 
 	if err != nil {
@@ -239,7 +236,7 @@ func (e *ReportExporter) exportInspection(ctx context.Context, apiClient api.API
 			e.Mu.Unlock()
 			break
 		} else if rec.Status == "FAILED" {
-			err = fmt.Errorf("%s report generation failed on server for %s", format, fn)
+			err = fmt.Errorf("%s report generation failed on server for %s", format, fmt.Sprintf("%s (%s)", inspection.Name, inspection.ID))
 			break
 		}
 
@@ -252,6 +249,30 @@ func (e *ReportExporter) exportInspection(ctx context.Context, apiClient api.API
 	}
 
 	return err
+}
+
+func (e *ReportExporter) updateReportResult(rep *Report, res *SaveReportsResult, inspection *Inspection, remaining int64) {
+	fn := fmt.Sprintf("%s (%s)", inspection.Name, inspection.ID)
+	if rep == nil {
+		res.NoChange += 1
+		e.Logger.Infof("No changes were made to %s", fn)
+	} else {
+		if rep.PDF == 1 {
+			res.PDFReports += 1
+			e.Logger.Infof("Saved PDF report for %s", fn)
+		} else if rep.PDF == -1 {
+			res.PDFErrors += 1
+		}
+
+		if rep.WORD == 1 {
+			res.WORDReports += 1
+			e.Logger.Infof("Saved Word report for %s", fn)
+		} else if rep.WORD == -1 {
+			res.WORDErrors += 1
+		}
+
+		e.Logger.Infof("%d inspections remaining", remaining)
+	}
 }
 
 func saveReportResponse(resp io.ReadCloser, inspection *Inspection, path string, format string) error {
@@ -269,6 +290,8 @@ func saveReportResponse(resp io.ReadCloser, inspection *Inspection, path string,
 
 func sanitizeName(name string) string {
 	res := strings.ReplaceAll(name, " / ", "-")
+	res = strings.ReplaceAll(res, " // ", "-")
+	res = strings.ReplaceAll(res, "/", "-")
 	res = strings.ReplaceAll(res, " ", "-")
 	return res
 }
@@ -301,24 +324,6 @@ func getFilePath(exportPath string, inspection *Inspection, format string) strin
 		}
 	}
 	return ""
-}
-
-func updateReportResult(rep *Report, res *SaveReportsResult) {
-	if rep == nil {
-		res.NoChange += 1
-	} else {
-		if rep.PDF == 1 {
-			res.PDFReports += 1
-		} else if rep.PDF == -1 {
-			res.PDFErrors += 1
-		}
-
-		if rep.WORD == 1 {
-			res.WORDReports += 1
-		} else if rep.WORD == -1 {
-			res.WORDErrors += 1
-		}
-	}
 }
 
 func NewReportExporter(exportPath string, format []string, preferenceID string) (*ReportExporter, error) {

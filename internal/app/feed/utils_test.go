@@ -10,6 +10,7 @@ import (
 	"regexp"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/SafetyCulture/iauditor-exporter/internal/app/feed"
 	"github.com/gofrs/uuid"
@@ -110,6 +111,11 @@ func filesEqualish(t *testing.T, expectedPath, actualPath string) {
 func fileExists(t *testing.T, expectedPath string) {
 	_, err := os.Stat(expectedPath)
 	assert.Nil(t, err)
+}
+
+func getFileModTime(filePath string) (time.Time, error) {
+	file, err := os.Stat(filePath)
+	return file.ModTime(), err
 }
 
 func countFileLines(filePath string) (int, error) {

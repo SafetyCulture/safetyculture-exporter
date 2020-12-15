@@ -34,6 +34,39 @@ func TestExportReports_should_export_all_reports(t *testing.T) {
 	fileExists(t, filepath.Join(exporter.ExportPath, "audit_3.docx"))
 }
 
+func TestExportReports_should_not_run_if_all_exported(t *testing.T) {
+	exporter, err := getTemporaryReportExporter([]string{"PDF"}, "")
+	assert.Nil(t, err)
+
+	viperConfig := viper.New()
+	viperConfig.Set("export.inspection.incremental", true)
+
+	apiClient := api.NewAPIClient("http://localhost:9999", "token")
+	defer resetMocks(apiClient.HTTPClient())
+	initMockFeedsSet1(apiClient.HTTPClient())
+	initMockReportExport(apiClient.HTTPClient(), "SUCCESS")
+
+	err = feed.ExportInspectionReports(viperConfig, apiClient, exporter)
+	assert.Nil(t, err)
+
+	file1ModTime1, _ := getFileModTime(filepath.Join(exporter.ExportPath, "My-Audit.pdf"))
+	file2ModTime1, _ := getFileModTime(filepath.Join(exporter.ExportPath, "audit_2.pdf"))
+	file3ModTime1, _ := getFileModTime(filepath.Join(exporter.ExportPath, "audit_3.pdf"))
+
+	// run the export process again
+	initMockFeedsSet1(apiClient.HTTPClient())
+	err = feed.ExportInspectionReports(viperConfig, apiClient, exporter)
+	assert.Nil(t, err)
+
+	file1ModTime2, _ := getFileModTime(filepath.Join(exporter.ExportPath, "My-Audit.pdf"))
+	file2ModTime2, _ := getFileModTime(filepath.Join(exporter.ExportPath, "audit_2.pdf"))
+	file3ModTime2, _ := getFileModTime(filepath.Join(exporter.ExportPath, "audit_3.pdf"))
+
+	assert.Equal(t, file1ModTime1, file1ModTime2)
+	assert.Equal(t, file2ModTime1, file2ModTime2)
+	assert.Equal(t, file3ModTime1, file3ModTime2)
+}
+
 func TestExportReports_should_fail_after_retries(t *testing.T) {
 	exporter, err := getTemporaryReportExporter([]string{"PDF"}, "")
 	assert.Nil(t, err)
