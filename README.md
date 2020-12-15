@@ -112,6 +112,10 @@ iauditor-exporter sql --db-dialect sqlserver --db-connection-string sqlserver://
 
 Please refer to [this page](https://github.com/denisenkom/go-mssqldb#connection-parameters-and-dsn) for supported formats for the connection string.
 
+## Inspection report export
+
+iAuditor exporter supports generating PDF and Word reports for inspections. See [docs/iauditor-exporter_report.md](docs/iauditor-exporter_report.md) for usage and options.
+
 ## Listing Schemas
 
 You can list all available tables with their schemas using following command.
