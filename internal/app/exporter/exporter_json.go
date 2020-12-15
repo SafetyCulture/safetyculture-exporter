@@ -34,19 +34,15 @@ func (e *JSONExporter) SetLastModifiedAt(modifiedAt time.Time) {
 	if lastModifiedFile == nil {
 		var err error
 		lastModifiedFile, err = os.OpenFile(exportFilePath, os.O_RDWR|os.O_CREATE, 0666)
-		if err != nil {
-			util.Check(err, "Failed to open last-modified file")
-		}
+		util.Check(err, "Failed to open last-modified file")
 	}
 
 	str := fmt.Sprintf("%s", modifiedAt.Format(layout))
-	if _, err := lastModifiedFile.WriteAt([]byte(str), 0); err != nil {
-		util.Check(err, "Failed to write last-modified to a file")
-	}
+	_, err := lastModifiedFile.WriteAt([]byte(str), 0)
+	util.Check(err, "Failed to write last-modified to a file")
 
-	if err := lastModifiedFile.Sync(); err != nil {
-		util.Check(err, "Failed to write last-modified to a file")
-	}
+	err = lastModifiedFile.Sync()
+	util.Check(err, "Failed to write last-modified to a file")
 
 	return
 }
@@ -59,22 +55,17 @@ func (e *JSONExporter) GetLastModifiedAt() *time.Time {
 		return nil
 	}
 
-	if lastModifiedFile == nil {
-		var err error
-		lastModifiedFile, err = os.OpenFile(exportFilePath, os.O_RDWR|os.O_CREATE, 0666)
-		if err != nil {
-			util.Check(err, "Failed to open last-modified file")
-		}
-	}
-
-	b := make([]byte, 50)
-	if _, err := lastModifiedFile.Read([]byte(b)); err != nil {
+	if lastModifiedFile != nil {
+		b := make([]byte, 50)
+		_, err := lastModifiedFile.Read([]byte(b))
 		util.Check(err, "Failed to read last-modified")
-	}
-	modifiedAt, err := time.Parse(layout, strings.TrimSpace(string(bytes.Trim(b, "\x00"))))
-	util.Check(err, "Failed to convert last-modified to iso format")
 
-	return &modifiedAt
+		modifiedAt, err := time.Parse(layout, strings.TrimSpace(string(bytes.Trim(b, "\x00"))))
+		util.Check(err, "Failed to convert last-modified to iso format")
+		return &modifiedAt
+	}
+
+	return nil
 }
 
 func (e *JSONExporter) WriteRow(name string, row *json.RawMessage) {
@@ -82,14 +73,11 @@ func (e *JSONExporter) WriteRow(name string, row *json.RawMessage) {
 
 	exportFilePath := filepath.Join(e.exportPath, fmt.Sprintf("%s.json", name))
 	file, err := os.OpenFile(exportFilePath, os.O_RDWR|os.O_CREATE, 0666)
-	if err != nil {
-		util.Check(err, "Failed to open file")
-	}
+	util.Check(err, "Failed to open file")
 	defer file.Close()
 
-	if _, err := file.WriteAt([]byte(str), 0); err != nil {
-		util.Check(err, "Failed to write inspection to a file")
-	}
+	_, err = file.WriteAt([]byte(str), 0)
+	util.Check(err, "Failed to write inspection to a file")
 
 	return
 }

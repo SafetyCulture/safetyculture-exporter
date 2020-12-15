@@ -15,8 +15,6 @@ import (
 
 const maxGoRoutines = 10
 
-type tFunc func(api.Inspection)
-
 type inspectionClient struct {
 	*zap.SugaredLogger
 
@@ -56,7 +54,7 @@ func (client *inspectionClient) Name() string {
 }
 
 // throttleFunc throttles the given function
-func throttleFunc(tfunc tFunc, inspection api.Inspection, guard chan struct{}) {
+func throttleFunc(tfunc func(api.Inspection), inspection api.Inspection, guard chan struct{}) {
 	// If the channel is full then this go-routine will be in waiting state.
 	// Multiple go routines can access this channel without any lock as the
 	// the channel internally maintains the lock for send and receive operations

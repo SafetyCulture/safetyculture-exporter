@@ -6,8 +6,30 @@ import (
 	"testing"
 	"time"
 
+	"github.com/SafetyCulture/iauditor-exporter/internal/app/exporter"
 	"github.com/stretchr/testify/assert"
 )
+
+func TestGetLastModifiedAt(t *testing.T) {
+	tests := [...]struct {
+		name     string
+		expected *time.Time
+		fileName string
+	}{
+		{
+			name:     "LastModifiedFilePathDontExist",
+			expected: nil,
+			fileName: "random",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			jsonExporter := exporter.NewJSONExporter("")
+			resp := jsonExporter.GetLastModifiedAt()
+			assert.Equal(t, tt.expected, resp)
+		})
+	}
+}
 
 func TestLastModifiedAt(t *testing.T) {
 	tmpExporter := getTemporaryJSONExporter()

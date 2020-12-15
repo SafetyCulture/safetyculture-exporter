@@ -97,7 +97,8 @@ func runSQL(cmd *cobra.Command, args []string) error {
 func runInspectionJSON(cmd *cobra.Command, args []string) error {
 
 	exportPath := fmt.Sprintf("%s/json/", viper.GetString("export.path"))
-	os.MkdirAll(exportPath, os.ModePerm)
+	err := os.MkdirAll(exportPath, os.ModePerm)
+	util.Check(err, fmt.Sprintf("Failed to create directory %s", exportPath))
 
 	inspectionsClient := inspections.NewInspectionClient(
 		viper.GetViper(),
