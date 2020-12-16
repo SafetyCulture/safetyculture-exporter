@@ -58,8 +58,8 @@ plugins:
     enabled: true
 
 exclude_patterns:
-    - "**/*_test.go"
-    - "**/*_mock.go"
-    - "**/*mock/"
-    - "**/*.pb.go"
-    - "**/*.pb.*.go"
+  - "**/*_test.go"
+  - "**/*_mock.go"
+  - "**/*mock/"
+  - "**/*.pb.go"
+  - "**/*.pb.*.go"
