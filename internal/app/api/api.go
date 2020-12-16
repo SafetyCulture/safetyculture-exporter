@@ -5,6 +5,7 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net"
@@ -24,6 +25,9 @@ type Client interface {
 	HTTPClient() *http.Client
 	GetFeed(ctx context.Context, request *GetFeedRequest) (*GetFeedResponse, error)
 	DrainFeed(ctx context.Context, request *GetFeedRequest, feedFn func(*GetFeedResponse) error) error
+	ListInspections(ctx context.Context, params *ListInspectionsParams) (*ListInspectionsResponse, error)
+	GetInspection(ctx context.Context, id string) (*json.RawMessage, error)
+	DrainInspections(ctx context.Context, params *ListInspectionsParams, callback func(*ListInspectionsResponse) error) error
 }
 
 type apiClient struct {
@@ -162,6 +166,25 @@ type GetFeedResponse struct {
 	Data json.RawMessage `json:"data"`
 }
 
+type ListInspectionsParams struct {
+	ModifiedAfter time.Time `url:"modified_after,omitempty"`
+	TemplateIDs   []string  `url:"template,omitempty"`
+	Archived      string    `url:"archived,omitempty"`
+	Completed     string    `url:"completed,omitempty"`
+	Limit         int       `url:"limit,omitempty"`
+}
+
+type Inspection struct {
+	ID         string    `json:"audit_id"`
+	ModifiedAt time.Time `json:"modified_at"`
+}
+
+type ListInspectionsResponse struct {
+	Count       int          `json:"count"`
+	Total       int          `json:"total"`
+	Inspections []Inspection `json:"audits"`
+}
+
 func (a *apiClient) GetFeed(ctx context.Context, request *GetFeedRequest) (*GetFeedResponse, error) {
 	logger := util.GetLogger()
 
@@ -222,6 +245,93 @@ func (a *apiClient) DrainFeed(ctx context.Context, request *GetFeedRequest, feed
 		if err != nil {
 			return err
 		}
+	}
+
+	return nil
+}
+
+func (a *apiClient) ListInspections(ctx context.Context, params *ListInspectionsParams) (*ListInspectionsResponse, error) {
+	var (
+		result *ListInspectionsResponse
+		errMsg json.RawMessage
+	)
+
+	sl := a.sling.New().Get("/audits/search").
+		Set(string(Authorization), fmt.Sprintf("Bearer %s", a.accessToken)).
+		Set(string(IntegrationID), "iauditor-exporter").
+		Set(string(IntegrationVersion), version.GetVersion()).
+		Set(string(XRequestID), util.RequestIDFromContext(ctx))
+
+	sl.QueryStruct(params)
+	req, _ := sl.Request()
+	req = req.WithContext(ctx)
+
+	if _, err := sl.Do(req, &result, &errMsg); err != nil {
+		return nil, errors.Wrap(err, "Failed request to API")
+	}
+
+	if errMsg != nil {
+		return result, errors.Errorf("%s", errMsg)
+	}
+
+	return result, nil
+}
+
+func (a *apiClient) GetInspection(ctx context.Context, id string) (*json.RawMessage, error) {
+	var (
+		result *json.RawMessage
+		errMsg json.RawMessage
+	)
+
+	sl := a.sling.New().Get(fmt.Sprintf("/audits/%s", id)).
+		Set(string(Authorization), fmt.Sprintf("Bearer %s", a.accessToken)).
+		Set(string(IntegrationID), "iauditor-exporter").
+		Set(string(IntegrationVersion), version.GetVersion()).
+		Set(string(XRequestID), util.RequestIDFromContext(ctx))
+
+	req, _ := sl.Request()
+	req = req.WithContext(ctx)
+
+	if _, err := sl.Do(req, &result, &errMsg); err != nil {
+		return nil, errors.Wrap(err, "Failed request to API")
+	}
+
+	if errMsg != nil {
+		return result, errors.Errorf("%s", errMsg)
+	}
+
+	return result, nil
+}
+
+func (a *apiClient) DrainInspections(
+	ctx context.Context,
+	params *ListInspectionsParams,
+	callback func(*ListInspectionsResponse) error,
+) error {
+	modifiedAfter := params.ModifiedAfter
+
+	for {
+		resp, err := a.ListInspections(
+			ctx,
+			&ListInspectionsParams{
+				ModifiedAfter: modifiedAfter,
+				TemplateIDs:   params.TemplateIDs,
+				Archived:      params.Archived,
+				Completed:     params.Completed,
+			},
+		)
+		if err != nil {
+			return err
+		}
+
+		if err := callback(resp); err != nil {
+			return err
+		}
+
+		if (resp.Total - resp.Count) == 0 {
+			break
+		}
+		modifiedAfter = resp.Inspections[resp.Count-1].ModifiedAt
 	}
 
 	return nil

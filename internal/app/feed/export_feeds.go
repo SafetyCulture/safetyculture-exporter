@@ -5,40 +5,37 @@ import (
 	"sync"
 
 	"github.com/SafetyCulture/iauditor-exporter/internal/app/api"
+	"github.com/SafetyCulture/iauditor-exporter/internal/app/config"
 	"github.com/SafetyCulture/iauditor-exporter/internal/app/util"
 	"github.com/spf13/viper"
 )
 
 // GetFeeds returns list of all available data feeds
 func GetFeeds(v *viper.Viper) []Feed {
-	inspectionSkipIDs := v.GetStringSlice("export.inspection.skip_ids")
-	inspectionModifiedAfter := v.GetString("export.inspection.modified_after")
-	inspectionArchived := v.GetString("export.inspection.archived")
-	inspectionCompleted := v.GetString("export.inspection.completed")
-	inspectionIncremental := v.GetBool("export.inspection.incremental")
 	inspectionIncludeInactiveItems := v.GetBool("export.inspection.included_inactive_items")
 	templateIDs := v.GetStringSlice("export.template_ids")
+	inspectionConfig := config.GetInspectionConfig(v)
 
 	return []Feed{
 		&InspectionFeed{
-			SkipIDs:       inspectionSkipIDs,
-			ModifiedAfter: inspectionModifiedAfter,
+			SkipIDs:       inspectionConfig.SkipIDs,
+			ModifiedAfter: inspectionConfig.ModifiedAfter,
 			TemplateIDs:   templateIDs,
-			Archived:      inspectionArchived,
-			Completed:     inspectionCompleted,
-			Incremental:   inspectionIncremental,
+			Archived:      inspectionConfig.Archived,
+			Completed:     inspectionConfig.Completed,
+			Incremental:   inspectionConfig.Incremental,
 		},
 		&InspectionItemFeed{
-			SkipIDs:         inspectionSkipIDs,
-			ModifiedAfter:   inspectionModifiedAfter,
+			SkipIDs:         inspectionConfig.SkipIDs,
+			ModifiedAfter:   inspectionConfig.ModifiedAfter,
 			TemplateIDs:     templateIDs,
-			Archived:        inspectionArchived,
-			Completed:       inspectionCompleted,
+			Archived:        inspectionConfig.Archived,
+			Completed:       inspectionConfig.Completed,
 			IncludeInactive: inspectionIncludeInactiveItems,
-			Incremental:     inspectionIncremental,
+			Incremental:     inspectionConfig.Incremental,
 		},
 		&TemplateFeed{
-			Incremental: inspectionIncremental,
+			Incremental: inspectionConfig.Incremental,
 		},
 		&SiteFeed{},
 		&UserFeed{},

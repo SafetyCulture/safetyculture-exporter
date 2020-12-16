@@ -1,0 +1,463 @@
+{
+    "template_id": "template_908eec58ab4a477789445688f8349de2",
+    "audit_id": "audit_d7e2f55b95094bd48fac601850e1db63",
+    "archived": false,
+    "created_at": "2020-02-13T04:03:40.507Z",
+    "modified_at": "2020-02-13T04:03:44.778Z",
+    "audit_data": {
+        "score": 0,
+        "total_score": 17,
+        "score_percentage": 0,
+        "name": "",
+        "duration": 0,
+        "authorship": {
+            "device_id": "user_e100804c5f754593aa5c35b20a8877d0",
+            "owner": "Alexandria Petigna",
+            "owner_id": "user_e100804c5f754593aa5c35b20a8877d0",
+            "author": "Alexandria Petigna",
+            "author_id": "user_e100804c5f754593aa5c35b20a8877d0"
+        },
+        "date_completed": null,
+        "date_modified": "2020-02-13T04:03:40.507Z",
+        "date_started": "2020-02-13T04:03:40.507Z"
+    },
+    "template_data": {
+        "authorship": {
+            "device_id": "user_d154ecc714724b82aaa77c8ec9d96263",
+            "owner": "Divya Konnur",
+            "owner_id": "user_d154ecc714724b82aaa77c8ec9d96263",
+            "author": "Divya Konnur",
+            "author_id": "user_d154ecc714724b82aaa77c8ec9d96263"
+        },
+        "metadata": {
+            "description": "Be across the common on-boarding for your area",
+            "name": "Onboarding: Function"
+        },
+        "response_sets": {
+            "5b69aee5-0532-46a4-b2f5-d020d4d5381d": {
+                "id": "5b69aee5-0532-46a4-b2f5-d020d4d5381d",
+                "type": "question",
+                "responses": [
+                    {
+                        "id": "ef4abf51-3361-46f5-ba04-70c23c85ca20",
+                        "label": "Good",
+                        "colour": "19,133,95",
+                        "score": 1,
+                        "enable_score": true
+                    },
+                    {
+                        "id": "ef4abf51-3361-46f5-ba04-70c23c85ca21",
+                        "label": "Fair",
+                        "colour": "255,176,0",
+                        "score": 1,
+                        "enable_score": true
+                    },
+                    {
+                        "id": "ef4abf51-3361-46f5-ba04-70c23c85ca22",
+                        "label": "Poor",
+                        "colour": "198,0,34",
+                        "score": 0,
+                        "failed": true,
+                        "enable_score": true
+                    },
+                    {
+                        "id": "ef4abf51-3361-46f5-ba04-70c23c85ca23",
+                        "label": "N/A",
+                        "colour": "112,112,112",
+                        "score": 1,
+                        "enable_score": false
+                    }
+                ]
+            },
+            "7601fb75-80ae-4409-b31a-9acd58d45445": {
+                "id": "7601fb75-80ae-4409-b31a-9acd58d45445",
+                "type": "question",
+                "responses": [
+                    {
+                        "id": "af89ffa0-5db2-4a49-93e5-7dd392ab8f10",
+                        "label": "Safe",
+                        "colour": "19,133,95",
+                        "score": 1,
+                        "enable_score": true
+                    },
+                    {
+                        "id": "af89ffa1-5db2-4a49-93e5-7dd392ab8f10",
+                        "label": "At Risk",
+                        "colour": "198,0,34",
+                        "score": 0,
+                        "failed": true,
+                        "enable_score": true
+                    },
+                    {
+                        "id": "af89ffa2-5db2-4a49-93e5-7dd392ab8f10",
+                        "label": "N/A",
+                        "colour": "112,112,112",
+                        "score": 1,
+                        "enable_score": false
+                    }
+                ]
+            },
+            "b52a8b4c-048b-4f7d-99b9-c6b9680be5ed": {
+                "id": "b52a8b4c-048b-4f7d-99b9-c6b9680be5ed",
+                "type": "question",
+                "responses": [
+                    {
+                        "id": "2a2b8507-c53d-4d0e-83ec-164cb179b6a0",
+                        "label": "Pass",
+                        "colour": "19,133,95",
+                        "score": 1,
+                        "enable_score": true
+                    },
+                    {
+                        "id": "2a2b8507-c53d-4d0e-83ec-164cb179b6a1",
+                        "label": "Fail",
+                        "colour": "198,0,34",
+                        "score": 0,
+                        "failed": true,
+                        "enable_score": true
+                    },
+                    {
+                        "id": "2a2b8507-c53d-4d0e-83ec-164cb179b6a2",
+                        "label": "N/A",
+                        "colour": "112,112,112",
+                        "score": 1,
+                        "enable_score": false
+                    }
+                ]
+            },
+            "c6c011ed-4ade-460d-a04b-da730834b667": {
+                "id": "c6c011ed-4ade-460d-a04b-da730834b667",
+                "type": "question",
+                "responses": [
+                    {
+                        "id": "060ace00-1f61-468e-9c42-918fa93badcf",
+                        "label": "Yes",
+                        "colour": "19,133,95",
+                        "score": 1,
+                        "enable_score": true
+                    },
+                    {
+                        "id": "060ace01-1f61-468e-9c42-918fa93badcf",
+                        "label": "No",
+                        "colour": "198,0,34",
+                        "score": 0,
+                        "failed": true,
+                        "enable_score": true
+                    },
+                    {
+                        "id": "060ace02-1f61-468e-9c42-918fa93badcf",
+                        "label": "N/A",
+                        "colour": "112,112,112",
+                        "score": 1,
+                        "enable_score": false
+                    }
+                ]
+            },
+            "d743f356-a147-472c-a790-0c46a187de92": {
+                "id": "d743f356-a147-472c-a790-0c46a187de92",
+                "type": "question",
+                "responses": [
+                    {
+                        "id": "6bb1beb4-494e-4a17-bff7-bed8a6fcd3d0",
+                        "label": "Compliant",
+                        "colour": "19,133,95",
+                        "score": 1,
+                        "enable_score": true
+                    },
+                    {
+                        "id": "6bb1beb4-494e-4a17-bff7-bed8a6fcd3d1",
+                        "label": "Non-Compliant",
+                        "colour": "198,0,34",
+                        "score": 0,
+                        "failed": true,
+                        "enable_score": true
+                    },
+                    {
+                        "id": "6bb1beb4-494e-4a17-bff7-bed8a6fcd3d2",
+                        "label": "N/A",
+                        "colour": "112,112,112",
+                        "score": 1,
+                        "enable_score": false
+                    }
+                ]
+            }
+        }
+    },
+    "header_items": [
+        {
+            "item_id": "f3245d39-ea77-11e1-aff1-0800200c9a66",
+            "label": "Title Page",
+            "type": "section",
+            "children": [
+                "f3245d42-ea77-11e1-aff1-0800200c9a66",
+                "f3245d43-ea77-11e1-aff1-0800200c9a66",
+                "f3245d44-ea77-11e1-aff1-0800200c9a66",
+                "a71124ef-a4d5-46bf-9e20-10f47ffbaecc",
+                "c0038fc2-dc38-4eed-84ee-5bdd7bd302dd"
+            ]
+        },
+        {
+            "parent_id": "f3245d39-ea77-11e1-aff1-0800200c9a66",
+            "item_id": "f3245d42-ea77-11e1-aff1-0800200c9a66",
+            "label": "Conducted on",
+            "type": "datetime",
+            "options": {
+                "enable_date": true,
+                "enable_time": true
+            },
+            "responses": {
+                "datetime": "2020-02-13T04:03:44.000Z"
+            }
+        },
+        {
+            "parent_id": "f3245d39-ea77-11e1-aff1-0800200c9a66",
+            "item_id": "f3245d43-ea77-11e1-aff1-0800200c9a66",
+            "label": "Prepared by",
+            "type": "textsingle",
+            "responses": {
+                "text": "Alexandria Petigna"
+            }
+        },
+        {
+            "parent_id": "f3245d39-ea77-11e1-aff1-0800200c9a66",
+            "item_id": "f3245d44-ea77-11e1-aff1-0800200c9a66",
+            "label": "Location",
+            "type": "address"
+        },
+        {
+            "parent_id": "f3245d39-ea77-11e1-aff1-0800200c9a66",
+            "item_id": "a71124ef-a4d5-46bf-9e20-10f47ffbaecc",
+            "label": "Barcode",
+            "type": "textsingle"
+        },
+        {
+            "parent_id": "f3245d39-ea77-11e1-aff1-0800200c9a66",
+            "item_id": "c0038fc2-dc38-4eed-84ee-5bdd7bd302dd",
+            "label": "Onboarding: Function",
+            "type": "information"
+        }
+    ],
+    "items": [
+        {
+            "item_id": "627c2e84-e08a-467c-8c05-7424101eaef9",
+            "label": "Inspection",
+            "type": "section",
+            "scoring": {
+                "combined_score": 0,
+                "combined_max_score": 12,
+                "combined_score_percentage": 0
+            },
+            "children": [
+                "c2fcefaa-e0b0-4207-a777-a498352333b7",
+                "c7d08c71-4ede-4fc8-87e5-8027b6e4dabb"
+            ]
+        },
+        {
+            "parent_id": "627c2e84-e08a-467c-8c05-7424101eaef9",
+            "item_id": "c2fcefaa-e0b0-4207-a777-a498352333b7",
+            "label": "Which Function?",
+            "type": "list",
+            "scoring": {
+                "score": 0,
+                "max_score": 2,
+                "score_percentage": 0
+            },
+            "options": {
+                "response_set": "5b69aee5-0532-46a4-b2f5-d020d4d5381d",
+                "failed_responses": [],
+                "multiple_selection": true
+            }
+        },
+        {
+            "parent_id": "627c2e84-e08a-467c-8c05-7424101eaef9",
+            "item_id": "c7d08c71-4ede-4fc8-87e5-8027b6e4dabb",
+            "label": "Feedback",
+            "type": "category",
+            "scoring": {
+                "combined_score": 0,
+                "combined_max_score": 10,
+                "combined_score_percentage": 0
+            },
+            "children": [
+                "4e62fb8c-b437-42a3-afd5-fe3ea1a54de3",
+                "9c241857-f19d-40b1-9e52-64f7da5f1dda"
+            ]
+        },
+        {
+            "parent_id": "c7d08c71-4ede-4fc8-87e5-8027b6e4dabb",
+            "item_id": "4e62fb8c-b437-42a3-afd5-fe3ea1a54de3",
+            "label": "How do you score the functional on-boarding process (0-10)?",
+            "type": "slider",
+            "scoring": {
+                "score": 0,
+                "max_score": 10,
+                "score_percentage": 0
+            },
+            "options": {
+                "weighting": 1,
+                "increment": 1,
+                "max": 10,
+                "min": 0,
+                "is_mandatory": false
+            },
+            "responses": {
+                "value": 0
+            }
+        },
+        {
+            "parent_id": "c7d08c71-4ede-4fc8-87e5-8027b6e4dabb",
+            "item_id": "9c241857-f19d-40b1-9e52-64f7da5f1dda",
+            "label": "",
+            "type": "dynamicfield",
+            "options": {
+                "element": ""
+            },
+            "children": [
+                "844cbd2c-3153-4189-a8e2-7dda635cee7d"
+            ]
+        },
+        {
+            "parent_id": "9c241857-f19d-40b1-9e52-64f7da5f1dda",
+            "item_id": "844cbd2c-3153-4189-a8e2-7dda635cee7d",
+            "label": "",
+            "type": "primeelement",
+            "inactive": true,
+            "children": [
+                "49c5a5c9-5276-4cbc-9480-9d9c8938372e"
+            ]
+        },
+        {
+            "parent_id": "844cbd2c-3153-4189-a8e2-7dda635cee7d",
+            "item_id": "49c5a5c9-5276-4cbc-9480-9d9c8938372e",
+            "label": "",
+            "type": "information",
+            "inactive": true
+        },
+        {
+            "item_id": "01762477-8531-4286-9873-e973936067b8",
+            "label": "Which Function?\n\nKnows the common expectations\nMeet Engineering leadership\nVP of Engineering\nFoundational Engineering\nShared Engineering\nJoin Slack channels\n#developers\n#backend-tech\n#ops\n\nTBD...\n\nTBD...",
+            "type": "section",
+            "scoring": {
+                "combined_score": 0,
+                "combined_max_score": 1,
+                "combined_score_percentage": 0
+            },
+            "children": [
+                "74c268c6-223d-4167-83c2-424430a00c3d"
+            ]
+        },
+        {
+            "parent_id": "01762477-8531-4286-9873-e973936067b8",
+            "item_id": "74c268c6-223d-4167-83c2-424430a00c3d",
+            "label": "",
+            "type": "question",
+            "scoring": {
+                "score": 0,
+                "max_score": 1,
+                "score_percentage": 0
+            },
+            "options": {
+                "response_set": "c6c011ed-4ade-460d-a04b-da730834b667",
+                "failed_responses": [
+                    "060ace01-1f61-468e-9c42-918fa93badcf"
+                ]
+            }
+        },
+        {
+            "item_id": "c0a6310c-21e2-4dc8-8bf5-b470a801cab5",
+            "label": "Untitled page",
+            "type": "section",
+            "scoring": {
+                "combined_score": 0,
+                "combined_max_score": 2,
+                "combined_score_percentage": 0
+            },
+            "children": [
+                "7f556a8d-3051-4912-8f61-348a51d14864",
+                "1d93ea1d-deee-4a03-8beb-f296e90b33d1"
+            ]
+        },
+        {
+            "parent_id": "c0a6310c-21e2-4dc8-8bf5-b470a801cab5",
+            "item_id": "7f556a8d-3051-4912-8f61-348a51d14864",
+            "label": "testing",
+            "type": "question",
+            "scoring": {
+                "score": 0,
+                "max_score": 1,
+                "score_percentage": 0
+            },
+            "options": {
+                "response_set": "c6c011ed-4ade-460d-a04b-da730834b667",
+                "failed_responses": [
+                    "060ace01-1f61-468e-9c42-918fa93badcf"
+                ]
+            }
+        },
+        {
+            "parent_id": "c0a6310c-21e2-4dc8-8bf5-b470a801cab5",
+            "item_id": "1d93ea1d-deee-4a03-8beb-f296e90b33d1",
+            "label": "test",
+            "type": "question",
+            "scoring": {
+                "score": 0,
+                "max_score": 1,
+                "score_percentage": 0
+            },
+            "options": {
+                "response_set": "c6c011ed-4ade-460d-a04b-da730834b667",
+                "failed_responses": [
+                    "060ace01-1f61-468e-9c42-918fa93badcf"
+                ]
+            }
+        },
+        {
+            "item_id": "fe8173ff-8741-408e-a81d-e2ae9e7ed712",
+            "label": "Untitled page",
+            "type": "section",
+            "scoring": {
+                "combined_score": 0,
+                "combined_max_score": 2,
+                "combined_score_percentage": 0
+            },
+            "children": [
+                "ce1afa14-bd4a-40c9-92cd-c422f33ff8f2",
+                "b31e7321-0142-41e1-b014-33e2f0939020"
+            ]
+        },
+        {
+            "parent_id": "fe8173ff-8741-408e-a81d-e2ae9e7ed712",
+            "item_id": "ce1afa14-bd4a-40c9-92cd-c422f33ff8f2",
+            "label": "testing",
+            "type": "question",
+            "scoring": {
+                "score": 0,
+                "max_score": 1,
+                "score_percentage": 0
+            },
+            "options": {
+                "response_set": "c6c011ed-4ade-460d-a04b-da730834b667",
+                "failed_responses": [
+                    "060ace01-1f61-468e-9c42-918fa93badcf"
+                ]
+            }
+        },
+        {
+            "parent_id": "fe8173ff-8741-408e-a81d-e2ae9e7ed712",
+            "item_id": "b31e7321-0142-41e1-b014-33e2f0939020",
+            "label": "test",
+            "type": "question",
+            "scoring": {
+                "score": 0,
+                "max_score": 1,
+                "score_percentage": 0
+            },
+            "options": {
+                "response_set": "c6c011ed-4ade-460d-a04b-da730834b667",
+                "failed_responses": [
+                    "060ace01-1f61-468e-9c42-918fa93badcf"
+                ]
+            }
+        }
+    ]
+}
