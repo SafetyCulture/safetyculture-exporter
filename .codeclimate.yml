@@ -1,7 +1,8 @@
 version: "2"
 
 checks:
-# Defaults are NOT documented for golang. The below defaults have been determined by running the analysis
+# Defaults are NOT documented for golang.
+# The below defaults have been determined by running the analysis
   argument-count:
     enabled: true
     config:
@@ -45,16 +46,16 @@ checks:
 
 
 plugins:
-    gofmt:
-      enabled: true
-    golint:
-      enabled: true
-    govet:
-      enabled: true
-    shellcheck:
-      enabled: true
-    fixme:
-      enabled: true
+  gofmt:
+    enabled: true
+  golint:
+    enabled: true
+  govet:
+    enabled: true
+  shellcheck:
+    enabled: true
+  fixme:
+    enabled: true
 
 exclude_patterns:
     - "**/*_test.go"
