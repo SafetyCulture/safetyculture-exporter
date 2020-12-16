@@ -138,6 +138,7 @@ type FeedMetadata struct {
 	RemainingRecords int64  `json:"remaining_records"`
 }
 
+// GetFeedParams is a list of all parameters we can set when fetching a feed
 type GetFeedParams struct {
 	ModifiedAfter   string   `url:"modified_after,omitempty"`
 	TemplateIDs     []string `url:"template,omitempty"`
@@ -147,12 +148,14 @@ type GetFeedParams struct {
 	Limit           int      `url:"limit,omitempty"`
 }
 
+// GetFeedRequest has all the data needed to make a request to get a feed
 type GetFeedRequest struct {
 	URL        string
 	InitialURL string
 	Params     GetFeedParams
 }
 
+// GetFeedResponse is a representation of the data returned when fetching a feed
 type GetFeedResponse struct {
 	Metadata FeedMetadata `json:"metadata"`
 

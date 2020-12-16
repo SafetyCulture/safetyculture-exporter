@@ -8,6 +8,7 @@ import (
 	"github.com/spf13/viper"
 )
 
+// Cmd is used to initialize configuration file
 func Cmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   "configure",

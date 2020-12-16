@@ -9,6 +9,7 @@ import (
 	"github.com/spf13/viper"
 )
 
+// GetFeeds returns list of all available data feeds
 func GetFeeds(v *viper.Viper) []Feed {
 	inspectionSkipIDs := v.GetStringSlice("export.inspection.skip_ids")
 	inspectionModifiedAfter := v.GetString("export.inspection.modified_after")
@@ -55,6 +56,7 @@ func GetFeeds(v *viper.Viper) []Feed {
 	}
 }
 
+// CreateSchemas generates schemas for the data feeds without fetching any data
 func CreateSchemas(v *viper.Viper, exporter Exporter) error {
 	logger := util.GetLogger()
 	logger.Info("Creating schemas started")
@@ -68,6 +70,7 @@ func CreateSchemas(v *viper.Viper, exporter Exporter) error {
 	return nil
 }
 
+// WriteSchemas is used to print the schema of each feed to console output
 func WriteSchemas(v *viper.Viper, exporter *SchemaExporter) error {
 	logger := util.GetLogger()
 	logger.Info("Writing schemas started")
@@ -84,6 +87,7 @@ func WriteSchemas(v *viper.Viper, exporter *SchemaExporter) error {
 	return nil
 }
 
+// ExportFeeds fetches all the feeds data from server and stores them in the format provided
 func ExportFeeds(v *viper.Viper, apiClient api.APIClient, exporter Exporter) error {
 	logger := util.GetLogger()
 	ctx := context.Background()

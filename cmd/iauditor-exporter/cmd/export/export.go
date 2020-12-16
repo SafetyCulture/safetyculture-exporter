@@ -11,7 +11,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-// Cmd implements the sts commands.
+// Cmds implements the sts commands.
 func Cmds() []*cobra.Command {
 	return []*cobra.Command{
 		&cobra.Command{

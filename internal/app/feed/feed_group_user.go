@@ -29,7 +29,7 @@ func (f *GroupUserFeed) Model() interface{} {
 	return GroupUser{}
 }
 
-// Model returns the model of feed rows
+// RowsModel returns the model of feed rows
 func (f *GroupUserFeed) RowsModel() interface{} {
 	return &[]*GroupUser{}
 }

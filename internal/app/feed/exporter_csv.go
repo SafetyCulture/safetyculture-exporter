@@ -19,6 +19,7 @@ type CSVExporter struct {
 	Logger *zap.SugaredLogger
 }
 
+// CreateSchema generated schema for a feed in csv format
 func (e *CSVExporter) CreateSchema(feed Feed, rows interface{}) error {
 	e.Logger.Infof("%s: writing out CSV schema file", feed.Name())
 

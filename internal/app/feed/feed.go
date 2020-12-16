@@ -21,6 +21,7 @@ type Feed interface {
 	Export(ctx context.Context, apiClient api.APIClient, exporter Exporter) error
 }
 
+// InitFeedOptions contains the options used when initialising a feed
 type InitFeedOptions struct {
 	Truncate bool
 }
