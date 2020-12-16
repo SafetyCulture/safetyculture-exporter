@@ -180,3 +180,82 @@ func TestAPIClientGetInspection(t *testing.T) {
 	assert.Equal(t, true, ok)
 	assert.Equal(t, expected, auditID)
 }
+
+func TestAPIClientGetInspectionWithError(t *testing.T) {
+	defer gock.Off()
+
+	auditID := "audit_8E2B1F3CB9C94D8792957F9F99E2E4BD"
+	gock.New("http://localhost:9999").
+		Get(fmt.Sprintf("/audits/%s", auditID)).
+		ReplyError(fmt.Errorf("test error"))
+
+	apiClient := api.NewAPIClient("http://localhost:9999", "abc123")
+	gock.InterceptClient(apiClient.HTTPClient())
+
+	_, err := apiClient.GetInspection(context.Background(), auditID)
+	assert.NotNil(t, err)
+}
+
+func TestAPIClientListInspectionWithError(t *testing.T) {
+	defer gock.Off()
+
+	gock.New("http://localhost:9999").
+		Get("/audits/search").
+		ReplyError(fmt.Errorf("test error"))
+
+	apiClient := api.NewAPIClient("http://localhost:9999", "abc123")
+	gock.InterceptClient(apiClient.HTTPClient())
+
+	_, err := apiClient.ListInspections(context.Background(), nil)
+	assert.NotNil(t, err)
+}
+
+func TestDrainInspectionsWithAPIError(t *testing.T) {
+	defer gock.Off()
+
+	gock.New("http://localhost:9999").
+		Get("/audits/search").
+		ReplyError(fmt.Errorf("test error"))
+
+	apiClient := api.NewAPIClient("http://localhost:9999", "abc123")
+	gock.InterceptClient(apiClient.HTTPClient())
+
+	err := apiClient.DrainInspections(
+		context.Background(),
+		&api.ListInspectionsParams{},
+		func(data *api.ListInspectionsResponse) error {
+			return nil
+		})
+	assert.NotNil(t, err)
+}
+
+func TestDrainInspectionsWithCallbackError(t *testing.T) {
+	defer gock.Off()
+
+	gock.New("http://localhost:9999").
+		Get("/audits/search").
+		Reply(200).
+		BodyString(`{
+			"count": 2,
+			"total": 2,
+			"audits": [
+				{
+					"audit_id": "audit_8E2B1F3CB9C94D8792957F9F99E2E4BD"
+				},
+				{
+					"audit_id": "audit_1743ae1aaa8741e6a23db83300e56efe"
+				}
+			]
+		}`)
+
+	apiClient := api.NewAPIClient("http://localhost:9999", "abc123")
+	gock.InterceptClient(apiClient.HTTPClient())
+
+	err := apiClient.DrainInspections(
+		context.Background(),
+		&api.ListInspectionsParams{},
+		func(data *api.ListInspectionsResponse) error {
+			return fmt.Errorf("test error")
+		})
+	assert.NotNil(t, err)
+}
