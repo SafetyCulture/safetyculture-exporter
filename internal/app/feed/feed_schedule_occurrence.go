@@ -91,7 +91,7 @@ func (f *ScheduleOccurrenceFeed) writeRows(exporter Exporter, rows []*ScheduleOc
 }
 
 // Export exports the feed to the supplied exporter
-func (f *ScheduleOccurrenceFeed) Export(ctx context.Context, apiClient api.APIClient, exporter Exporter) error {
+func (f *ScheduleOccurrenceFeed) Export(ctx context.Context, apiClient api.Client, exporter Exporter) error {
 	logger := util.GetLogger()
 	feedName := f.Name()
 

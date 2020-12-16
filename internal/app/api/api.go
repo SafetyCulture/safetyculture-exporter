@@ -19,8 +19,8 @@ import (
 	"github.com/pkg/errors"
 )
 
-// APIClient is an interface to the iAuditor API
-type APIClient interface {
+// Client is an interface to the iAuditor API
+type Client interface {
 	HTTPClient() *http.Client
 	GetFeed(ctx context.Context, request *GetFeedRequest) (*GetFeedResponse, error)
 	DrainFeed(ctx context.Context, request *GetFeedRequest, feedFn func(*GetFeedResponse) error) error
@@ -37,7 +37,7 @@ type apiClient struct {
 type Opt func(*apiClient)
 
 // NewAPIClient crates a new instance of the APIClient
-func NewAPIClient(addr string, accessToken string, opts ...Opt) APIClient {
+func NewAPIClient(addr string, accessToken string, opts ...Opt) Client {
 	httpTransport := &http.Transport{
 		DialContext: (&net.Dialer{
 			Timeout:   30 * time.Second,

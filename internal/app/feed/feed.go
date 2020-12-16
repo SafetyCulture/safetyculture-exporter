@@ -18,7 +18,7 @@ type Feed interface {
 	Order() string
 
 	CreateSchema(exporter Exporter) error
-	Export(ctx context.Context, apiClient api.APIClient, exporter Exporter) error
+	Export(ctx context.Context, apiClient api.Client, exporter Exporter) error
 }
 
 // InitFeedOptions contains the options used when initialising a feed

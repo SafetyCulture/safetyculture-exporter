@@ -45,7 +45,7 @@ iauditor-exporter sql --export-path /path/to/export/to`,
 	}
 }
 
-func getAPIClient() api.APIClient {
+func getAPIClient() api.Client {
 	apiOpts := []api.Opt{}
 	if viper.GetBool("api.tls_skip_verify") {
 		apiOpts = append(apiOpts, api.OptSetInsecureTLS(true))
