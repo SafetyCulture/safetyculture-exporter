@@ -20,8 +20,8 @@ import (
 	"github.com/pkg/errors"
 )
 
-// APIClient is an interface to the iAuditor API
-type APIClient interface {
+// Client is an interface to the iAuditor API
+type Client interface {
 	HTTPClient() *http.Client
 	GetFeed(ctx context.Context, request *GetFeedRequest) (*GetFeedResponse, error)
 	DrainFeed(ctx context.Context, request *GetFeedRequest, feedFn func(*GetFeedResponse) error) error
@@ -41,7 +41,7 @@ type apiClient struct {
 type Opt func(*apiClient)
 
 // NewAPIClient crates a new instance of the APIClient
-func NewAPIClient(addr string, accessToken string, opts ...Opt) APIClient {
+func NewAPIClient(addr string, accessToken string, opts ...Opt) Client {
 	httpTransport := &http.Transport{
 		DialContext: (&net.Dialer{
 			Timeout:   30 * time.Second,
@@ -142,6 +142,7 @@ type FeedMetadata struct {
 	RemainingRecords int64  `json:"remaining_records"`
 }
 
+// GetFeedParams is a list of all parameters we can set when fetching a feed
 type GetFeedParams struct {
 	ModifiedAfter   string   `url:"modified_after,omitempty"`
 	TemplateIDs     []string `url:"template,omitempty"`
@@ -151,18 +152,21 @@ type GetFeedParams struct {
 	Limit           int      `url:"limit,omitempty"`
 }
 
+// GetFeedRequest has all the data needed to make a request to get a feed
 type GetFeedRequest struct {
 	URL        string
 	InitialURL string
 	Params     GetFeedParams
 }
 
+// GetFeedResponse is a representation of the data returned when fetching a feed
 type GetFeedResponse struct {
 	Metadata FeedMetadata `json:"metadata"`
 
 	Data json.RawMessage `json:"data"`
 }
 
+// ListInspectionsParams is a list of all parameters we can set when fetching inspections
 type ListInspectionsParams struct {
 	ModifiedAfter time.Time `url:"modified_after,omitempty"`
 	TemplateIDs   []string  `url:"template,omitempty"`
@@ -171,11 +175,13 @@ type ListInspectionsParams struct {
 	Limit         int       `url:"limit,omitempty"`
 }
 
+// Inspection represents some of the properties present in an inspection
 type Inspection struct {
 	ID         string    `json:"audit_id"`
 	ModifiedAt time.Time `json:"modified_at"`
 }
 
+// ListInspectionsResponse represents the response of listing inspections
 type ListInspectionsResponse struct {
 	Count       int          `json:"count"`
 	Total       int          `json:"total"`

@@ -18,7 +18,7 @@ const maxGoRoutines = 10
 type inspectionClient struct {
 	*zap.SugaredLogger
 
-	apiClient     api.APIClient
+	apiClient     api.Client
 	exporter      exporter.Exporter
 	SkipIDs       []string
 	ModifiedAfter string
@@ -28,11 +28,13 @@ type inspectionClient struct {
 	Incremental   bool
 }
 
+// InspectionClient is an interface to get inspections from server
 type InspectionClient interface {
 	Export(ctx context.Context) error
 }
 
-func NewInspectionClient(v *viper.Viper, apiClient api.APIClient, exporter exporter.Exporter) InspectionClient {
+// NewInspectionClient returns a new instance of InspectionClient
+func NewInspectionClient(v *viper.Viper, apiClient api.Client, exporter exporter.Exporter) InspectionClient {
 	inspectionConfig := config.GetInspectionConfig(v)
 	templateIDs := v.GetStringSlice("export.template_ids")
 

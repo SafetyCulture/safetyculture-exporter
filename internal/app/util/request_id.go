@@ -12,7 +12,7 @@ import (
 // RequestIDFromContext returns the Request ID stored in context or a new RequestID.
 func RequestIDFromContext(ctx context.Context) string {
 	if ctx == nil {
-		return NewRequestID()
+		return newRequestID()
 	}
 	if ctxValue := ctx.Value(ContextKeyRequestID); ctxValue != nil {
 		if ctxRequestID, ok := ctxValue.(string); ok && ctxRequestID != "" {
@@ -20,10 +20,10 @@ func RequestIDFromContext(ctx context.Context) string {
 		}
 	}
 
-	return NewRequestID()
+	return newRequestID()
 }
 
-func NewRequestID() string {
+func newRequestID() string {
 	id := uuid.Must(uuid.NewV4())
 	buf := make([]byte, 32)
 	hex.Encode(buf, id.Bytes())

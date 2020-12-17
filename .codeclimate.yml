@@ -1,0 +1,66 @@
+---
+version: "2"
+
+checks:
+  # Defaults are NOT documented for golang.
+  # The below defaults have been determined by running the analysis
+  argument-count:
+    enabled: true
+    config:
+      threshold: 4  # default
+  complex-logic:
+    enabled: true
+    config:
+      threshold: 4  # default
+  file-lines:
+    enabled: true
+    config:
+      threshold: 500  # default
+  method-complexity:
+    enabled: true
+    config:
+      threshold: 20  # default
+  method-count:
+    enabled: true
+    config:
+      threshold: 20  # default
+  method-lines:
+    enabled: true
+    config:
+      threshold: 50  # default
+  nested-control-flow:
+    enabled: true
+    config:
+      threshold: 4  # default
+  return-statements:
+    enabled: true
+    config:
+      threshold: 8  # custom
+  similar-code:
+    enabled: true
+    config:
+      threshold: 100  # default
+  identical-code:
+    enabled: true
+    config:
+      threshold: 100  # default
+
+
+plugins:
+  gofmt:
+    enabled: true
+  golint:
+    enabled: true
+  govet:
+    enabled: true
+  shellcheck:
+    enabled: true
+  fixme:
+    enabled: true
+
+exclude_patterns:
+  - "**/*_test.go"
+  - "**/*_mock.go"
+  - "**/*mock/"
+  - "**/*.pb.go"
+  - "**/*.pb.*.go"

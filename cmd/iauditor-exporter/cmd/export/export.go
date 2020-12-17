@@ -15,7 +15,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-// Cmd implements the sts commands.
+// Cmds implements the sts commands.
 func Cmds() []*cobra.Command {
 	return []*cobra.Command{
 		&cobra.Command{
@@ -59,7 +59,7 @@ iauditor-exporter inspection-json --export-path /path/to/export/to`,
 	}
 }
 
-func getAPIClient() api.APIClient {
+func getAPIClient() api.Client {
 	apiOpts := []api.Opt{}
 	if viper.GetBool("api.tls_skip_verify") {
 		apiOpts = append(apiOpts, api.OptSetInsecureTLS(true))

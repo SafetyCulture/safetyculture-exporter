@@ -24,6 +24,7 @@ var (
 	trace        = false
 )
 
+// GormLogger wraps logger with some gorm specific functionality
 type GormLogger struct {
 	*zap.SugaredLogger
 
@@ -86,6 +87,7 @@ func (l GormLogger) Trace(ctx context.Context, begin time.Time, fc func() (strin
 	}
 }
 
+// GetLogger returns a configured instance of the logger
 func GetLogger() *zap.SugaredLogger {
 	logFileEncoder := zapcore.NewJSONEncoder(zap.NewProductionEncoderConfig())
 	consoleEncoder := zapcore.NewConsoleEncoder(zap.NewDevelopmentEncoderConfig())

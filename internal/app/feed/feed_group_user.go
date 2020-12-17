@@ -29,7 +29,7 @@ func (f *GroupUserFeed) Model() interface{} {
 	return GroupUser{}
 }
 
-// Model returns the model of feed rows
+// RowsModel returns the model of feed rows
 func (f *GroupUserFeed) RowsModel() interface{} {
 	return &[]*GroupUser{}
 }
@@ -59,7 +59,7 @@ func (f *GroupUserFeed) CreateSchema(exporter Exporter) error {
 }
 
 // Export exports the feed to the supplied exporter
-func (f *GroupUserFeed) Export(ctx context.Context, apiClient api.APIClient, exporter Exporter) error {
+func (f *GroupUserFeed) Export(ctx context.Context, apiClient api.Client, exporter Exporter) error {
 	logger := util.GetLogger()
 	feedName := f.Name()
 
