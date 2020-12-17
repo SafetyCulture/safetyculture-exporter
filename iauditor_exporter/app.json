@@ -1,0 +1,90 @@
+{
+  "name": "iAuditor Exporter",
+  "description": "Easy deployment of the iAuditor Exporter to Heroku.",
+  "keywords": [
+    "productivity",
+    "python",
+    "inspections"
+  ],
+  "website": "https://www.safetyculture.com",
+  "repository": "https://github.com/eddible/iauditor-exporter",
+  "logo": "https://safetyculture.com/wp-content/media/2019/10/iauditor-by-SafetyCulture-Logo-rgb-icon.png",
+  "env": {
+    "ACTIONS_MERGE_ROWS": {
+      "value": false
+    },
+    "ALLOW_TABLE_CREATION": {
+      "value": true
+    },
+    "API_TOKEN": {
+      "description": "Your API Token from iAuditor",
+      "value": "Your API Token"
+    },
+    "CONFIG_NAME": {
+      "value": "iauditor"
+    },
+    "DB_NAME": {
+      "value": "iauditor"
+    },
+    "DB_PORT": {
+      "value": 5432
+    },
+    "DB_PWD": {
+      "value": "None"
+    },
+    "DB_SCHEMA": {
+      "value": "None"
+    },
+    "DB_SERVER": {
+      "description": "Leave as 'heroku' if using Heroku database.",
+      "value": "heroku"
+    },
+    "DB_TYPE": {
+      "value": "postgres"
+    },
+    "DB_USER": {
+      "value": "None"
+    },
+    "EXPORT_ARCHIVED": {
+      "value": false
+    },
+    "EXPORT_COMPLETED": {
+      "value": "both"
+    },
+    "MEDIA_SYNC_OFFSET_IN_SECONDS": {
+      "value": 900
+    },
+    "MERGE_ROWS": {
+      "value": true
+    },
+    "PROXY_HTTP": {
+      "value": "None"
+    },
+    "PROXY_HTTPS": {
+      "value": "None"
+    },
+    "SQL_TABLE": {
+      "value": "iauditor_data"
+    },
+    "SSL_CERT": {
+      "value": "None"
+    },
+    "SSL_VERIFY": {
+      "value": "None"
+    },
+    "SYNC_DELAY_IN_SECONDS": {
+      "value": 900
+    },
+    "TEMPLATE_IDS": {
+      "value": "None"
+    },
+    "USE_REAL_TEMPLATE_NAME": {
+      "value": false
+    }
+  },
+  "addons": [
+    {
+      "plan": "heroku-postgresql:hobby-dev"
+    }
+  ]
+}

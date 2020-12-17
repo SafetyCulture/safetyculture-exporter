@@ -1,0 +1,45 @@
+[tool.poetry]
+name = "iauditor_exporter"
+version = "1.7.4"
+description = "The iAuditor Exporter tool is the primary way to bulk export iAuditor information for use in BI tools such as PowerBI. The tool is coded in the Python programming language and can be ran simply and easily on any computer with Python installed."
+authors = ["Edd <edward.abrahamsen-mills@safetyculture.io>"]
+packages = [
+    { include = "iauditor_exporter"}
+]
+[tool.poetry.dependencies]
+python = "^3.7"
+PyYAML = "^5.3.1"
+unicodecsv = ">=0.14.1"
+tzlocal = ">=2.0.0"
+pytz = ">=2019.2"
+python_dateutil = ">=2.8.0"
+pandas = ">=0.24.2"
+numpy = ">=1.16.4"
+coloredlogs = ">=10.0"
+safetyculture-sdk-python-beta = ">=2.2.3"
+tqdm = "^4.48.2"
+rich = "^4.2.2"
+dateparser = "^0.7.6"
+questionary = "^1.5.2"
+SQLAlchemy = ">=1.3.4"
+psycopg2 = {version = "^2.8.5", optional = true}
+mysqlclient = {version = "^2.0.1", optional = true}
+pyodbc = {version = "^4.0.30", optional = true}
+
+[tool.poetry.extras]
+all_db = ["pyodbc","psycopg2","mysqlclient"]
+sql = ["pyodbc"]
+postgres = ["psycopg2"]
+mysql = ["mysqlclient"]
+
+[tool.poetry.scripts]
+ia_exporter = "iauditor_exporter.exporter:main"
+
+[tool.poetry.dev-dependencies]
+pytest = "^4.6"
+pyinstaller = "^3.6"
+black = "^19.10b0"
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"

@@ -1,0 +1,1 @@
+powershell -c "python 'C:\<PATH TO EXPORTER>\schedule-exporter.py'"
