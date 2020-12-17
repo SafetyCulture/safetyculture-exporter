@@ -27,7 +27,7 @@ type ReportExporter struct {
 	Mu           sync.Mutex
 }
 
-type ReportExportFormat struct {
+type reportExportFormat struct {
 	PDF  bool
 	WORD bool
 }
@@ -39,7 +39,7 @@ type Report struct {
 	WORD            int       `gorm:"column:word"`
 }
 
-type SaveReportsResult struct {
+type saveReportsResult struct {
 	NoChange    int
 	PDFReports  int
 	PDFErrors   int
@@ -47,6 +47,7 @@ type SaveReportsResult struct {
 	WORDErrors  int
 }
 
+// SaveReports downloads and stores inspection reports on disk
 func (e *ReportExporter) SaveReports(ctx context.Context, apiClient api.Client, feed *InspectionFeed) error {
 	e.Logger.Info("Generating inspection reports")
 
@@ -68,7 +69,7 @@ func (e *ReportExporter) SaveReports(ctx context.Context, apiClient api.Client, 
 		}
 	}
 
-	res := &SaveReportsResult{}
+	res := &saveReportsResult{}
 
 	// you can specify level of concurrency by increasing channel size
 	buffers := make(chan bool, 3)
@@ -133,8 +134,8 @@ func (e *ReportExporter) SaveReports(ctx context.Context, apiClient api.Client, 
 	return err
 }
 
-func (e *ReportExporter) getFormats() (*ReportExportFormat, error) {
-	format := &ReportExportFormat{}
+func (e *ReportExporter) getFormats() (*reportExportFormat, error) {
+	format := &reportExportFormat{}
 	for _, f := range e.Format {
 		switch f {
 		case "PDF":
@@ -153,7 +154,7 @@ func (e *ReportExporter) getFormats() (*ReportExportFormat, error) {
 	return format, nil
 }
 
-func (e *ReportExporter) saveReport(ctx context.Context, apiClient api.Client, inspection *Inspection, format *ReportExportFormat) *Report {
+func (e *ReportExporter) saveReport(ctx context.Context, apiClient api.Client, inspection *Inspection, format *reportExportFormat) *Report {
 	exportPDF, exportWORD := format.PDF, format.WORD
 
 	report := &Report{}
@@ -207,7 +208,7 @@ func (e *ReportExporter) saveReport(ctx context.Context, apiClient api.Client, i
 }
 
 func (e *ReportExporter) exportInspection(ctx context.Context, apiClient api.Client, inspection *Inspection, format string) error {
-	mId, err := apiClient.InitiateInspectionReportExport(ctx, inspection.ID, format, e.PreferenceID)
+	messageID, err := apiClient.InitiateInspectionReportExport(ctx, inspection.ID, format, e.PreferenceID)
 
 	if err != nil {
 		return err
@@ -218,7 +219,7 @@ func (e *ReportExporter) exportInspection(ctx context.Context, apiClient api.Cli
 	for {
 		// wait for a second before checking for report completion
 		time.Sleep(1 * time.Second)
-		rec, cErr := apiClient.CheckInspectionReportExportCompletion(ctx, inspection.ID, mId)
+		rec, cErr := apiClient.CheckInspectionReportExportCompletion(ctx, inspection.ID, messageID)
 		if cErr != nil {
 			err = cErr
 			break
@@ -251,24 +252,24 @@ func (e *ReportExporter) exportInspection(ctx context.Context, apiClient api.Cli
 	return err
 }
 
-func (e *ReportExporter) updateReportResult(rep *Report, res *SaveReportsResult, inspection *Inspection, remaining int64) {
+func (e *ReportExporter) updateReportResult(rep *Report, res *saveReportsResult, inspection *Inspection, remaining int64) {
 	fn := fmt.Sprintf("%s (%s)", inspection.Name, inspection.ID)
 	if rep == nil {
-		res.NoChange += 1
+		res.NoChange++
 		e.Logger.Infof("No changes were made to %s", fn)
 	} else {
 		if rep.PDF == 1 {
-			res.PDFReports += 1
+			res.PDFReports++
 			e.Logger.Infof("Saved PDF report for %s", fn)
 		} else if rep.PDF == -1 {
-			res.PDFErrors += 1
+			res.PDFErrors++
 		}
 
 		if rep.WORD == 1 {
-			res.WORDReports += 1
+			res.WORDReports++
 			e.Logger.Infof("Saved Word report for %s", fn)
 		} else if rep.WORD == -1 {
-			res.WORDErrors += 1
+			res.WORDErrors++
 		}
 
 		e.Logger.Infof("%d inspections remaining", remaining)
@@ -302,8 +303,9 @@ func getFileExtension(format string) string {
 		return "pdf"
 	case "WORD":
 		return "docx"
+	default:
+		return ""
 	}
-	return ""
 }
 
 func getFilePath(exportPath string, inspection *Inspection, format string) string {
@@ -313,19 +315,23 @@ func getFilePath(exportPath string, inspection *Inspection, format string) strin
 		if strings.TrimSpace(fileName) == "" {
 			fileName = inspection.ID
 		}
+
 		if dupIndex > 0 {
 			fileName = fmt.Sprintf("%s (%d)", fileName, dupIndex)
 		}
+
 		exportFilePath := filepath.Join(exportPath, fmt.Sprintf("%s.%s", fileName, getFileExtension(format)))
 		if _, err := os.Stat(exportFilePath); os.IsNotExist(err) {
 			return exportFilePath
-		} else {
-			dupIndex += 1
 		}
+
+		dupIndex++
 	}
+
 	return ""
 }
 
+// NewReportExporter returns a new instance of ReportExporter
 func NewReportExporter(exportPath string, format []string, preferenceID string) (*ReportExporter, error) {
 	sqlExporter, err := NewSQLExporter("sqlite", filepath.Join(exportPath, "reports.db"), true)
 	if err != nil {

@@ -131,10 +131,12 @@ func printSchema(cmd *cobra.Command, args []string) error {
 	return feed.WriteSchemas(viper.GetViper(), exporter)
 }
 
-func ExportReports(cmd *cobra.Command, args []string) error {
+// RunInspectionReports downloads and stores inspection reports
+func RunInspectionReports(cmd *cobra.Command, args []string) error {
 
 	exportPath := viper.GetString("export.path")
-	os.MkdirAll(exportPath, os.ModePerm)
+	err := os.MkdirAll(exportPath, os.ModePerm)
+	util.Check(err, "unable to create export directory")
 
 	format := viper.GetStringSlice("report.format")
 	preferenceID := viper.GetString("report.preference_id")

@@ -29,8 +29,8 @@ type Client interface {
 	ListInspections(ctx context.Context, params *ListInspectionsParams) (*ListInspectionsResponse, error)
 	GetInspection(ctx context.Context, id string) (*json.RawMessage, error)
 	DrainInspections(ctx context.Context, params *ListInspectionsParams, callback func(*ListInspectionsResponse) error) error
-	InitiateInspectionReportExport(ctx context.Context, auditId string, format string, preferenceID string) (string, error)
-	CheckInspectionReportExportCompletion(ctx context.Context, auditId string, messageId string) (*InspectionReportExportCompletionResponse, error)
+	InitiateInspectionReportExport(ctx context.Context, auditID string, format string, preferenceID string) (string, error)
+	CheckInspectionReportExportCompletion(ctx context.Context, auditID string, messageID string) (*InspectionReportExportCompletionResponse, error)
 	DownloadInspectionReportFile(ctx context.Context, url string) (io.ReadCloser, error)
 }
 
@@ -344,27 +344,27 @@ func (a *apiClient) DrainInspections(
 	return nil
 }
 
-type InitiateInspectionReportExportRequest struct {
+type initiateInspectionReportExportRequest struct {
 	Format       string `json:"format"`
 	PreferenceID string `json:"preference_id,omitempty"`
 }
 
-type InitiateInspectionReportExportResponse struct {
+type initiateInspectionReportExportResponse struct {
 	MessageID string `json:"messageId"`
 }
 
-func (a *apiClient) InitiateInspectionReportExport(ctx context.Context, auditId string, format string, preferenceID string) (string, error) {
+func (a *apiClient) InitiateInspectionReportExport(ctx context.Context, auditID string, format string, preferenceID string) (string, error) {
 	logger := util.GetLogger()
 
 	var (
-		result *InitiateInspectionReportExportResponse
+		result *initiateInspectionReportExportResponse
 		errMsg json.RawMessage
 		res    *http.Response
 		err    error
 	)
 
-	url := fmt.Sprintf("audits/%s/report", auditId)
-	body := &InitiateInspectionReportExportRequest{
+	url := fmt.Sprintf("audits/%s/report", auditID)
+	body := &initiateInspectionReportExportRequest{
 		Format:       format,
 		PreferenceID: preferenceID,
 	}
@@ -394,12 +394,13 @@ func (a *apiClient) InitiateInspectionReportExport(ctx context.Context, auditId 
 	return result.MessageID, nil
 }
 
+// InspectionReportExportCompletionResponse represents the response of report export completion status
 type InspectionReportExportCompletionResponse struct {
 	Status string `json:"status"`
 	URL    string `json:"url,omitempty"`
 }
 
-func (a *apiClient) CheckInspectionReportExportCompletion(ctx context.Context, auditId string, messageId string) (*InspectionReportExportCompletionResponse, error) {
+func (a *apiClient) CheckInspectionReportExportCompletion(ctx context.Context, auditID string, messageID string) (*InspectionReportExportCompletionResponse, error) {
 	logger := util.GetLogger()
 
 	var (
@@ -409,7 +410,7 @@ func (a *apiClient) CheckInspectionReportExportCompletion(ctx context.Context, a
 		err    error
 	)
 
-	url := fmt.Sprintf("audits/%s/report/%s", auditId, messageId)
+	url := fmt.Sprintf("audits/%s/report/%s", auditID, messageID)
 
 	sl := a.sling.New().Get(url).
 		Set(string(Authorization), "Bearer "+a.accessToken).

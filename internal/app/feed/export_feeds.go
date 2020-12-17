@@ -13,7 +13,7 @@ import (
 // GetFeeds returns list of all available data feeds
 func GetFeeds(v *viper.Viper) []Feed {
 	inspectionIncludeInactiveItems := v.GetBool("export.inspection.included_inactive_items")
-	templateIDs := v.GetStringSlice("export.template_ids")
+	templateIDs := getTemplateIDs(v)
 	inspectionConfig := config.GetInspectionConfig(v)
 
 	return []Feed{
@@ -51,6 +51,21 @@ func GetFeeds(v *viper.Viper) []Feed {
 			TemplateIDs: templateIDs,
 		},
 	}
+}
+
+func getInspectionFeed(v *viper.Viper, inspectionConfig *config.InspectionConfig, templateIDs []string) *InspectionFeed {
+	return &InspectionFeed{
+		SkipIDs:       inspectionConfig.SkipIDs,
+		ModifiedAfter: inspectionConfig.ModifiedAfter,
+		TemplateIDs:   templateIDs,
+		Archived:      inspectionConfig.Archived,
+		Completed:     inspectionConfig.Completed,
+		Incremental:   inspectionConfig.Incremental,
+	}
+}
+
+func getTemplateIDs(v *viper.Viper) []string {
+	return v.GetStringSlice("export.template_ids")
 }
 
 // CreateSchemas generates schemas for the data feeds without fetching any data
@@ -118,16 +133,16 @@ func ExportFeeds(v *viper.Viper, apiClient api.Client, exporter Exporter) error 
 	return nil
 }
 
+// ExportInspectionReports download all the reports for inspections and stores them on disk
 func ExportInspectionReports(v *viper.Viper, apiClient api.Client, exporter *ReportExporter) error {
 	logger := util.GetLogger()
 	ctx := context.Background()
 
-	feed := GetFeeds(v)[0]
+	feed := getInspectionFeed(v, config.GetInspectionConfig(v), getTemplateIDs(v))
 	err := feed.Export(ctx, apiClient, exporter)
 	util.Check(err, "failed to export inspection feed")
 
-	err = exporter.SaveReports(ctx, apiClient, feed.(*InspectionFeed))
-
+	err = exporter.SaveReports(ctx, apiClient, feed)
 	if err != nil {
 		logger.Info("Export finished")
 	}

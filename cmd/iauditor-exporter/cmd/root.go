@@ -133,12 +133,15 @@ func addReportCmd() {
 		iauditor-exporter report --export-path /path/to/export/to --format PDF,WORD
 		// Export PDF inspection reports with a custom report preference
 		iauditor-exporter report --export-path /path/to/export/to --format PDF --preference-id abc`,
-		RunE: export.ExportReports,
+		RunE: export.RunInspectionReports,
 	}
+
 	reportCmd.PersistentFlags().StringSlice("format", []string{}, "Export format (PDF,WORD)")
 	reportCmd.PersistentFlags().String("preference-id", "", "The report preference to apply to the document")
+
 	util.Check(viper.BindPFlag("report.format", reportCmd.PersistentFlags().Lookup("format")), "while binding flag")
 	util.Check(viper.BindPFlag("report.preference_id", reportCmd.PersistentFlags().Lookup("preference-id")), "while binding flag")
+
 	RootCmd.AddCommand(reportCmd)
 }
 
