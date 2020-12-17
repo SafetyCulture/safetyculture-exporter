@@ -10,12 +10,13 @@ import (
 	"github.com/hashicorp/go-version"
 )
 
-// ReleaseInfo is the details of an available release of scli.
+// ReleaseInfo is the details of an available release.
 type ReleaseInfo struct {
 	Version      string
 	ChangelogURL string
 }
 
+// Check returns release info of a new version of this tool if available.
 func Check(currentVersion string) *ReleaseInfo {
 	ctx := context.Background()
 	g := github.NewClient(&http.Client{})

@@ -1,17 +1,21 @@
 package export
 
 import (
+	"context"
+	"fmt"
 	"net/url"
 	"os"
 
 	"github.com/SafetyCulture/iauditor-exporter/internal/app/api"
+	"github.com/SafetyCulture/iauditor-exporter/internal/app/exporter"
 	"github.com/SafetyCulture/iauditor-exporter/internal/app/feed"
+	"github.com/SafetyCulture/iauditor-exporter/internal/app/inspections"
 	"github.com/SafetyCulture/iauditor-exporter/internal/app/util"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
-// Cmd implements the sts commands.
+// Cmds implements the sts commands.
 func Cmds() []*cobra.Command {
 	return []*cobra.Command{
 		&cobra.Command{
@@ -35,6 +39,16 @@ iauditor-exporter sql --export-path /path/to/export/to`,
 			RunE: runSQL,
 		},
 		&cobra.Command{
+			Use:   "inspection-json",
+			Short: "Export iAuditor inspections to json files",
+			Example: `// Limit inspections to these templates
+iauditor-exporter inspection-json --template-ids template_F492E54D87F2419E9398F7BDCA0FA5D9,template_d54e06808d2f11e2893e83a731dba0ca
+
+// Customise export location
+iauditor-exporter inspection-json --export-path /path/to/export/to`,
+			RunE: runInspectionJSON,
+		},
+		&cobra.Command{
 			Use:     "schema",
 			Short:   "Print iAuditor table schemas",
 			Example: `iauditor-exporter schema`,
@@ -43,7 +57,7 @@ iauditor-exporter sql --export-path /path/to/export/to`,
 	}
 }
 
-func getAPIClient() api.APIClient {
+func getAPIClient() api.Client {
 	apiOpts := []api.Opt{}
 	if viper.GetBool("api.tls_skip_verify") {
 		apiOpts = append(apiOpts, api.OptSetInsecureTLS(true))
@@ -76,6 +90,21 @@ func runSQL(cmd *cobra.Command, args []string) error {
 	apiClient := getAPIClient()
 
 	return feed.ExportFeeds(viper.GetViper(), apiClient, exporter)
+}
+
+func runInspectionJSON(cmd *cobra.Command, args []string) error {
+
+	exportPath := fmt.Sprintf("%s/json/", viper.GetString("export.path"))
+	err := os.MkdirAll(exportPath, os.ModePerm)
+	util.Check(err, fmt.Sprintf("Failed to create directory %s", exportPath))
+
+	inspectionsClient := inspections.NewInspectionClient(
+		viper.GetViper(),
+		getAPIClient(),
+		exporter.NewJSONExporter(exportPath),
+	)
+
+	return inspectionsClient.Export(context.Background())
 }
 
 func runCSV(cmd *cobra.Command, args []string) error {

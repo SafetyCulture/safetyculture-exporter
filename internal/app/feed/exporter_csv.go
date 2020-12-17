@@ -19,6 +19,7 @@ type CSVExporter struct {
 	Logger *zap.SugaredLogger
 }
 
+// CreateSchema generated schema for a feed in csv format
 func (e *CSVExporter) CreateSchema(feed Feed, rows interface{}) error {
 	e.Logger.Infof("%s: writing out CSV schema file", feed.Name())
 
@@ -81,6 +82,7 @@ func (e *CSVExporter) FinaliseExport(feed Feed, rows interface{}) error {
 	return nil
 }
 
+// NewCSVExporter creates a new instance of CSVExporter
 func NewCSVExporter(exportPath string) (*CSVExporter, error) {
 	sqlExporter, err := NewSQLExporter("sqlite", filepath.Join(exportPath, "sqlite.db"), true)
 	if err != nil {

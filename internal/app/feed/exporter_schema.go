@@ -16,7 +16,7 @@ type SchemaExporter struct {
 	Output io.Writer
 }
 
-type Schema struct {
+type schema struct {
 	Index        int    `gorm:"column:cid"`
 	Name         string `gorm:"column:name"`
 	Type         string `gorm:"column:type"`
@@ -25,17 +25,18 @@ type Schema struct {
 	PrimaryKey   int    `gorm:"column:pk"`
 }
 
-func IsPrimaryKey(pk int) string {
+func isPrimaryKey(pk int) string {
 	if pk > 0 {
 		return "true"
 	}
 	return ""
 }
 
+// WriteSchema writes schema of a feed to output in tabular format
 func (e *SchemaExporter) WriteSchema(feed Feed) error {
 	e.Logger.Infof("Schema for %s:", feed.Name())
 
-	schema := &[]*Schema{}
+	schema := &[]*schema{}
 
 	resp := e.DB.Raw(fmt.Sprintf("PRAGMA table_info('%s') ", feed.Name())).Scan(schema)
 	if resp.Error != nil {
@@ -46,13 +47,14 @@ func (e *SchemaExporter) WriteSchema(feed Feed) error {
 	table.SetHeader([]string{"Name", "Type", "Primary Key"})
 
 	for _, v := range *schema {
-		table.Append([]string{v.Name, v.Type, IsPrimaryKey(v.PrimaryKey)})
+		table.Append([]string{v.Name, v.Type, isPrimaryKey(v.PrimaryKey)})
 	}
 	table.Render()
 
 	return nil
 }
 
+// NewSchemaExporter creates a new instance of SchemaExporter
 func NewSchemaExporter(output io.Writer) (*SchemaExporter, error) {
 	sqlExporter, err := NewSQLExporter("sqlite", "file::memory:?cache=shared", true)
 	if err != nil {

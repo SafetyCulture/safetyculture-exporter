@@ -47,7 +47,7 @@ type SaveReportsResult struct {
 	WORDErrors  int
 }
 
-func (e *ReportExporter) SaveReports(ctx context.Context, apiClient api.APIClient, feed *InspectionFeed) error {
+func (e *ReportExporter) SaveReports(ctx context.Context, apiClient api.Client, feed *InspectionFeed) error {
 	e.Logger.Info("Generating inspection reports")
 
 	format, err := e.getFormats()
@@ -153,7 +153,7 @@ func (e *ReportExporter) getFormats() (*ReportExportFormat, error) {
 	return format, nil
 }
 
-func (e *ReportExporter) saveReport(ctx context.Context, apiClient api.APIClient, inspection *Inspection, format *ReportExportFormat) *Report {
+func (e *ReportExporter) saveReport(ctx context.Context, apiClient api.Client, inspection *Inspection, format *ReportExportFormat) *Report {
 	exportPDF, exportWORD := format.PDF, format.WORD
 
 	report := &Report{}
@@ -206,7 +206,7 @@ func (e *ReportExporter) saveReport(ctx context.Context, apiClient api.APIClient
 	return report
 }
 
-func (e *ReportExporter) exportInspection(ctx context.Context, apiClient api.APIClient, inspection *Inspection, format string) error {
+func (e *ReportExporter) exportInspection(ctx context.Context, apiClient api.Client, inspection *Inspection, format string) error {
 	mId, err := apiClient.InitiateInspectionReportExport(ctx, inspection.ID, format, e.PreferenceID)
 
 	if err != nil {
