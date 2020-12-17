@@ -180,25 +180,32 @@ func initMockFeedsSet3(httpClient *http.Client) {
 		File("mocks/set_1/feed_schedule_occurrences_1.json")
 }
 
-func initMockReportExport(httpClient *http.Client, status string) {
+type InspectionReportExportMockOptions struct {
+	ReportExportCompletionStatus string
+	InitiateReportReply          int
+	ReportExportCompletionReply  int
+	DownloadReportReply          int
+}
+
+func initMockReportExport(httpClient *http.Client, opts *InspectionReportExportMockOptions) {
 	gock.InterceptClient(httpClient)
 
 	gock.New("http://localhost:9999").
 		Post("/audits/.*/report").
 		Persist().
-		Reply(200).
+		Reply(opts.InitiateReportReply).
 		JSON(map[string]string{"messageId": "abc"})
 
 	gock.New("http://localhost:9999").
 		Get("/audits/.*/report/.*").
 		Persist().
-		Reply(200).
-		JSON(map[string]string{"status": status, "url": "http://localhost:9999/report-exports/abc"})
+		Reply(opts.ReportExportCompletionReply).
+		JSON(map[string]string{"status": opts.ReportExportCompletionStatus, "url": "http://localhost:9999/report-exports/abc"})
 
 	gock.New("http://localhost:9999").
 		Get("/report-exports/abc").
 		Persist().
-		Reply(200).
+		Reply(opts.DownloadReportReply).
 		Body(bytes.NewBuffer([]byte(`file content`)))
 }
 

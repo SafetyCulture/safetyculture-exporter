@@ -32,14 +32,14 @@ type reportExportFormat struct {
 	WORD bool
 }
 
-type Report struct {
+type reportExport struct {
 	AuditID         string    `gorm:"primarykey;column:audit_id"`
 	AuditModifiedAt time.Time `gorm:"column:modified_at"`
 	PDF             int       `gorm:"column:pdf"`
 	WORD            int       `gorm:"column:word"`
 }
 
-type saveReportsResult struct {
+type reportExportResult struct {
 	NoChange    int
 	PDFReports  int
 	PDFErrors   int
@@ -56,8 +56,8 @@ func (e *ReportExporter) SaveReports(ctx context.Context, apiClient api.Client, 
 		return fmt.Errorf("No valid export format specified")
 	}
 
-	report := &Report{}
-	err = e.DB.AutoMigrate(&Report{})
+	report := &reportExport{}
+	err = e.DB.AutoMigrate(&reportExport{})
 	if err != nil {
 		return err
 	}
@@ -69,7 +69,7 @@ func (e *ReportExporter) SaveReports(ctx context.Context, apiClient api.Client, 
 		}
 	}
 
-	res := &saveReportsResult{}
+	res := &reportExportResult{}
 
 	// you can specify level of concurrency by increasing channel size
 	buffers := make(chan bool, 3)
@@ -154,10 +154,10 @@ func (e *ReportExporter) getFormats() (*reportExportFormat, error) {
 	return format, nil
 }
 
-func (e *ReportExporter) saveReport(ctx context.Context, apiClient api.Client, inspection *Inspection, format *reportExportFormat) *Report {
+func (e *ReportExporter) saveReport(ctx context.Context, apiClient api.Client, inspection *Inspection, format *reportExportFormat) *reportExport {
 	exportPDF, exportWORD := format.PDF, format.WORD
 
-	report := &Report{}
+	report := &reportExport{}
 	err := e.DB.First(&report, "audit_id = ?", inspection.ID).Error
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		e.Logger.Errorf("Error during loading report from reports db: %s", err)
@@ -209,7 +209,6 @@ func (e *ReportExporter) saveReport(ctx context.Context, apiClient api.Client, i
 
 func (e *ReportExporter) exportInspection(ctx context.Context, apiClient api.Client, inspection *Inspection, format string) error {
 	messageID, err := apiClient.InitiateInspectionReportExport(ctx, inspection.ID, format, e.PreferenceID)
-
 	if err != nil {
 		return err
 	}
@@ -225,7 +224,9 @@ func (e *ReportExporter) exportInspection(ctx context.Context, apiClient api.Cli
 			break
 		} else if rec.Status == "SUCCESS" {
 			resp, dErr := apiClient.DownloadInspectionReportFile(ctx, rec.URL)
+			e.Logger.Infof("----> got response back %s", rec.URL)
 			if dErr != nil {
+				e.Logger.Infof("----> got an error back: %s", dErr)
 				err = dErr
 				break
 			}
@@ -242,7 +243,7 @@ func (e *ReportExporter) exportInspection(ctx context.Context, apiClient api.Cli
 		}
 
 		// make sure we stop checking after a while
-		tries += 1
+		tries++
 		if tries == 15 {
 			err = fmt.Errorf("%s report generation for %s terminated after %d tries", format, inspection.Name, tries)
 			break
@@ -252,7 +253,7 @@ func (e *ReportExporter) exportInspection(ctx context.Context, apiClient api.Cli
 	return err
 }
 
-func (e *ReportExporter) updateReportResult(rep *Report, res *saveReportsResult, inspection *Inspection, remaining int64) {
+func (e *ReportExporter) updateReportResult(rep *reportExport, res *reportExportResult, inspection *Inspection, remaining int64) {
 	fn := fmt.Sprintf("%s (%s)", inspection.Name, inspection.ID)
 	if rep == nil {
 		res.NoChange++

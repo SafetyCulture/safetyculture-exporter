@@ -458,6 +458,11 @@ func (a *apiClient) DownloadInspectionReportFile(ctx context.Context, url string
 		return nil, errors.Wrap(err, "Failed request to API")
 	}
 
+	statusOK := res.StatusCode >= 200 && res.StatusCode < 300
+	if !statusOK {
+		return nil, errors.Errorf("Server returned error. %s", res.Status)
+	}
+
 	logger.Debugw("http request",
 		"url", req.URL.String(),
 		"status", res.Status,
