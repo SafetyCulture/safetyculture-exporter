@@ -166,6 +166,7 @@ type GetFeedResponse struct {
 	Data json.RawMessage `json:"data"`
 }
 
+// ListInspectionsParams is a list of all parameters we can set when fetching inspections
 type ListInspectionsParams struct {
 	ModifiedAfter time.Time `url:"modified_after,omitempty"`
 	TemplateIDs   []string  `url:"template,omitempty"`
@@ -174,11 +175,13 @@ type ListInspectionsParams struct {
 	Limit         int       `url:"limit,omitempty"`
 }
 
+// Inspection represents some of the properties present in an inspection
 type Inspection struct {
 	ID         string    `json:"audit_id"`
 	ModifiedAt time.Time `json:"modified_at"`
 }
 
+// ListInspectionsResponse represents the response of listing inspections
 type ListInspectionsResponse struct {
 	Count       int          `json:"count"`
 	Total       int          `json:"total"`

@@ -28,10 +28,12 @@ type inspectionClient struct {
 	Incremental   bool
 }
 
+// InspectionClient is an interface to get inspections from server
 type InspectionClient interface {
 	Export(ctx context.Context) error
 }
 
+// NewInspectionClient returns a new instance of InspectionClient
 func NewInspectionClient(v *viper.Viper, apiClient api.Client, exporter exporter.Exporter) InspectionClient {
 	inspectionConfig := config.GetInspectionConfig(v)
 	templateIDs := v.GetStringSlice("export.template_ids")

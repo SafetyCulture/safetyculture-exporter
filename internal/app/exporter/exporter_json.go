@@ -19,16 +19,19 @@ const (
 
 var lastModifiedFile *os.File
 
+// JSONExporter is an interface to export data feeds to json files
 type JSONExporter struct {
 	exportPath string
 }
 
+// NewJSONExporter creates new instance of JSONExporter
 func NewJSONExporter(exportPath string) Exporter {
 	return &JSONExporter{
 		exportPath: exportPath,
 	}
 }
 
+// SetLastModifiedAt writes last modified date to a file
 func (e *JSONExporter) SetLastModifiedAt(modifiedAt time.Time) {
 	exportFilePath := filepath.Join(e.exportPath, fmt.Sprintf("%s", lastModified))
 	if lastModifiedFile == nil {
@@ -47,6 +50,7 @@ func (e *JSONExporter) SetLastModifiedAt(modifiedAt time.Time) {
 	return
 }
 
+// GetLastModifiedAt reads last modified date from a file
 func (e *JSONExporter) GetLastModifiedAt() *time.Time {
 
 	exportFilePath := filepath.Join(e.exportPath, fmt.Sprintf("%s", lastModified))
@@ -68,6 +72,7 @@ func (e *JSONExporter) GetLastModifiedAt() *time.Time {
 	return nil
 }
 
+// WriteRow writes the json response into a file
 func (e *JSONExporter) WriteRow(name string, row *json.RawMessage) {
 	str, err := json.MarshalIndent(row, "", " ")
 

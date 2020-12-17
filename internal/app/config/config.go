@@ -4,7 +4,8 @@ import (
 	"github.com/spf13/viper"
 )
 
-type inspectionConfig struct {
+// InspectionConfig includes all the configurations available when fetching inspections
+type InspectionConfig struct {
 	SkipIDs       []string
 	ModifiedAfter string
 	Archived      string
@@ -12,8 +13,9 @@ type inspectionConfig struct {
 	Incremental   bool
 }
 
-func GetInspectionConfig(v *viper.Viper) *inspectionConfig {
-	return &inspectionConfig{
+// GetInspectionConfig returns configurations that have been set for fetching inspections
+func GetInspectionConfig(v *viper.Viper) *InspectionConfig {
+	return &InspectionConfig{
 		SkipIDs:       v.GetStringSlice("export.inspection.skip_ids"),
 		ModifiedAfter: v.GetString("export.inspection.modified_after"),
 		Archived:      v.GetString("export.inspection.archived"),
