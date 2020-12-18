@@ -224,9 +224,7 @@ func (e *ReportExporter) exportInspection(ctx context.Context, apiClient api.Cli
 			break
 		} else if rec.Status == "SUCCESS" {
 			resp, dErr := apiClient.DownloadInspectionReportFile(ctx, rec.URL)
-			e.Logger.Infof("----> got response back %s", rec.URL)
 			if dErr != nil {
-				e.Logger.Infof("----> got an error back: %s", dErr)
 				err = dErr
 				break
 			}

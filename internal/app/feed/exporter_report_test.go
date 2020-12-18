@@ -1,15 +1,29 @@
 package feed_test
 
 import (
+	"bytes"
+	"fmt"
 	"path/filepath"
 	"testing"
 
 	"github.com/SafetyCulture/iauditor-exporter/internal/app/api"
 	"github.com/SafetyCulture/iauditor-exporter/internal/app/feed"
+	"gopkg.in/h2non/gock.v1"
 
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 )
+
+const (
+	mockAPIBaseURL            string = "http://localhost:9999"
+	initiateReportURL         string = "/audits/.*/report"
+	reportExportCompletionURL string = "/audits/.*/report/.*"
+	downloadReportURL         string = "/report-exports/abc"
+)
+
+func getReportExportCompletionMessage(status string) string {
+	return fmt.Sprintf(`{"status": "%s", "url": "%s%s"}`, status, mockAPIBaseURL, downloadReportURL)
+}
 
 func TestExportReports_should_export_all_reports(t *testing.T) {
 	exporter, err := getTemporaryReportExporter([]string{"PDF", "WORD"}, "")
@@ -17,17 +31,27 @@ func TestExportReports_should_export_all_reports(t *testing.T) {
 
 	viperConfig := viper.New()
 
-	apiClient := api.NewAPIClient("http://localhost:9999", "token")
+	apiClient := api.NewAPIClient(mockAPIBaseURL, "token")
 	defer resetMocks(apiClient.HTTPClient())
 	initMockFeedsSet1(apiClient.HTTPClient())
 
-	reportExportMockOptions := &InspectionReportExportMockOptions{
-		ReportExportCompletionStatus: "SUCCESS",
-		InitiateReportReply:          200,
-		ReportExportCompletionReply:  200,
-		DownloadReportReply:          200,
-	}
-	initMockReportExport(apiClient.HTTPClient(), reportExportMockOptions)
+	gock.New(mockAPIBaseURL).
+		Post(initiateReportURL).
+		Times(6).
+		Reply(200).
+		JSON(`{"messageId": "abc"}`)
+
+	gock.New(mockAPIBaseURL).
+		Get(reportExportCompletionURL).
+		Times(6).
+		Reply(200).
+		JSON(getReportExportCompletionMessage("SUCCESS"))
+
+	gock.New(mockAPIBaseURL).
+		Get(downloadReportURL).
+		Times(6).
+		Reply(200).
+		Body(bytes.NewBuffer([]byte(`file content`)))
 
 	err = feed.ExportInspectionReports(viperConfig, apiClient, exporter)
 	assert.Nil(t, err)
@@ -52,13 +76,24 @@ func TestExportReports_should_not_run_if_all_exported(t *testing.T) {
 	defer resetMocks(apiClient.HTTPClient())
 	initMockFeedsSet1(apiClient.HTTPClient())
 
-	reportExportMockOptions := &InspectionReportExportMockOptions{
-		ReportExportCompletionStatus: "SUCCESS",
-		InitiateReportReply:          200,
-		ReportExportCompletionReply:  200,
-		DownloadReportReply:          200,
-	}
-	initMockReportExport(apiClient.HTTPClient(), reportExportMockOptions)
+	// Making sure the endpoints have been called only 3 times
+	gock.New(mockAPIBaseURL).
+		Post(initiateReportURL).
+		Times(3).
+		Reply(200).
+		JSON(`{"messageId": "abc"}`)
+
+	gock.New(mockAPIBaseURL).
+		Get(reportExportCompletionURL).
+		Times(3).
+		Reply(200).
+		JSON(getReportExportCompletionMessage("SUCCESS"))
+
+	gock.New(mockAPIBaseURL).
+		Get(downloadReportURL).
+		Times(3).
+		Reply(200).
+		Body(bytes.NewBuffer([]byte(`file content`)))
 
 	err = feed.ExportInspectionReports(viperConfig, apiClient, exporter)
 	assert.Nil(t, err)
@@ -91,16 +126,22 @@ func TestExportReports_should_fail_after_retries(t *testing.T) {
 	defer resetMocks(apiClient.HTTPClient())
 	initMockFeedsSet1(apiClient.HTTPClient())
 
-	reportExportMockOptions := &InspectionReportExportMockOptions{
-		ReportExportCompletionStatus: "IN_PROGRESS",
-		InitiateReportReply:          200,
-		ReportExportCompletionReply:  200,
-		DownloadReportReply:          200,
-	}
-	initMockReportExport(apiClient.HTTPClient(), reportExportMockOptions)
+	gock.New(mockAPIBaseURL).
+		Post(initiateReportURL).
+		Times(3).
+		Reply(200).
+		JSON(`{"messageId": "abc"}`)
+
+	// Making sure the endpoints is called 15 times for each inspection
+	gock.New(mockAPIBaseURL).
+		Get(reportExportCompletionURL).
+		Times(45).
+		Reply(200).
+		JSON(getReportExportCompletionMessage("IN_PROGRESS"))
 
 	err = feed.ExportInspectionReports(viperConfig, apiClient, exporter)
 	assert.NotNil(t, err)
+	assert.Contains(t, err.Error(), "Failed to generate 3 PDF reports and 0 WORD reports")
 }
 
 func TestExportReports_should_fail_if_report_status_fails(t *testing.T) {
@@ -113,16 +154,21 @@ func TestExportReports_should_fail_if_report_status_fails(t *testing.T) {
 	defer resetMocks(apiClient.HTTPClient())
 	initMockFeedsSet1(apiClient.HTTPClient())
 
-	reportExportMockOptions := &InspectionReportExportMockOptions{
-		ReportExportCompletionStatus: "FAILED",
-		InitiateReportReply:          200,
-		ReportExportCompletionReply:  200,
-		DownloadReportReply:          200,
-	}
-	initMockReportExport(apiClient.HTTPClient(), reportExportMockOptions)
+	gock.New(mockAPIBaseURL).
+		Post(initiateReportURL).
+		Times(3).
+		Reply(200).
+		JSON(`{"messageId": "abc"}`)
+
+	gock.New(mockAPIBaseURL).
+		Get(reportExportCompletionURL).
+		Times(3).
+		Reply(200).
+		JSON(getReportExportCompletionMessage("FAILED"))
 
 	err = feed.ExportInspectionReports(viperConfig, apiClient, exporter)
 	assert.NotNil(t, err)
+	assert.Contains(t, err.Error(), "Failed to generate 0 PDF reports and 3 WORD reports")
 }
 
 func TestExportReports_should_fail_if_init_report_reply_is_not_success(t *testing.T) {
@@ -135,16 +181,15 @@ func TestExportReports_should_fail_if_init_report_reply_is_not_success(t *testin
 	defer resetMocks(apiClient.HTTPClient())
 	initMockFeedsSet1(apiClient.HTTPClient())
 
-	reportExportMockOptions := &InspectionReportExportMockOptions{
-		ReportExportCompletionStatus: "SUCCESS",
-		InitiateReportReply:          500,
-		ReportExportCompletionReply:  200,
-		DownloadReportReply:          200,
-	}
-	initMockReportExport(apiClient.HTTPClient(), reportExportMockOptions)
+	gock.New(mockAPIBaseURL).
+		Post(initiateReportURL).
+		Times(3).
+		Reply(500).
+		JSON(`{"error": "something went wrong"}`)
 
 	err = feed.ExportInspectionReports(viperConfig, apiClient, exporter)
 	assert.NotNil(t, err)
+	assert.Contains(t, err.Error(), "Failed to generate 0 PDF reports and 3 WORD reports")
 }
 
 func TestExportReports_should_fail_if_report_completion_reply_is_not_success(t *testing.T) {
@@ -157,20 +202,25 @@ func TestExportReports_should_fail_if_report_completion_reply_is_not_success(t *
 	defer resetMocks(apiClient.HTTPClient())
 	initMockFeedsSet1(apiClient.HTTPClient())
 
-	reportExportMockOptions := &InspectionReportExportMockOptions{
-		ReportExportCompletionStatus: "SUCCESS",
-		InitiateReportReply:          200,
-		ReportExportCompletionReply:  500,
-		DownloadReportReply:          200,
-	}
-	initMockReportExport(apiClient.HTTPClient(), reportExportMockOptions)
+	gock.New(mockAPIBaseURL).
+		Post(initiateReportURL).
+		Times(3).
+		Reply(200).
+		JSON(`{"messageId": "abc"}`)
+
+	gock.New(mockAPIBaseURL).
+		Get(reportExportCompletionURL).
+		Times(3).
+		Reply(500).
+		JSON(`{"error": "something went wrong"}`)
 
 	err = feed.ExportInspectionReports(viperConfig, apiClient, exporter)
 	assert.NotNil(t, err)
+	assert.Contains(t, err.Error(), "Failed to generate 0 PDF reports and 3 WORD reports")
 }
 
 func TestExportReports_should_fail_if_download_report_reply_is_not_success(t *testing.T) {
-	exporter, err := getTemporaryReportExporter([]string{"WORD"}, "")
+	exporter, err := getTemporaryReportExporter([]string{"PDF"}, "")
 	assert.Nil(t, err)
 
 	viperConfig := viper.New()
@@ -179,16 +229,27 @@ func TestExportReports_should_fail_if_download_report_reply_is_not_success(t *te
 	defer resetMocks(apiClient.HTTPClient())
 	initMockFeedsSet1(apiClient.HTTPClient())
 
-	reportExportMockOptions := &InspectionReportExportMockOptions{
-		ReportExportCompletionStatus: "SUCCESS",
-		InitiateReportReply:          200,
-		ReportExportCompletionReply:  200,
-		DownloadReportReply:          500,
-	}
-	initMockReportExport(apiClient.HTTPClient(), reportExportMockOptions)
+	gock.New(mockAPIBaseURL).
+		Post(initiateReportURL).
+		Times(3).
+		Reply(200).
+		JSON(`{"messageId": "abc"}`)
+
+	gock.New(mockAPIBaseURL).
+		Get(reportExportCompletionURL).
+		Times(3).
+		Reply(200).
+		JSON(getReportExportCompletionMessage("SUCCESS"))
+
+	gock.New(mockAPIBaseURL).
+		Get(downloadReportURL).
+		Times(3).
+		Reply(500).
+		JSON(`{"error": "something went wrong"}`)
 
 	err = feed.ExportInspectionReports(viperConfig, apiClient, exporter)
 	assert.NotNil(t, err)
+	assert.Contains(t, err.Error(), "Failed to generate 3 PDF reports and 0 WORD reports")
 }
 
 func TestExportReports_should_return_error_for_unsupported_format(t *testing.T) {
