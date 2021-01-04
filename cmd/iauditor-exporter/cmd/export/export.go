@@ -15,6 +15,7 @@ import (
 	"github.com/spf13/viper"
 )
 
+// SQLCmd is used to export data in sql format
 func SQLCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   "sql",
@@ -28,6 +29,7 @@ iauditor-exporter sql --export-path /path/to/export/to`,
 	}
 }
 
+// CSVCmd is used to export data in csv format
 func CSVCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   "csv",
@@ -41,7 +43,8 @@ iauditor-exporter csv --export-path /path/to/export/to`,
 	}
 }
 
-func InspectionJsonCmd() *cobra.Command {
+// InspectionJSONCmd is used to export inspections to json files
+func InspectionJSONCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   "inspection-json",
 		Short: "Export iAuditor inspections to json files",
@@ -54,14 +57,13 @@ iauditor-exporter inspection-json --export-path /path/to/export/to`,
 	}
 }
 
+// PrintSchemaCmd is used to print table schemas
 func PrintSchemaCmd() *cobra.Command {
 	return &cobra.Command{
-		Use:       "schema",
-		Short:     "Print iAuditor table schemas",
-		Example:   `iauditor-exporter schema`,
-		ValidArgs: []string{},
-		Args:      cobra.OnlyValidArgs,
-		RunE:      printSchema,
+		Use:     "schema",
+		Short:   "Print iAuditor table schemas",
+		Example: `iauditor-exporter schema`,
+		RunE:    printSchema,
 	}
 }
 

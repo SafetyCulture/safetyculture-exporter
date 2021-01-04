@@ -76,7 +76,7 @@ func init() {
 	// Add sub-commands
 	addCmd(export.SQLCmd(), connectionFlags, dbFlags, inspectionFlags, tablesFlag, schemasFlag)
 	addCmd(export.CSVCmd(), connectionFlags, csvFlags, inspectionFlags, tablesFlag, schemasFlag)
-	addCmd(export.InspectionJsonCmd(), connectionFlags, inspectionFlags)
+	addCmd(export.InspectionJSONCmd(), connectionFlags, inspectionFlags)
 	addCmd(export.PrintSchemaCmd())
 	RootCmd.AddCommand(configure.Cmd())
 	RootCmd.AddCommand(&cobra.Command{
