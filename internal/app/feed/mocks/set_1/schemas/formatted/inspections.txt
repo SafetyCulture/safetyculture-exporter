@@ -28,5 +28,7 @@
 | conducted_on     | datetime |             |
 | personnel        | text     |             |
 | client_site      | text     |             |
+| latitude         | real     |             |
+| longitude        | real     |             |
 | web_report_link  | text     |             |
 +------------------+----------+-------------+
