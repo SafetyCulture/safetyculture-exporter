@@ -67,6 +67,19 @@ func PrintSchemaCmd() *cobra.Command {
 	}
 }
 
+// ReportCmd is used to download inspection reports
+func ReportCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:   "report",
+		Short: "Export inspection report",
+		Example: `// Export PDF and Word inspection reports
+		iauditor-exporter report --export-path /path/to/export/to --format PDF,WORD
+		// Export PDF inspection reports with a custom report preference
+		iauditor-exporter report --export-path /path/to/export/to --format PDF --preference-id abc`,
+		RunE: runInspectionReports,
+	}
+}
+
 func getAPIClient() api.Client {
 	apiOpts := []api.Opt{}
 	if viper.GetBool("api.tls_skip_verify") {
@@ -141,8 +154,7 @@ func printSchema(cmd *cobra.Command, args []string) error {
 	return feed.WriteSchemas(viper.GetViper(), exporter)
 }
 
-// RunInspectionReports downloads and stores inspection reports
-func RunInspectionReports(cmd *cobra.Command, args []string) error {
+func runInspectionReports(cmd *cobra.Command, args []string) error {
 
 	exportPath := viper.GetString("export.path")
 	err := os.MkdirAll(exportPath, os.ModePerm)
