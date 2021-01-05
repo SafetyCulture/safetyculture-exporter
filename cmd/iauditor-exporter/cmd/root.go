@@ -19,7 +19,7 @@ import (
 )
 
 var cfgFile string
-var connectionFlags, dbFlags, csvFlags, inspectionFlags, tablesFlag, schemasFlag *flag.FlagSet
+var connectionFlags, dbFlags, csvFlags, inspectionFlags, templatesFlag, tablesFlag, schemasFlag *flag.FlagSet
 
 // RootCmd represents the base command when called without any subcommands.
 var RootCmd = &cobra.Command{
@@ -74,9 +74,9 @@ func init() {
 	bindFlags()
 
 	// Add sub-commands
-	addCmd(export.SQLCmd(), connectionFlags, dbFlags, inspectionFlags, tablesFlag, schemasFlag)
-	addCmd(export.CSVCmd(), connectionFlags, csvFlags, inspectionFlags, tablesFlag, schemasFlag)
-	addCmd(export.InspectionJSONCmd(), connectionFlags, inspectionFlags)
+	addCmd(export.SQLCmd(), connectionFlags, dbFlags, inspectionFlags, templatesFlag, tablesFlag, schemasFlag)
+	addCmd(export.CSVCmd(), connectionFlags, csvFlags, inspectionFlags, templatesFlag, tablesFlag, schemasFlag)
+	addCmd(export.InspectionJSONCmd(), connectionFlags, inspectionFlags, templatesFlag)
 	addCmd(export.PrintSchemaCmd())
 	RootCmd.AddCommand(configure.Cmd())
 	RootCmd.AddCommand(&cobra.Command{
@@ -105,12 +105,14 @@ func configFlags() {
 	csvFlags.String("export-path", "./export/", "CSV Export Path")
 
 	inspectionFlags = flag.NewFlagSet("inspection", flag.ContinueOnError)
-	inspectionFlags.StringSlice("template-ids", []string{}, "Template IDs to filter inspections and schedules by (default all)")
 	inspectionFlags.StringSlice("inspection-skip-ids", []string{}, "Skip storing these inspection IDs")
 	inspectionFlags.Bool("inspection-incremental-update", true, "Update inspections, inspection_items and templates tables incrementally")
 	inspectionFlags.Bool("inspection-include-inactive-items", false, "Include inactive items in the inspection_items table (default false)")
 	inspectionFlags.String("inspection-archived", "false", "Return archived inspections, false, true or both")
 	inspectionFlags.String("inspection-completed", "both", "Return completed inspections, false, true or both")
+
+	templatesFlag = flag.NewFlagSet("templates", flag.ContinueOnError)
+	templatesFlag.StringSlice("template-ids", []string{}, "Template IDs to filter inspections and schedules by (default all)")
 
 	tablesFlag = flag.NewFlagSet("tables", flag.ContinueOnError)
 	tablesFlag.StringSlice("tables", []string{}, "Tables to export (default all)")
@@ -120,25 +122,25 @@ func configFlags() {
 }
 
 func bindFlags() {
-	util.Check(viper.BindPFlag("access_token", RootCmd.PersistentFlags().Lookup("access-token")), "while binding flag")
+	util.Check(viper.BindPFlag("access_token", connectionFlags.Lookup("access-token")), "while binding flag")
 
-	util.Check(viper.BindPFlag("api.url", RootCmd.PersistentFlags().Lookup("api-url")), "while binding flag")
-	util.Check(viper.BindPFlag("api.tls_skip_verify", RootCmd.PersistentFlags().Lookup("tls-skip-verify")), "while binding flag")
-	util.Check(viper.BindPFlag("api.tls_cert", RootCmd.PersistentFlags().Lookup("tls-cert")), "while binding flag")
-	util.Check(viper.BindPFlag("api.proxy_url", RootCmd.PersistentFlags().Lookup("proxy-url")), "while binding flag")
+	util.Check(viper.BindPFlag("api.url", connectionFlags.Lookup("api-url")), "while binding flag")
+	util.Check(viper.BindPFlag("api.tls_skip_verify", connectionFlags.Lookup("tls-skip-verify")), "while binding flag")
+	util.Check(viper.BindPFlag("api.tls_cert", connectionFlags.Lookup("tls-cert")), "while binding flag")
+	util.Check(viper.BindPFlag("api.proxy_url", connectionFlags.Lookup("proxy-url")), "while binding flag")
 
-	util.Check(viper.BindPFlag("db.dialect", RootCmd.PersistentFlags().Lookup("db-dialect")), "while binding flag")
-	util.Check(viper.BindPFlag("db.connection_string", RootCmd.PersistentFlags().Lookup("db-connection-string")), "while binding flag")
+	util.Check(viper.BindPFlag("db.dialect", dbFlags.Lookup("db-dialect")), "while binding flag")
+	util.Check(viper.BindPFlag("db.connection_string", dbFlags.Lookup("db-connection-string")), "while binding flag")
 
-	util.Check(viper.BindPFlag("export.path", RootCmd.PersistentFlags().Lookup("export-path")), "while binding flag")
-	util.Check(viper.BindPFlag("export.template_ids", RootCmd.PersistentFlags().Lookup("template-ids")), "while binding flag")
-	util.Check(viper.BindPFlag("export.tables", RootCmd.PersistentFlags().Lookup("tables")), "while binding flag")
+	util.Check(viper.BindPFlag("export.path", csvFlags.Lookup("export-path")), "while binding flag")
+	util.Check(viper.BindPFlag("export.template_ids", templatesFlag.Lookup("template-ids")), "while binding flag")
+	util.Check(viper.BindPFlag("export.tables", tablesFlag.Lookup("tables")), "while binding flag")
 
-	util.Check(viper.BindPFlag("export.inspection.incremental", RootCmd.PersistentFlags().Lookup("inspection-incremental-update")), "while binding flag")
-	util.Check(viper.BindPFlag("export.inspection.included_inactive_items", RootCmd.PersistentFlags().Lookup("inspection-include-inactive-items")), "while binding flag")
-	util.Check(viper.BindPFlag("export.inspection.archived", RootCmd.PersistentFlags().Lookup("inspection-archived")), "while binding flag")
-	util.Check(viper.BindPFlag("export.inspection.completed", RootCmd.PersistentFlags().Lookup("inspection-completed")), "while binding flag")
-	util.Check(viper.BindPFlag("export.inspection.skip_ids", RootCmd.PersistentFlags().Lookup("inspection-skip-ids")), "while binding flag")
+	util.Check(viper.BindPFlag("export.inspection.incremental", inspectionFlags.Lookup("inspection-incremental-update")), "while binding flag")
+	util.Check(viper.BindPFlag("export.inspection.included_inactive_items", inspectionFlags.Lookup("inspection-include-inactive-items")), "while binding flag")
+	util.Check(viper.BindPFlag("export.inspection.archived", inspectionFlags.Lookup("inspection-archived")), "while binding flag")
+	util.Check(viper.BindPFlag("export.inspection.completed", inspectionFlags.Lookup("inspection-completed")), "while binding flag")
+	util.Check(viper.BindPFlag("export.inspection.skip_ids", inspectionFlags.Lookup("inspection-skip-ids")), "while binding flag")
 }
 
 func addCmd(cmd *cobra.Command, flags ...*flag.FlagSet) {
