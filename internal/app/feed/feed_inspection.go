@@ -38,6 +38,8 @@ type Inspection struct {
 	ConductedOn     *time.Time `json:"conducted_on" csv:"conducted_on"`
 	Personnel       string     `json:"personnel" csv:"personnel"`
 	ClientSite      string     `json:"client_site" csv:"client_site"`
+	Latitude        *float64   `json:"latitude" csv:"latitude"`
+	Longitude       *float64   `json:"longitude" csv:"longitude"`
 	WebReportLink   string     `json:"web_report_link" csv:"web_report_link"`
 }
 
@@ -101,6 +103,8 @@ func (f *InspectionFeed) Columns() []string {
 		"conducted_on",
 		"personnel",
 		"client_site",
+		"latitude",
+		"longitude",
 		"web_report_link",
 	}
 }

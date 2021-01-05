@@ -30,6 +30,8 @@
       "conducted_on": "2014-03-06T04:47:26.000Z",
       "personnel": null,
       "client_site": null,
+      "latitude": -33.8858784,
+      "longitude": 151.2116864,
       "web_report_link": "https://app.safetyculture.io/report/audit/audit_2"
     },
     {
@@ -58,6 +60,8 @@
       "conducted_on": "2014-03-17T00:35:40.000Z",
       "personnel": null,
       "client_site": null,
+      "latitude": null,
+      "longitude": null,
       "web_report_link": "https://app.safetyculture.io/report/audit/audit_3"
     }
   ]
