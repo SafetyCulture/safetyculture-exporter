@@ -15,47 +15,55 @@ import (
 	"github.com/spf13/viper"
 )
 
-// Cmds implements the sts commands.
-func Cmds() []*cobra.Command {
-	return []*cobra.Command{
-		&cobra.Command{
-			Use:   "csv",
-			Short: "Export iAuditor data to CSV files",
-			Example: `// Limit inspections and schedules to these templates
-iauditor-exporter csv --template-ids template_F492E54D87F2419E9398F7BDCA0FA5D9,template_d54e06808d2f11e2893e83a731dba0ca
-
-// Customise export location
-iauditor-exporter csv --export-path /path/to/export/to`,
-			RunE: runCSV,
-		},
-		&cobra.Command{
-			Use:   "sql",
-			Short: "Export iAuditor data to SQL database",
-			Example: `// Limit inspections and schedules to these templates
+// SQLCmd is used to export data in sql format
+func SQLCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:   "sql",
+		Short: "Export iAuditor data to SQL database",
+		Example: `// Limit inspections and schedules to these templates
 iauditor-exporter sql --template-ids template_F492E54D87F2419E9398F7BDCA0FA5D9,template_d54e06808d2f11e2893e83a731dba0ca
 
 // Customise export location
 iauditor-exporter sql --export-path /path/to/export/to`,
-			RunE: runSQL,
-		},
-		&cobra.Command{
-			Use:   "inspection-json",
-			Short: "Export iAuditor inspections to json files",
-			Example: `// Limit inspections to these templates
+		RunE: runSQL,
+	}
+}
+
+// CSVCmd is used to export data in csv format
+func CSVCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:   "csv",
+		Short: "Export iAuditor data to CSV files",
+		Example: `// Limit inspections and schedules to these templates
+iauditor-exporter csv --template-ids template_F492E54D87F2419E9398F7BDCA0FA5D9,template_d54e06808d2f11e2893e83a731dba0ca
+
+// Customise export location
+iauditor-exporter csv --export-path /path/to/export/to`,
+		RunE: runCSV,
+	}
+}
+
+// InspectionJSONCmd is used to export inspections to json files
+func InspectionJSONCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:   "inspection-json",
+		Short: "Export iAuditor inspections to json files",
+		Example: `// Limit inspections to these templates
 iauditor-exporter inspection-json --template-ids template_F492E54D87F2419E9398F7BDCA0FA5D9,template_d54e06808d2f11e2893e83a731dba0ca
 
 // Customise export location
 iauditor-exporter inspection-json --export-path /path/to/export/to`,
-			RunE: runInspectionJSON,
-		},
-		&cobra.Command{
-			Use:       "schema",
-			Short:     "Print iAuditor table schemas",
-			Example:   `iauditor-exporter schema`,
-			ValidArgs: []string{},
-			Args:      cobra.OnlyValidArgs,
-			RunE:      printSchema,
-		},
+		RunE: runInspectionJSON,
+	}
+}
+
+// PrintSchemaCmd is used to print table schemas
+func PrintSchemaCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:     "schema",
+		Short:   "Print iAuditor table schemas",
+		Example: `iauditor-exporter schema`,
+		RunE:    printSchema,
 	}
 }
 

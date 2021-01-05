@@ -14,9 +14,12 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/cobra/doc"
 	"github.com/spf13/viper"
+
+	flag "github.com/spf13/pflag"
 )
 
 var cfgFile string
+var connectionFlags, dbFlags, csvFlags, inspectionFlags, templatesFlag, tablesFlag, schemasFlag *flag.FlagSet
 
 // RootCmd represents the base command when called without any subcommands.
 var RootCmd = &cobra.Command{
@@ -67,52 +70,14 @@ func init() {
 	// will be global for your application.
 	RootCmd.PersistentFlags().StringVar(&cfgFile, "config-path", "./iauditor-exporter.yaml", "config file")
 
-	// TODO - Can we validate these tokens and throw error if they are wrong?
-	RootCmd.PersistentFlags().StringP("access-token", "t", "", "API Access Token")
-	RootCmd.PersistentFlags().String("api-url", "https://api.safetyculture.io", "API URL")
-	RootCmd.PersistentFlags().Bool("tls-skip-verify", false, "Skip verification of API TLS certificates")
-	RootCmd.PersistentFlags().String("tls-cert", "", "Custom root CA certificate to use when making API requests")
-	RootCmd.PersistentFlags().String("proxy-url", "", "Proxy URL for making API requests through")
-
-	RootCmd.PersistentFlags().String("db-dialect", "mysql", "Database dialect. mysql, postgres and sqlserver are the only valid options.")
-	RootCmd.PersistentFlags().String("db-connection-string", "", "Database connection string")
-
-	RootCmd.PersistentFlags().String("export-path", "./export/", "CSV Export Path")
-	RootCmd.PersistentFlags().StringSlice("template-ids", []string{}, "Template IDs to filter inspections and schedules by (default all)")
-	RootCmd.PersistentFlags().StringSlice("inspection-skip-ids", []string{}, "Skip storing these inspection IDs")
-
-	RootCmd.PersistentFlags().Bool("inspection-incremental-update", true, "Update inspections, inspection_items and templates tables incrementally")
-	RootCmd.PersistentFlags().Bool("inspection-include-inactive-items", false, "Include inactive items in the inspection_items table (default false)")
-	RootCmd.PersistentFlags().String("inspection-archived", "false", "Return archived inspections, false, true or both")
-	RootCmd.PersistentFlags().String("inspection-completed", "both", "Return completed inspections, false, true or both")
-	RootCmd.PersistentFlags().StringSlice("tables", []string{}, "Tables to export (default all)")
-
-	RootCmd.PersistentFlags().Bool("create-schema-only", false, "Create schema only (default false)")
-
-	util.Check(viper.BindPFlag("access_token", RootCmd.PersistentFlags().Lookup("access-token")), "while binding flag")
-
-	util.Check(viper.BindPFlag("api.url", RootCmd.PersistentFlags().Lookup("api-url")), "while binding flag")
-	util.Check(viper.BindPFlag("api.tls_skip_verify", RootCmd.PersistentFlags().Lookup("tls-skip-verify")), "while binding flag")
-	util.Check(viper.BindPFlag("api.tls_cert", RootCmd.PersistentFlags().Lookup("tls-cert")), "while binding flag")
-	util.Check(viper.BindPFlag("api.proxy_url", RootCmd.PersistentFlags().Lookup("proxy-url")), "while binding flag")
-
-	util.Check(viper.BindPFlag("db.dialect", RootCmd.PersistentFlags().Lookup("db-dialect")), "while binding flag")
-	util.Check(viper.BindPFlag("db.connection_string", RootCmd.PersistentFlags().Lookup("db-connection-string")), "while binding flag")
-
-	util.Check(viper.BindPFlag("export.path", RootCmd.PersistentFlags().Lookup("export-path")), "while binding flag")
-	util.Check(viper.BindPFlag("export.template_ids", RootCmd.PersistentFlags().Lookup("template-ids")), "while binding flag")
-	util.Check(viper.BindPFlag("export.tables", RootCmd.PersistentFlags().Lookup("tables")), "while binding flag")
-
-	util.Check(viper.BindPFlag("export.inspection.incremental", RootCmd.PersistentFlags().Lookup("inspection-incremental-update")), "while binding flag")
-	util.Check(viper.BindPFlag("export.inspection.included_inactive_items", RootCmd.PersistentFlags().Lookup("inspection-include-inactive-items")), "while binding flag")
-	util.Check(viper.BindPFlag("export.inspection.archived", RootCmd.PersistentFlags().Lookup("inspection-archived")), "while binding flag")
-	util.Check(viper.BindPFlag("export.inspection.completed", RootCmd.PersistentFlags().Lookup("inspection-completed")), "while binding flag")
-	util.Check(viper.BindPFlag("export.inspection.skip_ids", RootCmd.PersistentFlags().Lookup("inspection-skip-ids")), "while binding flag")
-
-	util.Check(viper.BindPFlag("export.schema_only", RootCmd.PersistentFlags().Lookup("create-schema-only")), "while binding flag")
+	configFlags()
+	bindFlags()
 
 	// Add sub-commands
-	RootCmd.AddCommand(export.Cmds()...)
+	addCmd(export.SQLCmd(), connectionFlags, dbFlags, inspectionFlags, templatesFlag, tablesFlag, schemasFlag)
+	addCmd(export.CSVCmd(), connectionFlags, csvFlags, inspectionFlags, templatesFlag, tablesFlag, schemasFlag)
+	addCmd(export.InspectionJSONCmd(), connectionFlags, inspectionFlags, templatesFlag)
+	addCmd(export.PrintSchemaCmd())
 	RootCmd.AddCommand(configure.Cmd())
 	RootCmd.AddCommand(&cobra.Command{
 		Hidden: true,
@@ -121,6 +86,69 @@ func init() {
 	})
 
 	initConfig()
+}
+
+func configFlags() {
+	connectionFlags = flag.NewFlagSet("connection", flag.ContinueOnError)
+	// TODO - Can we validate these tokens and throw error if they are wrong?
+	connectionFlags.StringP("access-token", "t", "", "API Access Token")
+	connectionFlags.String("api-url", "https://api.safetyculture.io", "API URL")
+	connectionFlags.Bool("tls-skip-verify", false, "Skip verification of API TLS certificates")
+	connectionFlags.String("tls-cert", "", "Custom root CA certificate to use when making API requests")
+	connectionFlags.String("proxy-url", "", "Proxy URL for making API requests through")
+
+	dbFlags = flag.NewFlagSet("db", flag.ContinueOnError)
+	dbFlags.String("db-dialect", "mysql", "Database dialect. mysql, postgres and sqlserver are the only valid options.")
+	dbFlags.String("db-connection-string", "", "Database connection string")
+
+	csvFlags = flag.NewFlagSet("csv", flag.ContinueOnError)
+	csvFlags.String("export-path", "./export/", "CSV Export Path")
+
+	inspectionFlags = flag.NewFlagSet("inspection", flag.ContinueOnError)
+	inspectionFlags.StringSlice("inspection-skip-ids", []string{}, "Skip storing these inspection IDs")
+	inspectionFlags.Bool("inspection-incremental-update", true, "Update inspections, inspection_items and templates tables incrementally")
+	inspectionFlags.Bool("inspection-include-inactive-items", false, "Include inactive items in the inspection_items table (default false)")
+	inspectionFlags.String("inspection-archived", "false", "Return archived inspections, false, true or both")
+	inspectionFlags.String("inspection-completed", "both", "Return completed inspections, false, true or both")
+
+	templatesFlag = flag.NewFlagSet("templates", flag.ContinueOnError)
+	templatesFlag.StringSlice("template-ids", []string{}, "Template IDs to filter inspections and schedules by (default all)")
+
+	tablesFlag = flag.NewFlagSet("tables", flag.ContinueOnError)
+	tablesFlag.StringSlice("tables", []string{}, "Tables to export (default all)")
+
+	schemasFlag = flag.NewFlagSet("schemas", flag.ContinueOnError)
+	schemasFlag.Bool("create-schema-only", false, "Create schema only (default false)")
+}
+
+func bindFlags() {
+	util.Check(viper.BindPFlag("access_token", connectionFlags.Lookup("access-token")), "while binding flag")
+
+	util.Check(viper.BindPFlag("api.url", connectionFlags.Lookup("api-url")), "while binding flag")
+	util.Check(viper.BindPFlag("api.tls_skip_verify", connectionFlags.Lookup("tls-skip-verify")), "while binding flag")
+	util.Check(viper.BindPFlag("api.tls_cert", connectionFlags.Lookup("tls-cert")), "while binding flag")
+	util.Check(viper.BindPFlag("api.proxy_url", connectionFlags.Lookup("proxy-url")), "while binding flag")
+
+	util.Check(viper.BindPFlag("db.dialect", dbFlags.Lookup("db-dialect")), "while binding flag")
+	util.Check(viper.BindPFlag("db.connection_string", dbFlags.Lookup("db-connection-string")), "while binding flag")
+
+	util.Check(viper.BindPFlag("export.path", csvFlags.Lookup("export-path")), "while binding flag")
+	util.Check(viper.BindPFlag("export.template_ids", templatesFlag.Lookup("template-ids")), "while binding flag")
+	util.Check(viper.BindPFlag("export.tables", tablesFlag.Lookup("tables")), "while binding flag")
+
+	util.Check(viper.BindPFlag("export.inspection.incremental", inspectionFlags.Lookup("inspection-incremental-update")), "while binding flag")
+	util.Check(viper.BindPFlag("export.inspection.included_inactive_items", inspectionFlags.Lookup("inspection-include-inactive-items")), "while binding flag")
+	util.Check(viper.BindPFlag("export.inspection.archived", inspectionFlags.Lookup("inspection-archived")), "while binding flag")
+	util.Check(viper.BindPFlag("export.inspection.completed", inspectionFlags.Lookup("inspection-completed")), "while binding flag")
+	util.Check(viper.BindPFlag("export.inspection.skip_ids", inspectionFlags.Lookup("inspection-skip-ids")), "while binding flag")
+}
+
+func addCmd(cmd *cobra.Command, flags ...*flag.FlagSet) {
+	for _, f := range flags {
+		cmd.PersistentFlags().AddFlagSet(f)
+	}
+
+	RootCmd.AddCommand(cmd)
 }
 
 // initConfig reads in config file and ENV variables if set.
