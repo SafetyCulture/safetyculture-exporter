@@ -37,40 +37,50 @@ api:
   url: https://api.safetyculture.io
 db:
   connection_string: ""
-  dialect: ""
+  dialect: mysql
 export:
   inspection:
-    archived: false
-    completed: "true"
+    archived: "false"
+    completed: both
     included_inactive_items: false
     incremental: true
-    modified_after: ""
     skip_ids: []
-    template_ids: []
   path: ./export/
   tables: []
+  template_ids: []
 ```
 
 All of the available configuration options can be found below.
 
-| Flag                                  | Environment Variable                            | Configuration Key                          | Description                                                                                   |
-|---------------------------------------|-------------------------------------------------|--------------------------------------------|-----------------------------------------------------------------------------------------------|
-| `--access-token`                      | `IAUD_ACCESS_TOKEN`                             | `access_token`                             | API Access Token                                                                              |
-| `--api-url`                           | `IAUD_API_URL`                                  | `api.url`                                  | iAuditor API URL                                                                              |
-| `--proxy-url`                         | `IAUD_API_PROXY_URL`                            | `api.proxy_url`                            | Proxy URL for making API requests through                                                     |
-| `--tls-cert`                          | `IAUD_API_TLS_CERT`                             | `api.tls_certs`                            | Custom root CA certificate to use when making API requests                                    |
-| `--tls-skip-verify`                   | `IAUD_API_TLS_SKIP_VERIFY`                      | `api.tls_skip_verify`                      | Skip verification of API TLS certificates                                                     |
-| `--config-path`                       | `-`                                             | `-`                                        | config file path (default "./iauditor-exporter.yaml")                                        |
-| `--db-connection-string`              | `IAUD_DB_CONNECTION_STRING`                     | `db.connection_string`                     | Database connection string                                                                    |
-| `--db-dialect`                        | `IAUD_DB_DIALECT`                               | `db.dialect`                               | Database dialect. mysql, postgres and sqlserver are the only valid options. (default "mysql") |
-| `--export-path`                       | `IAUD_EXPORT_PATH`                              | `export.path`                              | CSV Export Path (default "./export/")                                                         |
-| `--inspection-template-ids`           | `IAUD_EXPORT_TEMPLATE_IDS`                      | `export.template_ids`                      | Template IDs to filter inspections and schedules by (default all)                             |
-| `--tables`                            | `IAUD_EXPORT_TABLES`                            | `export.tables`                            | Tables to export (default all)                                                                |
-| `--inspection-archived`               | `IAUD_EXPORT_INSPECTION_ARCHIVED`               | `export.inspection.archived`               | Return archived inspections, false, true or both (default "false")                            |
-| `--inspection-completed`              | `IAUD_EXPORT_INSPECTION_COMPLETED`              | `export.inspection.completed`              | Return completed inspections, false, true or both (default "both")                            |
-| `--inspection-include-inactive-items` | `IAUD_EXPORT_INSPECTION_INCLUDE_INACTIVE_ITEMS` | `export.inspection.include_inactive_items` | Include inactive items in the inspection_items table (default false)                          |
-| `--inspection-incremental-update`     | `IAUD_EXPORT_INSPECTION_INCREMENTAL`            | `export.inspection.incremental`            | Update inspections, inspection_items and templates tables incrementally (default true)        |
-| `--inspection-skip-ids`               | `IAUD_EXPORT_INSPECTION_SKIP_IDS`               | `export.inspection.skip_ids`               | Skip storing these inspection IDs                                                             |
+### `access_token`
+API Access Token  
+> Flag: `--access-token`  
+Env: `IAUD_ACCESS_TOKEN`  
+
+
+### `api.url`
+iAuditor API URL  
+> Flag: `--api-url`  
+Env: `IAUD_API_URL`  
+Default: `https://api.safetyculture.io`
+
+| Configuration Key                          | Description                                                                                   |
+|--------------------------------------------|-----------------------------------------------------------------------------------------------|
+| `access_token`                             | API Access Token                                                                              |
+| `api.url`                                  | iAuditor API URL                                                                              |
+| `api.proxy_url`                            | Proxy URL for making API requests through                                                     |
+| `api.tls_certs`                            | Custom root CA certificate to use when making API requests                                    |
+| `api.tls_skip_verify`                      | Skip verification of API TLS certificates                                                     |
+| `db.connection_string`                     | Database connection string                                                                    |
+| `db.dialect`                               | Database dialect. mysql, postgres and sqlserver are the only valid options. (default "mysql") |
+| `export.path`                              | CSV Export Path (default "./export/")                                                         |
+| `export.template_ids`                      | Template IDs to filter inspections and schedules by (default all)                             |
+| `export.tables`                            | Tables to export (default all)                                                                |
+| `export.inspection.archived`               | Return archived inspections, false, true or both (default "false")                            |
+| `export.inspection.completed`              | Return completed inspections, false, true or both (default "both")                            |
+| `export.inspection.include_inactive_items` | Include inactive items in the inspection_items table (default false)                          |
+| `export.inspection.incremental`            | Update inspections, inspection_items and templates tables incrementally (default true)        |
+| `export.inspection.skip_ids`               | Skip storing these inspection IDs                                                             |
 
 ## Using a proxy
 
