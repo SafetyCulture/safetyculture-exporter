@@ -58,11 +58,11 @@ API Access Token
 Env: `IAUD_ACCESS_TOKEN`  
 
 
-### `api.url`
+#### `api.url`
 iAuditor API URL  
-> Flag: `--api-url`  
-Env: `IAUD_API_URL`  
-Default: `https://api.safetyculture.io`
+> Flag: --api-url  
+Env: IAUD_API_URL  
+Default: https://api.safetyculture.io
 
 | Configuration Key                          | Description                                                                                   |
 |--------------------------------------------|-----------------------------------------------------------------------------------------------|
