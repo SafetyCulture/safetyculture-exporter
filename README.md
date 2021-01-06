@@ -91,7 +91,7 @@ env: `IAUD_DB_DIALECT`\
 default: `mysql`
 
 #### `export.path`
-Export path on disk 
+Export path on disk
 > flag: `--export-path`\
 env: `IAUD_EXPORT_PATH`\
 default: `./export/`
