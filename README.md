@@ -52,17 +52,17 @@ export:
 
 All of the available configuration options can be found below.
 
-### `access_token`
+#### `access_token`
 API Access Token  
-> Flag: `--access-token`  
-Env: `IAUD_ACCESS_TOKEN`  
+> flag: `--access-token`  
+env: `IAUD_ACCESS_TOKEN`  
 
 
 #### `api.url`
 iAuditor API URL  
-> Flag: --api-url  
-Env: IAUD_API_URL  
-Default: https://api.safetyculture.io
+> flag: `--api-url`  
+env: `IAUD_API_URL`  
+default: `https://api.safetyculture.io`
 
 | Configuration Key                          | Description                                                                                   |
 |--------------------------------------------|-----------------------------------------------------------------------------------------------|
