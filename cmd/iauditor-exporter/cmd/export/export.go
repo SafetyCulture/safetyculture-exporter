@@ -90,7 +90,16 @@ func getAPIClient() api.Client {
 
 func runSQL(cmd *cobra.Command, args []string) error {
 
-	exporter, err := feed.NewSQLExporter(viper.GetString("db.dialect"), viper.GetString("db.connection_string"), true)
+	var exportMediaPath string
+	exportMedia := viper.GetBool("export.media")
+	if exportMedia {
+		exportMediaPath = viper.GetString("export.media_path")
+
+		err := os.MkdirAll(exportMediaPath, os.ModePerm)
+		util.Check(err, fmt.Sprintf("Failed to create directory %s", exportMediaPath))
+	}
+
+	exporter, err := feed.NewSQLExporter(viper.GetString("db.dialect"), viper.GetString("db.connection_string"), true, exportMediaPath)
 	util.Check(err, "unable to create exporter")
 
 	if viper.GetBool("export.schema_only") {
@@ -120,9 +129,19 @@ func runInspectionJSON(cmd *cobra.Command, args []string) error {
 func runCSV(cmd *cobra.Command, args []string) error {
 
 	exportPath := viper.GetString("export.path")
-	os.MkdirAll(exportPath, os.ModePerm)
 
-	exporter, err := feed.NewCSVExporter(exportPath)
+	err := os.MkdirAll(exportPath, os.ModePerm)
+	util.Check(err, fmt.Sprintf("Failed to create directory %s", exportPath))
+
+	var exportMediaPath string
+	exportMedia := viper.GetBool("export.media")
+	if exportMedia {
+		exportMediaPath = viper.GetString("export.media_path")
+		err := os.MkdirAll(exportMediaPath, os.ModePerm)
+		util.Check(err, fmt.Sprintf("Failed to create directory %s", exportMediaPath))
+	}
+
+	exporter, err := feed.NewCSVExporter(exportPath, exportMediaPath)
 	util.Check(err, "unable to create exporter")
 
 	if viper.GetBool("export.schema_only") {

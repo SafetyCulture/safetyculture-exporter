@@ -19,7 +19,7 @@ import (
 )
 
 var cfgFile string
-var connectionFlags, dbFlags, csvFlags, inspectionFlags, templatesFlag, tablesFlag, schemasFlag *flag.FlagSet
+var connectionFlags, dbFlags, csvFlags, mediaFlags, inspectionFlags, templatesFlag, tablesFlag, schemasFlag *flag.FlagSet
 
 // RootCmd represents the base command when called without any subcommands.
 var RootCmd = &cobra.Command{
@@ -74,8 +74,8 @@ func init() {
 	bindFlags()
 
 	// Add sub-commands
-	addCmd(export.SQLCmd(), connectionFlags, dbFlags, inspectionFlags, templatesFlag, tablesFlag, schemasFlag)
-	addCmd(export.CSVCmd(), connectionFlags, csvFlags, inspectionFlags, templatesFlag, tablesFlag, schemasFlag)
+	addCmd(export.SQLCmd(), connectionFlags, dbFlags, inspectionFlags, templatesFlag, tablesFlag, schemasFlag, mediaFlags)
+	addCmd(export.CSVCmd(), connectionFlags, csvFlags, inspectionFlags, templatesFlag, tablesFlag, schemasFlag, mediaFlags)
 	addCmd(export.InspectionJSONCmd(), connectionFlags, inspectionFlags, templatesFlag)
 	addCmd(export.PrintSchemaCmd())
 	addCmd(configure.Cmd(), connectionFlags, dbFlags, csvFlags, inspectionFlags, templatesFlag, tablesFlag)
@@ -104,6 +104,10 @@ func configFlags() {
 
 	csvFlags = flag.NewFlagSet("csv", flag.ContinueOnError)
 	csvFlags.String("export-path", "./export/", "CSV Export Path")
+
+	mediaFlags = flag.NewFlagSet("media", flag.ContinueOnError)
+	mediaFlags.Bool("export-media", false, "Export media")
+	mediaFlags.String("export-media-path", "./export/media/", "Media Export Path")
 
 	inspectionFlags = flag.NewFlagSet("inspection", flag.ContinueOnError)
 	inspectionFlags.StringSlice("inspection-skip-ids", []string{}, "Skip storing these inspection IDs")
@@ -134,6 +138,8 @@ func bindFlags() {
 	util.Check(viper.BindPFlag("db.connection_string", dbFlags.Lookup("db-connection-string")), "while binding flag")
 
 	util.Check(viper.BindPFlag("export.path", csvFlags.Lookup("export-path")), "while binding flag")
+	util.Check(viper.BindPFlag("export.media", mediaFlags.Lookup("export-media")), "while binding flag")
+	util.Check(viper.BindPFlag("export.media_path", mediaFlags.Lookup("export-media-path")), "while binding flag")
 	util.Check(viper.BindPFlag("export.template_ids", templatesFlag.Lookup("template-ids")), "while binding flag")
 	util.Check(viper.BindPFlag("export.tables", tablesFlag.Lookup("tables")), "while binding flag")
 

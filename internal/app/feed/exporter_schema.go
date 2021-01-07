@@ -56,7 +56,7 @@ func (e *SchemaExporter) WriteSchema(feed Feed) error {
 
 // NewSchemaExporter creates a new instance of SchemaExporter
 func NewSchemaExporter(output io.Writer) (*SchemaExporter, error) {
-	sqlExporter, err := NewSQLExporter("sqlite", "file::memory:?cache=shared", true)
+	sqlExporter, err := NewSQLExporter("sqlite", "file::memory:?cache=shared", true, "")
 	if err != nil {
 		return nil, err
 	}

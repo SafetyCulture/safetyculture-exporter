@@ -2,6 +2,9 @@ package feed
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/SafetyCulture/iauditor-exporter/internal/app/util"
@@ -17,9 +20,10 @@ import (
 
 // SQLExporter is an interface to export data feeds to SQL databases
 type SQLExporter struct {
-	DB          *gorm.DB
-	Logger      *zap.SugaredLogger
-	AutoMigrate bool
+	DB              *gorm.DB
+	Logger          *zap.SugaredLogger
+	AutoMigrate     bool
+	ExportMediaPath string
 }
 
 // SupportsUpsert returns a bool if the exporter supports upserts
@@ -109,8 +113,27 @@ func (e *SQLExporter) FinaliseExport(feed Feed, rows interface{}) error {
 	return nil
 }
 
+func (e *SQLExporter) WriteMedia(auditID, mediaID, contentType string, body []byte) error {
+
+	exportMediaDir := filepath.Join(e.ExportMediaPath, fmt.Sprintf("%s", auditID))
+	err := os.MkdirAll(exportMediaDir, os.ModePerm)
+	util.Check(err, fmt.Sprintf("Failed to create directory %s", exportMediaDir))
+
+	ext := strings.Split(contentType, "/")
+	exportFilePath := filepath.Join(exportMediaDir, fmt.Sprintf("%s.%s", mediaID, ext[1]))
+
+	file, err := os.OpenFile(exportFilePath, os.O_RDWR|os.O_CREATE, 0666)
+	util.Check(err, fmt.Sprintf("Failed to open file: %v", exportFilePath))
+	defer file.Close()
+
+	_, err = file.WriteAt(body, 0)
+	util.Check(err, "Failed to write media to a file")
+
+	return nil
+}
+
 // NewSQLExporter creates a new instance of the SQLExporter
-func NewSQLExporter(dialect, connectionString string, autoMigrate bool) (*SQLExporter, error) {
+func NewSQLExporter(dialect, connectionString string, autoMigrate bool, exportMediaPath string) (*SQLExporter, error) {
 	logger := util.GetLogger()
 	gormLogger := &util.GormLogger{
 		SugaredLogger: logger,
@@ -143,8 +166,9 @@ func NewSQLExporter(dialect, connectionString string, autoMigrate bool) (*SQLExp
 	}
 
 	return &SQLExporter{
-		DB:          db,
-		Logger:      logger,
-		AutoMigrate: autoMigrate,
+		DB:              db,
+		Logger:          logger,
+		AutoMigrate:     autoMigrate,
+		ExportMediaPath: exportMediaPath,
 	}, nil
 }
