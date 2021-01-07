@@ -746,8 +746,8 @@ def ask_question(logger, str, q_type, choices=None, special=None, default=""):
     response = None
     if q_type == "multi":
         if default == "":
-            default = []
-        response = questionary.select(str, default=default, choices=choices).ask()
+            default = None
+        response = questionary.select(str, choices=choices).ask()
     elif q_type == "text":
         response = questionary.text(str, default=default).ask()
 

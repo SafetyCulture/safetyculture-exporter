@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "iauditor_exporter"
-version = "1.7.4"
+version = "1.7.5"
 description = "The iAuditor Exporter tool is the primary way to bulk export iAuditor information for use in BI tools such as PowerBI. The tool is coded in the Python programming language and can be ran simply and easily on any computer with Python installed."
 authors = ["Edd <edward.abrahamsen-mills@safetyculture.io>"]
 packages = [
@@ -14,7 +14,7 @@ tzlocal = ">=2.0.0"
 pytz = ">=2019.2"
 python_dateutil = ">=2.8.0"
 pandas = ">=0.24.2"
-numpy = ">=1.16.4"
+numpy = ">=1.19.5"
 coloredlogs = ">=10.0"
 safetyculture-sdk-python-beta = ">=2.2.3"
 tqdm = "^4.48.2"
