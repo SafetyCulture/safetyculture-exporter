@@ -2,9 +2,13 @@
 
 [![Maintainability](https://api.codeclimate.com/v1/badges/39eecd9ef3573ecca044/maintainability)](https://codeclimate.com/github/SafetyCulture/iauditor-exporter/maintainability) [![Test Coverage](https://api.codeclimate.com/v1/badges/39eecd9ef3573ecca044/test_coverage)](https://codeclimate.com/github/SafetyCulture/iauditor-exporter/test_coverage)
 
-iAuditor Exporter is a CLI tool for extracting your iAuditor data.
+The iAuditor Exporter is a CLI tool for extracting your iAuditor data that’s available to all our Premium customers. It’s used to bulk export `inspections`, `templates`, `sites`, `users`, `groups` and `schedules` to CSV and SQL formats for business intelligence tools. It’s also capable of exporting inspections to formats such as JSON, PDF and Word.
+
+Please note that you must be on our [Premium subscription](https://safetyculture.com/pricing/) in order to install and run the iAuditor Exporter tool.
 
 To see the full set of commands available run `iauditor-exporter --help`
+
+We recommend that you have some basic knowledge of running command lines before installing the iAuditor Exporter CLI tool.
 
 ## Install
 
