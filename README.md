@@ -2,13 +2,31 @@
 
 [![Maintainability](https://api.codeclimate.com/v1/badges/39eecd9ef3573ecca044/maintainability)](https://codeclimate.com/github/SafetyCulture/iauditor-exporter/maintainability) [![Test Coverage](https://api.codeclimate.com/v1/badges/39eecd9ef3573ecca044/test_coverage)](https://codeclimate.com/github/SafetyCulture/iauditor-exporter/test_coverage)
 
-iAuditor Exporter is a CLI tool for extracting your iAuditor data.
+The iAuditor Exporter is a CLI tool for extracting your iAuditor data that’s available to all our Premium customers. It’s used to bulk export `inspections`, `templates`, `sites`, `users`, `groups` and `schedules` to CSV and SQL formats for business intelligence tools. It’s also capable of exporting inspections to formats such as JSON, PDF and Word.
 
-To see the full set of commands available run `iauditor-exporter --help`
+- [Before you begin](#before-you-begin)
+- [Install](#install)
+- [Configure](#configure)
+- [Exporting to CSV](#exporting-to-csv)
+- [Exporting to SQL](#exporting-to-sql)
+    - [MySQL](#mysql)
+    - [PostgreSQL](#postgresql)
+    - [SQL Server](#sql-server)
+- [Exporting inspections to JSON](#exporting-inspections-to-json)
+- [Listing Schemas](#listing-schemas)
+- [Development](#development)
+
+## Before you begin
+
+Please note that you must be on our [Premium subscription](https://safetyculture.com/pricing/) in order to install and run the iAuditor Exporter tool.
+
+We recommend that you have some basic knowledge of running command lines before installing the iAuditor Exporter CLI tool.
 
 ## Install
 
-Download the latest release from [iauditor-exporter/releases](https://github.com/SafetyCulture/iauditor-exporter/releases).
+Download the latest release from [iauditor-exporter/releases](https://github.com/SafetyCulture/iauditor-exporter/releases) and extract it to a directory on you machine.
+
+Open the terminal and navigate to the folder the archive was extracted to. Run `./iauditor-exporter --help` to make sure your installation was successful.
 
 ### Quick Start
 
@@ -176,6 +194,10 @@ iauditor-exporter sql --db-dialect sqlserver --db-connection-string sqlserver://
 ```
 
 Please refer to [this page](https://github.com/denisenkom/go-mssqldb#connection-parameters-and-dsn) for supported formats for the connection string.
+
+## Exporting inspections to JSON
+
+See [docs/iauditor-exporter_inspection-json.md](docs/iauditor-exporter_inspection-json.md) for usage and options.
 
 ## Listing Schemas
 
