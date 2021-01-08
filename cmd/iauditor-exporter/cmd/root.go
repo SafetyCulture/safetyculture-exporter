@@ -78,6 +78,7 @@ func init() {
 	addCmd(export.CSVCmd(), connectionFlags, csvFlags, inspectionFlags, templatesFlag, tablesFlag, schemasFlag)
 	addCmd(export.InspectionJSONCmd(), connectionFlags, inspectionFlags, templatesFlag)
 	addCmd(export.PrintSchemaCmd())
+	addCmd(configure.Cmd(), connectionFlags, dbFlags, csvFlags, inspectionFlags, templatesFlag, tablesFlag)
 	RootCmd.AddCommand(configure.Cmd())
 	RootCmd.AddCommand(&cobra.Command{
 		Hidden: true,
