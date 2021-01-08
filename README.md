@@ -26,7 +26,7 @@ We recommend that you have some basic knowledge of running command lines before 
 
 Download the latest release from [iauditor-exporter/releases](https://github.com/SafetyCulture/iauditor-exporter/releases) and extract it to a directory on you machine.
 
-Open the terminal and navigate to the folder the archive was extracted to. Run `iauditor-exporter --help` to make sure your installation was successful.
+Open the terminal and navigate to the folder the archive was extracted to. Run `./iauditor-exporter --help` to make sure your installation was successful.
 
 ### Quick Start
 
