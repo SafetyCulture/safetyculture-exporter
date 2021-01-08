@@ -4,15 +4,17 @@
 
 The iAuditor Exporter is a CLI tool for extracting your iAuditor data that’s available to all our Premium customers. It’s used to bulk export `inspections`, `templates`, `sites`, `users`, `groups` and `schedules` to CSV and SQL formats for business intelligence tools. It’s also capable of exporting inspections to formats such as JSON, PDF and Word.
 
-Please note that you must be on our [Premium subscription](https://safetyculture.com/pricing/) in order to install and run the iAuditor Exporter tool.
+## Before you begin
 
-To see the full set of commands available run `iauditor-exporter --help`
+Please note that you must be on our [Premium subscription](https://safetyculture.com/pricing/) in order to install and run the iAuditor Exporter tool.
 
 We recommend that you have some basic knowledge of running command lines before installing the iAuditor Exporter CLI tool.
 
 ## Install
 
-Download the latest release from [iauditor-exporter/releases](https://github.com/SafetyCulture/iauditor-exporter/releases).
+Download the latest release from [iauditor-exporter/releases](https://github.com/SafetyCulture/iauditor-exporter/releases) and extract it to a directory on you machine.
+
+Open your terminal and navigate to the folder the archive was extracted to. Run `iauditor-exporter --help` to make sure your installation was successful.
 
 ### Quick Start
 
