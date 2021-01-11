@@ -129,6 +129,26 @@ func (f *InspectionItemFeed) fetchAndSaveMedia(ctx context.Context, exporter Exp
 	return nil
 }
 
+func fetchAndWriteMedia(ctx context.Context, apiClient api.Client, exporter Exporter, auditID, mediaURL string) error {
+	resp, err := apiClient.GetMedia(
+		ctx,
+		&api.GetMediaRequest{
+			URL:     mediaURL,
+			AuditID: auditID,
+		},
+	)
+	if err != nil {
+		return err
+	}
+
+	err = exporter.WriteMedia(auditID, resp.MediaID, resp.ContentType, resp.Body)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (f *InspectionItemFeed) writeRows(ctx context.Context, exporter Exporter, rows []*InspectionItem, apiClient api.Client) error {
 	skipIDs := map[string]bool{}
 	for _, id := range f.SkipIDs {
@@ -164,26 +184,6 @@ func (f *InspectionItemFeed) writeRows(ctx context.Context, exporter Exporter, r
 				continue
 			}
 
-			operation := func(mediaURL string) error {
-				resp, err := apiClient.GetMedia(
-					ctx,
-					&api.GetMediaRequest{
-						URL:     mediaURL,
-						AuditID: row.AuditID,
-					},
-				)
-				if err != nil {
-					return err
-				}
-
-				err = exporter.WriteMedia(row.AuditID, resp.MediaID, resp.ContentType, resp.Body)
-				if err != nil {
-					return err
-				}
-
-				return nil
-			}
-
 			mediaURLList := strings.Split(row.MediaHypertextReference, "\n")
 			for _, mediaURL := range mediaURLList {
 				wg.Add(1)
@@ -192,7 +192,7 @@ func (f *InspectionItemFeed) writeRows(ctx context.Context, exporter Exporter, r
 					defer wg.Done()
 					buffers <- true
 
-					err := operation(mediaURL)
+					err := fetchAndWriteMedia(ctx, apiClient, exporter, row.AuditID, mediaURL)
 					util.Check(err, fmt.Sprintf("Failed to write media of inspection: %s", row.AuditID))
 
 					<-buffers

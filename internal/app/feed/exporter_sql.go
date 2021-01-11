@@ -113,6 +113,7 @@ func (e *SQLExporter) FinaliseExport(feed Feed, rows interface{}) error {
 	return nil
 }
 
+// WriteMedia writes the media to a file
 func (e *SQLExporter) WriteMedia(auditID, mediaID, contentType string, body []byte) error {
 
 	exportMediaDir := filepath.Join(e.ExportMediaPath, fmt.Sprintf("%s", auditID))
