@@ -259,3 +259,23 @@ func TestDrainInspectionsWithCallbackError(t *testing.T) {
 		})
 	assert.NotNil(t, err)
 }
+
+func TestGetMediaWithAPIError(t *testing.T) {
+	defer gock.Off()
+
+	gock.New("http://localhost:9999").
+		Get("/audits/1234/media/12345").
+		ReplyError(fmt.Errorf("test error"))
+
+	apiClient := api.NewAPIClient("http://localhost:9999", "abc123")
+	gock.InterceptClient(apiClient.HTTPClient())
+
+	_, err := apiClient.GetMedia(
+		context.Background(),
+		&api.GetMediaRequest{
+			URL:     "http://localhost:9999/audits/1234/media/12345",
+			AuditID: "1234",
+		},
+	)
+	assert.NotNil(t, err)
+}

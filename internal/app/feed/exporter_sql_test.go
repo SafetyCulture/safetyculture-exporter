@@ -1,6 +1,8 @@
 package feed_test
 
 import (
+	"io/ioutil"
+	"log"
 	"testing"
 	"time"
 
@@ -240,4 +242,16 @@ func TestNewSQLExporter_should_return_error_for_connection_errors(t *testing.T) 
 	sqlExporter, err := feed.NewSQLExporter("sqlite", "*$////bad connection string", true, "")
 	assert.NotNil(t, err)
 	assert.Nil(t, sqlExporter)
+}
+
+func TestSQLExporterWriteMedia(t *testing.T) {
+	dir, err := ioutil.TempDir("", "export")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	sqlExporter, err := feed.NewSQLExporter("sqlite", "file::memory:", true, dir)
+	assert.Nil(t, err)
+
+	sqlExporter.WriteMedia("1234", "12345", "image/jpeg", []byte("sample-string"))
 }
