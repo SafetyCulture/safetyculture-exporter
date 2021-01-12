@@ -19,8 +19,8 @@ import (
 var dateRegex = regexp.MustCompile(`(?m)(-?(?:[1-9][0-9]*)?[0-9]{4})-(1[0-2]|0[1-9])-(3[01]|0[1-9]|[12][0-9])T(2[0-3]|[01][0-9]):([0-5][0-9]):([0-5][0-9])(\.[0-9]+)?(\+|Z)(2[0-3]|[01][0-9])?:?([0-5][0-9])?`)
 
 // getInmemorySQLExporter creates a SQLExporter that uses an inmemory DB
-func getInmemorySQLExporter() (*feed.SQLExporter, error) {
-	return feed.NewSQLExporter("sqlite", "file::memory:", true, "")
+func getInmemorySQLExporter(exportMediaPath string) (*feed.SQLExporter, error) {
+	return feed.NewSQLExporter("sqlite", "file::memory:", true, exportMediaPath)
 }
 
 // getTemporaryCSVExporter creates a CSVExporter that writes to a temp folder

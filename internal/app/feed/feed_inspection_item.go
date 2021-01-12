@@ -109,26 +109,6 @@ func (f *InspectionItemFeed) Order() string {
 	return "modified_at ASC, id"
 }
 
-func (f *InspectionItemFeed) fetchAndSaveMedia(ctx context.Context, exporter Exporter, auditID, mediaURL string, apiClient api.Client) error {
-	resp, err := apiClient.GetMedia(
-		ctx,
-		&api.GetMediaRequest{
-			URL:     mediaURL,
-			AuditID: auditID,
-		},
-	)
-	if err != nil {
-		return err
-	}
-
-	err = exporter.WriteMedia(auditID, resp.MediaID, resp.ContentType, resp.Body)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func fetchAndWriteMedia(ctx context.Context, apiClient api.Client, exporter Exporter, auditID, mediaURL string) error {
 	resp, err := apiClient.GetMedia(
 		ctx,
