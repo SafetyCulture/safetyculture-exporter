@@ -7,13 +7,16 @@ The iAuditor Exporter is a CLI tool for extracting your iAuditor data that’s a
 - [Before you begin](#before-you-begin)
 - [Install](#install)
 - [Configure](#configure)
-- [Exporting to CSV](#exporting-to-csv)
-- [Exporting to SQL](#exporting-to-sql)
+  - [Using a proxy](#using-a-proxy)
+- [Usage](#usage)
+  - [Exporting to CSV](#exporting-to-csv)
+  - [Exporting to SQL](#exporting-to-sql)
     - [MySQL](#mysql)
     - [PostgreSQL](#postgresql)
     - [SQL Server](#sql-server)
-- [Exporting inspections to JSON](#exporting-inspections-to-json)
-- [Listing Schemas](#listing-schemas)
+  - [Exporting inspections to JSON](#exporting-inspections-to-json)
+  - [Listing Schemas](#listing-schemas)
+- [Old version (Python)](#old-version_python)
 - [Development](#development)
 
 ## Before you begin
@@ -68,7 +71,7 @@ export:
   template_ids: []
 ```
 
-All of the available configuration options can be found below.
+All of the available configuration options and flags can be found below.
 
 #### `access_token`
 API Access Token
@@ -155,7 +158,7 @@ Skip storing these inspection IDs
 > flag: `--inspection-skip-ids`\
 env: `IAUD_EXPORT_INSPECTION_SKIP_IDS`
 
-## Using a proxy
+### Using a proxy
 
 If you need to use a proxy to connect to the iAuditor API the following parameters can be set.
 
@@ -165,15 +168,19 @@ See above for the exact usage and alternative mechanisms to set them.
 - `--tls-cert "/path/to/my/root-ca.pem"`
 - `--tls-skip-verify true`
 
-## Exporting to CSV
+## Usage
+
+See [docs/iauditor-exporter.md](docs/iauditor-exporter.md) for list of commands and options.
+
+### Exporting to CSV
 
 See [docs/iauditor-exporter_csv.md](docs/iauditor-exporter_csv.md) for usage and options.
 
-## Exporting to SQL DBs
+### Exporting to SQL DBs
 
 iAuditor Exporter supports exporting data to MySQL, PostgreSQL and SQL Server databases. See [docs/iauditor-exporter_sql.md](docs/iauditor-exporter_sql.md) for usage and options.
 
-### MySQL
+#### MySQL
 
 ```
 iauditor-exporter sql --db-dialect mysql --db-connection-string user:pass@tcp(127.0.0.1:3306)/dbname?charset=utf8mb4&parseTime=True&loc=Local
@@ -181,13 +188,13 @@ iauditor-exporter sql --db-dialect mysql --db-connection-string user:pass@tcp(12
 
 Please refer to [this page](https://github.com/go-sql-driver/mysql#dsn-data-source-name) for supported formats for the connection string.
 
-### PostgreSQL
+#### PostgreSQL
 
 ```
 iauditor-exporter sql --db-dialect postgres --db-connection-string postgresql://user:pass@localhost:5434/dbname
 ```
 
-### SQL Server
+#### SQL Server
 
 ```
 iauditor-exporter sql --db-dialect sqlserver --db-connection-string sqlserver://user:pass@localhost:1433?database=dbname
@@ -195,17 +202,26 @@ iauditor-exporter sql --db-dialect sqlserver --db-connection-string sqlserver://
 
 Please refer to [this page](https://github.com/denisenkom/go-mssqldb#connection-parameters-and-dsn) for supported formats for the connection string.
 
-## Exporting inspections to JSON
+### Exporting inspections to JSON
 
 See [docs/iauditor-exporter_inspection-json.md](docs/iauditor-exporter_inspection-json.md) for usage and options.
 
-## Listing Schemas
+### Listing Schemas
 
 You can list all available tables with their schemas using following command.
 
 ```
 iauditor-exporter schema
 ```
+
+## Old version (Python)
+
+Old version of this tool needs Python to be installed on the target machine.
+We no longer support this version but it can be accessed from [this location](https://github.com/SafetyCulture/iauditor-exporter/tree/v2).
+
+There is feature parity between the new version and old version of this tool.
+Although configuration values are similar, the format of the configuration files varies between two versions.
+Please refer to the [Configure](#configure) section of this page to learn more about the format of the new configuration file.
 
 ## Development
 
