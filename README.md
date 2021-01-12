@@ -16,7 +16,7 @@ The iAuditor Exporter is a CLI tool for extracting your iAuditor data that’s a
     - [SQL Server](#sql-server)
   - [Exporting inspections to JSON](#exporting-inspections-to-json)
   - [Listing Schemas](#listing-schemas)
-- [Old version (Python)](#old-version_python)
+- [Old version (Python)](#old-version-python)
 - [Development](#development)
 
 ## Before you begin
