@@ -17,6 +17,7 @@ The iAuditor Exporter is a CLI tool for extracting your iAuditor data that’s a
   - [Exporting inspections to JSON](#exporting-inspections-to-json)
   - [Listing Schemas](#listing-schemas)
 - [Old version (Python)](#old-version-python)
+  - [Migrating to new version](#migrating-to-new-version)
 - [Development](#development)
 
 ## Before you begin
@@ -219,7 +220,11 @@ iauditor-exporter schema
 Old version of this tool needs Python to be installed on the target machine.
 We no longer support this version but it can be accessed from [this location](https://github.com/SafetyCulture/iauditor-exporter/tree/v2).
 
+### Migrating to new version
+
+We highly recommend to upgrade to the new version of iAuditor Exporter tool as soon as possible.
 There is feature parity between the new version and old version of this tool.
+
 Although configuration values are similar, the format of the configuration files varies between two versions.
 Please refer to the [Configure](#configure) section of this page to learn more about the format of the new configuration file.
 
