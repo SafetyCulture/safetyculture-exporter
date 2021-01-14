@@ -83,8 +83,8 @@ func (e *CSVExporter) FinaliseExport(feed Feed, rows interface{}) error {
 }
 
 // NewCSVExporter creates a new instance of CSVExporter
-func NewCSVExporter(exportPath string) (*CSVExporter, error) {
-	sqlExporter, err := NewSQLExporter("sqlite", filepath.Join(exportPath, "sqlite.db"), true)
+func NewCSVExporter(exportPath, exportMediaPath string) (*CSVExporter, error) {
+	sqlExporter, err := NewSQLExporter("sqlite", filepath.Join(exportPath, "sqlite.db"), true, exportMediaPath)
 	if err != nil {
 		return nil, err
 	}

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/http"
 	"testing"
 	"time"
 
@@ -258,4 +259,100 @@ func TestDrainInspectionsWithCallbackError(t *testing.T) {
 			return fmt.Errorf("test error")
 		})
 	assert.NotNil(t, err)
+}
+
+func TestGetMediaWithAPIError(t *testing.T) {
+	defer gock.Off()
+
+	gock.New("http://localhost:9999").
+		Get("/audits/1234/media/12345").
+		ReplyError(fmt.Errorf("test error"))
+
+	apiClient := api.NewAPIClient("http://localhost:9999", "abc123")
+	gock.InterceptClient(apiClient.HTTPClient())
+
+	_, err := apiClient.GetMedia(
+		context.Background(),
+		&api.GetMediaRequest{
+			URL:     "http://localhost:9999/audits/1234/media/12345",
+			AuditID: "1234",
+		},
+	)
+	assert.NotNil(t, err)
+}
+
+func TestGetMediaWith204Error(t *testing.T) {
+	defer gock.Off()
+
+	result := `{id:"test-id"}`
+	gock.New("http://localhost:9999").
+		Get("/audits/1234/media/12345").
+		Reply(204).
+		BodyString(result)
+
+	apiClient := api.NewAPIClient("http://localhost:9999", "abc123")
+	gock.InterceptClient(apiClient.HTTPClient())
+
+	resp, err := apiClient.GetMedia(
+		context.Background(),
+		&api.GetMediaRequest{
+			URL:     "http://localhost:9999/audits/1234/media/12345",
+			AuditID: "1234",
+		},
+	)
+	assert.Nil(t, err)
+	assert.Nil(t, resp)
+}
+
+func TestGetMediaWithNoContentType(t *testing.T) {
+	defer gock.Off()
+
+	result := `{id:"test-id"}`
+	gock.New("http://localhost:9999").
+		Get("/audits/1234/media/12345").
+		Reply(200).
+		BodyString(result)
+
+	apiClient := api.NewAPIClient("http://localhost:9999", "abc123")
+	gock.InterceptClient(apiClient.HTTPClient())
+
+	_, err := apiClient.GetMedia(
+		context.Background(),
+		&api.GetMediaRequest{
+			URL:     "http://localhost:9999/audits/1234/media/12345",
+			AuditID: "1234",
+		},
+	)
+	assert.NotNil(t, err)
+}
+
+func TestGetMedia(t *testing.T) {
+	defer gock.Off()
+
+	result := `{id:"test-id"}`
+	header := make(http.Header)
+	header["Content-Type"] = []string{"test-content"}
+	req := gock.New("http://localhost:9999").
+		Get("/audits/1234/media/12345").
+		Reply(200).
+		BodyString(result)
+	req.SetHeader("Content-Type", "test-content")
+
+	apiClient := api.NewAPIClient("http://localhost:9999", "abc123")
+	gock.InterceptClient(apiClient.HTTPClient())
+
+	expected := &api.GetMediaResponse{
+		ContentType: "test-content",
+		Body:        []byte(result),
+		MediaID:     "12345",
+	}
+	resp, err := apiClient.GetMedia(
+		context.Background(),
+		&api.GetMediaRequest{
+			URL:     "http://localhost:9999/audits/1234/media/12345",
+			AuditID: "1234",
+		},
+	)
+	assert.Nil(t, err)
+	assert.Equal(t, resp, expected)
 }
