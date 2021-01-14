@@ -20,8 +20,8 @@ import (
 var dateRegex = regexp.MustCompile(`(?m)(-?(?:[1-9][0-9]*)?[0-9]{4})-(1[0-2]|0[1-9])-(3[01]|0[1-9]|[12][0-9])T(2[0-3]|[01][0-9]):([0-5][0-9]):([0-5][0-9])(\.[0-9]+)?(\+|Z)(2[0-3]|[01][0-9])?:?([0-5][0-9])?`)
 
 // getInmemorySQLExporter creates a SQLExporter that uses an inmemory DB
-func getInmemorySQLExporter() (*feed.SQLExporter, error) {
-	return feed.NewSQLExporter("sqlite", "file::memory:", true)
+func getInmemorySQLExporter(exportMediaPath string) (*feed.SQLExporter, error) {
+	return feed.NewSQLExporter("sqlite", "file::memory:", true, exportMediaPath)
 }
 
 // getTemporaryCSVExporter creates a CSVExporter that writes to a temp folder
@@ -31,7 +31,7 @@ func getTemporaryCSVExporter() (*feed.CSVExporter, error) {
 		log.Fatal(err)
 	}
 
-	return feed.NewCSVExporter(dir)
+	return feed.NewCSVExporter(dir, "")
 }
 
 // getTemporaryReportExporter creates a ReportExporter that writes to a temp folder
@@ -52,7 +52,7 @@ func getTemporaryCSVExporterWithRealSQLExporter(sqlExporter *feed.SQLExporter) (
 		return nil, err
 	}
 
-	exporter, err := feed.NewCSVExporter(dir)
+	exporter, err := feed.NewCSVExporter(dir, "")
 	if err != nil {
 		return nil, err
 	}
@@ -67,7 +67,7 @@ func getTestingSQLExporter() (*feed.SQLExporter, error) {
 	dialect := os.Getenv("TEST_DB_DIALECT")
 	connectionString := os.Getenv("TEST_DB_CONN_STRING")
 
-	exporter, err := feed.NewSQLExporter(dialect, connectionString, true)
+	exporter, err := feed.NewSQLExporter(dialect, connectionString, true, "")
 	if err != nil {
 		return nil, err
 	}
@@ -91,7 +91,7 @@ func getTestingSQLExporter() (*feed.SQLExporter, error) {
 	connectionString = strings.Replace(connectionString, "iauditor_exporter_db", dbName, 1)
 	connectionString = strings.Replace(connectionString, "master", dbName, 1)
 
-	return feed.NewSQLExporter(dialect, connectionString, true)
+	return feed.NewSQLExporter(dialect, connectionString, true, "")
 }
 
 // filesEqualish checks if files are equal enough (ignoring dates)

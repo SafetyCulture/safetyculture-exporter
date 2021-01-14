@@ -15,6 +15,7 @@ func GetFeeds(v *viper.Viper) []Feed {
 	inspectionIncludeInactiveItems := v.GetBool("export.inspection.included_inactive_items")
 	templateIDs := getTemplateIDs(v)
 	inspectionConfig := config.GetInspectionConfig(v)
+	exportMedia := viper.GetBool("export.media")
 
 	return []Feed{
 		&InspectionFeed{
@@ -33,6 +34,7 @@ func GetFeeds(v *viper.Viper) []Feed {
 			Completed:       inspectionConfig.Completed,
 			IncludeInactive: inspectionIncludeInactiveItems,
 			Incremental:     inspectionConfig.Incremental,
+			ExportMedia:     exportMedia,
 		},
 		&TemplateFeed{
 			Incremental: inspectionConfig.Incremental,

@@ -22,7 +22,7 @@
       "response_set_id": null,
       "is_failed_response": false,
       "comment": null,
-      "media_hypertext_reference": "",
+      "media_hypertext_reference": "http://localhost:9999/audits/audit_1/media/12345",
       "score": null,
       "max_score": null,
       "score_percentage": null,

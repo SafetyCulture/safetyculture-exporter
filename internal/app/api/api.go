@@ -1,6 +1,7 @@
 package api
 
 import (
+	"bytes"
 	"context"
 	"crypto/tls"
 	"crypto/x509"
@@ -12,6 +13,7 @@ import (
 	"net"
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
 
 	"github.com/SafetyCulture/iauditor-exporter/internal/app/util"
@@ -32,10 +34,12 @@ type Client interface {
 	InitiateInspectionReportExport(ctx context.Context, auditID string, format string, preferenceID string) (string, error)
 	CheckInspectionReportExportCompletion(ctx context.Context, auditID string, messageID string) (*InspectionReportExportCompletionResponse, error)
 	DownloadInspectionReportFile(ctx context.Context, url string) (io.ReadCloser, error)
+	GetMedia(ctx context.Context, request *GetMediaRequest) (*GetMediaResponse, error)
 }
 
 type apiClient struct {
 	accessToken   string
+	baseURL       string
 	sling         *sling.Sling
 	httpClient    *http.Client
 	httpTransport *http.Transport
@@ -66,6 +70,7 @@ func NewAPIClient(addr string, accessToken string, opts ...Opt) Client {
 
 	a := apiClient{
 		httpClient:    httpClient,
+		baseURL:       addr,
 		httpTransport: httpTransport,
 		sling:         sling.New().Client(httpClient).Base(addr),
 		accessToken:   accessToken,
@@ -170,6 +175,19 @@ type GetFeedResponse struct {
 	Data json.RawMessage `json:"data"`
 }
 
+// GetMediaRequest has all the data needed to make a request to get a media
+type GetMediaRequest struct {
+	URL     string
+	AuditID string
+}
+
+// GetMediaResponse is a representation of the data returned when fetching media
+type GetMediaResponse struct {
+	ContentType string
+	Body        []byte
+	MediaID     string
+}
+
 // ListInspectionsParams is a list of all parameters we can set when fetching inspections
 type ListInspectionsParams struct {
 	ModifiedAfter time.Time `url:"modified_after,omitempty"`
@@ -190,6 +208,45 @@ type ListInspectionsResponse struct {
 	Count       int          `json:"count"`
 	Total       int          `json:"total"`
 	Inspections []Inspection `json:"audits"`
+}
+
+func (a *apiClient) GetMedia(ctx context.Context, request *GetMediaRequest) (*GetMediaResponse, error) {
+	baseURL := strings.TrimPrefix(request.URL, a.baseURL)
+	mediaID := strings.TrimPrefix(baseURL, fmt.Sprintf("/audits/%s/media/", request.AuditID))
+
+	sl := a.sling.New().Get(baseURL).
+		Set(string(Authorization), fmt.Sprintf("Bearer %s", a.accessToken)).
+		Set(string(IntegrationID), "iauditor-exporter").
+		Set(string(IntegrationVersion), version.GetVersion()).
+		Set(string(XRequestID), util.RequestIDFromContext(ctx))
+
+	req, _ := sl.Request()
+	req = req.WithContext(ctx)
+
+	result, err := a.httpClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer result.Body.Close()
+
+	if result.StatusCode == 204 {
+		return nil, nil
+	}
+
+	contentType, ok := result.Header["Content-Type"]
+	if !ok {
+		return nil, fmt.Errorf("Failed to get content-type of media")
+	}
+
+	buf := new(bytes.Buffer)
+	buf.ReadFrom(result.Body)
+
+	resp := &GetMediaResponse{
+		ContentType: contentType[0],
+		Body:        buf.Bytes(),
+		MediaID:     mediaID,
+	}
+	return resp, nil
 }
 
 func (a *apiClient) GetFeed(ctx context.Context, request *GetFeedRequest) (*GetFeedResponse, error) {

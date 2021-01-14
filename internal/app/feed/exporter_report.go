@@ -332,7 +332,7 @@ func getFilePath(exportPath string, inspection *Inspection, format string) strin
 
 // NewReportExporter returns a new instance of ReportExporter
 func NewReportExporter(exportPath string, format []string, preferenceID string) (*ReportExporter, error) {
-	sqlExporter, err := NewSQLExporter("sqlite", filepath.Join(exportPath, "reports.db"), true)
+	sqlExporter, err := NewSQLExporter("sqlite", filepath.Join(exportPath, "reports.db"), true, "")
 	if err != nil {
 		return nil, err
 	}
