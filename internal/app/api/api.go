@@ -7,6 +7,7 @@ import (
 	"crypto/x509"
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"net"
@@ -30,6 +31,9 @@ type Client interface {
 	ListInspections(ctx context.Context, params *ListInspectionsParams) (*ListInspectionsResponse, error)
 	GetInspection(ctx context.Context, id string) (*json.RawMessage, error)
 	DrainInspections(ctx context.Context, params *ListInspectionsParams, callback func(*ListInspectionsResponse) error) error
+	InitiateInspectionReportExport(ctx context.Context, auditID string, format string, preferenceID string) (string, error)
+	CheckInspectionReportExportCompletion(ctx context.Context, auditID string, messageID string) (*InspectionReportExportCompletionResponse, error)
+	DownloadInspectionReportFile(ctx context.Context, url string) (io.ReadCloser, error)
 	GetMedia(ctx context.Context, request *GetMediaRequest) (*GetMediaResponse, error)
 }
 
@@ -395,4 +399,131 @@ func (a *apiClient) DrainInspections(
 	}
 
 	return nil
+}
+
+type initiateInspectionReportExportRequest struct {
+	Format       string `json:"format"`
+	PreferenceID string `json:"preference_id,omitempty"`
+}
+
+type initiateInspectionReportExportResponse struct {
+	MessageID string `json:"messageId"`
+}
+
+func (a *apiClient) InitiateInspectionReportExport(ctx context.Context, auditID string, format string, preferenceID string) (string, error) {
+	logger := util.GetLogger()
+
+	var (
+		result *initiateInspectionReportExportResponse
+		errMsg json.RawMessage
+		res    *http.Response
+		err    error
+	)
+
+	url := fmt.Sprintf("audits/%s/report", auditID)
+	body := &initiateInspectionReportExportRequest{
+		Format:       format,
+		PreferenceID: preferenceID,
+	}
+
+	sl := a.sling.New().Post(url).
+		Set(string(Authorization), "Bearer "+a.accessToken).
+		Set(string(IntegrationID), "iauditor-exporter").
+		Set(string(IntegrationVersion), version.GetVersion()).
+		Set(string(XRequestID), util.RequestIDFromContext(ctx)).
+		BodyJSON(body)
+
+	req, _ := sl.Request()
+	req = req.WithContext(ctx)
+
+	res, err = sl.Do(req, &result, &errMsg)
+	if err != nil {
+		return "", errors.Wrap(err, "Failed request to API")
+	}
+	if errMsg != nil {
+		return "", errors.Errorf("%s", errMsg)
+	}
+	logger.Debugw("http request",
+		"url", req.URL.String(),
+		"status", res.Status,
+	)
+
+	return result.MessageID, nil
+}
+
+// InspectionReportExportCompletionResponse represents the response of report export completion status
+type InspectionReportExportCompletionResponse struct {
+	Status string `json:"status"`
+	URL    string `json:"url,omitempty"`
+}
+
+func (a *apiClient) CheckInspectionReportExportCompletion(ctx context.Context, auditID string, messageID string) (*InspectionReportExportCompletionResponse, error) {
+	logger := util.GetLogger()
+
+	var (
+		result *InspectionReportExportCompletionResponse
+		errMsg json.RawMessage
+		res    *http.Response
+		err    error
+	)
+
+	url := fmt.Sprintf("audits/%s/report/%s", auditID, messageID)
+
+	sl := a.sling.New().Get(url).
+		Set(string(Authorization), "Bearer "+a.accessToken).
+		Set(string(IntegrationID), "iauditor-exporter").
+		Set(string(IntegrationVersion), version.GetVersion()).
+		Set(string(XRequestID), util.RequestIDFromContext(ctx))
+
+	req, _ := sl.Request()
+	req = req.WithContext(ctx)
+
+	res, err = sl.Do(req, &result, &errMsg)
+	if err != nil {
+		return nil, errors.Wrap(err, "Failed request to API")
+	}
+	if errMsg != nil {
+		return nil, errors.Errorf("%s", errMsg)
+	}
+	logger.Debugw("http request",
+		"url", req.URL.String(),
+		"status", res.Status,
+	)
+
+	return result, nil
+}
+
+func (a *apiClient) DownloadInspectionReportFile(ctx context.Context, url string) (io.ReadCloser, error) {
+	logger := util.GetLogger()
+
+	var (
+		res *http.Response
+		err error
+	)
+
+	sl := a.sling.New().Get(url).
+		Set(string(Authorization), "Bearer "+a.accessToken).
+		Set(string(IntegrationID), "iauditor-exporter").
+		Set(string(IntegrationVersion), version.GetVersion()).
+		Set(string(XRequestID), util.RequestIDFromContext(ctx))
+
+	req, _ := sl.Request()
+	req = req.WithContext(ctx)
+
+	res, err = a.httpClient.Do(req)
+	if err != nil {
+		return nil, errors.Wrap(err, "Failed request to API")
+	}
+
+	statusOK := res.StatusCode >= 200 && res.StatusCode < 300
+	if !statusOK {
+		return nil, errors.Errorf("Server returned error. %s", res.Status)
+	}
+
+	logger.Debugw("http request",
+		"url", req.URL.String(),
+		"status", res.Status,
+	)
+
+	return res.Body, err
 }

@@ -19,7 +19,7 @@ import (
 )
 
 var cfgFile string
-var connectionFlags, dbFlags, csvFlags, mediaFlags, inspectionFlags, templatesFlag, tablesFlag, schemasFlag *flag.FlagSet
+var connectionFlags, dbFlags, pathFlag, mediaFlags, inspectionFlags, templatesFlag, tablesFlag, schemasFlag, reportFlags *flag.FlagSet
 
 // RootCmd represents the base command when called without any subcommands.
 var RootCmd = &cobra.Command{
@@ -75,10 +75,11 @@ func init() {
 
 	// Add sub-commands
 	addCmd(export.SQLCmd(), connectionFlags, dbFlags, inspectionFlags, templatesFlag, tablesFlag, schemasFlag, mediaFlags)
-	addCmd(export.CSVCmd(), connectionFlags, csvFlags, inspectionFlags, templatesFlag, tablesFlag, schemasFlag, mediaFlags)
+	addCmd(export.CSVCmd(), connectionFlags, pathFlag, inspectionFlags, templatesFlag, tablesFlag, schemasFlag, mediaFlags)
 	addCmd(export.InspectionJSONCmd(), connectionFlags, inspectionFlags, templatesFlag)
+	addCmd(export.ReportCmd(), connectionFlags, pathFlag, inspectionFlags, templatesFlag, reportFlags)
 	addCmd(export.PrintSchemaCmd())
-	addCmd(configure.Cmd(), connectionFlags, dbFlags, csvFlags, inspectionFlags, templatesFlag, tablesFlag)
+	addCmd(configure.Cmd(), connectionFlags, dbFlags, pathFlag, inspectionFlags, templatesFlag, tablesFlag)
 	RootCmd.AddCommand(configure.Cmd())
 	RootCmd.AddCommand(&cobra.Command{
 		Hidden: true,
@@ -102,8 +103,8 @@ func configFlags() {
 	dbFlags.String("db-dialect", "mysql", "Database dialect. mysql, postgres and sqlserver are the only valid options.")
 	dbFlags.String("db-connection-string", "", "Database connection string")
 
-	csvFlags = flag.NewFlagSet("csv", flag.ContinueOnError)
-	csvFlags.String("export-path", "./export/", "CSV Export Path")
+	pathFlag = flag.NewFlagSet("csv", flag.ContinueOnError)
+	pathFlag.String("export-path", "./export/", "CSV Export Path")
 
 	mediaFlags = flag.NewFlagSet("media", flag.ContinueOnError)
 	mediaFlags.Bool("export-media", false, "Export media")
@@ -124,6 +125,10 @@ func configFlags() {
 
 	schemasFlag = flag.NewFlagSet("schemas", flag.ContinueOnError)
 	schemasFlag.Bool("create-schema-only", false, "Create schema only (default false)")
+
+	reportFlags = flag.NewFlagSet("report", flag.ContinueOnError)
+	reportFlags.StringSlice("format", []string{}, "Export format (PDF,WORD)")
+	reportFlags.String("preference-id", "", "The report preference to apply to the document")
 }
 
 func bindFlags() {
@@ -137,7 +142,7 @@ func bindFlags() {
 	util.Check(viper.BindPFlag("db.dialect", dbFlags.Lookup("db-dialect")), "while binding flag")
 	util.Check(viper.BindPFlag("db.connection_string", dbFlags.Lookup("db-connection-string")), "while binding flag")
 
-	util.Check(viper.BindPFlag("export.path", csvFlags.Lookup("export-path")), "while binding flag")
+	util.Check(viper.BindPFlag("export.path", pathFlag.Lookup("export-path")), "while binding flag")
 	util.Check(viper.BindPFlag("export.media", mediaFlags.Lookup("export-media")), "while binding flag")
 	util.Check(viper.BindPFlag("export.media_path", mediaFlags.Lookup("export-media-path")), "while binding flag")
 	util.Check(viper.BindPFlag("export.template_ids", templatesFlag.Lookup("template-ids")), "while binding flag")
@@ -148,6 +153,9 @@ func bindFlags() {
 	util.Check(viper.BindPFlag("export.inspection.archived", inspectionFlags.Lookup("inspection-archived")), "while binding flag")
 	util.Check(viper.BindPFlag("export.inspection.completed", inspectionFlags.Lookup("inspection-completed")), "while binding flag")
 	util.Check(viper.BindPFlag("export.inspection.skip_ids", inspectionFlags.Lookup("inspection-skip-ids")), "while binding flag")
+
+	util.Check(viper.BindPFlag("report.format", reportFlags.Lookup("format")), "while binding flag")
+	util.Check(viper.BindPFlag("report.preference_id", reportFlags.Lookup("preference-id")), "while binding flag")
 }
 
 func addCmd(cmd *cobra.Command, flags ...*flag.FlagSet) {

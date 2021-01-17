@@ -10,6 +10,7 @@ import (
 	"regexp"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/SafetyCulture/iauditor-exporter/internal/app/feed"
 	"github.com/gofrs/uuid"
@@ -31,6 +32,16 @@ func getTemporaryCSVExporter() (*feed.CSVExporter, error) {
 	}
 
 	return feed.NewCSVExporter(dir, "")
+}
+
+// getTemporaryReportExporter creates a ReportExporter that writes to a temp folder
+func getTemporaryReportExporter(format []string, preferenceID string) (*feed.ReportExporter, error) {
+	dir, err := ioutil.TempDir("", "export")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return feed.NewReportExporter(dir, format, preferenceID)
 }
 
 // getTemporaryCSVExporterWithRealSQLExporter creates a CSV exporter that writes a temporary folder
@@ -95,6 +106,16 @@ func filesEqualish(t *testing.T, expectedPath, actualPath string) {
 		dateRegex.ReplaceAllLiteralString(strings.TrimSpace(string(expectedFile)), "--date--"),
 		dateRegex.ReplaceAllLiteralString(strings.TrimSpace(string(actualFile)), "--date--"),
 	)
+}
+
+func fileExists(t *testing.T, expectedPath string) {
+	_, err := os.Stat(expectedPath)
+	assert.Nil(t, err)
+}
+
+func getFileModTime(filePath string) (time.Time, error) {
+	file, err := os.Stat(filePath)
+	return file.ModTime(), err
 }
 
 func countFileLines(filePath string) (int, error) {

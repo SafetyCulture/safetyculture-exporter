@@ -1,13 +1,22 @@
-## iauditor-exporter configure
+## iauditor-exporter report
 
-Initialises your configuration file.
+Export inspection report
 
 ### Synopsis
 
-Initialises your config file with your access token and other configuration options.
+Export inspection report
 
 ```
-iauditor-exporter configure [flags]
+iauditor-exporter report [flags]
+```
+
+### Examples
+
+```
+// Export PDF and Word inspection reports
+		iauditor-exporter report --export-path /path/to/export/to --format PDF,WORD
+		// Export PDF inspection reports with a custom report preference
+		iauditor-exporter report --export-path /path/to/export/to --format PDF --preference-id abc
 ```
 
 ### Options
@@ -15,17 +24,16 @@ iauditor-exporter configure [flags]
 ```
   -t, --access-token string                 API Access Token
       --api-url string                      API URL (default "https://api.safetyculture.io")
-      --db-connection-string string         Database connection string
-      --db-dialect string                   Database dialect. mysql, postgres and sqlserver are the only valid options. (default "mysql")
       --export-path string                  CSV Export Path (default "./export/")
-  -h, --help                                help for configure
+      --format strings                      Export format (PDF,WORD)
+  -h, --help                                help for report
       --inspection-archived string          Return archived inspections, false, true or both (default "false")
       --inspection-completed string         Return completed inspections, false, true or both (default "both")
       --inspection-include-inactive-items   Include inactive items in the inspection_items table (default false)
       --inspection-incremental-update       Update inspections, inspection_items and templates tables incrementally (default true)
       --inspection-skip-ids strings         Skip storing these inspection IDs
+      --preference-id string                The report preference to apply to the document
       --proxy-url string                    Proxy URL for making API requests through
-      --tables strings                      Tables to export (default all)
       --template-ids strings                Template IDs to filter inspections and schedules by (default all)
       --tls-cert string                     Custom root CA certificate to use when making API requests
       --tls-skip-verify                     Skip verification of API TLS certificates

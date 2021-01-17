@@ -1,6 +1,7 @@
 package api_test
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -355,4 +356,120 @@ func TestGetMedia(t *testing.T) {
 	)
 	assert.Nil(t, err)
 	assert.Equal(t, resp, expected)
+}
+
+func TestAPIClientInitiateInspectionReportExport_should_return_messageID(t *testing.T) {
+	defer gock.Off()
+
+	gock.New("http://localhost:9999").
+		Post("/audits/audit_123/report").
+		JSON(`{
+			"format": "PDF",
+			"preference_id": "p123"
+		}`).
+		Reply(200).
+		JSON(`{
+			"messageId": "abc"
+		}`)
+
+	apiClient := api.NewAPIClient("http://localhost:9999", "abc123")
+	gock.InterceptClient(apiClient.HTTPClient())
+
+	mId, err := apiClient.InitiateInspectionReportExport(context.Background(), "audit_123", "PDF", "p123")
+
+	assert.Nil(t, err)
+	assert.Equal(t, "abc", mId)
+}
+
+func TestAPIClientInitiateInspectionReportExport_should_return_error_on_failure(t *testing.T) {
+	defer gock.Off()
+
+	gock.New("http://localhost:9999").
+		Post("/audits/audit_123/report").
+		JSON(`{"format": "PDF"}`).
+		Reply(500).
+		JSON(`{"error": "something bad happened"}`)
+
+	apiClient := api.NewAPIClient("http://localhost:9999", "abc123")
+	gock.InterceptClient(apiClient.HTTPClient())
+
+	_, err := apiClient.InitiateInspectionReportExport(context.Background(), "audit_123", "PDF", "")
+
+	assert.NotNil(t, err)
+	assert.Contains(t, err.Error(), "something bad happened")
+}
+
+func TestAPIClientCheckInspectionReportExportCompletion_should_return_status(t *testing.T) {
+	defer gock.Off()
+
+	gock.New("http://localhost:9999").
+		Get("/audits/audit_123/report/abc").
+		Reply(200).
+		JSON(`{
+			"status": "SUCCESS",
+			"url": "http://domain.com/report"
+		}`)
+
+	apiClient := api.NewAPIClient("http://localhost:9999", "abc123")
+	gock.InterceptClient(apiClient.HTTPClient())
+
+	res, err := apiClient.CheckInspectionReportExportCompletion(context.Background(), "audit_123", "abc")
+
+	assert.Nil(t, err)
+	assert.Equal(t, res.Status, "SUCCESS")
+	assert.Equal(t, res.URL, "http://domain.com/report")
+}
+
+func TestAPIClientCheckInspectionReportExportCompletion_should_return_error_on_failure(t *testing.T) {
+	defer gock.Off()
+
+	gock.New("http://localhost:9999").
+		Get("/audits/audit_123/report/abc").
+		Reply(500).
+		JSON(`{"error": "something bad happened"}`)
+
+	apiClient := api.NewAPIClient("http://localhost:9999", "abc123")
+	gock.InterceptClient(apiClient.HTTPClient())
+
+	_, err := apiClient.CheckInspectionReportExportCompletion(context.Background(), "audit_123", "abc")
+
+	assert.NotNil(t, err)
+	assert.Contains(t, err.Error(), "something bad happened")
+}
+
+func TestAPIClientDownloadInspectionReportFile_should_return_status(t *testing.T) {
+	defer gock.Off()
+
+	gock.New("http://localhost:9999").
+		Get("/report-exports/abc").
+		Reply(200).
+		Body(bytes.NewBuffer([]byte(`file content`)))
+
+	apiClient := api.NewAPIClient("http://localhost:9999", "abc123")
+	gock.InterceptClient(apiClient.HTTPClient())
+
+	res, err := apiClient.DownloadInspectionReportFile(context.Background(), "http://localhost:9999/report-exports/abc")
+
+	assert.Nil(t, err)
+
+	buf := new(bytes.Buffer)
+	buf.ReadFrom(res)
+	assert.Equal(t, buf.String(), "file content")
+}
+
+func TestAPIClientDownloadInspectionReportFile_should_return_error_on_failure(t *testing.T) {
+	defer gock.Off()
+
+	gock.New("http://localhost:9999").
+		Get("/report-exports/abc").
+		Reply(500).
+		BodyString("somthing bad happened")
+
+	apiClient := api.NewAPIClient("http://localhost:9999", "abc123")
+	gock.InterceptClient(apiClient.HTTPClient())
+
+	_, err := apiClient.DownloadInspectionReportFile(context.Background(), "http://localhost:9999/report-exports/abc")
+
+	assert.NotNil(t, err)
+	assert.Contains(t, err.Error(), "500 Internal Server Error")
 }

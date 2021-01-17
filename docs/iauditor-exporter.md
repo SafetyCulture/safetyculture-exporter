@@ -19,6 +19,7 @@ A CLI tool for extracting your iAuditor data
 * [iauditor-exporter configure](iauditor-exporter_configure.md)	 - Initialises your configuration file.
 * [iauditor-exporter csv](iauditor-exporter_csv.md)	 - Export iAuditor data to CSV files
 * [iauditor-exporter inspection-json](iauditor-exporter_inspection-json.md)	 - Export iAuditor inspections to json files
+* [iauditor-exporter report](iauditor-exporter_report.md)	 - Export inspection report
 * [iauditor-exporter schema](iauditor-exporter_schema.md)	 - Print iAuditor table schemas
 * [iauditor-exporter sql](iauditor-exporter_sql.md)	 - Export iAuditor data to SQL database
 
