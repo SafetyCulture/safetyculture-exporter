@@ -1,6 +1,8 @@
 package feed_test
 
 import (
+	"io/ioutil"
+	"log"
 	"testing"
 	"time"
 
@@ -9,14 +11,14 @@ import (
 )
 
 func TestSQLExporterSupportsUpsert_should_return_true(t *testing.T) {
-	exporter, err := getInmemorySQLExporter()
+	exporter, err := getInmemorySQLExporter("")
 	assert.Nil(t, err)
 
 	assert.True(t, exporter.SupportsUpsert())
 }
 
 func TestSQLExporterInitFeed_should_create_table_if_not_exists(t *testing.T) {
-	exporter, err := getInmemorySQLExporter()
+	exporter, err := getInmemorySQLExporter("")
 	assert.Nil(t, err)
 
 	userFeed := &feed.UserFeed{}
@@ -39,7 +41,7 @@ func TestSQLExporterInitFeed_should_create_table_if_not_exists(t *testing.T) {
 }
 
 func TestSQLExporterInitFeed_should_truncate_table_if_truncate_is_true(t *testing.T) {
-	exporter, err := getInmemorySQLExporter()
+	exporter, err := getInmemorySQLExporter("")
 	assert.Nil(t, err)
 
 	userFeed := &feed.UserFeed{}
@@ -72,7 +74,7 @@ func TestSQLExporterInitFeed_should_truncate_table_if_truncate_is_true(t *testin
 }
 
 func TestSQLExporterInitFeed_should_not_truncate_table_if_truncate_is_false(t *testing.T) {
-	exporter, err := getInmemorySQLExporter()
+	exporter, err := getInmemorySQLExporter("")
 	assert.Nil(t, err)
 
 	userFeed := &feed.UserFeed{}
@@ -105,7 +107,7 @@ func TestSQLExporterInitFeed_should_not_truncate_table_if_truncate_is_false(t *t
 }
 
 func TestSQLExporterWriteRows_should_write_rows(t *testing.T) {
-	exporter, err := getInmemorySQLExporter()
+	exporter, err := getInmemorySQLExporter("")
 	assert.Nil(t, err)
 
 	userFeed := &feed.UserFeed{}
@@ -141,7 +143,7 @@ func TestSQLExporterWriteRows_should_write_rows(t *testing.T) {
 }
 
 func TestSQLExporterWriteRows_should_update_rows(t *testing.T) {
-	exporter, err := getInmemorySQLExporter()
+	exporter, err := getInmemorySQLExporter("")
 	assert.Nil(t, err)
 
 	userFeed := &feed.UserFeed{}
@@ -184,7 +186,7 @@ func TestSQLExporterWriteRows_should_update_rows(t *testing.T) {
 }
 
 func TestSQLExporterLastModifiedAt_should_return_latest_modified_at(t *testing.T) {
-	exporter, err := getInmemorySQLExporter()
+	exporter, err := getInmemorySQLExporter("")
 	assert.Nil(t, err)
 
 	inspectionFeed := &feed.InspectionFeed{}
@@ -224,20 +226,32 @@ func TestSQLExporterLastModifiedAt_should_return_latest_modified_at(t *testing.T
 }
 
 func TestNewSQLExporter_should_create_exporter_for_sqlite(t *testing.T) {
-	sqlExporter, err := feed.NewSQLExporter("sqlite", "file::memory:", true)
+	sqlExporter, err := feed.NewSQLExporter("sqlite", "file::memory:", true, "")
 	assert.Nil(t, err)
 
 	assert.NotNil(t, sqlExporter)
 }
 
 func TestNewSQLExporter_should_return_error_for_invalid_dialect(t *testing.T) {
-	sqlExporter, err := feed.NewSQLExporter("not-supported", "file::memory:", true)
+	sqlExporter, err := feed.NewSQLExporter("not-supported", "file::memory:", true, "")
 	assert.NotNil(t, err)
 	assert.Nil(t, sqlExporter)
 }
 
 func TestNewSQLExporter_should_return_error_for_connection_errors(t *testing.T) {
-	sqlExporter, err := feed.NewSQLExporter("sqlite", "*$////bad connection string", true)
+	sqlExporter, err := feed.NewSQLExporter("sqlite", "*$////bad connection string", true, "")
 	assert.NotNil(t, err)
 	assert.Nil(t, sqlExporter)
+}
+
+func TestSQLExporterWriteMedia(t *testing.T) {
+	dir, err := ioutil.TempDir("", "export")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	sqlExporter, err := feed.NewSQLExporter("sqlite", "file::memory:", true, dir)
+	assert.Nil(t, err)
+
+	sqlExporter.WriteMedia("1234", "12345", "image/jpeg", []byte("sample-string"))
 }

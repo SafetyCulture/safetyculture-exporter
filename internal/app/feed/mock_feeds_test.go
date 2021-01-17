@@ -178,3 +178,9 @@ func initMockFeedsSet3(httpClient *http.Client) {
 		Reply(200).
 		File("mocks/set_1/feed_schedule_occurrences_1.json")
 }
+
+func resetMocks(httpClient *http.Client) {
+	gock.Off()
+	gock.Clean()
+	gock.RestoreClient(httpClient)
+}
