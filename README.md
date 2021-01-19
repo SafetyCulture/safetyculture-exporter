@@ -220,6 +220,10 @@ You can list all available tables with their schemas using following command.
 iauditor-exporter schema
 ```
 
+#### Relationships
+
+![Relationships Diagram](docs/assets/relationships.png)
+
 ## Old version (Python)
 
 Old version of this tool needs Python to be installed on the target machine.
