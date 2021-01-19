@@ -222,7 +222,7 @@ iauditor-exporter schema
 
 #### Relationships
 
-![Relationships Diagram](./relationships.png)
+![Relationships Diagram](docs/assets/relationships.png)
 
 ## Old version (Python)
 
