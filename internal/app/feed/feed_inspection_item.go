@@ -19,6 +19,7 @@ type InspectionItem struct {
 	ID                      string    `json:"id" csv:"id" gorm:"primarykey"`
 	ItemID                  string    `json:"item_id" csv:"item_id"`
 	AuditID                 string    `json:"audit_id" csv:"audit_id"`
+	ItemIndex               int64     `json:"item_index" csv:"item_index"`
 	TemplateID              string    `json:"template_id" csv:"template_id"`
 	ParentID                string    `json:"parent_id" csv:"parent_id"`
 	CreatedAt               time.Time `json:"created_at" csv:"created_at"`

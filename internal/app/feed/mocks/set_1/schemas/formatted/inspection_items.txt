@@ -4,6 +4,7 @@
 | id                        | text     | true        |
 | item_id                   | text     |             |
 | audit_id                  | text     |             |
+| item_index                | integer  |             |
 | template_id               | text     |             |
 | parent_id                 | text     |             |
 | created_at                | datetime |             |
