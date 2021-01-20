@@ -80,6 +80,7 @@ func (f *InspectionItemFeed) PrimaryKey() []string {
 // Columns returns the columns of the row
 func (f *InspectionItemFeed) Columns() []string {
 	return []string{
+		"item_index",
 		"template_id",
 		"parent_id",
 		"created_at",
