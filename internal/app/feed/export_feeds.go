@@ -39,6 +39,9 @@ func GetFeeds(v *viper.Viper) []Feed {
 		&TemplateFeed{
 			Incremental: inspectionConfig.Incremental,
 		},
+		&TemplatePermissionFeed{
+			Incremental: inspectionConfig.Incremental,
+		},
 		&SiteFeed{},
 		&UserFeed{},
 		&GroupFeed{},

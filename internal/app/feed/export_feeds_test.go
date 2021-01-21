@@ -23,6 +23,7 @@ func TestCreateSchemas_should_create_all_schemas_to_file(t *testing.T) {
 	filesEqualish(t, "mocks/set_1/schemas/inspections.csv", filepath.Join(exporter.ExportPath, "inspections.csv"))
 	filesEqualish(t, "mocks/set_1/schemas/inspection_items.csv", filepath.Join(exporter.ExportPath, "inspection_items.csv"))
 	filesEqualish(t, "mocks/set_1/schemas/templates.csv", filepath.Join(exporter.ExportPath, "templates.csv"))
+	filesEqualish(t, "mocks/set_1/schemas/template_permissions.csv", filepath.Join(exporter.ExportPath, "template_permissions.csv"))
 
 	filesEqualish(t, "mocks/set_1/schemas/sites.csv", filepath.Join(exporter.ExportPath, "sites.csv"))
 
@@ -50,6 +51,7 @@ func TestExportFeeds_should_export_all_feeds_to_file(t *testing.T) {
 	filesEqualish(t, "mocks/set_1/outputs/inspections.csv", filepath.Join(exporter.ExportPath, "inspections.csv"))
 	filesEqualish(t, "mocks/set_1/outputs/inspection_items.csv", filepath.Join(exporter.ExportPath, "inspection_items.csv"))
 	filesEqualish(t, "mocks/set_1/outputs/templates.csv", filepath.Join(exporter.ExportPath, "templates.csv"))
+	filesEqualish(t, "mocks/set_1/outputs/template_permissions.csv", filepath.Join(exporter.ExportPath, "template_permissions.csv"))
 
 	filesEqualish(t, "mocks/set_1/outputs/sites.csv", filepath.Join(exporter.ExportPath, "sites.csv"))
 
@@ -85,6 +87,7 @@ func TestExportFeeds_should_perform_incremental_update_on_second_run(t *testing.
 	filesEqualish(t, "mocks/set_2/outputs/inspections.csv", filepath.Join(exporter.ExportPath, "inspections.csv"))
 	filesEqualish(t, "mocks/set_2/outputs/inspection_items.csv", filepath.Join(exporter.ExportPath, "inspection_items.csv"))
 	filesEqualish(t, "mocks/set_2/outputs/templates.csv", filepath.Join(exporter.ExportPath, "templates.csv"))
+	filesEqualish(t, "mocks/set_2/outputs/template_permissions.csv", filepath.Join(exporter.ExportPath, "template_permissions.csv"))
 
 	filesEqualish(t, "mocks/set_2/outputs/sites.csv", filepath.Join(exporter.ExportPath, "sites.csv"))
 

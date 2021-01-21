@@ -125,7 +125,7 @@ env: `IAUD_EXPORT_TEMPLATE_IDS`\
 default: All templates
 
 #### `export.tables`
-Tables to export. inspections, inspection_items, templates, sites, users, groups, group_users, schedules, schedule_assignees and schedule_occurrences are only valid values.
+Tables to export. inspections, inspection_items, templates, template_permissions, sites, users, groups, group_users, schedules, schedule_assignees and schedule_occurrences are only valid values.
 > flag: `--tables`\
 env: `IAUD_EXPORT_TABLES`\
 default: All tables
