@@ -18,6 +18,7 @@ repos:
     rev: 1.11.2
     hooks:
       - id: forbid-binary
+        exclude: docs/assets/.*
       - id: git-check
       - id: shellcheck
       - id: shfmt

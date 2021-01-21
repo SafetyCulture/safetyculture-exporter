@@ -33,6 +33,11 @@ func (f *UserFeed) Model() interface{} {
 	return User{}
 }
 
+// RowsModel returns the model of feed rows
+func (f *UserFeed) RowsModel() interface{} {
+	return &[]*User{}
+}
+
 // PrimaryKey returns the primary key(s)
 func (f *UserFeed) PrimaryKey() []string {
 	return []string{"user_id"}
@@ -55,8 +60,13 @@ func (f *UserFeed) Order() string {
 	return "user_id"
 }
 
+// CreateSchema creates the schema of the feed for the supplied exporter
+func (f *UserFeed) CreateSchema(exporter Exporter) error {
+	return exporter.CreateSchema(f, &[]*User{})
+}
+
 // Export exports the feed to the supplied exporter
-func (f *UserFeed) Export(ctx context.Context, apiClient api.APIClient, exporter Exporter) error {
+func (f *UserFeed) Export(ctx context.Context, apiClient api.Client, exporter Exporter) error {
 	logger := util.GetLogger()
 	feedName := f.Name()
 
@@ -78,8 +88,18 @@ func (f *UserFeed) Export(ctx context.Context, apiClient api.APIClient, exporter
 		util.Check(err, "Failed to unmarshal data to struct")
 
 		if len(rows) != 0 {
-			err = exporter.WriteRows(f, rows)
-			util.Check(err, "Failed to write data to exporter")
+			// Calculate the size of the batch we can insert into the DB at once. Column count + buffer
+			batchSize := exporter.ParameterLimit() / (len(f.Columns()) + 4)
+
+			for i := 0; i < len(rows); i += batchSize {
+				j := i + batchSize
+				if j > len(rows) {
+					j = len(rows)
+				}
+
+				err = exporter.WriteRows(f, rows[i:j])
+				util.Check(err, "Failed to write data to exporter")
+			}
 		}
 
 		logger.Infof("%s: %d remaining", feedName, resp.Metadata.RemainingRecords)

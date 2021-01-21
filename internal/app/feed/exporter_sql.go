@@ -2,6 +2,9 @@ package feed
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/SafetyCulture/iauditor-exporter/internal/app/util"
@@ -17,14 +20,34 @@ import (
 
 // SQLExporter is an interface to export data feeds to SQL databases
 type SQLExporter struct {
-	DB          *gorm.DB
-	Logger      *zap.SugaredLogger
-	AutoMigrate bool
+	DB              *gorm.DB
+	Logger          *zap.SugaredLogger
+	AutoMigrate     bool
+	ExportMediaPath string
 }
 
 // SupportsUpsert returns a bool if the exporter supports upserts
 func (e *SQLExporter) SupportsUpsert() bool {
 	return true
+}
+
+// ParameterLimit returns the number of parameters supported by the target DB
+func (e *SQLExporter) ParameterLimit() int {
+	switch e.DB.Dialector.Name() {
+	case "sqlserver":
+		return 2100
+	case "sqlite":
+		return 32768
+	}
+
+	return 65536
+}
+
+// CreateSchema creates the schema on the DB for the supplied feed
+func (e *SQLExporter) CreateSchema(feed Feed, rows interface{}) error {
+	return e.InitFeed(feed, &InitFeedOptions{
+		Truncate: false,
+	})
 }
 
 // InitFeed initialises any tables required to export
@@ -46,11 +69,6 @@ func (e *SQLExporter) InitFeed(feed Feed, opts *InitFeedOptions) error {
 		}
 	}
 
-	return nil
-}
-
-// SetLastModifiedAt updates the last modified at for the feed. No op for SQL as this is managed automatically.
-func (e *SQLExporter) SetLastModifiedAt(feed Feed, ts time.Time) error {
 	return nil
 }
 
@@ -95,8 +113,28 @@ func (e *SQLExporter) FinaliseExport(feed Feed, rows interface{}) error {
 	return nil
 }
 
+// WriteMedia writes the media to a file
+func (e *SQLExporter) WriteMedia(auditID, mediaID, contentType string, body []byte) error {
+
+	exportMediaDir := filepath.Join(e.ExportMediaPath, fmt.Sprintf("%s", auditID))
+	err := os.MkdirAll(exportMediaDir, os.ModePerm)
+	util.Check(err, fmt.Sprintf("Failed to create directory %s", exportMediaDir))
+
+	ext := strings.Split(contentType, "/")
+	exportFilePath := filepath.Join(exportMediaDir, fmt.Sprintf("%s.%s", mediaID, ext[1]))
+
+	file, err := os.OpenFile(exportFilePath, os.O_RDWR|os.O_CREATE, 0666)
+	util.Check(err, fmt.Sprintf("Failed to open file: %v", exportFilePath))
+	defer file.Close()
+
+	_, err = file.WriteAt(body, 0)
+	util.Check(err, "Failed to write media to a file")
+
+	return nil
+}
+
 // NewSQLExporter creates a new instance of the SQLExporter
-func NewSQLExporter(dialect, connectionString string, autoMigrate bool) (*SQLExporter, error) {
+func NewSQLExporter(dialect, connectionString string, autoMigrate bool, exportMediaPath string) (*SQLExporter, error) {
 	logger := util.GetLogger()
 	gormLogger := &util.GormLogger{
 		SugaredLogger: logger,
@@ -129,8 +167,9 @@ func NewSQLExporter(dialect, connectionString string, autoMigrate bool) (*SQLExp
 	}
 
 	return &SQLExporter{
-		DB:          db,
-		Logger:      logger,
-		AutoMigrate: autoMigrate,
+		DB:              db,
+		Logger:          logger,
+		AutoMigrate:     autoMigrate,
+		ExportMediaPath: exportMediaPath,
 	}, nil
 }

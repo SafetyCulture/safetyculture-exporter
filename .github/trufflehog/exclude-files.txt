@@ -1,0 +1,2 @@
+.github/trufflehog/rules.json
+.github/trufflehog.json

@@ -11,14 +11,17 @@ import (
 type Feed interface {
 	Name() string
 	Model() interface{}
+	RowsModel() interface{}
 
 	PrimaryKey() []string
 	Columns() []string
 	Order() string
 
-	Export(ctx context.Context, apiClient api.APIClient, exporter Exporter) error
+	CreateSchema(exporter Exporter) error
+	Export(ctx context.Context, apiClient api.Client, exporter Exporter) error
 }
 
+// InitFeedOptions contains the options used when initialising a feed
 type InitFeedOptions struct {
 	Truncate bool
 }
@@ -26,13 +29,13 @@ type InitFeedOptions struct {
 // Exporter is an interface to a Feed exporter. It provides methods to write rows out to a implemented format
 type Exporter interface {
 	InitFeed(feed Feed, opts *InitFeedOptions) error
+	CreateSchema(feed Feed, rows interface{}) error
 
 	WriteRows(feed Feed, rows interface{}) error
-
 	FinaliseExport(feed Feed, rows interface{}) error
-
-	SetLastModifiedAt(feed Feed, ts time.Time) error
 	LastModifiedAt(feed Feed) (*time.Time, error)
+	WriteMedia(auditID string, mediaID string, contentType string, body []byte) error
 
 	SupportsUpsert() bool
+	ParameterLimit() int
 }

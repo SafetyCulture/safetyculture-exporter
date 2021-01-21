@@ -1,0 +1,21 @@
+{
+    "count": 3,
+    "total": 3,
+    "audits": [
+        {
+            "audit_id": "audit_d7e2f55b95094bd48fac601850e1db63",
+            "modified_at": "2020-02-13T04:03:44.778Z",
+            "template_id": "template_908eec58ab4a477789445688f8349de2"
+        },
+        {
+            "audit_id": "audit_872d26e479924353b957b832cd98a7f6",
+            "modified_at": "2020-02-13T04:04:05.530Z",
+            "template_id": "template_908eec58ab4a477789445688f8349de2"
+        },
+        {
+            "audit_id": "audit_7f1ecd2e66474418b1e062657aeb1389",
+            "modified_at": "2020-02-13T04:15:15.577Z",
+            "template_id": "template_b90912bcb3354061b4385c4218328ac0"
+        }
+    ]
+}

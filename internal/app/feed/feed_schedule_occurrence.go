@@ -15,7 +15,7 @@ type ScheduleOccurrence struct {
 	ScheduleID       string     `json:"schedule_id" csv:"schedule_id"`
 	OccurrenceID     string     `json:"occurrence_id" csv:"occurrence_id"`
 	TemplateID       string     `json:"template_id" csv:"template_id"`
-	MissTime         time.Time  `json:"miss_time" csv:"miss_time"`
+	MissTime         *time.Time `json:"miss_time" csv:"miss_time"`
 	OccurrenceStatus string     `json:"occurrence_status" csv:"occurrence_status"`
 	AuditID          *string    `json:"audit_id" csv:"audit_id"`
 	CompletedAt      *time.Time `json:"completed_at" csv:"completed_at"`
@@ -32,6 +32,11 @@ type ScheduleOccurrenceFeed struct {
 // Name is the name of the feed
 func (f *ScheduleOccurrenceFeed) Name() string {
 	return "schedule_occurrences"
+}
+
+// RowsModel returns the model of feed rows
+func (f *ScheduleOccurrenceFeed) RowsModel() interface{} {
+	return &[]*ScheduleOccurrence{}
 }
 
 // Model returns the model of the feed row
@@ -64,6 +69,11 @@ func (f *ScheduleOccurrenceFeed) Order() string {
 	return "occurrence_id ASC, schedule_id"
 }
 
+// CreateSchema creates the schema of the feed for the supplied exporter
+func (f *ScheduleOccurrenceFeed) CreateSchema(exporter Exporter) error {
+	return exporter.CreateSchema(f, &[]*ScheduleOccurrence{})
+}
+
 func (f *ScheduleOccurrenceFeed) writeRows(exporter Exporter, rows []*ScheduleOccurrence) error {
 	// DB parameters are limited to 1000 params per query.
 	// Limit the batch size to prevent queries from failing
@@ -81,7 +91,7 @@ func (f *ScheduleOccurrenceFeed) writeRows(exporter Exporter, rows []*ScheduleOc
 }
 
 // Export exports the feed to the supplied exporter
-func (f *ScheduleOccurrenceFeed) Export(ctx context.Context, apiClient api.APIClient, exporter Exporter) error {
+func (f *ScheduleOccurrenceFeed) Export(ctx context.Context, apiClient api.Client, exporter Exporter) error {
 	logger := util.GetLogger()
 	feedName := f.Name()
 
@@ -104,8 +114,18 @@ func (f *ScheduleOccurrenceFeed) Export(ctx context.Context, apiClient api.APICl
 		util.Check(err, "Failed to unmarshal data to struct")
 
 		if len(rows) != 0 {
-			err = f.writeRows(exporter, rows)
-			util.Check(err, "Failed to write data to exporter")
+			// Calculate the size of the batch we can insert into the DB at once. Column count + buffer
+			batchSize := exporter.ParameterLimit() / (len(f.Columns()) + 4)
+
+			for i := 0; i < len(rows); i += batchSize {
+				j := i + batchSize
+				if j > len(rows) {
+					j = len(rows)
+				}
+
+				err = exporter.WriteRows(f, rows[i:j])
+				util.Check(err, "Failed to write data to exporter")
+			}
 		}
 
 		logger.Infof("%s: %d remaining", feedName, resp.Metadata.RemainingRecords)

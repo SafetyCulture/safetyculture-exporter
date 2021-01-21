@@ -8,8 +8,10 @@ import (
 	"time"
 
 	"github.com/SafetyCulture/iauditor-exporter/internal/app/version"
+	"github.com/pkg/errors"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 	"gorm.io/gorm/utils"
 )
@@ -24,6 +26,7 @@ var (
 	trace        = false
 )
 
+// GormLogger wraps logger with some gorm specific functionality
 type GormLogger struct {
 	*zap.SugaredLogger
 
@@ -54,6 +57,11 @@ func (l GormLogger) Error(ctx context.Context, msg string, data ...interface{}) 
 
 // Trace print sql message.
 func (l GormLogger) Trace(ctx context.Context, begin time.Time, fc func() (string, int64), err error) {
+	// do not log ErrRecordNotFound errors
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return
+	}
+
 	elapsed := time.Since(begin)
 	switch {
 	case err != nil:
@@ -86,6 +94,7 @@ func (l GormLogger) Trace(ctx context.Context, begin time.Time, fc func() (strin
 	}
 }
 
+// GetLogger returns a configured instance of the logger
 func GetLogger() *zap.SugaredLogger {
 	logFileEncoder := zapcore.NewJSONEncoder(zap.NewProductionEncoderConfig())
 	consoleEncoder := zapcore.NewConsoleEncoder(zap.NewDevelopmentEncoderConfig())

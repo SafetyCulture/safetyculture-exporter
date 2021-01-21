@@ -1,0 +1,31 @@
++---------------------------+----------+-------------+
+|           NAME            |   TYPE   | PRIMARY KEY |
++---------------------------+----------+-------------+
+| id                        | text     | true        |
+| item_id                   | text     |             |
+| audit_id                  | text     |             |
+| item_index                | integer  |             |
+| template_id               | text     |             |
+| parent_id                 | text     |             |
+| created_at                | datetime |             |
+| modified_at               | datetime |             |
+| exported_at               | datetime |             |
+| type                      | text     |             |
+| category                  | text     |             |
+| category_id               | text     |             |
+| parent_ids                | text     |             |
+| label                     | text     |             |
+| response                  | text     |             |
+| response_id               | text     |             |
+| response_set_id           | text     |             |
+| is_failed_response        | numeric  |             |
+| comment                   | text     |             |
+| media_hypertext_reference | text     |             |
+| score                     | real     |             |
+| max_score                 | real     |             |
+| score_percentage          | real     |             |
+| mandatory                 | numeric  |             |
+| inactive                  | numeric  |             |
+| location_latitude         | real     |             |
+| location_longitude        | real     |             |
++---------------------------+----------+-------------+

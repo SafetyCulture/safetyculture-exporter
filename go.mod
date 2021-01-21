@@ -3,6 +3,7 @@ module github.com/SafetyCulture/iauditor-exporter
 go 1.13
 
 require (
+	github.com/bmizerany/assert v0.0.0-20160611221934-b7ed37b82869
 	github.com/cpuguy83/go-md2man v1.0.10 // indirect
 	github.com/dghubble/sling v1.2.0
 	github.com/gocarina/gocsv v0.0.0-20200925213129-04be9ee2e1a2
@@ -13,9 +14,11 @@ require (
 	github.com/hashicorp/go-version v1.2.0
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/newrelic/go-agent/v3 v3.9.0
+	github.com/olekukonko/tablewriter v0.0.4
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/afero v1.2.2 // indirect
 	github.com/spf13/cobra v0.0.3
+	github.com/spf13/pflag v1.0.3
 	github.com/spf13/viper v1.3.1
 	github.com/stretchr/testify v1.5.1
 	go.uber.org/zap v1.10.0

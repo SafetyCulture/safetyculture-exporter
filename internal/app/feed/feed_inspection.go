@@ -35,9 +35,12 @@ type Inspection struct {
 	DocumentNo      string     `json:"document_no" csv:"document_no"`
 	PreparedBy      string     `json:"prepared_by" csv:"prepared_by"`
 	Location        string     `json:"location" csv:"location"`
-	ConductedOn     time.Time  `json:"conducted_on" csv:"conducted_on"`
+	ConductedOn     *time.Time `json:"conducted_on" csv:"conducted_on"`
 	Personnel       string     `json:"personnel" csv:"personnel"`
 	ClientSite      string     `json:"client_site" csv:"client_site"`
+	Latitude        *float64   `json:"latitude" csv:"latitude"`
+	Longitude       *float64   `json:"longitude" csv:"longitude"`
+	WebReportLink   string     `json:"web_report_link" csv:"web_report_link"`
 }
 
 // InspectionFeed is a representation of the inspections feed
@@ -60,6 +63,11 @@ func (f *InspectionFeed) Name() string {
 // Model returns the model of the feed row
 func (f *InspectionFeed) Model() interface{} {
 	return Inspection{}
+}
+
+// RowsModel returns the model of feed rows
+func (f *InspectionFeed) RowsModel() interface{} {
+	return &[]*Inspection{}
 }
 
 // PrimaryKey returns the primary key(s)
@@ -95,6 +103,9 @@ func (f *InspectionFeed) Columns() []string {
 		"conducted_on",
 		"personnel",
 		"client_site",
+		"latitude",
+		"longitude",
+		"web_report_link",
 	}
 }
 
@@ -109,18 +120,40 @@ func (f *InspectionFeed) writeRows(exporter Exporter, rows []*Inspection) error 
 		skipIDs[id] = true
 	}
 
-	rowsToInsert := []*Inspection{}
-	for _, row := range rows {
-		if !skipIDs[row.ID] {
-			rowsToInsert = append(rowsToInsert, row)
+	// Calculate the size of the batch we can insert into the DB at once. Column count + buffer
+	batchSize := exporter.ParameterLimit() / (len(f.Columns()) + 4)
+	for i := 0; i < len(rows); i += batchSize {
+		j := i + batchSize
+		if j > len(rows) {
+			j = len(rows)
+		}
+
+		// Some audits in production have the same item ID multiple times
+		// We can't insert them simultaneously. This means we are dropping data, which sucks.
+		rowsToInsert := []*Inspection{}
+		for _, row := range rows[i:j] {
+			skip := skipIDs[row.ID]
+			if !skip {
+				rowsToInsert = append(rowsToInsert, row)
+			}
+		}
+
+		err := exporter.WriteRows(f, rowsToInsert)
+		if err != nil {
+			return err
 		}
 	}
 
-	return exporter.WriteRows(f, rowsToInsert)
+	return nil
+}
+
+// CreateSchema creates the schema of the feed for the supplied exporter
+func (f *InspectionFeed) CreateSchema(exporter Exporter) error {
+	return exporter.CreateSchema(f, &[]*Inspection{})
 }
 
 // Export exports the feed to the supplied exporter
-func (f *InspectionFeed) Export(ctx context.Context, apiClient api.APIClient, exporter Exporter) error {
+func (f *InspectionFeed) Export(ctx context.Context, apiClient api.Client, exporter Exporter) error {
 	logger := util.GetLogger()
 	feedName := f.Name()
 
@@ -154,9 +187,6 @@ func (f *InspectionFeed) Export(ctx context.Context, apiClient api.APIClient, ex
 		if len(rows) != 0 {
 			err = f.writeRows(exporter, rows)
 			util.Check(err, "Failed to write data to exporter")
-
-			err = exporter.SetLastModifiedAt(f, rows[len(rows)-1].ModifiedAt)
-			util.Check(err, "Failed to write last modified at time")
 		}
 
 		logger.Infof("%s: %d remaining", feedName, resp.Metadata.RemainingRecords)

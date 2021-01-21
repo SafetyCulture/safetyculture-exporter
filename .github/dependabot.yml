@@ -1,0 +1,11 @@
+---
+version: 2
+updates:
+  - package-ecosystem: "gomod"
+    directory: "/"
+    schedule:
+      interval: "daily"
+      #  Check for npm updates at 11PM UTC, 9AM AEST, 10AM AEDT
+      time: "23:00"
+    commit-message:
+      prefix: "[INTG-1601]"

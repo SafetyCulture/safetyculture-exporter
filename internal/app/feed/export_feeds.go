@@ -5,11 +5,106 @@ import (
 	"sync"
 
 	"github.com/SafetyCulture/iauditor-exporter/internal/app/api"
+	"github.com/SafetyCulture/iauditor-exporter/internal/app/config"
 	"github.com/SafetyCulture/iauditor-exporter/internal/app/util"
 	"github.com/spf13/viper"
 )
 
-func ExportFeeds(v *viper.Viper, apiClient api.APIClient, exporter Exporter) error {
+// GetFeeds returns list of all available data feeds
+func GetFeeds(v *viper.Viper) []Feed {
+	inspectionIncludeInactiveItems := v.GetBool("export.inspection.included_inactive_items")
+	templateIDs := getTemplateIDs(v)
+	inspectionConfig := config.GetInspectionConfig(v)
+	exportMedia := viper.GetBool("export.media")
+
+	return []Feed{
+		&InspectionFeed{
+			SkipIDs:       inspectionConfig.SkipIDs,
+			ModifiedAfter: inspectionConfig.ModifiedAfter,
+			TemplateIDs:   templateIDs,
+			Archived:      inspectionConfig.Archived,
+			Completed:     inspectionConfig.Completed,
+			Incremental:   inspectionConfig.Incremental,
+		},
+		&InspectionItemFeed{
+			SkipIDs:         inspectionConfig.SkipIDs,
+			ModifiedAfter:   inspectionConfig.ModifiedAfter,
+			TemplateIDs:     templateIDs,
+			Archived:        inspectionConfig.Archived,
+			Completed:       inspectionConfig.Completed,
+			IncludeInactive: inspectionIncludeInactiveItems,
+			Incremental:     inspectionConfig.Incremental,
+			ExportMedia:     exportMedia,
+		},
+		&TemplateFeed{
+			Incremental: inspectionConfig.Incremental,
+		},
+		&SiteFeed{},
+		&UserFeed{},
+		&GroupFeed{},
+		&GroupUserFeed{},
+		&ScheduleFeed{
+			TemplateIDs: templateIDs,
+		},
+		&ScheduleAssigneeFeed{
+			TemplateIDs: templateIDs,
+		},
+		&ScheduleOccurrenceFeed{
+			TemplateIDs: templateIDs,
+		},
+		&ActionFeed{},
+		&ActionAssigneeFeed{},
+	}
+}
+
+func getInspectionFeed(v *viper.Viper, inspectionConfig *config.InspectionConfig, templateIDs []string) *InspectionFeed {
+	return &InspectionFeed{
+		SkipIDs:       inspectionConfig.SkipIDs,
+		ModifiedAfter: inspectionConfig.ModifiedAfter,
+		TemplateIDs:   templateIDs,
+		Archived:      inspectionConfig.Archived,
+		Completed:     inspectionConfig.Completed,
+		Incremental:   inspectionConfig.Incremental,
+	}
+}
+
+func getTemplateIDs(v *viper.Viper) []string {
+	return v.GetStringSlice("export.template_ids")
+}
+
+// CreateSchemas generates schemas for the data feeds without fetching any data
+func CreateSchemas(v *viper.Viper, exporter Exporter) error {
+	logger := util.GetLogger()
+	logger.Info("Creating schemas started")
+
+	for _, feed := range GetFeeds(v) {
+		err := feed.CreateSchema(exporter)
+		util.Check(err, "failed to create schema")
+	}
+
+	logger.Info("Creating schemas finished")
+	return nil
+}
+
+// WriteSchemas is used to print the schema of each feed to console output
+func WriteSchemas(v *viper.Viper, exporter *SchemaExporter) error {
+	logger := util.GetLogger()
+	logger.Info("Writing schemas started")
+
+	for _, feed := range GetFeeds(v) {
+		err := exporter.CreateSchema(feed, feed.RowsModel())
+		util.Check(err, "failed to create schema")
+
+		err = exporter.WriteSchema(feed)
+		util.Check(err, "failed to write schema")
+	}
+
+	logger.Info("Writing schemas finished")
+	return nil
+}
+
+// ExportFeeds fetches all the feeds data from server and stores them in the format provided
+func ExportFeeds(v *viper.Viper, apiClient api.Client, exporter Exporter) error {
 	logger := util.GetLogger()
 	ctx := context.Background()
 
@@ -22,159 +117,17 @@ func ExportFeeds(v *viper.Viper, apiClient api.APIClient, exporter Exporter) err
 
 	// TODO. Should validate auth before doing anything
 
-	if tablesMap["inspections"] || len(tables) == 0 {
-		wg.Add(1)
+	for _, feed := range GetFeeds(v) {
+		if tablesMap[feed.Name()] || len(tables) == 0 {
+			wg.Add(1)
 
-		go func() {
-			defer wg.Done()
+			go func(f Feed) {
+				defer wg.Done()
 
-			err := (&InspectionFeed{
-				SkipIDs:       v.GetStringSlice("export.inspection.skip_ids"),
-				ModifiedAfter: v.GetString("export.inspection.modified_after"),
-				TemplateIDs:   v.GetStringSlice("export.template_ids"),
-				Archived:      v.GetString("export.inspection.archived"),
-				Completed:     v.GetString("export.inspection.completed"),
-				Incremental:   v.GetBool("export.inspection.incremental"),
-			}).Export(ctx, apiClient, exporter)
-			util.Check(err, "failed to export")
-		}()
-	}
-
-	if tablesMap["inspection_items"] || len(tables) == 0 {
-		wg.Add(1)
-
-		go func() {
-			defer wg.Done()
-
-			err := (&InspectionItemFeed{
-				SkipIDs:         v.GetStringSlice("export.inspection.skip_ids"),
-				ModifiedAfter:   v.GetString("export.inspection.modified_after"),
-				TemplateIDs:     v.GetStringSlice("export.template_ids"),
-				Archived:        v.GetString("export.inspection.archived"),
-				Completed:       v.GetString("export.inspection.completed"),
-				IncludeInactive: v.GetBool("export.inspection.included_inactive_items"),
-				Incremental:     v.GetBool("export.inspection.incremental"),
-			}).Export(ctx, apiClient, exporter)
-			util.Check(err, "failed to export")
-		}()
-	}
-
-	if tablesMap["templates"] || len(tables) == 0 {
-		wg.Add(1)
-
-		go func() {
-			defer wg.Done()
-
-			err := (&TemplateFeed{
-				Incremental: v.GetBool("export.inspection.incremental"),
-			}).Export(ctx, apiClient, exporter)
-			util.Check(err, "failed to export")
-		}()
-	}
-
-	if tablesMap["sites"] || len(tables) == 0 {
-		wg.Add(1)
-
-		go func() {
-			defer wg.Done()
-
-			err := (&SiteFeed{}).Export(ctx, apiClient, exporter)
-			util.Check(err, "failed to export")
-		}()
-	}
-
-	if tablesMap["users"] || len(tables) == 0 {
-		wg.Add(1)
-
-		go func() {
-			defer wg.Done()
-
-			err := (&UserFeed{}).Export(ctx, apiClient, exporter)
-			util.Check(err, "failed to export")
-		}()
-	}
-
-	if tablesMap["groups"] || len(tables) == 0 {
-		wg.Add(1)
-
-		go func() {
-			defer wg.Done()
-
-			err := (&GroupFeed{}).Export(ctx, apiClient, exporter)
-			util.Check(err, "failed to export")
-		}()
-	}
-
-	if tablesMap["group_users"] || len(tables) == 0 {
-		wg.Add(1)
-
-		go func() {
-			defer wg.Done()
-
-			err := (&GroupUserFeed{}).Export(ctx, apiClient, exporter)
-			util.Check(err, "failed to export")
-		}()
-	}
-
-	if tablesMap["schedules"] || len(tables) == 0 {
-		wg.Add(1)
-
-		go func() {
-			defer wg.Done()
-
-			err := (&ScheduleFeed{
-				TemplateIDs: v.GetStringSlice("export.template_ids"),
-			}).Export(ctx, apiClient, exporter)
-			util.Check(err, "failed to export")
-		}()
-	}
-
-	if tablesMap["schedule_assignees"] || len(tables) == 0 {
-		wg.Add(1)
-
-		go func() {
-			defer wg.Done()
-
-			err := (&ScheduleAssigneeFeed{
-				TemplateIDs: v.GetStringSlice("export.template_ids"),
-			}).Export(ctx, apiClient, exporter)
-			util.Check(err, "failed to export")
-		}()
-	}
-
-	if tablesMap["schedule_occurrence"] || len(tables) == 0 {
-		wg.Add(1)
-
-		go func() {
-			defer wg.Done()
-
-			err := (&ScheduleOccurrenceFeed{
-				TemplateIDs: v.GetStringSlice("export.template_ids"),
-			}).Export(ctx, apiClient, exporter)
-			util.Check(err, "failed to export")
-		}()
-	}
-
-	if tablesMap["actions"] || len(tables) == 0 {
-		wg.Add(1)
-
-		go func() {
-			defer wg.Done()
-
-			err := (&ActionFeed{}).Export(ctx, apiClient, exporter)
-			util.Check(err, "failed to export")
-		}()
-	}
-
-	if tablesMap["action_assignees"] || len(tables) == 0 {
-		wg.Add(1)
-
-		go func() {
-			defer wg.Done()
-
-			err := (&ActionAssigneeFeed{}).Export(ctx, apiClient, exporter)
-			util.Check(err, "failed to export")
-		}()
+				err := f.Export(ctx, apiClient, exporter)
+				util.Check(err, "failed to export")
+			}(feed)
+		}
 	}
 
 	wg.Wait()
@@ -182,4 +135,21 @@ func ExportFeeds(v *viper.Viper, apiClient api.APIClient, exporter Exporter) err
 	logger.Info("Export finished")
 
 	return nil
+}
+
+// ExportInspectionReports download all the reports for inspections and stores them on disk
+func ExportInspectionReports(v *viper.Viper, apiClient api.Client, exporter *ReportExporter) error {
+	logger := util.GetLogger()
+	ctx := context.Background()
+
+	feed := getInspectionFeed(v, config.GetInspectionConfig(v), getTemplateIDs(v))
+	err := feed.Export(ctx, apiClient, exporter)
+	util.Check(err, "failed to export inspection feed")
+
+	err = exporter.SaveReports(ctx, apiClient, feed)
+	if err != nil {
+		logger.Info("Export finished")
+	}
+
+	return err
 }

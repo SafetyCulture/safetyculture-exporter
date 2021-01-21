@@ -1,0 +1,34 @@
++------------------+----------+-------------+
+|       NAME       |   TYPE   | PRIMARY KEY |
++------------------+----------+-------------+
+| audit_id         | text     | true        |
+| name             | text     |             |
+| archived         | numeric  |             |
+| owner_name       | text     |             |
+| owner_id         | text     |             |
+| author_name      | text     |             |
+| author_id        | text     |             |
+| score            | real     |             |
+| max_score        | real     |             |
+| score_percentage | real     |             |
+| duration         | integer  |             |
+| template_id      | text     |             |
+| template_name    | text     |             |
+| template_author  | text     |             |
+| site_id          | text     |             |
+| date_started     | datetime |             |
+| date_completed   | datetime |             |
+| date_modified    | datetime |             |
+| created_at       | datetime |             |
+| modified_at      | datetime |             |
+| exported_at      | datetime |             |
+| document_no      | text     |             |
+| prepared_by      | text     |             |
+| location         | text     |             |
+| conducted_on     | datetime |             |
+| personnel        | text     |             |
+| client_site      | text     |             |
+| latitude         | real     |             |
+| longitude        | real     |             |
+| web_report_link  | text     |             |
++------------------+----------+-------------+

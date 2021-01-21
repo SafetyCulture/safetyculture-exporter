@@ -3,17 +3,23 @@ package feed
 import (
 	"context"
 	"encoding/json"
+	"fmt"
+	"strings"
+	"sync"
 	"time"
 
 	"github.com/SafetyCulture/iauditor-exporter/internal/app/api"
 	"github.com/SafetyCulture/iauditor-exporter/internal/app/util"
 )
 
+const maxGoRoutines = 10
+
 // InspectionItem represents a row from the inspection_items feed
 type InspectionItem struct {
 	ID                      string    `json:"id" csv:"id" gorm:"primarykey"`
 	ItemID                  string    `json:"item_id" csv:"item_id"`
 	AuditID                 string    `json:"audit_id" csv:"audit_id"`
+	ItemIndex               int64     `json:"item_index" csv:"item_index"`
 	TemplateID              string    `json:"template_id" csv:"template_id"`
 	ParentID                string    `json:"parent_id" csv:"parent_id"`
 	CreatedAt               time.Time `json:"created_at" csv:"created_at"`
@@ -48,6 +54,7 @@ type InspectionItemFeed struct {
 	Completed       string
 	IncludeInactive bool
 	Incremental     bool
+	ExportMedia     bool
 }
 
 // Name is the name of the feed
@@ -60,6 +67,11 @@ func (f *InspectionItemFeed) Model() interface{} {
 	return InspectionItem{}
 }
 
+// RowsModel returns the model of feed rows
+func (f *InspectionItemFeed) RowsModel() interface{} {
+	return &[]*InspectionItem{}
+}
+
 // PrimaryKey returns the primary key(s)
 func (f *InspectionItemFeed) PrimaryKey() []string {
 	return []string{"id"}
@@ -68,6 +80,7 @@ func (f *InspectionItemFeed) PrimaryKey() []string {
 // Columns returns the columns of the row
 func (f *InspectionItemFeed) Columns() []string {
 	return []string{
+		"item_index",
 		"template_id",
 		"parent_id",
 		"created_at",
@@ -98,20 +111,43 @@ func (f *InspectionItemFeed) Order() string {
 	return "modified_at ASC, id"
 }
 
-func (f *InspectionItemFeed) writeRows(exporter Exporter, rows []*InspectionItem) error {
+func fetchAndWriteMedia(ctx context.Context, apiClient api.Client, exporter Exporter, auditID, mediaURL string) error {
+	resp, err := apiClient.GetMedia(
+		ctx,
+		&api.GetMediaRequest{
+			URL:     mediaURL,
+			AuditID: auditID,
+		},
+	)
+	if err != nil {
+		return err
+	}
+
+	err = exporter.WriteMedia(auditID, resp.MediaID, resp.ContentType, resp.Body)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (f *InspectionItemFeed) writeRows(ctx context.Context, exporter Exporter, rows []*InspectionItem, apiClient api.Client) error {
 	skipIDs := map[string]bool{}
 	for _, id := range f.SkipIDs {
 		skipIDs[id] = true
 	}
 
-	// DB parameters are limited to 65536 params per query.
-	// Limit the batch size to prevent queries from failing
-	batchSize := 1000
+	// Calculate the size of the batch we can insert into the DB at once. Column count + buffer
+	batchSize := exporter.ParameterLimit() / (len(f.Columns()) + 4)
 	for i := 0; i < len(rows); i += batchSize {
 		j := i + batchSize
 		if j > len(rows) {
 			j = len(rows)
 		}
+
+		// you can specify level of concurrency by increasing channel size
+		buffers := make(chan bool, maxGoRoutines)
+		var wg sync.WaitGroup
 
 		// Some audits in production have the same item ID multiple times
 		// We can't insert them simultaneously. This means we are dropping data, which sucks.
@@ -120,20 +156,49 @@ func (f *InspectionItemFeed) writeRows(exporter Exporter, rows []*InspectionItem
 		for _, row := range rows[i:j] {
 			skip := skipIDs[row.AuditID]
 			seen := idSeen[row.ID]
-			if !seen && !skip {
-				idSeen[row.ID] = true
-				rowsToInsert = append(rowsToInsert, row)
+			if seen || skip {
+				continue
 			}
+			idSeen[row.ID] = true
+			rowsToInsert = append(rowsToInsert, row)
+
+			if !f.ExportMedia || len(row.MediaHypertextReference) == 0 {
+				continue
+			}
+
+			mediaURLList := strings.Split(row.MediaHypertextReference, "\n")
+			for _, mediaURL := range mediaURLList {
+				wg.Add(1)
+
+				go func(mediaURL string) {
+					defer wg.Done()
+					buffers <- true
+
+					err := fetchAndWriteMedia(ctx, apiClient, exporter, row.AuditID, mediaURL)
+					util.Check(err, fmt.Sprintf("Failed to write media of inspection: %s", row.AuditID))
+
+					<-buffers
+				}(mediaURL)
+			}
+			wg.Wait()
 		}
 
-		return exporter.WriteRows(f, rowsToInsert)
+		err := exporter.WriteRows(f, rowsToInsert)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
 }
 
+// CreateSchema creates the schema of the feed for the supplied exporter
+func (f *InspectionItemFeed) CreateSchema(exporter Exporter) error {
+	return exporter.CreateSchema(f, &[]*InspectionItem{})
+}
+
 // Export exports the feed to the supplied exporter
-func (f *InspectionItemFeed) Export(ctx context.Context, apiClient api.APIClient, exporter Exporter) error {
+func (f *InspectionItemFeed) Export(ctx context.Context, apiClient api.Client, exporter Exporter) error {
 	logger := util.GetLogger()
 	feedName := f.Name()
 
@@ -166,11 +231,8 @@ func (f *InspectionItemFeed) Export(ctx context.Context, apiClient api.APIClient
 		util.Check(err, "Failed to unmarshal data to struct")
 
 		if len(rows) != 0 {
-			err = f.writeRows(exporter, rows)
+			err = f.writeRows(ctx, exporter, rows, apiClient)
 			util.Check(err, "Failed to write data to exporter")
-
-			err = exporter.SetLastModifiedAt(f, rows[len(rows)-1].ModifiedAt)
-			util.Check(err, "Failed to write last modified at time")
 		}
 
 		logger.Infof("%s: %d remaining", feedName, resp.Metadata.RemainingRecords)
