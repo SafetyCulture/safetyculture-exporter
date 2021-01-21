@@ -197,6 +197,16 @@ func initMockFeedsSet3(httpClient *http.Client) {
 		Get("/feed/schedule_occurrences").
 		Reply(200).
 		File("mocks/set_1/feed_schedule_occurrences_1.json")
+
+	gock.New("http://localhost:9999").
+		Get("/feed/actions").
+		Reply(200).
+		File("mocks/set_1/feed_actions_1.json")
+
+	gock.New("http://localhost:9999").
+		Get("/feed/action_assignees").
+		Reply(200).
+		File("mocks/set_1/feed_action_assignees_1.json")
 }
 
 func resetMocks(httpClient *http.Client) {

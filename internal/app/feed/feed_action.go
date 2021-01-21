@@ -42,6 +42,11 @@ func (f *ActionFeed) Model() interface{} {
 	return Action{}
 }
 
+// RowsModel returns the model of feed rows
+func (f *ActionFeed) RowsModel() interface{} {
+	return &[]*Action{}
+}
+
 // PrimaryKey returns the primary key(s)
 func (f *ActionFeed) PrimaryKey() []string {
 	return []string{"action_id"}
@@ -73,8 +78,13 @@ func (f *ActionFeed) Order() string {
 	return "action_id"
 }
 
+// CreateSchema creates the schema of the feed for the supplied exporter
+func (f *ActionFeed) CreateSchema(exporter Exporter) error {
+	return exporter.CreateSchema(f, &[]*Action{})
+}
+
 // Export exports the feed to the supplied exporter
-func (f *ActionFeed) Export(ctx context.Context, apiClient api.APIClient, exporter Exporter) error {
+func (f *ActionFeed) Export(ctx context.Context, apiClient api.Client, exporter Exporter) error {
 	logger := util.GetLogger()
 	feedName := f.Name()
 
