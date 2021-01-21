@@ -80,7 +80,6 @@ func init() {
 	addCmd(export.ReportCmd(), connectionFlags, pathFlag, inspectionFlags, templatesFlag, reportFlags)
 	addCmd(export.PrintSchemaCmd())
 	addCmd(configure.Cmd(), connectionFlags, dbFlags, pathFlag, inspectionFlags, templatesFlag, tablesFlag)
-	RootCmd.AddCommand(configure.Cmd())
 	RootCmd.AddCommand(&cobra.Command{
 		Hidden: true,
 		Use:    "docs",
