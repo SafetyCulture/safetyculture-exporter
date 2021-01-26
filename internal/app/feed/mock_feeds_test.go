@@ -50,6 +50,11 @@ func initMockFeedsSet1(httpClient *http.Client) {
 		File("mocks/set_1/feed_templates_1.json")
 
 	gock.New("http://localhost:9999").
+		Get("/feed/template_permissions").
+		Reply(200).
+		File("mocks/set_1/feed_template_permissions_1.json")
+
+	gock.New("http://localhost:9999").
 		Get("/feed/schedules").
 		Reply(200).
 		File("mocks/set_1/feed_schedules_1.json")
@@ -102,6 +107,11 @@ func initMockFeedsSet2(httpClient *http.Client) {
 		Get("/feed/templates").
 		Reply(200).
 		File("mocks/set_1/feed_templates_1.json")
+
+	gock.New("http://localhost:9999").
+		Get("/feed/template_permissions").
+		Reply(200).
+		File("mocks/set_1/feed_template_permissions_1.json")
 
 	gock.New("http://localhost:9999").
 		Get("/feed/schedules").
@@ -162,6 +172,11 @@ func initMockFeedsSet3(httpClient *http.Client) {
 		Get("/feed/templates").
 		Reply(200).
 		File("mocks/set_1/feed_templates_1.json")
+
+	gock.New("http://localhost:9999").
+		Get("/feed/template_permissions").
+		Reply(200).
+		File("mocks/set_1/feed_template_permissions_1.json")
 
 	gock.New("http://localhost:9999").
 		Get("/feed/schedules").
