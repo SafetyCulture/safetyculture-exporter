@@ -92,7 +92,7 @@ func (f *TemplateFeed) Export(ctx context.Context, apiClient api.Client, exporte
 		f.ModifiedAfter = *lastModifiedAt
 	}
 
-	logger.Infof("%s: exporting since %s", feedName, lastModifiedAt.Format(time.RFC1123))
+	logger.Infof("%s: exporting since %s", feedName, f.ModifiedAfter.Format(time.RFC1123))
 
 	err = apiClient.DrainFeed(ctx, &api.GetFeedRequest{
 		InitialURL: "/feed/templates",
