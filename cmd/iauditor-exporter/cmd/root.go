@@ -115,6 +115,7 @@ func configFlags() {
 	inspectionFlags.Bool("inspection-include-inactive-items", false, "Include inactive items in the inspection_items table (default false)")
 	inspectionFlags.String("inspection-archived", "false", "Return archived inspections, false, true or both")
 	inspectionFlags.String("inspection-completed", "both", "Return completed inspections, false, true or both")
+	inspectionFlags.String("inspection-modified-after", "", "Return inspections modified after this date")
 
 	templatesFlag = flag.NewFlagSet("templates", flag.ContinueOnError)
 	templatesFlag.StringSlice("template-ids", []string{}, "Template IDs to filter inspections and schedules by (default all)")
@@ -152,6 +153,7 @@ func bindFlags() {
 	util.Check(viper.BindPFlag("export.inspection.archived", inspectionFlags.Lookup("inspection-archived")), "while binding flag")
 	util.Check(viper.BindPFlag("export.inspection.completed", inspectionFlags.Lookup("inspection-completed")), "while binding flag")
 	util.Check(viper.BindPFlag("export.inspection.skip_ids", inspectionFlags.Lookup("inspection-skip-ids")), "while binding flag")
+	util.Check(viper.BindPFlag("export.inspection.modified_after", inspectionFlags.Lookup("inspection-modified-after")), "while binding flag")
 
 	util.Check(viper.BindPFlag("report.format", reportFlags.Lookup("format")), "while binding flag")
 	util.Check(viper.BindPFlag("report.preference_id", reportFlags.Lookup("preference-id")), "while binding flag")

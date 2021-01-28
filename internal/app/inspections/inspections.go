@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"sync"
+	"time"
 
 	"github.com/SafetyCulture/iauditor-exporter/internal/app/api"
 	"github.com/SafetyCulture/iauditor-exporter/internal/app/config"
@@ -21,7 +22,7 @@ type inspectionClient struct {
 	apiClient     api.Client
 	exporter      exporter.Exporter
 	SkipIDs       []string
-	ModifiedAfter string
+	ModifiedAfter time.Time
 	TemplateIDs   []string
 	Archived      string
 	Completed     string

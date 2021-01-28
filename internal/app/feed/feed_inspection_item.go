@@ -48,7 +48,7 @@ type InspectionItem struct {
 // InspectionItemFeed is a representation of the inspection_items feed
 type InspectionItemFeed struct {
 	SkipIDs         []string
-	ModifiedAfter   string
+	ModifiedAfter   time.Time
 	TemplateIDs     []string
 	Archived        string
 	Completed       string
@@ -202,8 +202,6 @@ func (f *InspectionItemFeed) Export(ctx context.Context, apiClient api.Client, e
 	logger := util.GetLogger()
 	feedName := f.Name()
 
-	logger.Infof("%s: exporting", feedName)
-
 	exporter.InitFeed(f, &InitFeedOptions{
 		// Delete data if incremental refresh is disabled so there is no duplicates
 		Truncate: f.Incremental == false,
@@ -212,8 +210,10 @@ func (f *InspectionItemFeed) Export(ctx context.Context, apiClient api.Client, e
 	lastModifiedAt, err := exporter.LastModifiedAt(f)
 	util.Check(err, "unable to load modified after")
 	if lastModifiedAt != nil {
-		f.ModifiedAfter = lastModifiedAt.Format(time.RFC3339Nano)
+		f.ModifiedAfter = *lastModifiedAt
 	}
+
+	logger.Infof("%s: exporting since %s", feedName, lastModifiedAt.Format(time.RFC1123))
 
 	err = apiClient.DrainFeed(ctx, &api.GetFeedRequest{
 		InitialURL: "/feed/inspection_items",
