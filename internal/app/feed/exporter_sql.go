@@ -93,6 +93,8 @@ func (e *SQLExporter) WriteRows(feed Feed, rows interface{}) error {
 }
 
 type modifiedAtRow struct {
+	// ExportedAt is here so gorm has an additional field to sort on in SQL Server
+	ExportedAt time.Time
 	ModifiedAt time.Time
 }
 
@@ -100,7 +102,7 @@ type modifiedAtRow struct {
 func (e *SQLExporter) LastModifiedAt(feed Feed) (*time.Time, error) {
 	latestRow := modifiedAtRow{}
 
-	result := e.DB.Table(feed.Name()).Order("modified_at desc").Limit(1).First(&latestRow)
+	result := e.DB.Table(feed.Name()).Order("modified_at DESC").Limit(1).First(&latestRow)
 	if result.RowsAffected != 0 {
 		return &latestRow.ModifiedAt, nil
 	}
