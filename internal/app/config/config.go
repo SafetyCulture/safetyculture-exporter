@@ -1,7 +1,6 @@
 package config
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/spf13/viper"
@@ -18,7 +17,6 @@ type InspectionConfig struct {
 
 // GetInspectionConfig returns configurations that have been set for fetching inspections
 func GetInspectionConfig(v *viper.Viper) *InspectionConfig {
-	fmt.Println(v.GetTime("export.inspection.modified_after"))
 	return &InspectionConfig{
 		SkipIDs:       v.GetStringSlice("export.inspection.skip_ids"),
 		ModifiedAfter: v.GetTime("export.inspection.modified_after"),
