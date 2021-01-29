@@ -4,6 +4,7 @@ import (
 	"context"
 	"io/ioutil"
 	"testing"
+	"time"
 
 	"github.com/SafetyCulture/iauditor-exporter/internal/app/feed"
 	"github.com/stretchr/testify/assert"
@@ -21,7 +22,7 @@ func TestInspectionItemFeedExport_should_export_rows_to_sql_db(t *testing.T) {
 
 	inspectionItemFeed := feed.InspectionItemFeed{
 		SkipIDs:       []string{},
-		ModifiedAfter: "",
+		ModifiedAfter: time.Now(),
 		TemplateIDs:   []string{},
 		Archived:      "both",
 		Completed:     "both",
@@ -58,7 +59,7 @@ func TestInspectionItemFeedExportWithMedia(t *testing.T) {
 
 	inspectionItemFeed := feed.InspectionItemFeed{
 		SkipIDs:       []string{},
-		ModifiedAfter: "",
+		ModifiedAfter: time.Now(),
 		TemplateIDs:   []string{},
 		Archived:      "both",
 		Completed:     "both",

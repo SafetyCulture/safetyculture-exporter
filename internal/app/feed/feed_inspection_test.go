@@ -3,6 +3,7 @@ package feed_test
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/SafetyCulture/iauditor-exporter/internal/app/feed"
 	"github.com/stretchr/testify/assert"
@@ -19,7 +20,7 @@ func TestInspectionFeedExport_should_export_rows_to_sql_db(t *testing.T) {
 
 	inspectionsFeed := feed.InspectionFeed{
 		SkipIDs:       []string{},
-		ModifiedAfter: "",
+		ModifiedAfter: time.Now(),
 		TemplateIDs:   []string{},
 		Archived:      "both",
 		Completed:     "both",

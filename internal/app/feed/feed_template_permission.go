@@ -3,6 +3,7 @@ package feed
 import (
 	"context"
 	"encoding/json"
+	"time"
 
 	"github.com/SafetyCulture/iauditor-exporter/internal/app/api"
 	"github.com/SafetyCulture/iauditor-exporter/internal/app/util"
@@ -19,7 +20,7 @@ type TemplatePermission struct {
 
 // TemplatePermissionFeed is a representation of the template_permissions feed
 type TemplatePermissionFeed struct {
-	ModifiedAfter string
+	ModifiedAfter time.Time
 	Incremental   bool
 }
 

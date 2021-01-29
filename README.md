@@ -159,6 +159,21 @@ Skip storing these inspection IDs
 > flag: `--inspection-skip-ids`\
 env: `IAUD_EXPORT_INSPECTION_SKIP_IDS`
 
+#### `export.inspection.modified_after`
+Return inspections modified only after this date
+> flag: `--inspection-modified-after`\
+env: `IAUD_EXPORT_INSPECTION_MODIFIED_AFTER`
+formats:
+
+- 2006-01-02T15:04:05Z07:00 (ISO8601)
+- Mon, 02 Jan 2006 15:04:05 MST (RFC1123)
+- 02 Jan 06 15:04 MST (RFC822)
+- Monday, 02-Jan-06 15:04:05 MST (RFC850)
+- Mon Jan 2 15:04:05 2006 (ANSIC)
+- Mon Jan 2 15:04:05 MST 2006
+- 2006-01-02
+- 02 Jan 2006
+
 ### Using a proxy
 
 If you need to use a proxy to connect to the iAuditor API the following parameters can be set.
