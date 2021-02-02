@@ -7,7 +7,7 @@ require (
 	github.com/cpuguy83/go-md2man v1.0.10 // indirect
 	github.com/dghubble/sling v1.2.0
 	github.com/gocarina/gocsv v0.0.0-20200925213129-04be9ee2e1a2
-	github.com/gofrs/uuid v3.3.0+incompatible
+	github.com/gofrs/uuid v3.4.0+incompatible
 	github.com/google/go-github v17.0.0+incompatible
 	github.com/google/go-querystring v1.0.0 // indirect
 	github.com/gookit/color v1.3.6
