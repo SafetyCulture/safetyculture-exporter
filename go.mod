@@ -10,8 +10,8 @@ require (
 	github.com/gofrs/uuid v3.3.0+incompatible
 	github.com/google/go-github v17.0.0+incompatible
 	github.com/google/go-querystring v1.0.0 // indirect
-	github.com/gookit/color v1.1.7
-	github.com/hashicorp/go-version v1.2.0
+	github.com/gookit/color v1.3.6
+	github.com/hashicorp/go-version v1.2.1
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/newrelic/go-agent/v3 v3.9.0
 	github.com/olekukonko/tablewriter v0.0.4
