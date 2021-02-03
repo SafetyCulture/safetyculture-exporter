@@ -3,6 +3,8 @@ package exporter_test
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"log"
 	"testing"
 	"time"
 
@@ -49,13 +51,17 @@ func TestLastModifiedAt(t *testing.T) {
 }
 
 func TestLastModifiedAtAfterRestart(t *testing.T) {
-	tmpExporter := getTemporaryJSONExporter()
+	dir, err := ioutil.TempDir("", "export")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	tmpExporter1 := exporter.NewJSONExporter(dir)
 	now := time.Now()
-	tmpExporter.SetLastModifiedAt(now)
+	tmpExporter1.SetLastModifiedAt(now)
 
-	exporter.SetLastModifiedFile(nil)
-
-	lastModified := tmpExporter.GetLastModifiedAt()
+	tmpExporter2 := exporter.NewJSONExporter(dir)
+	lastModified := tmpExporter2.GetLastModifiedAt()
 	assert.NotNil(t, lastModified)
 
 	expected := fmt.Sprintf("%d-%02d-%02dT%02d:%02d:%02d",

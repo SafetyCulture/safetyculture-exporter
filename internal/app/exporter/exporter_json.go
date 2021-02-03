@@ -17,11 +17,10 @@ const (
 	layout       = time.RFC3339Nano
 )
 
-var lastModifiedFile *os.File
-
 // JSONExporter is an interface to export data feeds to json files
 type JSONExporter struct {
-	exportPath string
+	exportPath       string
+	lastModifiedFile *os.File
 }
 
 // NewJSONExporter creates new instance of JSONExporter
@@ -31,27 +30,21 @@ func NewJSONExporter(exportPath string) Exporter {
 	}
 }
 
-// SetLastModifiedFile is used to set the last modified file pointer.
-// Currently used only for tests.
-func SetLastModifiedFile(f *os.File) {
-	lastModifiedFile = f
-}
-
 // SetLastModifiedAt writes last modified date to a file
 func (e *JSONExporter) SetLastModifiedAt(modifiedAt time.Time) {
 
 	exportFilePath := filepath.Join(e.exportPath, fmt.Sprintf("%s", lastModified))
-	if lastModifiedFile == nil {
+	if e.lastModifiedFile == nil {
 		var err error
-		lastModifiedFile, err = os.OpenFile(exportFilePath, os.O_RDWR|os.O_CREATE, 0666)
+		e.lastModifiedFile, err = os.OpenFile(exportFilePath, os.O_RDWR|os.O_CREATE, 0666)
 		util.Check(err, "Failed to open last-modified file")
 	}
 
 	str := fmt.Sprintf("%s", modifiedAt.Format(layout))
-	_, err := lastModifiedFile.WriteAt([]byte(str), 0)
+	_, err := e.lastModifiedFile.WriteAt([]byte(str), 0)
 	util.Check(err, "Failed to write last-modified to a file")
 
-	err = lastModifiedFile.Sync()
+	err = e.lastModifiedFile.Sync()
 	util.Check(err, "Failed to write last-modified to a file")
 
 	return
@@ -65,14 +58,14 @@ func (e *JSONExporter) GetLastModifiedAt() *time.Time {
 		return nil
 	}
 
-	if lastModifiedFile == nil {
+	if e.lastModifiedFile == nil {
 		var err error
-		lastModifiedFile, err = os.OpenFile(exportFilePath, os.O_RDWR|os.O_CREATE, 0666)
+		e.lastModifiedFile, err = os.OpenFile(exportFilePath, os.O_RDWR|os.O_CREATE, 0666)
 		util.Check(err, "Failed to open last-modified file")
 	}
 
 	b := make([]byte, 50)
-	_, err = lastModifiedFile.Read([]byte(b))
+	_, err = e.lastModifiedFile.Read([]byte(b))
 	util.Check(err, "Failed to read last-modified")
 
 	modifiedAt, err := time.Parse(layout, strings.TrimSpace(string(bytes.Trim(b, "\x00"))))
