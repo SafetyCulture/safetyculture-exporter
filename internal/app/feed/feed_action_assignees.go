@@ -3,6 +3,7 @@ package feed
 import (
 	"context"
 	"encoding/json"
+	"time"
 
 	"github.com/SafetyCulture/iauditor-exporter/internal/app/api"
 	"github.com/SafetyCulture/iauditor-exporter/internal/app/util"
@@ -10,11 +11,13 @@ import (
 
 // ActionAssignee represents a row from the action_assignees feed
 type ActionAssignee struct {
-	ID         string `json:"id" csv:"id" gorm:"primarykey"`
-	ActionID   string `json:"action_id" csv:"action_id"`
-	AssigneeID string `json:"assignee_id" csv:"assignee_id"`
-	Type       string `json:"type" csv:"type"`
-	Name       string `json:"name" csv:"name"`
+	ID         string    `json:"id" csv:"id" gorm:"primarykey"`
+	ActionID   string    `json:"action_id" csv:"action_id"`
+	AssigneeID string    `json:"assignee_id" csv:"assignee_id"`
+	Type       string    `json:"type" csv:"type"`
+	Name       string    `json:"name" csv:"name"`
+	ModifiedAt time.Time `json:"modified_at" csv:"modified_at"`
+	ExportedAt time.Time `json:"exported_at" csv:"exported_at" gorm:"autoUpdateTime"`
 }
 
 // ActionAssigneeFeed is a representation of the action_assignees feed
