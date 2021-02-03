@@ -31,8 +31,15 @@ func NewJSONExporter(exportPath string) Exporter {
 	}
 }
 
+// SetLastModifiedFile is used to set the last modified file pointer.
+// Currently used only for tests.
+func SetLastModifiedFile(f *os.File) {
+	lastModifiedFile = f
+}
+
 // SetLastModifiedAt writes last modified date to a file
 func (e *JSONExporter) SetLastModifiedAt(modifiedAt time.Time) {
+
 	exportFilePath := filepath.Join(e.exportPath, fmt.Sprintf("%s", lastModified))
 	if lastModifiedFile == nil {
 		var err error
@@ -52,24 +59,25 @@ func (e *JSONExporter) SetLastModifiedAt(modifiedAt time.Time) {
 
 // GetLastModifiedAt reads last modified date from a file
 func (e *JSONExporter) GetLastModifiedAt() *time.Time {
-
 	exportFilePath := filepath.Join(e.exportPath, fmt.Sprintf("%s", lastModified))
 	_, err := os.Stat(exportFilePath)
 	if os.IsNotExist(err) {
 		return nil
 	}
 
-	if lastModifiedFile != nil {
-		b := make([]byte, 50)
-		_, err := lastModifiedFile.Read([]byte(b))
-		util.Check(err, "Failed to read last-modified")
-
-		modifiedAt, err := time.Parse(layout, strings.TrimSpace(string(bytes.Trim(b, "\x00"))))
-		util.Check(err, "Failed to convert last-modified to iso format")
-		return &modifiedAt
+	if lastModifiedFile == nil {
+		var err error
+		lastModifiedFile, err = os.OpenFile(exportFilePath, os.O_RDWR|os.O_CREATE, 0666)
+		util.Check(err, "Failed to open last-modified file")
 	}
 
-	return nil
+	b := make([]byte, 50)
+	_, err = lastModifiedFile.Read([]byte(b))
+	util.Check(err, "Failed to read last-modified")
+
+	modifiedAt, err := time.Parse(layout, strings.TrimSpace(string(bytes.Trim(b, "\x00"))))
+	util.Check(err, "Failed to convert last-modified to iso format")
+	return &modifiedAt
 }
 
 // WriteRow writes the json response into a file

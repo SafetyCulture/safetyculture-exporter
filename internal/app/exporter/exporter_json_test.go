@@ -48,6 +48,25 @@ func TestLastModifiedAt(t *testing.T) {
 	assert.Equal(t, expected, actual)
 }
 
+func TestLastModifiedAtAfterRestart(t *testing.T) {
+	tmpExporter := getTemporaryJSONExporter()
+	now := time.Now()
+	tmpExporter.SetLastModifiedAt(now)
+
+	exporter.SetLastModifiedFile(nil)
+
+	lastModified := tmpExporter.GetLastModifiedAt()
+	assert.NotNil(t, lastModified)
+
+	expected := fmt.Sprintf("%d-%02d-%02dT%02d:%02d:%02d",
+		now.Year(), now.Month(), now.Day(),
+		now.Hour(), now.Minute(), now.Second())
+	actual := fmt.Sprintf("%d-%02d-%02dT%02d:%02d:%02d",
+		lastModified.Year(), lastModified.Month(), lastModified.Day(),
+		lastModified.Hour(), lastModified.Minute(), lastModified.Second())
+	assert.Equal(t, expected, actual)
+}
+
 func TestWriteRow(t *testing.T) {
 	tmpExporter := getTemporaryJSONExporter()
 	str := "sample-string"
