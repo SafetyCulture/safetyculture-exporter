@@ -153,12 +153,12 @@ type FeedMetadata struct {
 
 // GetFeedParams is a list of all parameters we can set when fetching a feed
 type GetFeedParams struct {
-	ModifiedAfter   string   `url:"modified_after,omitempty"`
-	TemplateIDs     []string `url:"template,omitempty"`
-	Archived        string   `url:"archived,omitempty"`
-	Completed       string   `url:"completed,omitempty"`
-	IncludeInactive bool     `url:"include_inactive,omitempty"`
-	Limit           int      `url:"limit,omitempty"`
+	ModifiedAfter   time.Time `url:"modified_after,omitempty"`
+	TemplateIDs     []string  `url:"template,omitempty"`
+	Archived        string    `url:"archived,omitempty"`
+	Completed       string    `url:"completed,omitempty"`
+	IncludeInactive bool      `url:"include_inactive,omitempty"`
+	Limit           int       `url:"limit,omitempty"`
 }
 
 // GetFeedRequest has all the data needed to make a request to get a feed

@@ -125,7 +125,7 @@ env: `IAUD_EXPORT_TEMPLATE_IDS`\
 default: All templates
 
 #### `export.tables`
-Tables to export. inspections, inspection_items, templates, sites, users, groups, group_users, schedules, schedule_assignees and schedule_occurrences are only valid values.
+Tables to export. inspections, inspection_items, templates, template_permissions, sites, users, groups, group_users, schedules, schedule_assignees and schedule_occurrences are only valid values.
 > flag: `--tables`\
 env: `IAUD_EXPORT_TABLES`\
 default: All tables
@@ -158,6 +158,21 @@ default: `true`
 Skip storing these inspection IDs
 > flag: `--inspection-skip-ids`\
 env: `IAUD_EXPORT_INSPECTION_SKIP_IDS`
+
+#### `export.inspection.modified_after`
+Return inspections modified only after this date
+> flag: `--inspection-modified-after`\
+env: `IAUD_EXPORT_INSPECTION_MODIFIED_AFTER`
+formats:
+
+- 2006-01-02T15:04:05Z07:00 (ISO8601)
+- Mon, 02 Jan 2006 15:04:05 MST (RFC1123)
+- 02 Jan 06 15:04 MST (RFC822)
+- Monday, 02-Jan-06 15:04:05 MST (RFC850)
+- Mon Jan 2 15:04:05 2006 (ANSIC)
+- Mon Jan 2 15:04:05 MST 2006
+- 2006-01-02
+- 02 Jan 2006
 
 ### Using a proxy
 
