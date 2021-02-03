@@ -1,9 +1,11 @@
-+-------------+------+-------------+
-|    NAME     | TYPE | PRIMARY KEY |
-+-------------+------+-------------+
-| id          | text | true        |
-| action_id   | text |             |
-| assignee_id | text |             |
-| type        | text |             |
-| name        | text |             |
-+-------------+------+-------------+
++-------------+----------+-------------+
+|    NAME     |   TYPE   | PRIMARY KEY |
++-------------+----------+-------------+
+| id          | text     | true        |
+| action_id   | text     |             |
+| assignee_id | text     |             |
+| type        | text     |             |
+| name        | text     |             |
+| modified_at | datetime |             |
+| exported_at | datetime |             |
++-------------+----------+-------------+

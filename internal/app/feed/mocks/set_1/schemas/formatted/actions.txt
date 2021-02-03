@@ -10,6 +10,7 @@
 | due_date          | datetime |             |
 | created_at        | datetime |             |
 | modified_at       | datetime |             |
+| exported_at       | datetime |             |
 | creator_user_id   | text     |             |
 | creator_user_name | text     |             |
 | template_id       | text     |             |
