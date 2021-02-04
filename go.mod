@@ -8,6 +8,7 @@ require (
 	github.com/dghubble/sling v1.2.0
 	github.com/gocarina/gocsv v0.0.0-20200925213129-04be9ee2e1a2
 	github.com/gofrs/uuid v3.4.0+incompatible
+	github.com/golang/protobuf v1.3.3 // indirect
 	github.com/google/go-github v17.0.0+incompatible
 	github.com/google/go-querystring v1.0.0 // indirect
 	github.com/gookit/color v1.3.6
@@ -15,7 +16,6 @@ require (
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/jackc/pgproto3/v2 v2.0.7 // indirect
 	github.com/mattn/go-sqlite3 v1.14.6 // indirect
-	github.com/newrelic/go-agent/v3 v3.9.0
 	github.com/olekukonko/tablewriter v0.0.4
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/afero v1.2.2 // indirect

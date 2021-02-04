@@ -130,6 +130,27 @@ Tables to export. inspections, inspection_items, templates, template_permissions
 env: `IAUD_EXPORT_TABLES`\
 default: All tables
 
+#### `export.incremental`
+Update actions, action_assignees, inspections, inspection_items and templates tables incrementally
+> flag: `--incremental-update`\
+env: `IAUD_EXPORT_INCREMENTAL`\
+default: `true`
+
+#### `export.modified_after`
+Return inspections and actions modified only after this date
+> flag: `--modified-after`\
+env: `IAUD_EXPORT_MODIFIED_AFTER`
+formats:
+
+- 2006-01-02T15:04:05Z07:00 (ISO8601)
+- Mon, 02 Jan 2006 15:04:05 MST (RFC1123)
+- 02 Jan 06 15:04 MST (RFC822)
+- Monday, 02-Jan-06 15:04:05 MST (RFC850)
+- Mon Jan 2 15:04:05 2006 (ANSIC)
+- Mon Jan 2 15:04:05 MST 2006
+- 2006-01-02
+- 02 Jan 2006
+
 #### `export.inspection.archived`
 Return archived inspections, false, true or both
 > flag: `--inspection-archived`\
@@ -148,31 +169,10 @@ Include inactive items in the inspection_items table
 env: `IAUD_EXPORT_INSPECTION_INCLUDE_INACTIVE_ITEMS`\
 default: `false`
 
-#### `export.inspection.incremental`
-Update inspections, inspection_items and templates tables incrementally
-> flag: `--inspection-incremental-update`\
-env: `IAUD_EXPORT_INSPECTION_INCREMENTAL`\
-default: `true`
-
 #### `export.inspection.skip_ids`
 Skip storing these inspection IDs
 > flag: `--inspection-skip-ids`\
 env: `IAUD_EXPORT_INSPECTION_SKIP_IDS`
-
-#### `export.inspection.modified_after`
-Return inspections modified only after this date
-> flag: `--inspection-modified-after`\
-env: `IAUD_EXPORT_INSPECTION_MODIFIED_AFTER`
-formats:
-
-- 2006-01-02T15:04:05Z07:00 (ISO8601)
-- Mon, 02 Jan 2006 15:04:05 MST (RFC1123)
-- 02 Jan 06 15:04 MST (RFC822)
-- Monday, 02-Jan-06 15:04:05 MST (RFC850)
-- Mon Jan 2 15:04:05 2006 (ANSIC)
-- Mon Jan 2 15:04:05 MST 2006
-- 2006-01-02
-- 02 Jan 2006
 
 ### Using a proxy
 

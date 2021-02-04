@@ -45,8 +45,6 @@ type Inspection struct {
 
 // InspectionFeed is a representation of the inspections feed
 type InspectionFeed struct {
-	rows *[]*Inspection
-
 	SkipIDs       []string
 	ModifiedAfter time.Time
 	TemplateIDs   []string

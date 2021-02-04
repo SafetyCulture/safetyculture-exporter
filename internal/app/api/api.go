@@ -19,7 +19,6 @@ import (
 	"github.com/SafetyCulture/iauditor-exporter/internal/app/util"
 	"github.com/SafetyCulture/iauditor-exporter/internal/app/version"
 	"github.com/dghubble/sling"
-	"github.com/newrelic/go-agent/v3/newrelic"
 	"github.com/pkg/errors"
 )
 
@@ -65,7 +64,7 @@ func NewAPIClient(addr string, accessToken string, opts ...Opt) Client {
 
 	httpClient := &http.Client{
 		Timeout:   120 * time.Second,
-		Transport: newrelic.NewRoundTripper(httpTransport),
+		Transport: httpTransport,
 	}
 
 	a := apiClient{
