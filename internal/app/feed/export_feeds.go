@@ -55,6 +55,8 @@ func GetFeeds(v *viper.Viper) []Feed {
 		&ScheduleOccurrenceFeed{
 			TemplateIDs: templateIDs,
 		},
+		&ActionFeed{},
+		&ActionAssigneeFeed{},
 	}
 }
 
