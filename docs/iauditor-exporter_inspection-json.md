@@ -2,10 +2,6 @@
 
 Export iAuditor inspections to json files
 
-### Synopsis
-
-Export iAuditor inspections to json files
-
 ```
 iauditor-exporter inspection-json [flags]
 ```
