@@ -11,8 +11,8 @@ import (
 
 func TestGetInspectionConfig(t *testing.T) {
 	viperConfig := viper.New()
-	viperConfig.Set("export.inspection.incremental", true)
-	viperConfig.Set("export.inspection.modified_after", "2010-12-20")
+	viperConfig.Set("export.incremental", true)
+	viperConfig.Set("export.modified_after", "2010-12-20")
 	viperConfig.Set("export.inspection.archived", "both")
 	viperConfig.Set("export.inspection.completed", "both")
 	viperConfig.Set("export.inspection.skip_ids", "1 2 3")

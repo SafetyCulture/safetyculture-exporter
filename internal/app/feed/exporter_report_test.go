@@ -70,7 +70,7 @@ func TestExportReports_should_not_run_if_all_exported(t *testing.T) {
 	assert.Nil(t, err)
 
 	viperConfig := viper.New()
-	viperConfig.Set("export.inspection.incremental", true)
+	viperConfig.Set("export.incremental", true)
 
 	apiClient := api.NewAPIClient("http://localhost:9999", "token")
 	defer resetMocks(apiClient.HTTPClient())

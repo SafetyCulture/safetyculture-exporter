@@ -74,7 +74,7 @@ func TestExportFeeds_should_perform_incremental_update_on_second_run(t *testing.
 	assert.Nil(t, err)
 
 	viperConfig := viper.New()
-	viperConfig.Set("export.inspection.incremental", true)
+	viperConfig.Set("export.incremental", true)
 
 	apiClient := api.NewAPIClient("http://localhost:9999", "token")
 	initMockFeedsSet1(apiClient.HTTPClient())
@@ -111,7 +111,7 @@ func TestExportFeeds_should_handle_lots_of_rows_ok(t *testing.T) {
 	assert.Nil(t, err)
 
 	viperConfig := viper.New()
-	viperConfig.Set("export.inspection.incremental", true)
+	viperConfig.Set("export.incremental", true)
 
 	apiClient := api.NewAPIClient("http://localhost:9999", "token")
 	initMockFeedsSet3(apiClient.HTTPClient())
