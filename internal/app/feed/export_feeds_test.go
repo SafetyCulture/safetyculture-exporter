@@ -62,6 +62,9 @@ func TestExportFeeds_should_export_all_feeds_to_file(t *testing.T) {
 	filesEqualish(t, "mocks/set_1/outputs/schedules.csv", filepath.Join(exporter.ExportPath, "schedules.csv"))
 	filesEqualish(t, "mocks/set_1/outputs/schedule_assignees.csv", filepath.Join(exporter.ExportPath, "schedule_assignees.csv"))
 	filesEqualish(t, "mocks/set_1/outputs/schedule_occurrences.csv", filepath.Join(exporter.ExportPath, "schedule_occurrences.csv"))
+
+	filesEqualish(t, "mocks/set_1/outputs/actions.csv", filepath.Join(exporter.ExportPath, "actions.csv"))
+	filesEqualish(t, "mocks/set_1/outputs/action_assignees.csv", filepath.Join(exporter.ExportPath, "action_assignees.csv"))
 }
 
 // Expectation of this test is that group_users and schedule_assignees are truncated and refreshed
@@ -98,6 +101,9 @@ func TestExportFeeds_should_perform_incremental_update_on_second_run(t *testing.
 	filesEqualish(t, "mocks/set_2/outputs/schedules.csv", filepath.Join(exporter.ExportPath, "schedules.csv"))
 	filesEqualish(t, "mocks/set_2/outputs/schedule_assignees.csv", filepath.Join(exporter.ExportPath, "schedule_assignees.csv"))
 	filesEqualish(t, "mocks/set_2/outputs/schedule_occurrences.csv", filepath.Join(exporter.ExportPath, "schedule_occurrences.csv"))
+
+	filesEqualish(t, "mocks/set_2/outputs/actions.csv", filepath.Join(exporter.ExportPath, "actions.csv"))
+	filesEqualish(t, "mocks/set_2/outputs/action_assignees.csv", filepath.Join(exporter.ExportPath, "action_assignees.csv"))
 }
 
 func TestExportFeeds_should_handle_lots_of_rows_ok(t *testing.T) {
