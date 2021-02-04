@@ -19,7 +19,7 @@ import (
 )
 
 var cfgFile string
-var connectionFlags, dbFlags, pathFlag, mediaFlags, inspectionFlags, templatesFlag, tablesFlag, schemasFlag, reportFlags *flag.FlagSet
+var connectionFlags, dbFlags, exportFlags, mediaFlags, inspectionFlags, templatesFlag, tablesFlag, schemasFlag, reportFlags *flag.FlagSet
 
 // RootCmd represents the base command when called without any subcommands.
 var RootCmd = &cobra.Command{
@@ -74,12 +74,12 @@ func init() {
 	bindFlags()
 
 	// Add sub-commands
-	addCmd(export.SQLCmd(), connectionFlags, dbFlags, inspectionFlags, templatesFlag, tablesFlag, schemasFlag, mediaFlags)
-	addCmd(export.CSVCmd(), connectionFlags, pathFlag, inspectionFlags, templatesFlag, tablesFlag, schemasFlag, mediaFlags)
-	addCmd(export.InspectionJSONCmd(), connectionFlags, inspectionFlags, templatesFlag)
-	addCmd(export.ReportCmd(), connectionFlags, pathFlag, inspectionFlags, templatesFlag, reportFlags)
+	addCmd(export.SQLCmd(), connectionFlags, exportFlags, dbFlags, inspectionFlags, templatesFlag, tablesFlag, schemasFlag, mediaFlags)
+	addCmd(export.CSVCmd(), connectionFlags, exportFlags, inspectionFlags, templatesFlag, tablesFlag, schemasFlag, mediaFlags)
+	addCmd(export.InspectionJSONCmd(), exportFlags, connectionFlags, inspectionFlags, templatesFlag)
+	addCmd(export.ReportCmd(), connectionFlags, exportFlags, inspectionFlags, templatesFlag, reportFlags)
 	addCmd(export.PrintSchemaCmd())
-	addCmd(configure.Cmd(), connectionFlags, dbFlags, pathFlag, inspectionFlags, templatesFlag, tablesFlag)
+	addCmd(configure.Cmd(), connectionFlags, dbFlags, exportFlags, inspectionFlags, templatesFlag, tablesFlag)
 	RootCmd.AddCommand(&cobra.Command{
 		Hidden: true,
 		Use:    "docs",
@@ -102,8 +102,10 @@ func configFlags() {
 	dbFlags.String("db-dialect", "mysql", "Database dialect. mysql, postgres and sqlserver are the only valid options.")
 	dbFlags.String("db-connection-string", "", "Database connection string")
 
-	pathFlag = flag.NewFlagSet("csv", flag.ContinueOnError)
-	pathFlag.String("export-path", "./export/", "CSV Export Path")
+	exportFlags = flag.NewFlagSet("export", flag.ContinueOnError)
+	exportFlags.String("export-path", "./export/", "File Export Path")
+	exportFlags.Bool("incremental", true, "Update inspections, inspection_items and templates tables incrementally")
+	exportFlags.String("modified-after", "", "Return inspections modified after this date (see readme for supported formats)")
 
 	mediaFlags = flag.NewFlagSet("media", flag.ContinueOnError)
 	mediaFlags.Bool("export-media", false, "Export media")
@@ -111,11 +113,9 @@ func configFlags() {
 
 	inspectionFlags = flag.NewFlagSet("inspection", flag.ContinueOnError)
 	inspectionFlags.StringSlice("inspection-skip-ids", []string{}, "Skip storing these inspection IDs")
-	inspectionFlags.Bool("inspection-incremental-update", true, "Update inspections, inspection_items and templates tables incrementally")
 	inspectionFlags.Bool("inspection-include-inactive-items", false, "Include inactive items in the inspection_items table (default false)")
 	inspectionFlags.String("inspection-archived", "false", "Return archived inspections, false, true or both")
 	inspectionFlags.String("inspection-completed", "both", "Return completed inspections, false, true or both")
-	inspectionFlags.String("inspection-modified-after", "", "Return inspections modified after this date (see readme for supported formats)")
 
 	templatesFlag = flag.NewFlagSet("templates", flag.ContinueOnError)
 	templatesFlag.StringSlice("template-ids", []string{}, "Template IDs to filter inspections and schedules by (default all)")
@@ -142,18 +142,19 @@ func bindFlags() {
 	util.Check(viper.BindPFlag("db.dialect", dbFlags.Lookup("db-dialect")), "while binding flag")
 	util.Check(viper.BindPFlag("db.connection_string", dbFlags.Lookup("db-connection-string")), "while binding flag")
 
-	util.Check(viper.BindPFlag("export.path", pathFlag.Lookup("export-path")), "while binding flag")
+	util.Check(viper.BindPFlag("export.path", exportFlags.Lookup("export-path")), "while binding flag")
+	util.Check(viper.BindPFlag("export.incremental", exportFlags.Lookup("incremental")), "while binding flag")
+	util.Check(viper.BindPFlag("export.modified_after", exportFlags.Lookup("modified-after")), "while binding flag")
+
 	util.Check(viper.BindPFlag("export.media", mediaFlags.Lookup("export-media")), "while binding flag")
 	util.Check(viper.BindPFlag("export.media_path", mediaFlags.Lookup("export-media-path")), "while binding flag")
 	util.Check(viper.BindPFlag("export.template_ids", templatesFlag.Lookup("template-ids")), "while binding flag")
 	util.Check(viper.BindPFlag("export.tables", tablesFlag.Lookup("tables")), "while binding flag")
 
-	util.Check(viper.BindPFlag("export.inspection.incremental", inspectionFlags.Lookup("inspection-incremental-update")), "while binding flag")
 	util.Check(viper.BindPFlag("export.inspection.included_inactive_items", inspectionFlags.Lookup("inspection-include-inactive-items")), "while binding flag")
 	util.Check(viper.BindPFlag("export.inspection.archived", inspectionFlags.Lookup("inspection-archived")), "while binding flag")
 	util.Check(viper.BindPFlag("export.inspection.completed", inspectionFlags.Lookup("inspection-completed")), "while binding flag")
 	util.Check(viper.BindPFlag("export.inspection.skip_ids", inspectionFlags.Lookup("inspection-skip-ids")), "while binding flag")
-	util.Check(viper.BindPFlag("export.inspection.modified_after", inspectionFlags.Lookup("inspection-modified-after")), "while binding flag")
 
 	util.Check(viper.BindPFlag("report.format", reportFlags.Lookup("format")), "while binding flag")
 	util.Check(viper.BindPFlag("report.preference_id", reportFlags.Lookup("preference-id")), "while binding flag")

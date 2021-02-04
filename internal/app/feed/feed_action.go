@@ -31,7 +31,10 @@ type Action struct {
 }
 
 // ActionFeed is a representation of the actions feed
-type ActionFeed struct{}
+type ActionFeed struct {
+	ModifiedAfter time.Time
+	Incremental   bool
+}
 
 // Name is the name of the feed
 func (f *ActionFeed) Name() string {
@@ -89,17 +92,24 @@ func (f *ActionFeed) Export(ctx context.Context, apiClient api.Client, exporter 
 	logger := util.GetLogger()
 	feedName := f.Name()
 
-	logger.Infof("%s: exporting", feedName)
-
 	exporter.InitFeed(f, &InitFeedOptions{
-		// Truncate files if upserts aren't supported.
-		// This ensure that the export does not contain duplicate rows
-		Truncate: exporter.SupportsUpsert() == false,
+		// Delete data if incremental refresh is disabled so there is no duplicates
+		Truncate: f.Incremental == false,
 	})
 
-	err := apiClient.DrainFeed(ctx, &api.GetFeedRequest{
+	lastModifiedAt, err := exporter.LastModifiedAt(f)
+	util.Check(err, "unable to load modified after")
+	if lastModifiedAt != nil {
+		f.ModifiedAfter = *lastModifiedAt
+	}
+
+	logger.Infof("%s: exporting since %s", feedName, f.ModifiedAfter.Format(time.RFC1123))
+
+	err = apiClient.DrainFeed(ctx, &api.GetFeedRequest{
 		InitialURL: "/feed/actions",
-		Params:     api.GetFeedParams{},
+		Params: api.GetFeedParams{
+			ModifiedAfter: f.ModifiedAfter,
+		},
 	}, func(resp *api.GetFeedResponse) error {
 		rows := []*Action{}
 

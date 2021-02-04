@@ -19,9 +19,9 @@ type InspectionConfig struct {
 func GetInspectionConfig(v *viper.Viper) *InspectionConfig {
 	return &InspectionConfig{
 		SkipIDs:       v.GetStringSlice("export.inspection.skip_ids"),
-		ModifiedAfter: v.GetTime("export.inspection.modified_after"),
+		ModifiedAfter: v.GetTime("export.modified_after"),
 		Archived:      v.GetString("export.inspection.archived"),
 		Completed:     v.GetString("export.inspection.completed"),
-		Incremental:   v.GetBool("export.inspection.incremental"),
+		Incremental:   v.GetBool("export.incremental"),
 	}
 }
