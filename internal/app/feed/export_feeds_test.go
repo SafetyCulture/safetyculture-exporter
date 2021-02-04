@@ -16,6 +16,7 @@ func TestCreateSchemas_should_create_all_schemas_to_file(t *testing.T) {
 	assert.Nil(t, err)
 
 	viperConfig := viper.New()
+	viperConfig.Set("export.site.include_deleted", true)
 
 	err = feed.CreateSchemas(viperConfig, exporter)
 	assert.Nil(t, err)
@@ -41,6 +42,7 @@ func TestExportFeeds_should_export_all_feeds_to_file(t *testing.T) {
 	assert.Nil(t, err)
 
 	viperConfig := viper.New()
+	viperConfig.Set("export.site.include_deleted", true)
 
 	apiClient := api.NewAPIClient("http://localhost:9999", "token")
 	initMockFeedsSet1(apiClient.HTTPClient())
@@ -75,6 +77,7 @@ func TestExportFeeds_should_perform_incremental_update_on_second_run(t *testing.
 
 	viperConfig := viper.New()
 	viperConfig.Set("export.incremental", true)
+	viperConfig.Set("export.site.include_deleted", true)
 
 	apiClient := api.NewAPIClient("http://localhost:9999", "token")
 	initMockFeedsSet1(apiClient.HTTPClient())

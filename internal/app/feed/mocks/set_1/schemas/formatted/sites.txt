@@ -6,4 +6,5 @@
 | creator_id      | text     |             |
 | organisation_id | text     |             |
 | exported_at     | datetime |             |
+| deleted         | numeric  |             |
 +-----------------+----------+-------------+
