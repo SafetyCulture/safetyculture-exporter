@@ -64,9 +64,11 @@ export:
   inspection:
     archived: "false"
     completed: both
-    included_inactive_items: false
+    include_inactive_items: false
     incremental: true
     skip_ids: []
+  site:
+    include_deleted: false
   path: ./export/
   tables: []
   template_ids: []
@@ -173,6 +175,12 @@ default: `false`
 Skip storing these inspection IDs
 > flag: `--inspection-skip-ids`\
 env: `IAUD_EXPORT_INSPECTION_SKIP_IDS`
+
+#### `export.site.include_deleted`
+Include deleted sites in the sites table
+> flag: `--site-include-deleted`\
+env: `IAUD_EXPORT_SITE_INCLUDE_DELETED`\
+default: `false`
 
 ### Using a proxy
 

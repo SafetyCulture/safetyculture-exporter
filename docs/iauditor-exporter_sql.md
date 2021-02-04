@@ -39,6 +39,7 @@ iauditor-exporter sql --export-path /path/to/export/to
       --inspection-skip-ids strings         Skip storing these inspection IDs
       --modified-after string               Return inspections modified after this date (see readme for supported formats)
       --proxy-url string                    Proxy URL for making API requests through
+      --site-include-deleted                Include deleted sites in the sites table (default false)
       --tables strings                      Tables to export (default all)
       --template-ids strings                Template IDs to filter inspections and schedules by (default all)
       --tls-cert string                     Custom root CA certificate to use when making API requests
