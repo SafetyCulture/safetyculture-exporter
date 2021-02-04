@@ -86,7 +86,9 @@ func (f *ActionAssigneeFeed) Export(ctx context.Context, apiClient api.Client, e
 
 	err = apiClient.DrainFeed(ctx, &api.GetFeedRequest{
 		InitialURL: "/feed/action_assignees",
-		Params:     api.GetFeedParams{},
+		Params: api.GetFeedParams{
+			ModifiedAfter: f.ModifiedAfter,
+		},
 	}, func(resp *api.GetFeedResponse) error {
 		rows := []*ActionAssignee{}
 

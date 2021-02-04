@@ -143,7 +143,7 @@ func bindFlags() {
 	util.Check(viper.BindPFlag("db.connection_string", dbFlags.Lookup("db-connection-string")), "while binding flag")
 
 	util.Check(viper.BindPFlag("export.path", exportFlags.Lookup("export-path")), "while binding flag")
-	util.Check(viper.BindPFlag("export.incremental", exportFlags.Lookup("incremental-update")), "while binding flag")
+	util.Check(viper.BindPFlag("export.incremental", exportFlags.Lookup("incremental")), "while binding flag")
 	util.Check(viper.BindPFlag("export.modified_after", exportFlags.Lookup("modified-after")), "while binding flag")
 
 	util.Check(viper.BindPFlag("export.media", mediaFlags.Lookup("export-media")), "while binding flag")
