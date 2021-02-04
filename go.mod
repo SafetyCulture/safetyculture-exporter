@@ -5,12 +5,11 @@ go 1.13
 require (
 	github.com/bmizerany/assert v0.0.0-20160611221934-b7ed37b82869
 	github.com/cpuguy83/go-md2man v1.0.10 // indirect
-	github.com/dghubble/sling v1.2.0
+	github.com/dghubble/sling v1.3.0
 	github.com/gocarina/gocsv v0.0.0-20200925213129-04be9ee2e1a2
 	github.com/gofrs/uuid v3.4.0+incompatible
 	github.com/golang/protobuf v1.3.3 // indirect
 	github.com/google/go-github v17.0.0+incompatible
-	github.com/google/go-querystring v1.0.0 // indirect
 	github.com/gookit/color v1.3.6
 	github.com/hashicorp/go-version v1.2.1
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
