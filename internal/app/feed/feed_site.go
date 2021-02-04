@@ -16,10 +16,13 @@ type Site struct {
 	CreatorID      string    `json:"creator_id" csv:"creator_id"`
 	OrganisationID string    `json:"organisation_id" csv:"organisation_id"`
 	ExportedAt     time.Time `json:"exported_at" csv:"exported_at" gorm:"autoUpdateTime"`
+	Deleted        bool      `json:"deleted" csv:"deleted" gorm:"deleted"`
 }
 
 // SiteFeed is a representation of the sites feed
-type SiteFeed struct{}
+type SiteFeed struct {
+	IncludeDeleted bool
+}
 
 // Name is the name of the feed
 func (f *SiteFeed) Name() string {
@@ -76,7 +79,9 @@ func (f *SiteFeed) Export(ctx context.Context, apiClient api.Client, exporter Ex
 
 	err := apiClient.DrainFeed(ctx, &api.GetFeedRequest{
 		InitialURL: "/feed/sites",
-		Params:     api.GetFeedParams{},
+		Params: api.GetFeedParams{
+			IncludeDeleted: f.IncludeDeleted,
+		},
 	}, func(resp *api.GetFeedResponse) error {
 		rows := []*Site{}
 

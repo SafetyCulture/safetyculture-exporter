@@ -158,6 +158,9 @@ type GetFeedParams struct {
 	Completed       string    `url:"completed,omitempty"`
 	IncludeInactive bool      `url:"include_inactive,omitempty"`
 	Limit           int       `url:"limit,omitempty"`
+
+	// Applicable only for sites
+	IncludeDeleted bool `url:"include_deleted,omitempty"`
 }
 
 // GetFeedRequest has all the data needed to make a request to get a feed
