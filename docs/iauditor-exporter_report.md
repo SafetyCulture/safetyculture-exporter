@@ -2,10 +2,6 @@
 
 Export inspection report
 
-### Synopsis
-
-Export inspection report
-
 ```
 iauditor-exporter report [flags]
 ```

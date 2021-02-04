@@ -2,10 +2,6 @@
 
 Print iAuditor table schemas
 
-### Synopsis
-
-Print iAuditor table schemas
-
 ```
 iauditor-exporter schema [flags]
 ```

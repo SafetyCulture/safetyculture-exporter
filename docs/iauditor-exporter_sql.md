@@ -2,10 +2,6 @@
 
 Export iAuditor data to SQL database
 
-### Synopsis
-
-Export iAuditor data to SQL database
-
 ```
 iauditor-exporter sql [flags]
 ```

@@ -2,10 +2,6 @@
 
 Export iAuditor data to CSV files
 
-### Synopsis
-
-Export iAuditor data to CSV files
-
 ```
 iauditor-exporter csv [flags]
 ```
