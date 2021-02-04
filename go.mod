@@ -7,7 +7,6 @@ require (
 	github.com/dghubble/sling v1.3.0
 	github.com/gocarina/gocsv v0.0.0-20200925213129-04be9ee2e1a2
 	github.com/gofrs/uuid v3.4.0+incompatible
-	github.com/golang/protobuf v1.3.3 // indirect
 	github.com/google/go-github v17.0.0+incompatible
 	github.com/gookit/color v1.3.6
 	github.com/hashicorp/go-version v1.2.1
@@ -25,7 +24,7 @@ require (
 	golang.org/x/net v0.0.0-20200226121028-0de0cce0169b // indirect
 	golang.org/x/text v0.3.5 // indirect
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
-	google.golang.org/grpc v1.27.0
+	google.golang.org/grpc v1.35.0
 	gopkg.in/h2non/gock.v1 v1.0.16
 	gorm.io/driver/mysql v1.0.4
 	gorm.io/driver/postgres v1.0.8
