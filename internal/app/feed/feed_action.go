@@ -109,7 +109,6 @@ func (f *ActionFeed) Export(ctx context.Context, apiClient api.Client, exporter 
 		InitialURL: "/feed/actions",
 		Params: api.GetFeedParams{
 			ModifiedAfter: f.ModifiedAfter,
-			Limit:         1000,
 		},
 	}, func(resp *api.GetFeedResponse) error {
 		rows := []*Action{}
