@@ -46,5 +46,5 @@ The easiest way to run this tool is by installing it as a package. The tool `Pip
 * `pipx install "iauditor_exporter[all_db]"` This installs requirements for all 3 databases. Keep in mind that you'll need all the additional requirements installed to use this, so only use this if you really need all 3. 
 
 
-## [Documentation](https://safetyculture.github.io/iauditor-exporter/)
-Extensive documentation is available [here](https://safetyculture.github.io/iauditor-exporter/). Please note this documentation is for a slightly older release of the exporter tool (before it was packaged up.) The installation guide will be updated soon. 
+## Documentation
+Extensive documentation is available [here](./docs). Please note this documentation is for a slightly older release of the exporter tool (before it was packaged up.) The installation guide will be updated soon. 
