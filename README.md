@@ -47,4 +47,4 @@ The easiest way to run this tool is by installing it as a package. The tool `Pip
 
 
 ## Documentation
-Extensive documentation is available [here](./docs). Please note this documentation is for a slightly older release of the exporter tool (before it was packaged up.) The installation guide will be updated soon. 
+Extensive documentation is available [here](./iauditor_exporter/docs). Please note this documentation is for a slightly older release of the exporter tool (before it was packaged up.) The installation guide will be updated soon. 
