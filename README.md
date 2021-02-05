@@ -6,7 +6,7 @@ The iAuditor Exporter is a CLI tool for extracting your iAuditor data that’s a
 
 # If you're looking for the Python exporter you can find it below
 
-See: [Old version (Python)](#old-version-python).  
+See: [Old version (Python)](#old-version-python).\
 This is the latest version of iAuditor Exporter and the Python implementation is no longer being maintained.
 
 ## Table of Contents
