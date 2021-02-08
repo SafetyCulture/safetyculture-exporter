@@ -117,7 +117,7 @@ func (client *inspectionClient) Export(ctx context.Context) error {
 	}
 
 	modifiedAt := client.exporter.GetLastModifiedAt()
-	if modifiedAt != nil {
+	if modifiedAt != nil && modifiedAt.After(params.ModifiedAfter) {
 		params.ModifiedAfter = *modifiedAt
 	}
 
