@@ -60,7 +60,7 @@ func TestIntegrationDbSQLExporterLastModifiedAt_should_return_latest_modified_at
 	err = exporter.WriteRows(inspectionFeed, inspections)
 	assert.Nil(t, err)
 
-	lastModifiedAt, err := exporter.LastModifiedAt(inspectionFeed, time.Now().Add(time.Hour-30000))
+	lastModifiedAt, err := exporter.LastModifiedAt(inspectionFeed, time.Now().Add(time.Hour*-30000))
 	assert.Nil(t, err)
 	// Times are slightly lossy, convery to ISO string
 	assert.Equal(t, now.Format(time.RFC3339), lastModifiedAt.Format(time.RFC3339))
