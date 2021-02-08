@@ -4,6 +4,13 @@
 
 The iAuditor Exporter is a CLI tool for extracting your iAuditor data that’s available to all our Premium customers. It’s used to bulk export `inspections`, `templates`, `sites`, `users`, `groups` and `schedules` to CSV and SQL formats for business intelligence tools. It’s also capable of exporting inspections to formats such as JSON, PDF and Word.
 
+## If you're looking for the Python exporter you can find it below
+
+See: [Old version (Python)](#old-version-python).\
+This is the latest version of iAuditor Exporter and the Python implementation is no longer being maintained.
+
+## Table of Contents
+
 - [Before you begin](#before-you-begin)
 - [Install](#install)
 - [Configure](#configure)
