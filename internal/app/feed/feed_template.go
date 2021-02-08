@@ -88,7 +88,7 @@ func (f *TemplateFeed) Export(ctx context.Context, apiClient api.Client, exporte
 
 	lastModifiedAt, err := exporter.LastModifiedAt(f)
 	util.Check(err, "unable to load modified after")
-	if lastModifiedAt != nil {
+	if lastModifiedAt != nil && f.ModifiedAfter.Before(*lastModifiedAt) {
 		f.ModifiedAfter = *lastModifiedAt
 	}
 

@@ -162,7 +162,7 @@ func (f *InspectionFeed) Export(ctx context.Context, apiClient api.Client, expor
 
 	lastModifiedAt, err := exporter.LastModifiedAt(f)
 	util.Check(err, "unable to load modified after")
-	if lastModifiedAt != nil {
+	if lastModifiedAt != nil && f.ModifiedAfter.Before(*lastModifiedAt) {
 		f.ModifiedAfter = *lastModifiedAt
 	}
 
