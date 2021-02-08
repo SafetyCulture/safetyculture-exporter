@@ -86,11 +86,9 @@ func (f *TemplateFeed) Export(ctx context.Context, apiClient api.Client, exporte
 		Truncate: f.Incremental == false,
 	})
 
-	lastModifiedAt, err := exporter.LastModifiedAt(f)
+	var err error
+	f.ModifiedAfter, err = exporter.LastModifiedAt(f, f.ModifiedAfter)
 	util.Check(err, "unable to load modified after")
-	if lastModifiedAt != nil && f.ModifiedAfter.Before(*lastModifiedAt) {
-		f.ModifiedAfter = *lastModifiedAt
-	}
 
 	logger.Infof("%s: exporting since %s", feedName, f.ModifiedAfter.Format(time.RFC1123))
 

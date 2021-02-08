@@ -99,15 +99,15 @@ type modifiedAtRow struct {
 }
 
 // LastModifiedAt returns the latest stored modified at date for the feed
-func (e *SQLExporter) LastModifiedAt(feed Feed) (*time.Time, error) {
+func (e *SQLExporter) LastModifiedAt(feed Feed, modifiedAfter time.Time) (time.Time, error) {
 	latestRow := modifiedAtRow{}
 
 	result := e.DB.Table(feed.Name()).Order("modified_at DESC").Limit(1).First(&latestRow)
-	if result.RowsAffected != 0 {
-		return &latestRow.ModifiedAt, nil
+	if result.RowsAffected != 0 && modifiedAfter.Before(latestRow.ModifiedAt) {
+		return latestRow.ModifiedAt, nil
 	}
 
-	return nil, nil
+	return modifiedAfter, nil
 }
 
 // FinaliseExport closes out an export
