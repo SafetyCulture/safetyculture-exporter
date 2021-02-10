@@ -33,7 +33,7 @@ type Exporter interface {
 
 	WriteRows(feed Feed, rows interface{}) error
 	FinaliseExport(feed Feed, rows interface{}) error
-	LastModifiedAt(feed Feed) (*time.Time, error)
+	LastModifiedAt(feed Feed, modifiedAfter time.Time) (time.Time, error)
 	WriteMedia(auditID string, mediaID string, contentType string, body []byte) error
 
 	SupportsUpsert() bool
