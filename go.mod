@@ -12,7 +12,7 @@ require (
 	github.com/hashicorp/go-version v1.2.1
 	github.com/jackc/pgproto3/v2 v2.0.7 // indirect
 	github.com/mattn/go-sqlite3 v1.14.6 // indirect
-	github.com/olekukonko/tablewriter v0.0.4
+	github.com/olekukonko/tablewriter v0.0.5
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/afero v1.2.2 // indirect
 	github.com/spf13/cobra v1.1.1
