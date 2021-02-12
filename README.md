@@ -134,7 +134,7 @@ env: `IAUD_EXPORT_TEMPLATE_IDS`\
 default: All templates
 
 #### `export.tables`
-Tables to export. inspections, inspection_items, templates, template_permissions, sites, users, groups, group_users, schedules, schedule_assignees and schedule_occurrences are only valid values.
+Tables to export. inspections, inspection_items, templates, template_permissions, sites, users, groups, group_users, schedules, schedule_assignees schedule_occurrences, actions, action_assignees are only valid values.
 > flag: `--tables`\
 env: `IAUD_EXPORT_TABLES`\
 default: All tables
@@ -170,7 +170,7 @@ default: `false`
 Return completed inspections, false, true or both
 > flag: `--inspection-completed`\
 env: `IAUD_EXPORT_INSPECTION_COMPLETED`\
-default: `both`
+default: `true`
 
 #### `export.inspection.include_inactive_items`
 Include inactive items in the inspection_items table
