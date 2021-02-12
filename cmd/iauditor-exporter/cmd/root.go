@@ -115,7 +115,7 @@ func configFlags() {
 	inspectionFlags.StringSlice("inspection-skip-ids", []string{}, "Skip storing these inspection IDs")
 	inspectionFlags.Bool("inspection-include-inactive-items", false, "Include inactive items in the inspection_items table (default false)")
 	inspectionFlags.String("inspection-archived", "false", "Return archived inspections, false, true or both")
-	inspectionFlags.String("inspection-completed", "both", "Return completed inspections, false, true or both")
+	inspectionFlags.String("inspection-completed", "true", "Return completed inspections, false, true or both")
 
 	templatesFlag = flag.NewFlagSet("templates", flag.ContinueOnError)
 	templatesFlag.StringSlice("template-ids", []string{}, "Template IDs to filter inspections and schedules by (default all)")
