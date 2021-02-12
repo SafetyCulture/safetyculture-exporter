@@ -88,7 +88,7 @@ func (f *TemplatePermissionFeed) Export(ctx context.Context, apiClient api.Clien
 		util.Check(err, "Failed to unmarshal data to struct")
 
 		if len(rows) != 0 {
-			// Calculate the size of the batch we can insert into the DB at once. Column count + buffer
+			// Calculate the size of the batch we can insert into the DB at once. Column count + buffer to account for primary keys
 			batchSize := exporter.ParameterLimit() / (len(f.Columns()) + 4)
 
 			for i := 0; i < len(rows); i += batchSize {

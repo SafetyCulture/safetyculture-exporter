@@ -94,8 +94,18 @@ func (f *ActionAssigneeFeed) Export(ctx context.Context, apiClient api.Client, e
 		util.Check(err, "Failed to unmarshal data to struct")
 
 		if len(rows) != 0 {
-			err = exporter.WriteRows(f, rows)
-			util.Check(err, "Failed to write data to exporter")
+			// Calculate the size of the batch we can insert into the DB at once. Column count + buffer to account for primary keys
+			batchSize := exporter.ParameterLimit() / (len(f.Columns()) + 4)
+
+			for i := 0; i < len(rows); i += batchSize {
+				j := i + batchSize
+				if j > len(rows) {
+					j = len(rows)
+				}
+
+				err = exporter.WriteRows(f, rows[i:j])
+				util.Check(err, "Failed to write data to exporter")
+			}
 		}
 
 		logger.Infof("%s: %d remaining", feedName, resp.Metadata.RemainingRecords)
