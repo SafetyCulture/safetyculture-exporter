@@ -29,14 +29,9 @@ var RootCmd = &cobra.Command{
 	Long:    "A CLI tool for extracting your iAuditor data",
 }
 
-var disclaimer = `THIS SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.`
-
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
-	fmt.Printf("\033[1;33m%s\033[0m\n", disclaimer)
 	updateMsgChan := make(chan *update.ReleaseInfo)
 
 	go func() {
