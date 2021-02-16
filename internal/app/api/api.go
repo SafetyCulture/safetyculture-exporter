@@ -59,7 +59,7 @@ func NewAPIClient(addr string, accessToken string, opts ...Opt) Client {
 		MaxIdleConns:          100,
 		IdleConnTimeout:       90 * time.Second,
 		TLSHandshakeTimeout:   10 * time.Second,
-		ExpectContinueTimeout: 1 * time.Second,
+		ExpectContinueTimeout: 10 * time.Second,
 	}
 
 	httpClient := &http.Client{
@@ -212,6 +212,44 @@ type ListInspectionsResponse struct {
 	Inspections []Inspection `json:"audits"`
 }
 
+func (a *apiClient) do(sl *sling.Sling, req *http.Request, successV, failureV interface{}) (*http.Response, error) {
+	var errMsg json.RawMessage
+
+	logger := util.GetLogger()
+
+	logger.Debugw("http request",
+		"url", req.URL.String(),
+	)
+	res, err := sl.Do(req, successV, failureV)
+	status := ""
+	if res != nil {
+		status = res.Status
+	}
+	logger.Debugw("http response",
+		"url", req.URL.String(),
+		"status", status,
+	)
+
+	if err != nil {
+		logger.Errorw("http request error",
+			"url", req.URL.String(),
+			"status", status,
+			"err", err,
+		)
+		return res, errors.Wrap(err, "request error")
+	}
+	if errMsg != nil {
+		logger.Errorw("http request error",
+			"url", req.URL.String(),
+			"status", status,
+			"err", errMsg,
+		)
+		return res, errors.Errorf("request error: %s", errMsg)
+	}
+
+	return res, nil
+}
+
 func (a *apiClient) GetMedia(ctx context.Context, request *GetMediaRequest) (*GetMediaResponse, error) {
 	baseURL := strings.TrimPrefix(request.URL, a.baseURL)
 	mediaID := strings.TrimPrefix(baseURL, fmt.Sprintf("/audits/%s/media/", request.AuditID))
@@ -252,12 +290,9 @@ func (a *apiClient) GetMedia(ctx context.Context, request *GetMediaRequest) (*Ge
 }
 
 func (a *apiClient) GetFeed(ctx context.Context, request *GetFeedRequest) (*GetFeedResponse, error) {
-	logger := util.GetLogger()
-
 	var (
 		result *GetFeedResponse
 		errMsg json.RawMessage
-		res    *http.Response
 		err    error
 	)
 
@@ -279,17 +314,10 @@ func (a *apiClient) GetFeed(ctx context.Context, request *GetFeedRequest) (*GetF
 	req, _ := sl.Request()
 	req = req.WithContext(ctx)
 
-	res, err = sl.Do(req, &result, &errMsg)
+	_, err = a.do(sl, req, &result, &errMsg)
 	if err != nil {
 		return nil, errors.Wrap(err, "Failed request to API")
 	}
-	if errMsg != nil {
-		return result, errors.Errorf("%s", errMsg)
-	}
-	logger.Debugw("http request",
-		"url", req.URL.String(),
-		"status", res.Status,
-	)
 
 	return result, nil
 }
@@ -332,12 +360,9 @@ func (a *apiClient) ListInspections(ctx context.Context, params *ListInspections
 	req, _ := sl.Request()
 	req = req.WithContext(ctx)
 
-	if _, err := sl.Do(req, &result, &errMsg); err != nil {
+	_, err := a.do(sl, req, &result, &errMsg)
+	if err != nil {
 		return nil, errors.Wrap(err, "Failed request to API")
-	}
-
-	if errMsg != nil {
-		return result, errors.Errorf("%s", errMsg)
 	}
 
 	return result, nil
@@ -358,12 +383,9 @@ func (a *apiClient) GetInspection(ctx context.Context, id string) (*json.RawMess
 	req, _ := sl.Request()
 	req = req.WithContext(ctx)
 
-	if _, err := sl.Do(req, &result, &errMsg); err != nil {
+	_, err := a.do(sl, req, &result, &errMsg)
+	if err != nil {
 		return nil, errors.Wrap(err, "Failed request to API")
-	}
-
-	if errMsg != nil {
-		return result, errors.Errorf("%s", errMsg)
 	}
 
 	return result, nil
@@ -413,12 +435,9 @@ type initiateInspectionReportExportResponse struct {
 }
 
 func (a *apiClient) InitiateInspectionReportExport(ctx context.Context, auditID string, format string, preferenceID string) (string, error) {
-	logger := util.GetLogger()
-
 	var (
-		result *initiateInspectionReportExportResponse
+		result initiateInspectionReportExportResponse
 		errMsg json.RawMessage
-		res    *http.Response
 		err    error
 	)
 
@@ -438,17 +457,10 @@ func (a *apiClient) InitiateInspectionReportExport(ctx context.Context, auditID 
 	req, _ := sl.Request()
 	req = req.WithContext(ctx)
 
-	res, err = sl.Do(req, &result, &errMsg)
+	_, err = a.do(sl, req, &result, &errMsg)
 	if err != nil {
 		return "", errors.Wrap(err, "Failed request to API")
 	}
-	if errMsg != nil {
-		return "", errors.Errorf("%s", errMsg)
-	}
-	logger.Debugw("http request",
-		"url", req.URL.String(),
-		"status", res.Status,
-	)
 
 	return result.MessageID, nil
 }
@@ -460,12 +472,9 @@ type InspectionReportExportCompletionResponse struct {
 }
 
 func (a *apiClient) CheckInspectionReportExportCompletion(ctx context.Context, auditID string, messageID string) (*InspectionReportExportCompletionResponse, error) {
-	logger := util.GetLogger()
-
 	var (
 		result *InspectionReportExportCompletionResponse
 		errMsg json.RawMessage
-		res    *http.Response
 		err    error
 	)
 
@@ -480,27 +489,20 @@ func (a *apiClient) CheckInspectionReportExportCompletion(ctx context.Context, a
 	req, _ := sl.Request()
 	req = req.WithContext(ctx)
 
-	res, err = sl.Do(req, &result, &errMsg)
+	_, err = a.do(sl, req, &result, &errMsg)
 	if err != nil {
 		return nil, errors.Wrap(err, "Failed request to API")
 	}
-	if errMsg != nil {
-		return nil, errors.Errorf("%s", errMsg)
-	}
-	logger.Debugw("http request",
-		"url", req.URL.String(),
-		"status", res.Status,
-	)
 
 	return result, nil
 }
 
 func (a *apiClient) DownloadInspectionReportFile(ctx context.Context, url string) (io.ReadCloser, error) {
-	logger := util.GetLogger()
-
 	var (
-		res *http.Response
-		err error
+		res    *http.Response
+		result interface{}
+		errMsg json.RawMessage
+		err    error
 	)
 
 	sl := a.sling.New().Get(url).
@@ -512,7 +514,7 @@ func (a *apiClient) DownloadInspectionReportFile(ctx context.Context, url string
 	req, _ := sl.Request()
 	req = req.WithContext(ctx)
 
-	res, err = a.httpClient.Do(req)
+	res, err = a.do(sl, req, &result, &errMsg)
 	if err != nil {
 		return nil, errors.Wrap(err, "Failed request to API")
 	}
@@ -521,11 +523,6 @@ func (a *apiClient) DownloadInspectionReportFile(ctx context.Context, url string
 	if !statusOK {
 		return nil, errors.Errorf("Server returned error. %s", res.Status)
 	}
-
-	logger.Debugw("http request",
-		"url", req.URL.String(),
-		"status", res.Status,
-	)
 
 	return res.Body, err
 }
