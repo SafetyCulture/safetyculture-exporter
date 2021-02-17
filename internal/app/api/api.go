@@ -213,8 +213,6 @@ type ListInspectionsResponse struct {
 }
 
 func (a *apiClient) do(sl *sling.Sling, req *http.Request, successV, failureV interface{}) (*http.Response, error) {
-	var errMsg json.RawMessage
-
 	logger := util.GetLogger()
 
 	logger.Debugw("http request",
@@ -237,14 +235,6 @@ func (a *apiClient) do(sl *sling.Sling, req *http.Request, successV, failureV in
 			"err", err,
 		)
 		return res, errors.Wrap(err, "request error")
-	}
-	if errMsg != nil {
-		logger.Errorw("http request error msg",
-			"url", req.URL.String(),
-			"status", status,
-			"err", errMsg,
-		)
-		return res, errors.Errorf("request error: %s", errMsg)
 	}
 	if res != nil && (res.StatusCode > 299 || res.StatusCode < 200) {
 		logger.Errorw("http request error status",

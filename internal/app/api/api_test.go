@@ -111,6 +111,27 @@ func TestAPIClientDrainFeed_should_bubble_up_errors_from_callback(t *testing.T) 
 	assert.Equal(t, expectedErr, err)
 }
 
+func TestAPIClientDrainFeed_should_return_api_errors(t *testing.T) {
+	defer gock.Off()
+
+	gock.New("http://localhost:9999").
+		Get("/feed/inspections").
+		Reply(500).
+		JSON(`{"error": "something bad happened"}`)
+
+	apiClient := api.NewAPIClient("http://localhost:9999", "abc123")
+	gock.InterceptClient(apiClient.HTTPClient())
+
+	err := apiClient.DrainFeed(context.Background(), &api.GetFeedRequest{
+		InitialURL: "/feed/inspections",
+	}, func(data *api.GetFeedResponse) error {
+		return nil
+	})
+
+	assert.NotNil(t, err)
+	assert.Contains(t, err.Error(), "500 Internal Server Error")
+}
+
 func TestApiOptSetTimeout_should_set_timeout(t *testing.T) {
 	apiClient := api.NewAPIClient("http://localhost:9999", "abc123", api.OptSetTimeout(time.Second*21))
 
