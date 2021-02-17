@@ -396,7 +396,7 @@ func TestAPIClientInitiateInspectionReportExport_should_return_error_on_failure(
 	_, err := apiClient.InitiateInspectionReportExport(context.Background(), "audit_123", "PDF", "")
 
 	assert.NotNil(t, err)
-	assert.Contains(t, err.Error(), "something bad happened")
+	assert.Contains(t, err.Error(), "500 Internal Server Error")
 }
 
 func TestAPIClientCheckInspectionReportExportCompletion_should_return_status(t *testing.T) {
@@ -434,7 +434,7 @@ func TestAPIClientCheckInspectionReportExportCompletion_should_return_error_on_f
 	_, err := apiClient.CheckInspectionReportExportCompletion(context.Background(), "audit_123", "abc")
 
 	assert.NotNil(t, err)
-	assert.Contains(t, err.Error(), "something bad happened")
+	assert.Contains(t, err.Error(), "500 Internal Server Error")
 }
 
 func TestAPIClientDownloadInspectionReportFile_should_return_status(t *testing.T) {

@@ -115,7 +115,10 @@ func fileExists(t *testing.T, expectedPath string) {
 
 func getFileModTime(filePath string) (time.Time, error) {
 	file, err := os.Stat(filePath)
-	return file.ModTime(), err
+	if err != nil {
+		return time.Time{}, err
+	}
+	return file.ModTime(), nil
 }
 
 func countFileLines(filePath string) (int, error) {

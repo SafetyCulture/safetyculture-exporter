@@ -239,12 +239,19 @@ func (a *apiClient) do(sl *sling.Sling, req *http.Request, successV, failureV in
 		return res, errors.Wrap(err, "request error")
 	}
 	if errMsg != nil {
-		logger.Errorw("http request error",
+		logger.Errorw("http request error msg",
 			"url", req.URL.String(),
 			"status", status,
 			"err", errMsg,
 		)
 		return res, errors.Errorf("request error: %s", errMsg)
+	}
+	if res != nil && (res.StatusCode > 299 || res.StatusCode < 200) {
+		logger.Errorw("http request error status",
+			"url", req.URL.String(),
+			"status", status,
+		)
+		return res, errors.Errorf("request error status: %s", status)
 	}
 
 	return res, nil
@@ -436,7 +443,7 @@ type initiateInspectionReportExportResponse struct {
 
 func (a *apiClient) InitiateInspectionReportExport(ctx context.Context, auditID string, format string, preferenceID string) (string, error) {
 	var (
-		result initiateInspectionReportExportResponse
+		result *initiateInspectionReportExportResponse
 		errMsg json.RawMessage
 		err    error
 	)
@@ -498,11 +505,11 @@ func (a *apiClient) CheckInspectionReportExportCompletion(ctx context.Context, a
 }
 
 func (a *apiClient) DownloadInspectionReportFile(ctx context.Context, url string) (io.ReadCloser, error) {
+	logger := util.GetLogger()
+
 	var (
-		res    *http.Response
-		result interface{}
-		errMsg json.RawMessage
-		err    error
+		res *http.Response
+		err error
 	)
 
 	sl := a.sling.New().Get(url).
@@ -514,14 +521,33 @@ func (a *apiClient) DownloadInspectionReportFile(ctx context.Context, url string
 	req, _ := sl.Request()
 	req = req.WithContext(ctx)
 
-	res, err = a.do(sl, req, &result, &errMsg)
-	if err != nil {
-		return nil, errors.Wrap(err, "Failed request to API")
+	logger.Debugw("http request",
+		"url", req.URL.String(),
+	)
+	res, err = a.httpClient.Do(req)
+	status := ""
+	if res != nil {
+		status = res.Status
 	}
+	logger.Debugw("http response",
+		"url", req.URL.String(),
+		"status", status,
+	)
 
-	statusOK := res.StatusCode >= 200 && res.StatusCode < 300
-	if !statusOK {
-		return nil, errors.Errorf("Server returned error. %s", res.Status)
+	if err != nil {
+		logger.Errorw("http request error",
+			"url", req.URL.String(),
+			"status", status,
+			"err", err,
+		)
+		return res.Body, errors.Wrap(err, "request error")
+	}
+	if res != nil && (res.StatusCode > 299 || res.StatusCode < 200) {
+		logger.Errorw("http request error status",
+			"url", req.URL.String(),
+			"status", status,
+		)
+		return res.Body, errors.Errorf("request error status: %s", status)
 	}
 
 	return res.Body, err
