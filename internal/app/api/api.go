@@ -240,6 +240,7 @@ func (a *apiClient) do(sl *sling.Sling, req *http.Request, successV, failureV in
 		logger.Errorw("http request error status",
 			"url", req.URL.String(),
 			"status", status,
+			"err", failureV,
 		)
 		return res, errors.Errorf("request error status: %s", status)
 	}
