@@ -63,6 +63,8 @@ func init() {
 	// Here you will define your flags and configuration settings.
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.
+	cobra.OnInitialize(initConfig)
+
 	RootCmd.PersistentFlags().StringVar(&cfgFile, "config-path", "./iauditor-exporter.yaml", "config file")
 
 	configFlags()
@@ -80,8 +82,6 @@ func init() {
 		Use:    "docs",
 		RunE:   writeDocs,
 	})
-
-	initConfig()
 }
 
 func configFlags() {
