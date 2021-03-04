@@ -94,8 +94,14 @@ func (l GormLogger) Trace(ctx context.Context, begin time.Time, fc func() (strin
 	}
 }
 
+var slg *zap.SugaredLogger
+
 // GetLogger returns a configured instance of the logger
 func GetLogger() *zap.SugaredLogger {
+	if slg != nil {
+		return slg
+	}
+
 	logFileEncoder := zapcore.NewJSONEncoder(zap.NewProductionEncoderConfig())
 	consoleEncoder := zapcore.NewConsoleEncoder(zap.NewDevelopmentEncoderConfig())
 
@@ -121,5 +127,7 @@ func GetLogger() *zap.SugaredLogger {
 	// redirects output from the standard library's package-global logger to the supplied logger
 	zap.RedirectStdLog(l)
 
-	return l.Sugar()
+	slg = l.Sugar()
+
+	return slg
 }
