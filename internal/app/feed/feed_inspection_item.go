@@ -226,7 +226,7 @@ func (f *InspectionItemFeed) Export(ctx context.Context, apiClient api.Client, e
 		rows := []*InspectionItem{}
 
 		err := json.Unmarshal(resp.Data, &rows)
-		util.Check(err, "Failed to unmarshal data to struct")
+		util.Check(err, "Failed to unmarshal inspection-items data to struct")
 
 		if len(rows) != 0 {
 			err = f.writeRows(ctx, exporter, rows, apiClient)

@@ -111,7 +111,7 @@ func (f *ScheduleOccurrenceFeed) Export(ctx context.Context, apiClient api.Clien
 		rows := []*ScheduleOccurrence{}
 
 		err := json.Unmarshal(resp.Data, &rows)
-		util.Check(err, "Failed to unmarshal data to struct")
+		util.Check(err, "Failed to unmarshal schedule-occurrences data to struct")
 
 		if len(rows) != 0 {
 			// Calculate the size of the batch we can insert into the DB at once. Column count + buffer to account for primary keys

@@ -77,7 +77,7 @@ func (f *GroupFeed) Export(ctx context.Context, apiClient api.Client, exporter E
 		rows := []*Group{}
 
 		err := json.Unmarshal(resp.Data, &rows)
-		util.Check(err, "Failed to unmarshal data to struct")
+		util.Check(err, "Failed to unmarshal groups data to struct")
 
 		if len(rows) != 0 {
 			// Calculate the size of the batch we can insert into the DB at once. Column count + buffer to account for primary keys
