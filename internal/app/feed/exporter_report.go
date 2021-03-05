@@ -277,7 +277,11 @@ func (e *ReportExporter) updateReportResult(rep *reportExport, res *reportExport
 }
 
 func saveReportResponse(resp io.ReadCloser, inspection *Inspection, path string, format string) error {
-	filePath := getFilePath(path, inspection, format)
+	filePath, pErr := getFilePath(path, inspection, format)
+	if pErr != nil {
+		return pErr
+	}
+
 	out, err := os.Create(filePath)
 	if err != nil {
 		return err
@@ -308,7 +312,7 @@ func getFileExtension(format string) string {
 	}
 }
 
-func getFilePath(exportPath string, inspection *Inspection, format string) string {
+func getFilePath(exportPath string, inspection *Inspection, format string) (string, error) {
 	dupIndex := 0
 	for true {
 		fileName := sanitizeName(inspection.Name)
@@ -326,14 +330,16 @@ func getFilePath(exportPath string, inspection *Inspection, format string) strin
 		}
 
 		exportFilePath := filepath.Join(exportPath, fmt.Sprintf("%s.%s", fileName, getFileExtension(format)))
-		if _, err := os.Stat(exportFilePath); os.IsNotExist(err) {
-			return exportFilePath
+		if _, err := os.Stat(exportFilePath); err == nil {
+			dupIndex++
+		} else if os.IsNotExist(err) {
+			return exportFilePath, nil
+		} else {
+			return "", err
 		}
-
-		dupIndex++
 	}
 
-	return ""
+	return "", nil
 }
 
 // NewReportExporter returns a new instance of ReportExporter
