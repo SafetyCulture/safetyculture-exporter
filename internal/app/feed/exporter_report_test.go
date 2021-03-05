@@ -156,13 +156,14 @@ func TestExportReports_should_take_care_of_invalid_file_names(t *testing.T) {
 	assert.Nil(t, err)
 
 	fileExists(t, filepath.Join(exporter.ExportPath, "My-Audit-1.pdf"))
+	fileExists(t, filepath.Join(exporter.ExportPath, "My-Audit-1 (1).pdf"))
 	var files []string
 	filepath.Walk(exporter.ExportPath, func(path string, info os.FileInfo, err error) error {
 		files = append(files, path)
 		assert.LessOrEqual(t, len(path), 255)
 		return nil
 	})
-	assert.Equal(t, 4, len(files))
+	assert.Equal(t, 5, len(files))
 }
 
 func TestExportReports_should_fail_after_retries(t *testing.T) {
