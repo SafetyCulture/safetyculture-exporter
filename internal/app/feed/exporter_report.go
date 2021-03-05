@@ -315,6 +315,11 @@ func getFilePath(exportPath string, inspection *Inspection, format string) strin
 			fileName = inspection.ID
 		}
 
+		maxLength := 250
+		if len(fileName)+len(exportPath) > maxLength {
+			fileName = fileName[:maxLength-len(exportPath)]
+		}
+
 		if dupIndex > 0 {
 			fileName = fmt.Sprintf("%s (%d)", fileName, dupIndex)
 		}

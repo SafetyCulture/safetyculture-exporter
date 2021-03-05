@@ -128,6 +128,5 @@ func GetLogger() *zap.SugaredLogger {
 	zap.RedirectStdLog(l)
 
 	slg = l.Sugar()
-
 	return slg
 }
