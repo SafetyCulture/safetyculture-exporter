@@ -320,6 +320,9 @@ func getFilePath(exportPath string, inspection *Inspection, format string) (stri
 			fileName = inspection.ID
 		}
 
+		// fully qualified file names on Windows cannot be longer than 260
+		// characters. The limit has been set to 250 because we are appending
+		// more characters like the extension to the end of the file
 		maxLength := 250
 		if len(fileName)+len(exportPath) > maxLength {
 			fileName = fileName[:maxLength-len(exportPath)]
