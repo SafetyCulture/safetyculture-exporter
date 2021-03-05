@@ -6,6 +6,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"sync"
 	"time"
@@ -291,8 +292,8 @@ func saveReportResponse(resp io.ReadCloser, inspection *Inspection, path string,
 func sanitizeName(name string) string {
 	res := strings.ReplaceAll(name, " / ", "-")
 	res = strings.ReplaceAll(res, " // ", "-")
-	res = strings.ReplaceAll(res, "/", "-")
-	res = strings.ReplaceAll(res, " ", "-")
+	var rx = regexp.MustCompile(`[/\\?%*:|"<> ]`)
+	res = rx.ReplaceAllString(res, "-")
 	return res
 }
 
