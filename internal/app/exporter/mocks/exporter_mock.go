@@ -14,13 +14,13 @@ type Exporter struct {
 	mock.Mock
 }
 
-// GetLastModifiedAt provides a mock function with given fields:
-func (_m *Exporter) GetLastModifiedAt() *time.Time {
-	ret := _m.Called()
+// GetLastModifiedAt provides a mock function with given fields: modifiedAfter
+func (_m *Exporter) GetLastModifiedAt(modifiedAfter time.Time) *time.Time {
+	ret := _m.Called(modifiedAfter)
 
 	var r0 *time.Time
-	if rf, ok := ret.Get(0).(func() *time.Time); ok {
-		r0 = rf()
+	if rf, ok := ret.Get(0).(func(time.Time) *time.Time); ok {
+		r0 = rf(modifiedAfter)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*time.Time)

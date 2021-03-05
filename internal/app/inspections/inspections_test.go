@@ -47,7 +47,7 @@ func TestInspectionsExport(t *testing.T) {
 	exporterMock := new(exportermock.Exporter)
 	exporterMock.On("WriteRow", mock.Anything, mock.Anything)
 	exporterMock.On("SetLastModifiedAt", mock.Anything)
-	exporterMock.On("GetLastModifiedAt").Return(nil)
+	exporterMock.On("GetLastModifiedAt", mock.Anything).Return(nil)
 
 	inspectionClient := inspections.NewInspectionClient(
 		viperConfig,
