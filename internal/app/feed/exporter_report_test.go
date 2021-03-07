@@ -153,7 +153,8 @@ func TestExportReports_should_take_care_of_invalid_file_names(t *testing.T) {
 		Body(bytes.NewBuffer([]byte(`file content`)))
 
 	err = feed.ExportInspectionReports(viperConfig, apiClient, exporter)
-	assert.Nil(t, err)
+	assert.NotNil(t, err)
+	assert.Equal(t, "Failed to generate 1 PDF reports and 0 WORD reports", err.Error())
 
 	fileExists(t, filepath.Join(exporter.ExportPath, "My-Audit-1.pdf"))
 	fileExists(t, filepath.Join(exporter.ExportPath, "My-Audit-1 (1).pdf"))
