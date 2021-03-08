@@ -71,8 +71,6 @@ func throttleFunc(tfunc func(api.Inspection), inspection api.Inspection, guard c
 func (client *inspectionClient) Export(ctx context.Context) error {
 	var wg sync.WaitGroup
 
-	client.Infof("%s: exporting", client.Name())
-
 	skipIDs := map[string]bool{}
 	for _, id := range client.SkipIDs {
 		skipIDs[id] = true
@@ -116,10 +114,11 @@ func (client *inspectionClient) Export(ctx context.Context) error {
 		Completed:   client.Completed,
 	}
 
-	modifiedAt := client.exporter.GetLastModifiedAt()
-	if modifiedAt != nil && modifiedAt.After(params.ModifiedAfter) {
+	modifiedAt := client.exporter.GetLastModifiedAt(client.ModifiedAfter)
+	if modifiedAt != nil {
 		params.ModifiedAfter = *modifiedAt
 	}
+	client.Infof("%s: exporting since %s", client.Name(), params.ModifiedAfter.Format(time.RFC1123))
 
 	err := client.apiClient.DrainInspections(
 		ctx,

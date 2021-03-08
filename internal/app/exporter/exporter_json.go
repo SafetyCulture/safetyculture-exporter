@@ -50,12 +50,14 @@ func (e *JSONExporter) SetLastModifiedAt(modifiedAt time.Time) {
 	return
 }
 
-// GetLastModifiedAt reads last modified date from a file
-func (e *JSONExporter) GetLastModifiedAt() *time.Time {
+// GetLastModifiedAt returns last modified timestamp
+// Value from config-path(modifiedAfter) -> (A)
+// Value from last-modified file -> (B)
+func (e *JSONExporter) GetLastModifiedAt(modifiedAfter time.Time) *time.Time {
 	exportFilePath := filepath.Join(e.exportPath, fmt.Sprintf("%s", lastModified))
 	_, err := os.Stat(exportFilePath)
 	if os.IsNotExist(err) {
-		return nil
+		return &modifiedAfter
 	}
 
 	if e.lastModifiedFile == nil {
@@ -70,7 +72,13 @@ func (e *JSONExporter) GetLastModifiedAt() *time.Time {
 
 	modifiedAt, err := time.Parse(layout, strings.TrimSpace(string(bytes.Trim(b, "\x00"))))
 	util.Check(err, "Failed to convert last-modified to iso format")
-	return &modifiedAt
+
+	// If (A) is less than (B) then return (B)
+	if !modifiedAt.IsZero() && modifiedAfter.Before(modifiedAt) {
+		return &modifiedAt
+	}
+
+	return &modifiedAfter
 }
 
 // WriteRow writes the json response into a file
