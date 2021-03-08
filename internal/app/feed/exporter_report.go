@@ -6,6 +6,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"sync"
 	"time"
@@ -276,7 +277,11 @@ func (e *ReportExporter) updateReportResult(rep *reportExport, res *reportExport
 }
 
 func saveReportResponse(resp io.ReadCloser, inspection *Inspection, path string, format string) error {
-	filePath := getFilePath(path, inspection, format)
+	filePath, pErr := getFilePath(path, inspection, format)
+	if pErr != nil {
+		return pErr
+	}
+
 	out, err := os.Create(filePath)
 	if err != nil {
 		return err
@@ -291,8 +296,8 @@ func saveReportResponse(resp io.ReadCloser, inspection *Inspection, path string,
 func sanitizeName(name string) string {
 	res := strings.ReplaceAll(name, " / ", "-")
 	res = strings.ReplaceAll(res, " // ", "-")
-	res = strings.ReplaceAll(res, "/", "-")
-	res = strings.ReplaceAll(res, " ", "-")
+	var rx = regexp.MustCompile(`[/\\?%*:|"<> ]`)
+	res = rx.ReplaceAllString(res, "-")
 	return res
 }
 
@@ -307,7 +312,7 @@ func getFileExtension(format string) string {
 	}
 }
 
-func getFilePath(exportPath string, inspection *Inspection, format string) string {
+func getFilePath(exportPath string, inspection *Inspection, format string) (string, error) {
 	dupIndex := 0
 	for true {
 		fileName := sanitizeName(inspection.Name)
@@ -315,19 +320,29 @@ func getFilePath(exportPath string, inspection *Inspection, format string) strin
 			fileName = inspection.ID
 		}
 
+		// fully qualified file names on Windows cannot be longer than 260
+		// characters. The limit has been set to 250 because we are appending
+		// more characters like the extension to the end of the file
+		maxLength := 250
+		if len(fileName)+len(exportPath) > maxLength {
+			fileName = fileName[:maxLength-len(exportPath)]
+		}
+
 		if dupIndex > 0 {
 			fileName = fmt.Sprintf("%s (%d)", fileName, dupIndex)
 		}
 
 		exportFilePath := filepath.Join(exportPath, fmt.Sprintf("%s.%s", fileName, getFileExtension(format)))
-		if _, err := os.Stat(exportFilePath); os.IsNotExist(err) {
-			return exportFilePath
+		if _, err := os.Stat(exportFilePath); err == nil {
+			dupIndex++
+		} else if os.IsNotExist(err) {
+			return exportFilePath, nil
+		} else {
+			return "", err
 		}
-
-		dupIndex++
 	}
 
-	return ""
+	return "", nil
 }
 
 // NewReportExporter returns a new instance of ReportExporter

@@ -3,6 +3,7 @@ package feed_test
 import (
 	"bytes"
 	"fmt"
+	"os"
 	"path/filepath"
 	"testing"
 
@@ -114,6 +115,55 @@ func TestExportReports_should_not_run_if_all_exported(t *testing.T) {
 	assert.Equal(t, file1ModTime1, file1ModTime2)
 	assert.Equal(t, file2ModTime1, file2ModTime2)
 	assert.Equal(t, file3ModTime1, file3ModTime2)
+}
+
+func TestExportReports_should_take_care_of_invalid_file_names(t *testing.T) {
+	exporter, err := getTemporaryReportExporter([]string{"PDF"}, "")
+	assert.Nil(t, err)
+
+	viperConfig := viper.New()
+	viperConfig.Set("export.incremental", true)
+
+	apiClient := api.NewAPIClient("http://localhost:9999", "token")
+	defer resetMocks(apiClient.HTTPClient())
+	gock.InterceptClient(apiClient.HTTPClient())
+
+	gock.New("http://localhost:9999").
+		Get("/feed/inspections").
+		Reply(200).
+		File("mocks/set_4/feed_inspections_1.json")
+
+	// Making sure the endpoints have been called only 3 times
+	gock.New(mockAPIBaseURL).
+		Post(initiateReportURL).
+		Times(3).
+		Reply(200).
+		JSON(`{"messageId": "abc"}`)
+
+	gock.New(mockAPIBaseURL).
+		Get(reportExportCompletionURL).
+		Times(3).
+		Reply(200).
+		JSON(getReportExportCompletionMessage("SUCCESS"))
+
+	gock.New(mockAPIBaseURL).
+		Get(downloadReportURL).
+		Times(3).
+		Reply(200).
+		Body(bytes.NewBuffer([]byte(`file content`)))
+
+	err = feed.ExportInspectionReports(viperConfig, apiClient, exporter)
+	assert.Nil(t, err)
+
+	fileExists(t, filepath.Join(exporter.ExportPath, "My-Audit-1.pdf"))
+	fileExists(t, filepath.Join(exporter.ExportPath, "My-Audit-1 (1).pdf"))
+	var files []string
+	filepath.Walk(exporter.ExportPath, func(path string, info os.FileInfo, err error) error {
+		files = append(files, path)
+		assert.LessOrEqual(t, len(path), 255)
+		return nil
+	})
+	assert.Equal(t, 5, len(files))
 }
 
 func TestExportReports_should_fail_after_retries(t *testing.T) {
