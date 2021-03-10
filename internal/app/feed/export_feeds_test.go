@@ -128,5 +128,5 @@ func TestExportFeeds_should_handle_lots_of_rows_ok(t *testing.T) {
 
 	inspectionItemsLines, err := countFileLines(filepath.Join(exporter.ExportPath, "inspection_items.csv"))
 	assert.Nil(t, err)
-	assert.Equal(t, 501, inspectionItemsLines)
+	assert.Equal(t, 230, inspectionItemsLines)
 }

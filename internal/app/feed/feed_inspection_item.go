@@ -35,6 +35,7 @@ type InspectionItem struct {
 	ResponseSetID           string    `json:"response_set_id" csv:"response_set_id"`
 	IsFailedResponse        bool      `json:"is_failed_response" csv:"is_failed_response"`
 	Comment                 string    `json:"comment" csv:"comment"`
+	MediaFiles              string    `json:"media_files" csv:"media_files"`
 	MediaHypertextReference string    `json:"media_hypertext_reference" csv:"media_hypertext_reference"`
 	Score                   float32   `json:"score" csv:"score"`
 	MaxScore                float32   `json:"max_score" csv:"max_score"`
@@ -95,6 +96,7 @@ func (f *InspectionItemFeed) Columns() []string {
 		"response_set_id",
 		"is_failed_response",
 		"comment",
+		"media_files",
 		"media_hypertext_reference",
 		"score",
 		"max_score",
@@ -138,7 +140,7 @@ func (f *InspectionItemFeed) writeRows(ctx context.Context, exporter Exporter, r
 	}
 
 	// Calculate the size of the batch we can insert into the DB at once. Column count + buffer to account for primary keys
-	batchSize := exporter.ParameterLimit() / (len(f.Columns()) + 4)
+	batchSize := exporter.ParameterLimit() / (len(f.Columns()) + 5)
 	for i := 0; i < len(rows); i += batchSize {
 		j := i + batchSize
 		if j > len(rows) {
