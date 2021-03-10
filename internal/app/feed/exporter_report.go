@@ -296,7 +296,7 @@ func saveReportResponse(resp io.ReadCloser, inspection *Inspection, path string,
 func sanitizeName(name string) string {
 	res := strings.ReplaceAll(name, " / ", "-")
 	res = strings.ReplaceAll(res, " // ", "-")
-	var rx = regexp.MustCompile(`[/\\?%*:|"<> ]`)
+	var rx = regexp.MustCompile(`[/\\?%*:|"<> \t\n]`)
 	res = rx.ReplaceAllString(res, "-")
 	return res
 }
