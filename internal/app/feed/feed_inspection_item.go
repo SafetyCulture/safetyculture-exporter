@@ -140,7 +140,7 @@ func (f *InspectionItemFeed) writeRows(ctx context.Context, exporter Exporter, r
 	}
 
 	// Calculate the size of the batch we can insert into the DB at once. Column count + buffer to account for primary keys
-	batchSize := exporter.ParameterLimit() / (len(f.Columns()) + 4)
+	batchSize := exporter.ParameterLimit() / (len(f.Columns()) + 5)
 	for i := 0; i < len(rows); i += batchSize {
 		j := i + batchSize
 		if j > len(rows) {
