@@ -44,7 +44,7 @@ type Client interface {
 	GetMedia(ctx context.Context, request *GetMediaRequest) (*GetMediaResponse, error)
 }
 
-type apiClient struct {
+type APIClient struct {
 	logger        *zap.SugaredLogger
 	accessToken   string
 	baseURL       string
@@ -60,10 +60,10 @@ type apiClient struct {
 }
 
 // Opt is an option to configure the APIClient
-type Opt func(*apiClient)
+type Opt func(*APIClient)
 
 // NewAPIClient crates a new instance of the APIClient
-func NewAPIClient(addr string, accessToken string, opts ...Opt) *apiClient {
+func NewAPIClient(addr string, accessToken string, opts ...Opt) *APIClient {
 	httpTransport := &http.Transport{
 		DialContext: (&net.Dialer{
 			Timeout:   30 * time.Second,
@@ -82,7 +82,7 @@ func NewAPIClient(addr string, accessToken string, opts ...Opt) *apiClient {
 		Transport: httpTransport,
 	}
 
-	a := apiClient{
+	a := APIClient{
 		logger:        util.GetLogger(),
 		httpClient:    httpClient,
 		baseURL:       addr,
@@ -104,27 +104,27 @@ func NewAPIClient(addr string, accessToken string, opts ...Opt) *apiClient {
 }
 
 // HTTPClient returns the http Client used by APIClient
-func (a *apiClient) HTTPClient() *http.Client {
+func (a *APIClient) HTTPClient() *http.Client {
 	return a.httpClient
 }
 
 // OptSetTimeout sets the timeout for the request
 func OptSetTimeout(t time.Duration) Opt {
-	return func(a *apiClient) {
+	return func(a *APIClient) {
 		a.httpClient.Timeout = t
 	}
 }
 
 // OptSetProxy sets the proxy URL to use for API requests
 func OptSetProxy(proxyURL *url.URL) Opt {
-	return func(a *apiClient) {
+	return func(a *APIClient) {
 		a.httpTransport.Proxy = http.ProxyURL(proxyURL)
 	}
 }
 
 // OptSetInsecureTLS sets whether TLS certs should be verified
 func OptSetInsecureTLS(insecureSkipVerify bool) Opt {
-	return func(a *apiClient) {
+	return func(a *APIClient) {
 		if a.httpTransport.TLSClientConfig == nil {
 			a.httpTransport.TLSClientConfig = &tls.Config{}
 		}
@@ -135,7 +135,7 @@ func OptSetInsecureTLS(insecureSkipVerify bool) Opt {
 
 // OptAddTLSCert adds a certificate at the supplied path to the cert pool
 func OptAddTLSCert(certPath string) Opt {
-	return func(a *apiClient) {
+	return func(a *APIClient) {
 		if certPath == "" {
 			return
 		}
@@ -233,11 +233,7 @@ type ListInspectionsResponse struct {
 	Inspections []Inspection `json:"audits"`
 }
 
-func (a *apiClient) retryDo(sl *sling.Sling, req *http.Request, successV, failureV interface{}) (*http.Response, error) {
-	return nil, nil
-}
-
-func (a *apiClient) do(doer HTTPDoer) (*http.Response, error) {
+func (a *APIClient) do(doer HTTPDoer) (*http.Response, error) {
 	url := doer.URL()
 
 	for iter := 0; ; iter++ {
@@ -295,7 +291,7 @@ func (a *apiClient) do(doer HTTPDoer) (*http.Response, error) {
 	return nil, fmt.Errorf("%s giving up after %d attempt(s)", url, a.RetryMax+1)
 }
 
-func (a *apiClient) GetMedia(ctx context.Context, request *GetMediaRequest) (*GetMediaResponse, error) {
+func (a *APIClient) GetMedia(ctx context.Context, request *GetMediaRequest) (*GetMediaResponse, error) {
 	baseURL := strings.TrimPrefix(request.URL, a.baseURL)
 	mediaID := strings.TrimPrefix(baseURL, fmt.Sprintf("/audits/%s/media/", request.AuditID))
 
@@ -337,7 +333,7 @@ func (a *apiClient) GetMedia(ctx context.Context, request *GetMediaRequest) (*Ge
 	return resp, nil
 }
 
-func (a *apiClient) GetFeed(ctx context.Context, request *GetFeedRequest) (*GetFeedResponse, error) {
+func (a *APIClient) GetFeed(ctx context.Context, request *GetFeedRequest) (*GetFeedResponse, error) {
 	var (
 		result *GetFeedResponse
 		errMsg json.RawMessage
@@ -374,7 +370,7 @@ func (a *apiClient) GetFeed(ctx context.Context, request *GetFeedRequest) (*GetF
 	return result, nil
 }
 
-func (a *apiClient) DrainFeed(ctx context.Context, request *GetFeedRequest, feedFn func(*GetFeedResponse) error) error {
+func (a *APIClient) DrainFeed(ctx context.Context, request *GetFeedRequest, feedFn func(*GetFeedResponse) error) error {
 	var nextURL string
 	// Used to both ensure the fetchFn is called at least once
 	first := true
@@ -396,7 +392,7 @@ func (a *apiClient) DrainFeed(ctx context.Context, request *GetFeedRequest, feed
 	return nil
 }
 
-func (a *apiClient) ListInspections(ctx context.Context, params *ListInspectionsParams) (*ListInspectionsResponse, error) {
+func (a *APIClient) ListInspections(ctx context.Context, params *ListInspectionsParams) (*ListInspectionsResponse, error) {
 	var (
 		result *ListInspectionsResponse
 		errMsg json.RawMessage
@@ -425,7 +421,7 @@ func (a *apiClient) ListInspections(ctx context.Context, params *ListInspections
 	return result, nil
 }
 
-func (a *apiClient) GetInspection(ctx context.Context, id string) (*json.RawMessage, error) {
+func (a *APIClient) GetInspection(ctx context.Context, id string) (*json.RawMessage, error) {
 	var (
 		result *json.RawMessage
 		errMsg json.RawMessage
@@ -453,7 +449,7 @@ func (a *apiClient) GetInspection(ctx context.Context, id string) (*json.RawMess
 	return result, nil
 }
 
-func (a *apiClient) DrainInspections(
+func (a *APIClient) DrainInspections(
 	ctx context.Context,
 	params *ListInspectionsParams,
 	callback func(*ListInspectionsResponse) error,
@@ -496,7 +492,7 @@ type initiateInspectionReportExportResponse struct {
 	MessageID string `json:"messageId"`
 }
 
-func (a *apiClient) InitiateInspectionReportExport(ctx context.Context, auditID string, format string, preferenceID string) (string, error) {
+func (a *APIClient) InitiateInspectionReportExport(ctx context.Context, auditID string, format string, preferenceID string) (string, error) {
 	var (
 		result *initiateInspectionReportExportResponse
 		errMsg json.RawMessage
@@ -537,7 +533,7 @@ type InspectionReportExportCompletionResponse struct {
 	URL    string `json:"url,omitempty"`
 }
 
-func (a *apiClient) CheckInspectionReportExportCompletion(ctx context.Context, auditID string, messageID string) (*InspectionReportExportCompletionResponse, error) {
+func (a *APIClient) CheckInspectionReportExportCompletion(ctx context.Context, auditID string, messageID string) (*InspectionReportExportCompletionResponse, error) {
 	var (
 		result *InspectionReportExportCompletionResponse
 		errMsg json.RawMessage
@@ -567,7 +563,7 @@ func (a *apiClient) CheckInspectionReportExportCompletion(ctx context.Context, a
 	return result, nil
 }
 
-func (a *apiClient) DownloadInspectionReportFile(ctx context.Context, url string) (io.ReadCloser, error) {
+func (a *APIClient) DownloadInspectionReportFile(ctx context.Context, url string) (io.ReadCloser, error) {
 	var res *http.Response
 
 	sl := a.sling.New().Get(url).
