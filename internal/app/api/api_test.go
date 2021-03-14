@@ -7,6 +7,8 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strconv"
+	"strings"
 	"testing"
 	"time"
 
@@ -119,17 +121,38 @@ func TestAPIClientDrainFeed_should_return_api_errors(t *testing.T) {
 		Reply(500).
 		JSON(`{"error": "something bad happened"}`)
 
-	apiClient := api.NewAPIClient("http://localhost:9999", "abc123")
-	gock.InterceptClient(apiClient.HTTPClient())
+	tests := []struct {
+		name string
+		cr   api.CheckForRetry
+		err  string
+	}{
+		{
+			name: "default_retry_policy",
+			cr:   api.DefaultRetryPolicy,
+			err:  "giving up after 3 attempt(s)",
+		},
+	}
 
-	err := apiClient.DrainFeed(context.Background(), &api.GetFeedRequest{
-		InitialURL: "/feed/inspections",
-	}, func(data *api.GetFeedResponse) error {
-		return nil
-	})
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			apiClient := api.NewAPIClient("http://localhost:9999", "abc123")
+			gock.InterceptClient(apiClient.HTTPClient())
 
-	assert.NotNil(t, err)
-	assert.Contains(t, err.Error(), "500 Internal Server Error")
+			apiClient.RetryWaitMin = 10 * time.Millisecond
+			apiClient.RetryWaitMax = 10 * time.Millisecond
+			apiClient.CheckForRetry = tt.cr
+			apiClient.RetryMax = 2
+
+			err := apiClient.DrainFeed(context.Background(), &api.GetFeedRequest{
+				InitialURL: "/feed/inspections",
+			}, func(data *api.GetFeedResponse) error {
+				return nil
+			})
+			if err == nil || !strings.HasSuffix(err.Error(), tt.err) {
+				t.Fatalf("expected giving up error, got: %#v", err)
+			}
+		})
+	}
 }
 
 func TestApiOptSetTimeout_should_set_timeout(t *testing.T) {
@@ -411,13 +434,34 @@ func TestAPIClientInitiateInspectionReportExport_should_return_error_on_failure(
 		Reply(500).
 		JSON(`{"error": "something bad happened"}`)
 
-	apiClient := api.NewAPIClient("http://localhost:9999", "abc123")
-	gock.InterceptClient(apiClient.HTTPClient())
+	tests := []struct {
+		name string
+		cr   api.CheckForRetry
+		err  string
+	}{
+		{
+			name: "default_retry_policy",
+			cr:   api.DefaultRetryPolicy,
+			err:  "giving up after 2 attempt(s)",
+		},
+	}
 
-	_, err := apiClient.InitiateInspectionReportExport(context.Background(), "audit_123", "PDF", "")
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			apiClient := api.NewAPIClient("http://localhost:9999", "abc123")
+			gock.InterceptClient(apiClient.HTTPClient())
 
-	assert.NotNil(t, err)
-	assert.Contains(t, err.Error(), "500 Internal Server Error")
+			apiClient.RetryWaitMin = 10 * time.Millisecond
+			apiClient.RetryWaitMax = 10 * time.Millisecond
+			apiClient.CheckForRetry = tt.cr
+			apiClient.RetryMax = 1
+
+			_, err := apiClient.InitiateInspectionReportExport(context.Background(), "audit_123", "PDF", "")
+			if err == nil || !strings.HasSuffix(err.Error(), tt.err) {
+				t.Fatalf("expected giving up error, got: %#v", err)
+			}
+		})
+	}
 }
 
 func TestAPIClientCheckInspectionReportExportCompletion_should_return_status(t *testing.T) {
@@ -449,13 +493,34 @@ func TestAPIClientCheckInspectionReportExportCompletion_should_return_error_on_f
 		Reply(500).
 		JSON(`{"error": "something bad happened"}`)
 
-	apiClient := api.NewAPIClient("http://localhost:9999", "abc123")
-	gock.InterceptClient(apiClient.HTTPClient())
+	tests := []struct {
+		name string
+		cr   api.CheckForRetry
+		err  string
+	}{
+		{
+			name: "default_retry_policy",
+			cr:   api.DefaultRetryPolicy,
+			err:  "giving up after 2 attempt(s)",
+		},
+	}
 
-	_, err := apiClient.CheckInspectionReportExportCompletion(context.Background(), "audit_123", "abc")
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			apiClient := api.NewAPIClient("http://localhost:9999", "abc123")
+			gock.InterceptClient(apiClient.HTTPClient())
 
-	assert.NotNil(t, err)
-	assert.Contains(t, err.Error(), "500 Internal Server Error")
+			apiClient.RetryWaitMin = 10 * time.Millisecond
+			apiClient.RetryWaitMax = 10 * time.Millisecond
+			apiClient.CheckForRetry = tt.cr
+			apiClient.RetryMax = 1
+
+			_, err := apiClient.CheckInspectionReportExportCompletion(context.Background(), "audit_123", "abc")
+			if err == nil || !strings.HasSuffix(err.Error(), tt.err) {
+				t.Fatalf("expected giving up error, got: %#v", err)
+			}
+		})
+	}
 }
 
 func TestAPIClientDownloadInspectionReportFile_should_return_status(t *testing.T) {
@@ -486,11 +551,67 @@ func TestAPIClientDownloadInspectionReportFile_should_return_error_on_failure(t 
 		Reply(500).
 		BodyString("somthing bad happened")
 
-	apiClient := api.NewAPIClient("http://localhost:9999", "abc123")
-	gock.InterceptClient(apiClient.HTTPClient())
+	tests := []struct {
+		name string
+		cr   api.CheckForRetry
+		err  string
+	}{
+		{
+			name: "default_retry_policy",
+			cr:   api.DefaultRetryPolicy,
+			err:  "giving up after 2 attempt(s)",
+		},
+	}
 
-	_, err := apiClient.DownloadInspectionReportFile(context.Background(), "http://localhost:9999/report-exports/abc")
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			apiClient := api.NewAPIClient("http://localhost:9999", "abc123")
+			gock.InterceptClient(apiClient.HTTPClient())
 
-	assert.NotNil(t, err)
-	assert.Contains(t, err.Error(), "500 Internal Server Error")
+			apiClient.RetryWaitMin = 10 * time.Millisecond
+			apiClient.RetryWaitMax = 10 * time.Millisecond
+			apiClient.CheckForRetry = tt.cr
+			apiClient.RetryMax = 1
+
+			_, err := apiClient.DownloadInspectionReportFile(context.Background(), "http://localhost:9999/report-exports/abc")
+			if err == nil || !strings.HasSuffix(err.Error(), tt.err) {
+				t.Fatalf("expected giving up error, got: %#v", err)
+			}
+		})
+	}
+}
+
+func TestAPIClientBackoff429TooManyRequest(t *testing.T) {
+	defer gock.Off()
+
+	req := gock.New("http://localhost:9999").
+		Get(fmt.Sprintf("/audits/%s", "1234")).
+		Reply(429)
+	now := time.Now().Unix() * 1000
+	req.SetHeader("X-Rate-Limit-Reset", strconv.FormatInt(now, 10))
+
+	tests := []struct {
+		name string
+		bo   api.Backoff
+		err  string
+	}{
+		{
+			name: "default_backoff_policy",
+			bo:   api.DefaultBackoff,
+			err:  "giving up after 2 attempt(s)",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			apiClient := api.NewAPIClient("http://localhost:9999", "abc123")
+			gock.InterceptClient(apiClient.HTTPClient())
+			apiClient.RetryMax = 1
+
+			_, err := apiClient.GetInspection(context.Background(), "1234")
+			if err == nil || !strings.HasSuffix(err.Error(), tt.err) {
+				t.Fatalf("expected giving up error, got: %#v", err)
+			}
+		})
+	}
 }

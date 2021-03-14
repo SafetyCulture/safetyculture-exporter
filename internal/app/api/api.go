@@ -20,6 +20,14 @@ import (
 	"github.com/SafetyCulture/iauditor-exporter/internal/app/version"
 	"github.com/dghubble/sling"
 	"github.com/pkg/errors"
+	"go.uber.org/zap"
+)
+
+var (
+	// Default retry configuration
+	defaultRetryWaitMin = 1 * time.Second
+	defaultRetryWaitMax = 30 * time.Second
+	defaultRetryMax     = 4
 )
 
 // Client is an interface to the iAuditor API
@@ -37,18 +45,25 @@ type Client interface {
 }
 
 type apiClient struct {
+	logger        *zap.SugaredLogger
 	accessToken   string
 	baseURL       string
 	sling         *sling.Sling
 	httpClient    *http.Client
 	httpTransport *http.Transport
+
+	CheckForRetry CheckForRetry
+	Backoff       Backoff
+	RetryMax      int
+	RetryWaitMin  time.Duration
+	RetryWaitMax  time.Duration
 }
 
 // Opt is an option to configure the APIClient
 type Opt func(*apiClient)
 
 // NewAPIClient crates a new instance of the APIClient
-func NewAPIClient(addr string, accessToken string, opts ...Opt) Client {
+func NewAPIClient(addr string, accessToken string, opts ...Opt) *apiClient {
 	httpTransport := &http.Transport{
 		DialContext: (&net.Dialer{
 			Timeout:   30 * time.Second,
@@ -68,11 +83,17 @@ func NewAPIClient(addr string, accessToken string, opts ...Opt) Client {
 	}
 
 	a := apiClient{
+		logger:        util.GetLogger(),
 		httpClient:    httpClient,
 		baseURL:       addr,
 		httpTransport: httpTransport,
 		sling:         sling.New().Client(httpClient).Base(addr),
 		accessToken:   accessToken,
+		CheckForRetry: DefaultRetryPolicy,
+		Backoff:       DefaultBackoff,
+		RetryMax:      defaultRetryMax,
+		RetryWaitMin:  defaultRetryWaitMin,
+		RetryWaitMax:  defaultRetryWaitMax,
 	}
 
 	for _, opt := range opts {
@@ -212,40 +233,66 @@ type ListInspectionsResponse struct {
 	Inspections []Inspection `json:"audits"`
 }
 
-func (a *apiClient) do(sl *sling.Sling, req *http.Request, successV, failureV interface{}) (*http.Response, error) {
-	logger := util.GetLogger()
+func (a *apiClient) retryDo(sl *sling.Sling, req *http.Request, successV, failureV interface{}) (*http.Response, error) {
+	return nil, nil
+}
 
-	logger.Debugw("http request",
-		"url", req.URL.String(),
-	)
-	res, err := sl.Do(req, successV, failureV)
-	status := ""
-	if res != nil {
-		status = res.Status
-	}
-	logger.Debugw("http response",
-		"url", req.URL.String(),
-		"status", status,
-	)
+func (a *apiClient) do(doer HTTPDoer) (*http.Response, error) {
+	url := doer.URL()
 
-	if err != nil {
-		logger.Errorw("http request error",
-			"url", req.URL.String(),
-			"status", status,
-			"err", err,
+	for iter := 0; ; iter++ {
+		a.logger.Debugw("http request",
+			"url", url,
 		)
-		return res, errors.Wrap(err, "request error")
-	}
-	if res != nil && (res.StatusCode > 299 || res.StatusCode < 200) {
-		logger.Errorw("http request error status",
-			"url", req.URL.String(),
+
+		resp, err := doer.Do()
+		status := ""
+		if resp != nil {
+			status = resp.Status
+		}
+
+		if err != nil {
+			a.logger.Errorw("http request error",
+				"url", url,
+				"status", status,
+				"err", err,
+			)
+		}
+
+		a.logger.Debugw("http response",
+			"url", url,
 			"status", status,
-			"err", failureV,
 		)
-		return res, errors.Errorf("request error status: %s", status)
+
+		if resp != nil && (resp.StatusCode > 299 || resp.StatusCode < 200) {
+			a.logger.Errorw("http request error status",
+				"url", url,
+				"status", resp.Status,
+				"err", doer.Error(),
+			)
+		}
+
+		// Check if we should continue with the retries
+		shouldRetry, checkErr := a.CheckForRetry(resp, err)
+		if !shouldRetry {
+			if checkErr != nil {
+				err = checkErr
+			}
+			return resp, err
+		}
+
+		remain := a.RetryMax - iter
+		if remain == 0 {
+			break
+		}
+
+		wait := a.Backoff(a.RetryWaitMin, a.RetryWaitMax, iter, resp)
+		a.logger.Infof("retrying URL %s after %v", url, wait)
+
+		time.Sleep(wait)
 	}
 
-	return res, nil
+	return nil, fmt.Errorf("%s giving up after %d attempt(s)", url, a.RetryMax+1)
 }
 
 func (a *apiClient) GetMedia(ctx context.Context, request *GetMediaRequest) (*GetMediaResponse, error) {
@@ -261,7 +308,10 @@ func (a *apiClient) GetMedia(ctx context.Context, request *GetMediaRequest) (*Ge
 	req, _ := sl.Request()
 	req = req.WithContext(ctx)
 
-	result, err := a.httpClient.Do(req)
+	result, err := a.do(&defaultHTTPDoer{
+		req:        req,
+		httpClient: a.httpClient,
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -291,7 +341,6 @@ func (a *apiClient) GetFeed(ctx context.Context, request *GetFeedRequest) (*GetF
 	var (
 		result *GetFeedResponse
 		errMsg json.RawMessage
-		err    error
 	)
 
 	url := request.InitialURL
@@ -312,7 +361,12 @@ func (a *apiClient) GetFeed(ctx context.Context, request *GetFeedRequest) (*GetF
 	req, _ := sl.Request()
 	req = req.WithContext(ctx)
 
-	_, err = a.do(sl, req, &result, &errMsg)
+	_, err := a.do(&slingHTTPDoer{
+		sl:       sl,
+		req:      req,
+		successV: &result,
+		failureV: &errMsg,
+	})
 	if err != nil {
 		return nil, errors.Wrap(err, "Failed request to API")
 	}
@@ -358,7 +412,12 @@ func (a *apiClient) ListInspections(ctx context.Context, params *ListInspections
 	req, _ := sl.Request()
 	req = req.WithContext(ctx)
 
-	_, err := a.do(sl, req, &result, &errMsg)
+	_, err := a.do(&slingHTTPDoer{
+		sl:       sl,
+		req:      req,
+		successV: &result,
+		failureV: &errMsg,
+	})
 	if err != nil {
 		return nil, errors.Wrap(err, "Failed request to API")
 	}
@@ -381,7 +440,12 @@ func (a *apiClient) GetInspection(ctx context.Context, id string) (*json.RawMess
 	req, _ := sl.Request()
 	req = req.WithContext(ctx)
 
-	_, err := a.do(sl, req, &result, &errMsg)
+	_, err := a.do(&slingHTTPDoer{
+		sl:       sl,
+		req:      req,
+		successV: &result,
+		failureV: &errMsg,
+	})
 	if err != nil {
 		return nil, errors.Wrap(err, "Failed request to API")
 	}
@@ -436,7 +500,6 @@ func (a *apiClient) InitiateInspectionReportExport(ctx context.Context, auditID 
 	var (
 		result *initiateInspectionReportExportResponse
 		errMsg json.RawMessage
-		err    error
 	)
 
 	url := fmt.Sprintf("audits/%s/report", auditID)
@@ -455,7 +518,12 @@ func (a *apiClient) InitiateInspectionReportExport(ctx context.Context, auditID 
 	req, _ := sl.Request()
 	req = req.WithContext(ctx)
 
-	_, err = a.do(sl, req, &result, &errMsg)
+	_, err := a.do(&slingHTTPDoer{
+		sl:       sl,
+		req:      req,
+		successV: &result,
+		failureV: &errMsg,
+	})
 	if err != nil {
 		return "", errors.Wrap(err, "Failed request to API")
 	}
@@ -473,7 +541,6 @@ func (a *apiClient) CheckInspectionReportExportCompletion(ctx context.Context, a
 	var (
 		result *InspectionReportExportCompletionResponse
 		errMsg json.RawMessage
-		err    error
 	)
 
 	url := fmt.Sprintf("audits/%s/report/%s", auditID, messageID)
@@ -487,7 +554,12 @@ func (a *apiClient) CheckInspectionReportExportCompletion(ctx context.Context, a
 	req, _ := sl.Request()
 	req = req.WithContext(ctx)
 
-	_, err = a.do(sl, req, &result, &errMsg)
+	_, err := a.do(&slingHTTPDoer{
+		sl:       sl,
+		req:      req,
+		successV: &result,
+		failureV: &errMsg,
+	})
 	if err != nil {
 		return nil, errors.Wrap(err, "Failed request to API")
 	}
@@ -496,12 +568,7 @@ func (a *apiClient) CheckInspectionReportExportCompletion(ctx context.Context, a
 }
 
 func (a *apiClient) DownloadInspectionReportFile(ctx context.Context, url string) (io.ReadCloser, error) {
-	logger := util.GetLogger()
-
-	var (
-		res *http.Response
-		err error
-	)
+	var res *http.Response
 
 	sl := a.sling.New().Get(url).
 		Set(string(Authorization), "Bearer "+a.accessToken).
@@ -512,34 +579,13 @@ func (a *apiClient) DownloadInspectionReportFile(ctx context.Context, url string
 	req, _ := sl.Request()
 	req = req.WithContext(ctx)
 
-	logger.Debugw("http request",
-		"url", req.URL.String(),
-	)
-	res, err = a.httpClient.Do(req)
-	status := ""
-	if res != nil {
-		status = res.Status
-	}
-	logger.Debugw("http response",
-		"url", req.URL.String(),
-		"status", status,
-	)
-
+	res, err := a.do(&defaultHTTPDoer{
+		req:        req,
+		httpClient: a.httpClient,
+	})
 	if err != nil {
-		logger.Errorw("http request error",
-			"url", req.URL.String(),
-			"status", status,
-			"err", err,
-		)
-		return res.Body, errors.Wrap(err, "request error")
-	}
-	if res != nil && (res.StatusCode > 299 || res.StatusCode < 200) {
-		logger.Errorw("http request error status",
-			"url", req.URL.String(),
-			"status", status,
-		)
-		return res.Body, errors.Errorf("request error status: %s", status)
+		return nil, err
 	}
 
-	return res.Body, err
+	return res.Body, nil
 }
