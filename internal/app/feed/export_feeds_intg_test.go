@@ -53,7 +53,7 @@ func TestIntegrationDbExportFeeds_should_export_all_feeds_to_file(t *testing.T) 
 
 	viperConfig := viper.New()
 
-	apiClient := api.NewClient("http://localhost:9999", "token")
+	apiClient := api.GetTestClient()
 	initMockFeedsSet1(apiClient.HTTPClient())
 
 	err = feed.ExportFeeds(viperConfig, apiClient, exporter)
@@ -87,7 +87,7 @@ func TestIntegrationDbExportFeeds_should_perform_incremental_update_on_second_ru
 	viperConfig := viper.New()
 	viperConfig.Set("export.incremental", true)
 
-	apiClient := api.NewClient("http://localhost:9999", "token")
+	apiClient := api.GetTestClient()
 	initMockFeedsSet1(apiClient.HTTPClient())
 
 	err = feed.ExportFeeds(viperConfig, apiClient, exporter)
@@ -123,7 +123,7 @@ func TestIntegrationDbExportFeeds_should_handle_lots_of_rows_ok(t *testing.T) {
 	viperConfig := viper.New()
 	viperConfig.Set("export.incremental", true)
 
-	apiClient := api.NewClient("http://localhost:9999", "token")
+	apiClient := api.GetTestClient()
 	initMockFeedsSet3(apiClient.HTTPClient())
 
 	err = feed.ExportFeeds(viperConfig, apiClient, exporter)

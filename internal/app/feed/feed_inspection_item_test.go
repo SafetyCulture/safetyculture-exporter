@@ -17,7 +17,7 @@ func TestInspectionItemFeedExport_should_export_rows_to_sql_db(t *testing.T) {
 	exporter, err := getInmemorySQLExporter("")
 	assert.Nil(t, err)
 
-	apiClient := api.NewClient("http://localhost:9999", "abc123")
+	apiClient := api.GetTestClient()
 	initMockFeedsSet1(apiClient.HTTPClient())
 
 	inspectionItemFeed := feed.InspectionItemFeed{
@@ -53,7 +53,7 @@ func TestInspectionItemFeedExportWithMedia(t *testing.T) {
 		BodyString(result)
 	req.SetHeader("Content-Type", "image/test-content")
 
-	apiClient := api.NewClient("http://localhost:9999", "abc123")
+	apiClient := api.GetTestClient()
 	gock.InterceptClient(apiClient.HTTPClient())
 	initMockFeedsSet1(apiClient.HTTPClient())
 
