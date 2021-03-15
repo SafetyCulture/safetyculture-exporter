@@ -247,17 +247,17 @@ func (a *Client) do(doer HTTPDoer) (*http.Response, error) {
 			"status", status,
 		)
 
-		if resp != nil && (resp.StatusCode > 299 || resp.StatusCode < 200) {
-			a.logger.Errorw("http request error status",
-				"url", url,
-				"status", resp.Status,
-				"err", doer.Error(),
-			)
-		}
-
 		// Check if we should continue with the retries
 		shouldRetry, checkErr := a.CheckForRetry(resp, err)
 		if !shouldRetry {
+			if resp != nil && (resp.StatusCode > 299 || resp.StatusCode < 200) {
+				a.logger.Errorw("http request error status",
+					"url", url,
+					"status", status,
+					"err", doer.Error(),
+				)
+				return resp, errors.Errorf("request error status: %s", status)
+			}
 			if checkErr != nil {
 				err = checkErr
 			}

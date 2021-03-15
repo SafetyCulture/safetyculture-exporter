@@ -122,7 +122,7 @@ func configFlags() {
 	schemasFlag.Bool("create-schema-only", false, "Create schema only (default false)")
 
 	reportFlags = flag.NewFlagSet("report", flag.ContinueOnError)
-	reportFlags.StringSlice("format", []string{}, "Export format (PDF,WORD)")
+	reportFlags.StringSlice("format", []string{"PDF"}, "Export format (PDF,WORD)")
 	reportFlags.String("preference-id", "", "The report preference to apply to the document")
 
 	sitesFlags = flag.NewFlagSet("sites", flag.ContinueOnError)
