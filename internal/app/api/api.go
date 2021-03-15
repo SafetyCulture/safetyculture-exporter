@@ -30,21 +30,8 @@ var (
 	defaultRetryMax     = 4
 )
 
-// Client is an interface to the iAuditor API
-type Client interface {
-	HTTPClient() *http.Client
-	GetFeed(ctx context.Context, request *GetFeedRequest) (*GetFeedResponse, error)
-	DrainFeed(ctx context.Context, request *GetFeedRequest, feedFn func(*GetFeedResponse) error) error
-	ListInspections(ctx context.Context, params *ListInspectionsParams) (*ListInspectionsResponse, error)
-	GetInspection(ctx context.Context, id string) (*json.RawMessage, error)
-	DrainInspections(ctx context.Context, params *ListInspectionsParams, callback func(*ListInspectionsResponse) error) error
-	InitiateInspectionReportExport(ctx context.Context, auditID string, format string, preferenceID string) (string, error)
-	CheckInspectionReportExportCompletion(ctx context.Context, auditID string, messageID string) (*InspectionReportExportCompletionResponse, error)
-	DownloadInspectionReportFile(ctx context.Context, url string) (io.ReadCloser, error)
-	GetMedia(ctx context.Context, request *GetMediaRequest) (*GetMediaResponse, error)
-}
-
-type APIClient struct {
+// Client is used to with iAuditor API's.
+type Client struct {
 	logger        *zap.SugaredLogger
 	accessToken   string
 	baseURL       string
@@ -59,11 +46,11 @@ type APIClient struct {
 	RetryWaitMax  time.Duration
 }
 
-// Opt is an option to configure the APIClient
-type Opt func(*APIClient)
+// Opt is an option to configure the Client
+type Opt func(*Client)
 
-// NewAPIClient crates a new instance of the APIClient
-func NewAPIClient(addr string, accessToken string, opts ...Opt) *APIClient {
+// NewClient creates a new instance of the Client
+func NewClient(addr string, accessToken string, opts ...Opt) *Client {
 	httpTransport := &http.Transport{
 		DialContext: (&net.Dialer{
 			Timeout:   30 * time.Second,
@@ -82,7 +69,7 @@ func NewAPIClient(addr string, accessToken string, opts ...Opt) *APIClient {
 		Transport: httpTransport,
 	}
 
-	a := APIClient{
+	a := &Client{
 		logger:        util.GetLogger(),
 		httpClient:    httpClient,
 		baseURL:       addr,
@@ -97,34 +84,34 @@ func NewAPIClient(addr string, accessToken string, opts ...Opt) *APIClient {
 	}
 
 	for _, opt := range opts {
-		opt(&a)
+		opt(a)
 	}
 
-	return &a
+	return a
 }
 
 // HTTPClient returns the http Client used by APIClient
-func (a *APIClient) HTTPClient() *http.Client {
+func (a *Client) HTTPClient() *http.Client {
 	return a.httpClient
 }
 
 // OptSetTimeout sets the timeout for the request
 func OptSetTimeout(t time.Duration) Opt {
-	return func(a *APIClient) {
+	return func(a *Client) {
 		a.httpClient.Timeout = t
 	}
 }
 
 // OptSetProxy sets the proxy URL to use for API requests
 func OptSetProxy(proxyURL *url.URL) Opt {
-	return func(a *APIClient) {
+	return func(a *Client) {
 		a.httpTransport.Proxy = http.ProxyURL(proxyURL)
 	}
 }
 
 // OptSetInsecureTLS sets whether TLS certs should be verified
 func OptSetInsecureTLS(insecureSkipVerify bool) Opt {
-	return func(a *APIClient) {
+	return func(a *Client) {
 		if a.httpTransport.TLSClientConfig == nil {
 			a.httpTransport.TLSClientConfig = &tls.Config{}
 		}
@@ -135,7 +122,7 @@ func OptSetInsecureTLS(insecureSkipVerify bool) Opt {
 
 // OptAddTLSCert adds a certificate at the supplied path to the cert pool
 func OptAddTLSCert(certPath string) Opt {
-	return func(a *APIClient) {
+	return func(a *Client) {
 		if certPath == "" {
 			return
 		}
@@ -233,7 +220,7 @@ type ListInspectionsResponse struct {
 	Inspections []Inspection `json:"audits"`
 }
 
-func (a *APIClient) do(doer HTTPDoer) (*http.Response, error) {
+func (a *Client) do(doer HTTPDoer) (*http.Response, error) {
 	url := doer.URL()
 
 	for iter := 0; ; iter++ {
@@ -291,7 +278,8 @@ func (a *APIClient) do(doer HTTPDoer) (*http.Response, error) {
 	return nil, fmt.Errorf("%s giving up after %d attempt(s)", url, a.RetryMax+1)
 }
 
-func (a *APIClient) GetMedia(ctx context.Context, request *GetMediaRequest) (*GetMediaResponse, error) {
+// GetMedia fetches the media object from iAuditor.
+func (a *Client) GetMedia(ctx context.Context, request *GetMediaRequest) (*GetMediaResponse, error) {
 	baseURL := strings.TrimPrefix(request.URL, a.baseURL)
 	mediaID := strings.TrimPrefix(baseURL, fmt.Sprintf("/audits/%s/media/", request.AuditID))
 
@@ -333,7 +321,8 @@ func (a *APIClient) GetMedia(ctx context.Context, request *GetMediaRequest) (*Ge
 	return resp, nil
 }
 
-func (a *APIClient) GetFeed(ctx context.Context, request *GetFeedRequest) (*GetFeedResponse, error) {
+// GetFeed executes the feed request and
+func (a *Client) GetFeed(ctx context.Context, request *GetFeedRequest) (*GetFeedResponse, error) {
 	var (
 		result *GetFeedResponse
 		errMsg json.RawMessage
@@ -370,7 +359,8 @@ func (a *APIClient) GetFeed(ctx context.Context, request *GetFeedRequest) (*GetF
 	return result, nil
 }
 
-func (a *APIClient) DrainFeed(ctx context.Context, request *GetFeedRequest, feedFn func(*GetFeedResponse) error) error {
+// DrainFeed fetches the data in batches and triggers the callback for each batch.
+func (a *Client) DrainFeed(ctx context.Context, request *GetFeedRequest, feedFn func(*GetFeedResponse) error) error {
 	var nextURL string
 	// Used to both ensure the fetchFn is called at least once
 	first := true
@@ -392,7 +382,8 @@ func (a *APIClient) DrainFeed(ctx context.Context, request *GetFeedRequest, feed
 	return nil
 }
 
-func (a *APIClient) ListInspections(ctx context.Context, params *ListInspectionsParams) (*ListInspectionsResponse, error) {
+// ListInspections retrieves the list of inspections from iAuditor
+func (a *Client) ListInspections(ctx context.Context, params *ListInspectionsParams) (*ListInspectionsResponse, error) {
 	var (
 		result *ListInspectionsResponse
 		errMsg json.RawMessage
@@ -421,7 +412,8 @@ func (a *APIClient) ListInspections(ctx context.Context, params *ListInspections
 	return result, nil
 }
 
-func (a *APIClient) GetInspection(ctx context.Context, id string) (*json.RawMessage, error) {
+// GetInspection retrieves the inspection of the given id.
+func (a *Client) GetInspection(ctx context.Context, id string) (*json.RawMessage, error) {
 	var (
 		result *json.RawMessage
 		errMsg json.RawMessage
@@ -449,7 +441,9 @@ func (a *APIClient) GetInspection(ctx context.Context, id string) (*json.RawMess
 	return result, nil
 }
 
-func (a *APIClient) DrainInspections(
+// DrainInspections fetches the inspections in batches and triggers the callback
+// for each batch.
+func (a *Client) DrainInspections(
 	ctx context.Context,
 	params *ListInspectionsParams,
 	callback func(*ListInspectionsResponse) error,
@@ -492,7 +486,8 @@ type initiateInspectionReportExportResponse struct {
 	MessageID string `json:"messageId"`
 }
 
-func (a *APIClient) InitiateInspectionReportExport(ctx context.Context, auditID string, format string, preferenceID string) (string, error) {
+// InitiateInspectionReportExport export the report of the given auditID.
+func (a *Client) InitiateInspectionReportExport(ctx context.Context, auditID string, format string, preferenceID string) (string, error) {
 	var (
 		result *initiateInspectionReportExportResponse
 		errMsg json.RawMessage
@@ -533,7 +528,8 @@ type InspectionReportExportCompletionResponse struct {
 	URL    string `json:"url,omitempty"`
 }
 
-func (a *APIClient) CheckInspectionReportExportCompletion(ctx context.Context, auditID string, messageID string) (*InspectionReportExportCompletionResponse, error) {
+// CheckInspectionReportExportCompletion checks if the report export is complete.
+func (a *Client) CheckInspectionReportExportCompletion(ctx context.Context, auditID string, messageID string) (*InspectionReportExportCompletionResponse, error) {
 	var (
 		result *InspectionReportExportCompletionResponse
 		errMsg json.RawMessage
@@ -563,7 +559,8 @@ func (a *APIClient) CheckInspectionReportExportCompletion(ctx context.Context, a
 	return result, nil
 }
 
-func (a *APIClient) DownloadInspectionReportFile(ctx context.Context, url string) (io.ReadCloser, error) {
+// DownloadInspectionReportFile downloads the report file of the inspection.
+func (a *Client) DownloadInspectionReportFile(ctx context.Context, url string) (io.ReadCloser, error) {
 	var res *http.Response
 
 	sl := a.sling.New().Get(url).

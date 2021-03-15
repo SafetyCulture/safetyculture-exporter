@@ -19,7 +19,7 @@ const maxGoRoutines = 10
 type inspectionClient struct {
 	*zap.SugaredLogger
 
-	apiClient     api.Client
+	apiClient     *api.Client
 	exporter      exporter.Exporter
 	SkipIDs       []string
 	ModifiedAfter time.Time
@@ -35,7 +35,7 @@ type InspectionClient interface {
 }
 
 // NewInspectionClient returns a new instance of InspectionClient
-func NewInspectionClient(v *viper.Viper, apiClient api.Client, exporter exporter.Exporter) InspectionClient {
+func NewInspectionClient(v *viper.Viper, apiClient *api.Client, exporter exporter.Exporter) InspectionClient {
 	inspectionConfig := config.GetInspectionConfig(v)
 	templateIDs := v.GetStringSlice("export.template_ids")
 

@@ -67,7 +67,7 @@ func (f *ActionAssigneeFeed) CreateSchema(exporter Exporter) error {
 }
 
 // Export exports the feed to the supplied exporter
-func (f *ActionAssigneeFeed) Export(ctx context.Context, apiClient api.Client, exporter Exporter) error {
+func (f *ActionAssigneeFeed) Export(ctx context.Context, apiClient *api.Client, exporter Exporter) error {
 	logger := util.GetLogger()
 	feedName := f.Name()
 

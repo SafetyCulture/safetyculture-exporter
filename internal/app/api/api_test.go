@@ -56,7 +56,7 @@ func TestAPIClientDrainFeed_should_return_for_as_long_next_page_set(t *testing.T
 			]
 		}`)
 
-	apiClient := api.NewAPIClient("http://localhost:9999", "abc123")
+	apiClient := api.NewClient("http://localhost:9999", "abc123")
 	gock.InterceptClient(apiClient.HTTPClient())
 
 	calls := 0
@@ -101,7 +101,7 @@ func TestAPIClientDrainFeed_should_bubble_up_errors_from_callback(t *testing.T) 
 			"data": []
 		}`)
 
-	apiClient := api.NewAPIClient("http://localhost:9999", "abc123")
+	apiClient := api.NewClient("http://localhost:9999", "abc123")
 	gock.InterceptClient(apiClient.HTTPClient())
 
 	expectedErr := errors.New("test error")
@@ -135,7 +135,7 @@ func TestAPIClientDrainFeed_should_return_api_errors(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			apiClient := api.NewAPIClient("http://localhost:9999", "abc123")
+			apiClient := api.NewClient("http://localhost:9999", "abc123")
 			gock.InterceptClient(apiClient.HTTPClient())
 
 			apiClient.RetryWaitMin = 10 * time.Millisecond
@@ -156,7 +156,7 @@ func TestAPIClientDrainFeed_should_return_api_errors(t *testing.T) {
 }
 
 func TestApiOptSetTimeout_should_set_timeout(t *testing.T) {
-	apiClient := api.NewAPIClient("http://localhost:9999", "abc123", api.OptSetTimeout(time.Second*21))
+	apiClient := api.NewClient("http://localhost:9999", "abc123", api.OptSetTimeout(time.Second*21))
 
 	assert.Equal(t, time.Second*21, apiClient.HTTPClient().Timeout)
 }
@@ -180,7 +180,7 @@ func TestAPIClientDrainInspections_should_return_for_as_long_next_page_set(t *te
 			]
 		}`)
 
-	apiClient := api.NewAPIClient("http://localhost:9999", "abc123")
+	apiClient := api.NewClient("http://localhost:9999", "abc123")
 	gock.InterceptClient(apiClient.HTTPClient())
 
 	auditIDs := []string{}
@@ -212,7 +212,7 @@ func TestAPIClientGetInspection(t *testing.T) {
 			"audit_id": "audit_8E2B1F3CB9C94D8792957F9F99E2E4BD"
 		}`)
 
-	apiClient := api.NewAPIClient("http://localhost:9999", "abc123")
+	apiClient := api.NewClient("http://localhost:9999", "abc123")
 	gock.InterceptClient(apiClient.HTTPClient())
 
 	resp, err := apiClient.GetInspection(context.Background(), auditID)
@@ -235,7 +235,7 @@ func TestAPIClientGetInspectionWithError(t *testing.T) {
 		Get(fmt.Sprintf("/audits/%s", auditID)).
 		ReplyError(fmt.Errorf("test error"))
 
-	apiClient := api.NewAPIClient("http://localhost:9999", "abc123")
+	apiClient := api.NewClient("http://localhost:9999", "abc123")
 	gock.InterceptClient(apiClient.HTTPClient())
 
 	_, err := apiClient.GetInspection(context.Background(), auditID)
@@ -249,7 +249,7 @@ func TestAPIClientListInspectionWithError(t *testing.T) {
 		Get("/audits/search").
 		ReplyError(fmt.Errorf("test error"))
 
-	apiClient := api.NewAPIClient("http://localhost:9999", "abc123")
+	apiClient := api.NewClient("http://localhost:9999", "abc123")
 	gock.InterceptClient(apiClient.HTTPClient())
 
 	_, err := apiClient.ListInspections(context.Background(), nil)
@@ -263,7 +263,7 @@ func TestDrainInspectionsWithAPIError(t *testing.T) {
 		Get("/audits/search").
 		ReplyError(fmt.Errorf("test error"))
 
-	apiClient := api.NewAPIClient("http://localhost:9999", "abc123")
+	apiClient := api.NewClient("http://localhost:9999", "abc123")
 	gock.InterceptClient(apiClient.HTTPClient())
 
 	err := apiClient.DrainInspections(
@@ -294,7 +294,7 @@ func TestDrainInspectionsWithCallbackError(t *testing.T) {
 			]
 		}`)
 
-	apiClient := api.NewAPIClient("http://localhost:9999", "abc123")
+	apiClient := api.NewClient("http://localhost:9999", "abc123")
 	gock.InterceptClient(apiClient.HTTPClient())
 
 	err := apiClient.DrainInspections(
@@ -313,7 +313,7 @@ func TestGetMediaWithAPIError(t *testing.T) {
 		Get("/audits/1234/media/12345").
 		ReplyError(fmt.Errorf("test error"))
 
-	apiClient := api.NewAPIClient("http://localhost:9999", "abc123")
+	apiClient := api.NewClient("http://localhost:9999", "abc123")
 	gock.InterceptClient(apiClient.HTTPClient())
 
 	_, err := apiClient.GetMedia(
@@ -335,7 +335,7 @@ func TestGetMediaWith204Error(t *testing.T) {
 		Reply(204).
 		BodyString(result)
 
-	apiClient := api.NewAPIClient("http://localhost:9999", "abc123")
+	apiClient := api.NewClient("http://localhost:9999", "abc123")
 	gock.InterceptClient(apiClient.HTTPClient())
 
 	resp, err := apiClient.GetMedia(
@@ -358,7 +358,7 @@ func TestGetMediaWithNoContentType(t *testing.T) {
 		Reply(200).
 		BodyString(result)
 
-	apiClient := api.NewAPIClient("http://localhost:9999", "abc123")
+	apiClient := api.NewClient("http://localhost:9999", "abc123")
 	gock.InterceptClient(apiClient.HTTPClient())
 
 	_, err := apiClient.GetMedia(
@@ -383,7 +383,7 @@ func TestGetMedia(t *testing.T) {
 		BodyString(result)
 	req.SetHeader("Content-Type", "test-content")
 
-	apiClient := api.NewAPIClient("http://localhost:9999", "abc123")
+	apiClient := api.NewClient("http://localhost:9999", "abc123")
 	gock.InterceptClient(apiClient.HTTPClient())
 
 	expected := &api.GetMediaResponse{
@@ -416,7 +416,7 @@ func TestAPIClientInitiateInspectionReportExport_should_return_messageID(t *test
 			"messageId": "abc"
 		}`)
 
-	apiClient := api.NewAPIClient("http://localhost:9999", "abc123")
+	apiClient := api.NewClient("http://localhost:9999", "abc123")
 	gock.InterceptClient(apiClient.HTTPClient())
 
 	mId, err := apiClient.InitiateInspectionReportExport(context.Background(), "audit_123", "PDF", "p123")
@@ -448,7 +448,7 @@ func TestAPIClientInitiateInspectionReportExport_should_return_error_on_failure(
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			apiClient := api.NewAPIClient("http://localhost:9999", "abc123")
+			apiClient := api.NewClient("http://localhost:9999", "abc123")
 			gock.InterceptClient(apiClient.HTTPClient())
 
 			apiClient.RetryWaitMin = 10 * time.Millisecond
@@ -475,7 +475,7 @@ func TestAPIClientCheckInspectionReportExportCompletion_should_return_status(t *
 			"url": "http://domain.com/report"
 		}`)
 
-	apiClient := api.NewAPIClient("http://localhost:9999", "abc123")
+	apiClient := api.NewClient("http://localhost:9999", "abc123")
 	gock.InterceptClient(apiClient.HTTPClient())
 
 	res, err := apiClient.CheckInspectionReportExportCompletion(context.Background(), "audit_123", "abc")
@@ -507,7 +507,7 @@ func TestAPIClientCheckInspectionReportExportCompletion_should_return_error_on_f
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			apiClient := api.NewAPIClient("http://localhost:9999", "abc123")
+			apiClient := api.NewClient("http://localhost:9999", "abc123")
 			gock.InterceptClient(apiClient.HTTPClient())
 
 			apiClient.RetryWaitMin = 10 * time.Millisecond
@@ -531,7 +531,7 @@ func TestAPIClientDownloadInspectionReportFile_should_return_status(t *testing.T
 		Reply(200).
 		Body(bytes.NewBuffer([]byte(`file content`)))
 
-	apiClient := api.NewAPIClient("http://localhost:9999", "abc123")
+	apiClient := api.NewClient("http://localhost:9999", "abc123")
 	gock.InterceptClient(apiClient.HTTPClient())
 
 	res, err := apiClient.DownloadInspectionReportFile(context.Background(), "http://localhost:9999/report-exports/abc")
@@ -565,7 +565,7 @@ func TestAPIClientDownloadInspectionReportFile_should_return_error_on_failure(t 
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			apiClient := api.NewAPIClient("http://localhost:9999", "abc123")
+			apiClient := api.NewClient("http://localhost:9999", "abc123")
 			gock.InterceptClient(apiClient.HTTPClient())
 
 			apiClient.RetryWaitMin = 10 * time.Millisecond
@@ -604,7 +604,7 @@ func TestAPIClientBackoff429TooManyRequest(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			apiClient := api.NewAPIClient("http://localhost:9999", "abc123")
+			apiClient := api.NewClient("http://localhost:9999", "abc123")
 			gock.InterceptClient(apiClient.HTTPClient())
 			apiClient.RetryMax = 1
 
