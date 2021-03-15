@@ -113,7 +113,7 @@ func (f *InspectionItemFeed) Order() string {
 	return "modified_at ASC, id"
 }
 
-func fetchAndWriteMedia(ctx context.Context, apiClient api.Client, exporter Exporter, auditID, mediaURL string) error {
+func fetchAndWriteMedia(ctx context.Context, apiClient *api.Client, exporter Exporter, auditID, mediaURL string) error {
 	resp, err := apiClient.GetMedia(
 		ctx,
 		&api.GetMediaRequest{
@@ -133,7 +133,7 @@ func fetchAndWriteMedia(ctx context.Context, apiClient api.Client, exporter Expo
 	return nil
 }
 
-func (f *InspectionItemFeed) writeRows(ctx context.Context, exporter Exporter, rows []*InspectionItem, apiClient api.Client) error {
+func (f *InspectionItemFeed) writeRows(ctx context.Context, exporter Exporter, rows []*InspectionItem, apiClient *api.Client) error {
 	skipIDs := map[string]bool{}
 	for _, id := range f.SkipIDs {
 		skipIDs[id] = true
@@ -200,7 +200,7 @@ func (f *InspectionItemFeed) CreateSchema(exporter Exporter) error {
 }
 
 // Export exports the feed to the supplied exporter
-func (f *InspectionItemFeed) Export(ctx context.Context, apiClient api.Client, exporter Exporter) error {
+func (f *InspectionItemFeed) Export(ctx context.Context, apiClient *api.Client, exporter Exporter) error {
 	logger := util.GetLogger()
 	feedName := f.Name()
 

@@ -65,7 +65,7 @@ func (f *TemplatePermissionFeed) CreateSchema(exporter Exporter) error {
 }
 
 // Export exports the feed to the supplied exporter
-func (f *TemplatePermissionFeed) Export(ctx context.Context, apiClient api.Client, exporter Exporter) error {
+func (f *TemplatePermissionFeed) Export(ctx context.Context, apiClient *api.Client, exporter Exporter) error {
 	logger := util.GetLogger()
 	feedName := f.Name()
 

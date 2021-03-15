@@ -116,7 +116,7 @@ func WriteSchemas(v *viper.Viper, exporter *SchemaExporter) error {
 }
 
 // ExportFeeds fetches all the feeds data from server and stores them in the format provided
-func ExportFeeds(v *viper.Viper, apiClient api.Client, exporter Exporter) error {
+func ExportFeeds(v *viper.Viper, apiClient *api.Client, exporter Exporter) error {
 	logger := util.GetLogger()
 	ctx := context.Background()
 
@@ -150,7 +150,7 @@ func ExportFeeds(v *viper.Viper, apiClient api.Client, exporter Exporter) error 
 }
 
 // ExportInspectionReports download all the reports for inspections and stores them on disk
-func ExportInspectionReports(v *viper.Viper, apiClient api.Client, exporter *ReportExporter) error {
+func ExportInspectionReports(v *viper.Viper, apiClient *api.Client, exporter *ReportExporter) error {
 	logger := util.GetLogger()
 	ctx := context.Background()
 
