@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+	"time"
 
 	"github.com/SafetyCulture/iauditor-exporter/internal/app/api"
 	"github.com/SafetyCulture/iauditor-exporter/internal/app/feed"
@@ -228,6 +229,10 @@ func TestExportReports_should_fail_if_init_report_reply_is_not_success(t *testin
 	viperConfig := viper.New()
 
 	apiClient := api.NewClient("http://localhost:9999", "token")
+	apiClient.RetryWaitMin = 10 * time.Millisecond
+	apiClient.RetryWaitMax = 10 * time.Millisecond
+	apiClient.CheckForRetry = api.DefaultRetryPolicy
+	apiClient.RetryMax = 1
 	defer resetMocks(apiClient.HTTPClient())
 	initMockFeedsSet1(apiClient.HTTPClient())
 
@@ -249,6 +254,10 @@ func TestExportReports_should_fail_if_report_completion_reply_is_not_success(t *
 	viperConfig := viper.New()
 
 	apiClient := api.NewClient("http://localhost:9999", "token")
+	apiClient.RetryWaitMin = 10 * time.Millisecond
+	apiClient.RetryWaitMax = 10 * time.Millisecond
+	apiClient.CheckForRetry = api.DefaultRetryPolicy
+	apiClient.RetryMax = 1
 	defer resetMocks(apiClient.HTTPClient())
 	initMockFeedsSet1(apiClient.HTTPClient())
 
@@ -276,6 +285,10 @@ func TestExportReports_should_fail_if_download_report_reply_is_not_success(t *te
 	viperConfig := viper.New()
 
 	apiClient := api.NewClient("http://localhost:9999", "token")
+	apiClient.RetryWaitMin = 10 * time.Millisecond
+	apiClient.RetryWaitMax = 10 * time.Millisecond
+	apiClient.CheckForRetry = api.DefaultRetryPolicy
+	apiClient.RetryMax = 1
 	defer resetMocks(apiClient.HTTPClient())
 	initMockFeedsSet1(apiClient.HTTPClient())
 

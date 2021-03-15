@@ -237,6 +237,10 @@ func TestAPIClientGetInspectionWithError(t *testing.T) {
 
 	apiClient := api.NewClient("http://localhost:9999", "abc123")
 	gock.InterceptClient(apiClient.HTTPClient())
+	apiClient.RetryWaitMin = 10 * time.Millisecond
+	apiClient.RetryWaitMax = 10 * time.Millisecond
+	apiClient.CheckForRetry = api.DefaultRetryPolicy
+	apiClient.RetryMax = 1
 
 	_, err := apiClient.GetInspection(context.Background(), auditID)
 	assert.NotNil(t, err)
@@ -251,6 +255,10 @@ func TestAPIClientListInspectionWithError(t *testing.T) {
 
 	apiClient := api.NewClient("http://localhost:9999", "abc123")
 	gock.InterceptClient(apiClient.HTTPClient())
+	apiClient.RetryWaitMin = 10 * time.Millisecond
+	apiClient.RetryWaitMax = 10 * time.Millisecond
+	apiClient.CheckForRetry = api.DefaultRetryPolicy
+	apiClient.RetryMax = 1
 
 	_, err := apiClient.ListInspections(context.Background(), nil)
 	assert.NotNil(t, err)
@@ -265,6 +273,10 @@ func TestDrainInspectionsWithAPIError(t *testing.T) {
 
 	apiClient := api.NewClient("http://localhost:9999", "abc123")
 	gock.InterceptClient(apiClient.HTTPClient())
+	apiClient.RetryWaitMin = 10 * time.Millisecond
+	apiClient.RetryWaitMax = 10 * time.Millisecond
+	apiClient.CheckForRetry = api.DefaultRetryPolicy
+	apiClient.RetryMax = 1
 
 	err := apiClient.DrainInspections(
 		context.Background(),
@@ -315,6 +327,10 @@ func TestGetMediaWithAPIError(t *testing.T) {
 
 	apiClient := api.NewClient("http://localhost:9999", "abc123")
 	gock.InterceptClient(apiClient.HTTPClient())
+	apiClient.RetryWaitMin = 10 * time.Millisecond
+	apiClient.RetryWaitMax = 10 * time.Millisecond
+	apiClient.CheckForRetry = api.DefaultRetryPolicy
+	apiClient.RetryMax = 1
 
 	_, err := apiClient.GetMedia(
 		context.Background(),
