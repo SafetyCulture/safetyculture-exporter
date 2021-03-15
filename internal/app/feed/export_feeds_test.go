@@ -44,7 +44,7 @@ func TestExportFeeds_should_export_all_feeds_to_file(t *testing.T) {
 	viperConfig := viper.New()
 	viperConfig.Set("export.site.include_deleted", true)
 
-	apiClient := api.NewClient("http://localhost:9999", "token")
+	apiClient := api.GetTestClient()
 	initMockFeedsSet1(apiClient.HTTPClient())
 
 	err = feed.ExportFeeds(viperConfig, apiClient, exporter)
@@ -79,7 +79,7 @@ func TestExportFeeds_should_perform_incremental_update_on_second_run(t *testing.
 	viperConfig.Set("export.incremental", true)
 	viperConfig.Set("export.site.include_deleted", true)
 
-	apiClient := api.NewClient("http://localhost:9999", "token")
+	apiClient := api.GetTestClient()
 	initMockFeedsSet1(apiClient.HTTPClient())
 
 	err = feed.ExportFeeds(viperConfig, apiClient, exporter)
@@ -116,7 +116,7 @@ func TestExportFeeds_should_handle_lots_of_rows_ok(t *testing.T) {
 	viperConfig := viper.New()
 	viperConfig.Set("export.incremental", true)
 
-	apiClient := api.NewClient("http://localhost:9999", "token")
+	apiClient := api.GetTestClient()
 	initMockFeedsSet3(apiClient.HTTPClient())
 
 	err = feed.ExportFeeds(viperConfig, apiClient, exporter)
