@@ -248,14 +248,12 @@ func (a *Client) do(doer HTTPDoer) (*http.Response, error) {
 		)
 
 		// Check if we should continue with the retries
-		shouldRetry, checkErr := a.CheckForRetry(resp, err)
+		shouldRetry, _ := a.CheckForRetry(resp, err)
 		if !shouldRetry {
-			if checkErr != nil {
-				err = checkErr
-			}
-			if resp == nil {
+			if err != nil {
 				return resp, err
 			}
+
 			switch status := resp.StatusCode; {
 			case status >= 200 && status <= 299:
 				return resp, nil
