@@ -321,12 +321,54 @@ func TestGetMediaWithAPIError(t *testing.T) {
 	assert.NotNil(t, err)
 }
 
+func TestGetMediaWith403Error(t *testing.T) {
+	defer gock.Off()
+
+	gock.New("http://localhost:9999").
+		Get("/audits/1234/media/12345").
+		Reply(403).
+		JSON(`{"error": "something bad happened"}`)
+
+	apiClient := api.GetTestClient()
+	gock.InterceptClient(apiClient.HTTPClient())
+
+	_, err := apiClient.GetMedia(
+		context.Background(),
+		&api.GetMediaRequest{
+			URL:     "http://localhost:9999/audits/1234/media/12345",
+			AuditID: "1234",
+		},
+	)
+	assert.Nil(t, err)
+}
+
 func TestGetMediaWith404Error(t *testing.T) {
 	defer gock.Off()
 
 	gock.New("http://localhost:9999").
 		Get("/audits/1234/media/12345").
 		Reply(404).
+		JSON(`{"error": "something bad happened"}`)
+
+	apiClient := api.GetTestClient()
+	gock.InterceptClient(apiClient.HTTPClient())
+
+	_, err := apiClient.GetMedia(
+		context.Background(),
+		&api.GetMediaRequest{
+			URL:     "http://localhost:9999/audits/1234/media/12345",
+			AuditID: "1234",
+		},
+	)
+	assert.Nil(t, err)
+}
+
+func TestGetMediaWith405Error(t *testing.T) {
+	defer gock.Off()
+
+	gock.New("http://localhost:9999").
+		Get("/audits/1234/media/12345").
+		Reply(405).
 		JSON(`{"error": "something bad happened"}`)
 
 	apiClient := api.GetTestClient()
