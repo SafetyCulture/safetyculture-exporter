@@ -248,18 +248,28 @@ func (a *Client) do(doer HTTPDoer) (*http.Response, error) {
 		)
 
 		// Check if we should continue with the retries
-		shouldRetry, checkErr := a.CheckForRetry(resp, err)
+		shouldRetry, _ := a.CheckForRetry(resp, err)
 		if !shouldRetry {
-			if resp != nil && (resp.StatusCode > 299 || resp.StatusCode < 200) {
-				a.logger.Errorw("http request error status",
-					"url", url,
-					"status", status,
-					"err", doer.Error(),
-				)
-				return resp, errors.Errorf("request error status: %s", status)
-			}
-			if checkErr != nil {
-				err = checkErr
+			if resp != nil {
+				switch status := resp.StatusCode; {
+				case status >= 200 && status <= 299:
+					return resp, nil
+
+				case status == http.StatusNotFound:
+					a.logger.Errorw("http request error status",
+						"url", url,
+						"status", status,
+					)
+					return resp, nil
+
+				default:
+					a.logger.Errorw("http request error status",
+						"url", url,
+						"status", status,
+						"err", doer.Error(),
+					)
+					return resp, errors.Errorf("request error status: %d", status)
+				}
 			}
 			return resp, err
 		}
@@ -297,6 +307,10 @@ func (a *Client) GetMedia(ctx context.Context, request *GetMediaRequest) (*GetMe
 		httpClient: a.httpClient,
 	})
 	if err != nil {
+		// Ignore forbidden errors for media objects.
+		if result != nil && result.StatusCode == http.StatusForbidden {
+			return nil, nil
+		}
 		return nil, err
 	}
 	defer result.Body.Close()

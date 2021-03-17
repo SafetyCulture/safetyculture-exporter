@@ -125,6 +125,11 @@ func fetchAndWriteMedia(ctx context.Context, apiClient *api.Client, exporter Exp
 		return err
 	}
 
+	// If the response is empty, then ignore this media object
+	if resp == nil {
+		return nil
+	}
+
 	err = exporter.WriteMedia(auditID, resp.MediaID, resp.ContentType, resp.Body)
 	if err != nil {
 		return err

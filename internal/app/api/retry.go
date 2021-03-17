@@ -25,6 +25,8 @@ func DefaultRetryPolicy(resp *http.Response, err error) (bool, error) {
 		return true, nil
 	case status == http.StatusTooManyRequests:
 		return true, nil
+	case status == http.StatusNotFound:
+		return false, nil
 	}
 	return false, nil
 }
