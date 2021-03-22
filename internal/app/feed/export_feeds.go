@@ -26,6 +26,7 @@ func GetFeeds(v *viper.Viper) []Feed {
 			Archived:      inspectionConfig.Archived,
 			Completed:     inspectionConfig.Completed,
 			Incremental:   inspectionConfig.Incremental,
+			Limit:         inspectionConfig.Limit,
 		},
 		&InspectionItemFeed{
 			SkipIDs:         inspectionConfig.SkipIDs,
@@ -35,6 +36,7 @@ func GetFeeds(v *viper.Viper) []Feed {
 			Completed:       inspectionConfig.Completed,
 			IncludeInactive: inspectionIncludeInactiveItems,
 			Incremental:     inspectionConfig.Incremental,
+			Limit:           inspectionConfig.Limit,
 			ExportMedia:     exportMedia,
 		},
 		&TemplateFeed{

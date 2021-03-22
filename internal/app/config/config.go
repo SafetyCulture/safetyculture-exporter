@@ -13,6 +13,7 @@ type InspectionConfig struct {
 	Archived      string
 	Completed     string
 	Incremental   bool
+	Limit         int
 }
 
 // GetInspectionConfig returns configurations that have been set for fetching inspections
@@ -22,6 +23,7 @@ func GetInspectionConfig(v *viper.Viper) *InspectionConfig {
 		ModifiedAfter: v.GetTime("export.modified_after"),
 		Archived:      v.GetString("export.inspection.archived"),
 		Completed:     v.GetString("export.inspection.completed"),
+		Limit:         v.GetInt("export.inspection.limit"),
 		Incremental:   v.GetBool("export.incremental"),
 	}
 }

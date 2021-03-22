@@ -56,6 +56,7 @@ type InspectionItemFeed struct {
 	IncludeInactive bool
 	Incremental     bool
 	ExportMedia     bool
+	Limit           int
 }
 
 // Name is the name of the feed
@@ -228,6 +229,7 @@ func (f *InspectionItemFeed) Export(ctx context.Context, apiClient *api.Client, 
 			Archived:        f.Archived,
 			Completed:       f.Completed,
 			IncludeInactive: f.IncludeInactive,
+			Limit:           f.Limit,
 		},
 	}, func(resp *api.GetFeedResponse) error {
 		rows := []*InspectionItem{}
