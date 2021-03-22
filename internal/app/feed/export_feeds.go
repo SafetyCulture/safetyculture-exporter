@@ -19,14 +19,7 @@ func GetFeeds(v *viper.Viper) []Feed {
 	sitesIncludeDeleted := viper.GetBool("export.site.include_deleted")
 
 	return []Feed{
-		&InspectionFeed{
-			SkipIDs:       inspectionConfig.SkipIDs,
-			ModifiedAfter: inspectionConfig.ModifiedAfter,
-			TemplateIDs:   templateIDs,
-			Archived:      inspectionConfig.Archived,
-			Completed:     inspectionConfig.Completed,
-			Incremental:   inspectionConfig.Incremental,
-		},
+		getInspectionFeed(v, inspectionConfig, templateIDs),
 		&InspectionItemFeed{
 			SkipIDs:         inspectionConfig.SkipIDs,
 			ModifiedAfter:   inspectionConfig.ModifiedAfter,
@@ -35,6 +28,7 @@ func GetFeeds(v *viper.Viper) []Feed {
 			Completed:       inspectionConfig.Completed,
 			IncludeInactive: inspectionIncludeInactiveItems,
 			Incremental:     inspectionConfig.Incremental,
+			Limit:           inspectionConfig.Limit,
 			ExportMedia:     exportMedia,
 		},
 		&TemplateFeed{
@@ -77,6 +71,7 @@ func getInspectionFeed(v *viper.Viper, inspectionConfig *config.InspectionConfig
 		Archived:      inspectionConfig.Archived,
 		Completed:     inspectionConfig.Completed,
 		Incremental:   inspectionConfig.Incremental,
+		Limit:         inspectionConfig.Limit,
 	}
 }
 
