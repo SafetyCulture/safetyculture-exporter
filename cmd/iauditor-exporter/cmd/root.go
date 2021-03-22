@@ -111,7 +111,7 @@ func configFlags() {
 	inspectionFlags.Bool("inspection-include-inactive-items", false, "Include inactive items in the inspection_items table (default false)")
 	inspectionFlags.String("inspection-archived", "false", "Return archived inspections, false, true or both")
 	inspectionFlags.String("inspection-completed", "true", "Return completed inspections, false, true or both")
-	inspectionFlags.Int("inspection-limit", 100, "Number of inspections to fetch at a time")
+	inspectionFlags.Int("inspection-limit", 100, "Number of inspections fetched at once. Lower this number if the exporter fails to load the data")
 
 	templatesFlag = flag.NewFlagSet("templates", flag.ContinueOnError)
 	templatesFlag.StringSlice("template-ids", []string{}, "Template IDs to filter inspections and schedules by (default all)")
