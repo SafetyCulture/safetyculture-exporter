@@ -1,5 +1,5 @@
 PACKAGE_NAME        	:= "github.com/safetyculture/iauditor-exporter"
-GOLANG_VERSION        ?= 1.15.3
+GOLANG_VERSION        ?= 1.16.1
 GOLANG_CROSS_VERSION  := v$(GOLANG_VERSION)
 
 .PHONY: help

@@ -24,6 +24,20 @@ builds:
       - -mod=readonly
     ldflags:
       - -s -w -X github.com/SafetyCulture/iauditor-exporter/internal/app/version.version={{.Version}}
+  - id: darwin-arm64
+    main: ./cmd/iauditor-exporter/main.go
+    goos:
+      - darwin
+    goarch:
+      - arm64
+    env:
+      - CC=oa64-clang
+      - CXX=oa64-clang++
+    flags:
+      - -tags=netgo  # Force using the go network stack
+      - -mod=readonly
+    ldflags:
+      - -s -w -X github.com/SafetyCulture/iauditor-exporter/internal/app/version.version={{.Version}}
   - id: linux-amd64
     main: ./cmd/iauditor-exporter/main.go
     goos:
@@ -59,6 +73,7 @@ archives:
   - id: iauditor-exporter
     builds:
       - darwin-amd64
+      - darwin-arm64
       - linux-amd64
       - windows-amd64
     replacements:
@@ -67,6 +82,7 @@ archives:
       windows: Windows
       386: i386
       amd64: x86_64
+      arm64: ARM
     format_overrides:
       - goos: windows
         format: zip
