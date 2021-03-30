@@ -20,8 +20,6 @@ require (
 	github.com/spf13/viper v1.7.1
 	github.com/stretchr/testify v1.7.0
 	go.uber.org/zap v1.16.0
-	golang.org/x/crypto v0.0.0-20201221181555-eec23a3978ad // indirect
-	golang.org/x/net v0.0.0-20200226121028-0de0cce0169b // indirect
 	golang.org/x/text v0.3.5 // indirect
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
 	google.golang.org/grpc v1.36.1
@@ -29,6 +27,6 @@ require (
 	gorm.io/driver/mysql v1.0.5
 	gorm.io/driver/postgres v1.0.8
 	gorm.io/driver/sqlite v1.1.4
-	gorm.io/driver/sqlserver v1.0.6
-	gorm.io/gorm v1.21.3
+	gorm.io/driver/sqlserver v1.0.7
+	gorm.io/gorm v1.21.4
 )
