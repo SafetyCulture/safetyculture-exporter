@@ -8,7 +8,7 @@ require (
 	github.com/gocarina/gocsv v0.0.0-20200925213129-04be9ee2e1a2
 	github.com/gofrs/uuid v3.4.0+incompatible
 	github.com/google/go-github v17.0.0+incompatible
-	github.com/gookit/color v1.3.8
+	github.com/gookit/color v1.4.1
 	github.com/hashicorp/go-version v1.2.1
 	github.com/jackc/pgproto3/v2 v2.0.7 // indirect
 	github.com/mattn/go-sqlite3 v1.14.6 // indirect
