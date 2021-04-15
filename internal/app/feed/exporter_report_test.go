@@ -27,7 +27,7 @@ func getReportExportCompletionMessage(status string) string {
 }
 
 func TestExportReports_should_export_all_reports(t *testing.T) {
-	exporter, err := getTemporaryReportExporter([]string{"PDF", "WORD"}, "")
+	exporter, err := getTemporaryReportExporter([]string{"PDF", "WORD"}, "", "TITLE")
 	assert.Nil(t, err)
 
 	viperConfig := viper.New()
@@ -66,8 +66,48 @@ func TestExportReports_should_export_all_reports(t *testing.T) {
 	fileExists(t, filepath.Join(exporter.ExportPath, "audit_3.docx"))
 }
 
+func TestExportReports_should_export_all_reports_with_ID_filename(t *testing.T) {
+	exporter, err := getTemporaryReportExporter([]string{"PDF", "WORD"}, "", "ID")
+	assert.Nil(t, err)
+
+	viperConfig := viper.New()
+
+	apiClient := api.GetTestClient()
+	defer resetMocks(apiClient.HTTPClient())
+	initMockFeedsSet1(apiClient.HTTPClient())
+
+	gock.New(mockAPIBaseURL).
+		Post(initiateReportURL).
+		Times(6).
+		Reply(200).
+		JSON(`{"messageId": "abc"}`)
+
+	gock.New(mockAPIBaseURL).
+		Get(reportExportCompletionURL).
+		Times(6).
+		Reply(200).
+		JSON(getReportExportCompletionMessage("SUCCESS"))
+
+	gock.New(mockAPIBaseURL).
+		Get(downloadReportURL).
+		Times(6).
+		Reply(200).
+		Body(bytes.NewBuffer([]byte(`file content`)))
+
+	err = feed.ExportInspectionReports(viperConfig, apiClient, exporter)
+	assert.Nil(t, err)
+
+	fileExists(t, filepath.Join(exporter.ExportPath, "audit_1.pdf"))
+	fileExists(t, filepath.Join(exporter.ExportPath, "audit_2.pdf"))
+	fileExists(t, filepath.Join(exporter.ExportPath, "audit_3.pdf"))
+
+	fileExists(t, filepath.Join(exporter.ExportPath, "audit_1.docx"))
+	fileExists(t, filepath.Join(exporter.ExportPath, "audit_2.docx"))
+	fileExists(t, filepath.Join(exporter.ExportPath, "audit_3.docx"))
+}
+
 func TestExportReports_should_not_run_if_all_exported(t *testing.T) {
-	exporter, err := getTemporaryReportExporter([]string{"PDF"}, "")
+	exporter, err := getTemporaryReportExporter([]string{"PDF"}, "", "TITLE")
 	assert.Nil(t, err)
 
 	viperConfig := viper.New()
@@ -118,7 +158,7 @@ func TestExportReports_should_not_run_if_all_exported(t *testing.T) {
 }
 
 func TestExportReports_should_take_care_of_invalid_file_names(t *testing.T) {
-	exporter, err := getTemporaryReportExporter([]string{"PDF"}, "")
+	exporter, err := getTemporaryReportExporter([]string{"PDF"}, "", "TITLE")
 	assert.Nil(t, err)
 
 	viperConfig := viper.New()
@@ -167,7 +207,7 @@ func TestExportReports_should_take_care_of_invalid_file_names(t *testing.T) {
 }
 
 func TestExportReports_should_fail_after_retries(t *testing.T) {
-	exporter, err := getTemporaryReportExporter([]string{"PDF"}, "")
+	exporter, err := getTemporaryReportExporter([]string{"PDF"}, "", "TITLE")
 	assert.Nil(t, err)
 
 	viperConfig := viper.New()
@@ -195,7 +235,7 @@ func TestExportReports_should_fail_after_retries(t *testing.T) {
 }
 
 func TestExportReports_should_fail_if_report_status_fails(t *testing.T) {
-	exporter, err := getTemporaryReportExporter([]string{"WORD"}, "")
+	exporter, err := getTemporaryReportExporter([]string{"WORD"}, "", "TITLE")
 	assert.Nil(t, err)
 
 	viperConfig := viper.New()
@@ -222,7 +262,7 @@ func TestExportReports_should_fail_if_report_status_fails(t *testing.T) {
 }
 
 func TestExportReports_should_fail_if_init_report_reply_is_not_success(t *testing.T) {
-	exporter, err := getTemporaryReportExporter([]string{"WORD"}, "")
+	exporter, err := getTemporaryReportExporter([]string{"WORD"}, "", "TITLE")
 	assert.Nil(t, err)
 
 	viperConfig := viper.New()
@@ -243,7 +283,7 @@ func TestExportReports_should_fail_if_init_report_reply_is_not_success(t *testin
 }
 
 func TestExportReports_should_fail_if_report_completion_reply_is_not_success(t *testing.T) {
-	exporter, err := getTemporaryReportExporter([]string{"WORD"}, "")
+	exporter, err := getTemporaryReportExporter([]string{"WORD"}, "", "TITLE")
 	assert.Nil(t, err)
 
 	viperConfig := viper.New()
@@ -270,7 +310,7 @@ func TestExportReports_should_fail_if_report_completion_reply_is_not_success(t *
 }
 
 func TestExportReports_should_fail_if_download_report_reply_is_not_success(t *testing.T) {
-	exporter, err := getTemporaryReportExporter([]string{"PDF"}, "")
+	exporter, err := getTemporaryReportExporter([]string{"PDF"}, "", "TITLE")
 	assert.Nil(t, err)
 
 	viperConfig := viper.New()
@@ -303,7 +343,7 @@ func TestExportReports_should_fail_if_download_report_reply_is_not_success(t *te
 }
 
 func TestExportReports_should_return_error_for_unsupported_format(t *testing.T) {
-	exporter, err := getTemporaryReportExporter([]string{"PNG"}, "")
+	exporter, err := getTemporaryReportExporter([]string{"PNG"}, "", "TITLE")
 	assert.Nil(t, err)
 
 	viperConfig := viper.New()

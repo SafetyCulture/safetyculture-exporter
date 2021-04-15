@@ -35,13 +35,13 @@ func getTemporaryCSVExporter() (*feed.CSVExporter, error) {
 }
 
 // getTemporaryReportExporter creates a ReportExporter that writes to a temp folder
-func getTemporaryReportExporter(format []string, preferenceID string) (*feed.ReportExporter, error) {
+func getTemporaryReportExporter(format []string, preferenceID string, filename string) (*feed.ReportExporter, error) {
 	dir, err := ioutil.TempDir("", "export")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	return feed.NewReportExporter(dir, format, preferenceID)
+	return feed.NewReportExporter(dir, format, preferenceID, filename)
 }
 
 // getTemporaryCSVExporterWithRealSQLExporter creates a CSV exporter that writes a temporary folder

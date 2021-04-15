@@ -181,8 +181,9 @@ func runInspectionReports(cmd *cobra.Command, args []string) error {
 
 	format := viper.GetStringSlice("report.format")
 	preferenceID := viper.GetString("report.preference_id")
+	filename := viper.GetString("report.filename")
 
-	exporter, err := feed.NewReportExporter(exportPath, format, preferenceID)
+	exporter, err := feed.NewReportExporter(exportPath, format, preferenceID, filename)
 	util.Check(err, "unable to create exporter")
 
 	apiClient := getAPIClient()

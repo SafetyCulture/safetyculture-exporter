@@ -124,6 +124,7 @@ func configFlags() {
 
 	reportFlags = flag.NewFlagSet("report", flag.ContinueOnError)
 	reportFlags.StringSlice("format", []string{"PDF"}, "Export format (PDF,WORD)")
+	reportFlags.String("filename", "TITLE", "The name of the report exported, either TITLE or ID")
 	reportFlags.String("preference-id", "", "The report preference to apply to the document")
 
 	sitesFlags = flag.NewFlagSet("sites", flag.ContinueOnError)
@@ -159,6 +160,7 @@ func bindFlags() {
 	util.Check(viper.BindPFlag("export.site.include_deleted", sitesFlags.Lookup("site-include-deleted")), "while binding flag")
 
 	util.Check(viper.BindPFlag("report.format", reportFlags.Lookup("format")), "while binding flag")
+	util.Check(viper.BindPFlag("report.filename", reportFlags.Lookup("filename")), "while binding flag")
 	util.Check(viper.BindPFlag("report.preference_id", reportFlags.Lookup("preference-id")), "while binding flag")
 }
 

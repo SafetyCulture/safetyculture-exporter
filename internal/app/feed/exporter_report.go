@@ -24,6 +24,7 @@ type ReportExporter struct {
 	Logger       *zap.SugaredLogger
 	ExportPath   string
 	PreferenceID string
+	Filename     string
 	Format       []string
 	Mu           sync.Mutex
 }
@@ -233,7 +234,7 @@ func (e *ReportExporter) exportInspection(ctx context.Context, apiClient *api.Cl
 			// only allow one process to access disk at the same time
 			// this way we won't allow process to overwrite reports with the same name
 			e.Mu.Lock()
-			err = saveReportResponse(resp, inspection, e.ExportPath, format)
+			err = saveReportResponse(resp, inspection, e.ExportPath, format, e.Filename)
 			e.Mu.Unlock()
 			break
 		} else if rec.Status == "FAILED" {
@@ -276,8 +277,8 @@ func (e *ReportExporter) updateReportResult(rep *reportExport, res *reportExport
 	}
 }
 
-func saveReportResponse(resp io.ReadCloser, inspection *Inspection, path string, format string) error {
-	filePath, pErr := getFilePath(path, inspection, format)
+func saveReportResponse(resp io.ReadCloser, inspection *Inspection, path string, format string, filename string) error {
+	filePath, pErr := getFilePath(path, inspection, format, filename)
 	if pErr != nil {
 		return pErr
 	}
@@ -312,11 +313,11 @@ func getFileExtension(format string) string {
 	}
 }
 
-func getFilePath(exportPath string, inspection *Inspection, format string) (string, error) {
+func getFilePath(exportPath string, inspection *Inspection, format string, filename string) (string, error) {
 	dupIndex := 0
 	for true {
 		fileName := sanitizeName(inspection.Name)
-		if strings.TrimSpace(fileName) == "" {
+		if strings.TrimSpace(fileName) == "" || filename == "ID" {
 			fileName = inspection.ID
 		}
 
@@ -346,7 +347,7 @@ func getFilePath(exportPath string, inspection *Inspection, format string) (stri
 }
 
 // NewReportExporter returns a new instance of ReportExporter
-func NewReportExporter(exportPath string, format []string, preferenceID string) (*ReportExporter, error) {
+func NewReportExporter(exportPath string, format []string, preferenceID string, filename string) (*ReportExporter, error) {
 	sqlExporter, err := NewSQLExporter("sqlite", filepath.Join(exportPath, "reports.db"), true, "")
 	if err != nil {
 		return nil, err
@@ -358,5 +359,6 @@ func NewReportExporter(exportPath string, format []string, preferenceID string) 
 		ExportPath:   exportPath,
 		Format:       format,
 		PreferenceID: preferenceID,
+		Filename:     filename,
 	}, nil
 }
