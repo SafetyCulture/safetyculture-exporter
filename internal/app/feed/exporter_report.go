@@ -313,11 +313,11 @@ func getFileExtension(format string) string {
 	}
 }
 
-func getFilePath(exportPath string, inspection *Inspection, format string, filename string) (string, error) {
+func getFilePath(exportPath string, inspection *Inspection, format string, filenameConvention string) (string, error) {
 	dupIndex := 0
 	for true {
 		fileName := sanitizeName(inspection.Name)
-		if strings.TrimSpace(fileName) == "" || filename == "ID" {
+		if strings.TrimSpace(fileName) == "" || filenameConvention == "INSPECTION_ID" {
 			fileName = inspection.ID
 		}
 

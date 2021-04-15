@@ -124,7 +124,7 @@ func configFlags() {
 
 	reportFlags = flag.NewFlagSet("report", flag.ContinueOnError)
 	reportFlags.StringSlice("format", []string{"PDF"}, "Export format (PDF,WORD)")
-	reportFlags.String("filename", "TITLE", "The name of the report exported, either TITLE or ID")
+	reportFlags.String("filename_convention", "INSPECTION_TITLE", "The name of the report exported, either INSPECTION_TITLE or INSPECTION_ID")
 	reportFlags.String("preference-id", "", "The report preference to apply to the document")
 
 	sitesFlags = flag.NewFlagSet("sites", flag.ContinueOnError)
