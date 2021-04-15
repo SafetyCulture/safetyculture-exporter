@@ -234,7 +234,7 @@ func (e *ReportExporter) exportInspection(ctx context.Context, apiClient *api.Cl
 			// only allow one process to access disk at the same time
 			// this way we won't allow process to overwrite reports with the same name
 			e.Mu.Lock()
-			err = saveReportResponse(resp, inspection, e.ExportPath, format, e.Filename)
+			err = e.saveReportResponse(resp, inspection, format)
 			e.Mu.Unlock()
 			break
 		} else if rec.Status == "FAILED" {
@@ -277,8 +277,8 @@ func (e *ReportExporter) updateReportResult(rep *reportExport, res *reportExport
 	}
 }
 
-func saveReportResponse(resp io.ReadCloser, inspection *Inspection, path string, format string, filename string) error {
-	filePath, pErr := getFilePath(path, inspection, format, filename)
+func (e *ReportExporter) saveReportResponse(resp io.ReadCloser, inspection *Inspection, format string) error {
+	filePath, pErr := getFilePath(e.ExportPath, inspection, format, e.Filename)
 	if pErr != nil {
 		return pErr
 	}
