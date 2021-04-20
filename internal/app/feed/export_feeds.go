@@ -19,14 +19,7 @@ func GetFeeds(v *viper.Viper) []Feed {
 	sitesIncludeDeleted := viper.GetBool("export.site.include_deleted")
 
 	return []Feed{
-		&InspectionFeed{
-			SkipIDs:       inspectionConfig.SkipIDs,
-			ModifiedAfter: inspectionConfig.ModifiedAfter,
-			TemplateIDs:   templateIDs,
-			Archived:      inspectionConfig.Archived,
-			Completed:     inspectionConfig.Completed,
-			Incremental:   inspectionConfig.Incremental,
-		},
+		getInspectionFeed(v, inspectionConfig, templateIDs),
 		&InspectionItemFeed{
 			SkipIDs:         inspectionConfig.SkipIDs,
 			ModifiedAfter:   inspectionConfig.ModifiedAfter,
@@ -35,6 +28,7 @@ func GetFeeds(v *viper.Viper) []Feed {
 			Completed:       inspectionConfig.Completed,
 			IncludeInactive: inspectionIncludeInactiveItems,
 			Incremental:     inspectionConfig.Incremental,
+			Limit:           inspectionConfig.Limit,
 			ExportMedia:     exportMedia,
 		},
 		&TemplateFeed{
@@ -77,6 +71,7 @@ func getInspectionFeed(v *viper.Viper, inspectionConfig *config.InspectionConfig
 		Archived:      inspectionConfig.Archived,
 		Completed:     inspectionConfig.Completed,
 		Incremental:   inspectionConfig.Incremental,
+		Limit:         inspectionConfig.Limit,
 	}
 }
 
@@ -116,7 +111,7 @@ func WriteSchemas(v *viper.Viper, exporter *SchemaExporter) error {
 }
 
 // ExportFeeds fetches all the feeds data from server and stores them in the format provided
-func ExportFeeds(v *viper.Viper, apiClient api.Client, exporter Exporter) error {
+func ExportFeeds(v *viper.Viper, apiClient *api.Client, exporter Exporter) error {
 	logger := util.GetLogger()
 	ctx := context.Background()
 
@@ -150,7 +145,7 @@ func ExportFeeds(v *viper.Viper, apiClient api.Client, exporter Exporter) error 
 }
 
 // ExportInspectionReports download all the reports for inspections and stores them on disk
-func ExportInspectionReports(v *viper.Viper, apiClient api.Client, exporter *ReportExporter) error {
+func ExportInspectionReports(v *viper.Viper, apiClient *api.Client, exporter *ReportExporter) error {
 	logger := util.GetLogger()
 	ctx := context.Background()
 

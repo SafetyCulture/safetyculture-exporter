@@ -35,6 +35,7 @@ type InspectionItem struct {
 	ResponseSetID           string    `json:"response_set_id" csv:"response_set_id"`
 	IsFailedResponse        bool      `json:"is_failed_response" csv:"is_failed_response"`
 	Comment                 string    `json:"comment" csv:"comment"`
+	MediaFiles              string    `json:"media_files" csv:"media_files"`
 	MediaHypertextReference string    `json:"media_hypertext_reference" csv:"media_hypertext_reference"`
 	Score                   float32   `json:"score" csv:"score"`
 	MaxScore                float32   `json:"max_score" csv:"max_score"`
@@ -55,6 +56,7 @@ type InspectionItemFeed struct {
 	IncludeInactive bool
 	Incremental     bool
 	ExportMedia     bool
+	Limit           int
 }
 
 // Name is the name of the feed
@@ -95,6 +97,7 @@ func (f *InspectionItemFeed) Columns() []string {
 		"response_set_id",
 		"is_failed_response",
 		"comment",
+		"media_files",
 		"media_hypertext_reference",
 		"score",
 		"max_score",
@@ -111,7 +114,7 @@ func (f *InspectionItemFeed) Order() string {
 	return "modified_at ASC, id"
 }
 
-func fetchAndWriteMedia(ctx context.Context, apiClient api.Client, exporter Exporter, auditID, mediaURL string) error {
+func fetchAndWriteMedia(ctx context.Context, apiClient *api.Client, exporter Exporter, auditID, mediaURL string) error {
 	resp, err := apiClient.GetMedia(
 		ctx,
 		&api.GetMediaRequest{
@@ -123,6 +126,11 @@ func fetchAndWriteMedia(ctx context.Context, apiClient api.Client, exporter Expo
 		return err
 	}
 
+	// If the response is empty, then ignore this media object
+	if resp == nil {
+		return nil
+	}
+
 	err = exporter.WriteMedia(auditID, resp.MediaID, resp.ContentType, resp.Body)
 	if err != nil {
 		return err
@@ -131,14 +139,14 @@ func fetchAndWriteMedia(ctx context.Context, apiClient api.Client, exporter Expo
 	return nil
 }
 
-func (f *InspectionItemFeed) writeRows(ctx context.Context, exporter Exporter, rows []*InspectionItem, apiClient api.Client) error {
+func (f *InspectionItemFeed) writeRows(ctx context.Context, exporter Exporter, rows []*InspectionItem, apiClient *api.Client) error {
 	skipIDs := map[string]bool{}
 	for _, id := range f.SkipIDs {
 		skipIDs[id] = true
 	}
 
 	// Calculate the size of the batch we can insert into the DB at once. Column count + buffer to account for primary keys
-	batchSize := exporter.ParameterLimit() / (len(f.Columns()) + 4)
+	batchSize := exporter.ParameterLimit() / (len(f.Columns()) + 5)
 	for i := 0; i < len(rows); i += batchSize {
 		j := i + batchSize
 		if j > len(rows) {
@@ -198,7 +206,7 @@ func (f *InspectionItemFeed) CreateSchema(exporter Exporter) error {
 }
 
 // Export exports the feed to the supplied exporter
-func (f *InspectionItemFeed) Export(ctx context.Context, apiClient api.Client, exporter Exporter) error {
+func (f *InspectionItemFeed) Export(ctx context.Context, apiClient *api.Client, exporter Exporter) error {
 	logger := util.GetLogger()
 	feedName := f.Name()
 
@@ -221,6 +229,7 @@ func (f *InspectionItemFeed) Export(ctx context.Context, apiClient api.Client, e
 			Archived:        f.Archived,
 			Completed:       f.Completed,
 			IncludeInactive: f.IncludeInactive,
+			Limit:           f.Limit,
 		},
 	}, func(resp *api.GetFeedResponse) error {
 		rows := []*InspectionItem{}

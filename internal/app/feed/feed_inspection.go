@@ -51,6 +51,7 @@ type InspectionFeed struct {
 	Archived      string
 	Completed     string
 	Incremental   bool
+	Limit         int
 }
 
 // Name is the name of the feed
@@ -151,7 +152,7 @@ func (f *InspectionFeed) CreateSchema(exporter Exporter) error {
 }
 
 // Export exports the feed to the supplied exporter
-func (f *InspectionFeed) Export(ctx context.Context, apiClient api.Client, exporter Exporter) error {
+func (f *InspectionFeed) Export(ctx context.Context, apiClient *api.Client, exporter Exporter) error {
 	logger := util.GetLogger()
 	feedName := f.Name()
 
@@ -173,6 +174,7 @@ func (f *InspectionFeed) Export(ctx context.Context, apiClient api.Client, expor
 			TemplateIDs:   f.TemplateIDs,
 			Archived:      f.Archived,
 			Completed:     f.Completed,
+			Limit:         f.Limit,
 		},
 	}, func(resp *api.GetFeedResponse) error {
 		rows := []*Inspection{}

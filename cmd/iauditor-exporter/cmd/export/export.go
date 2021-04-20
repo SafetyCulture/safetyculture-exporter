@@ -80,7 +80,7 @@ func ReportCmd() *cobra.Command {
 	}
 }
 
-func getAPIClient() api.Client {
+func getAPIClient() *api.Client {
 	apiOpts := []api.Opt{}
 	if viper.GetBool("api.tls_skip_verify") {
 		apiOpts = append(apiOpts, api.OptSetInsecureTLS(true))
@@ -94,7 +94,7 @@ func getAPIClient() api.Client {
 		apiOpts = append(apiOpts, api.OptSetProxy(proxyURL))
 	}
 
-	return api.NewAPIClient(
+	return api.NewClient(
 		viper.GetString("api.url"),
 		viper.GetString("access_token"),
 		apiOpts...,

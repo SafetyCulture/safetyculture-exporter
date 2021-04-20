@@ -41,7 +41,7 @@ func initMockInspections(httpClient *http.Client) {
 func TestInspectionsExport(t *testing.T) {
 
 	viperConfig := viper.New()
-	apiClient := api.NewAPIClient("http://localhost:9999", "token")
+	apiClient := api.GetTestClient()
 	initMockInspections(apiClient.HTTPClient())
 
 	exporterMock := new(exportermock.Exporter)

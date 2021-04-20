@@ -15,7 +15,7 @@ func TestInspectionFeedExport_should_export_rows_to_sql_db(t *testing.T) {
 	exporter, err := getInmemorySQLExporter("")
 	assert.Nil(t, err)
 
-	apiClient := api.NewAPIClient("http://localhost:9999", "abc123")
+	apiClient := api.GetTestClient()
 	initMockFeedsSet1(apiClient.HTTPClient())
 
 	inspectionsFeed := feed.InspectionFeed{

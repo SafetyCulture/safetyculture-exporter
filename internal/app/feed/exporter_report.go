@@ -49,7 +49,7 @@ type reportExportResult struct {
 }
 
 // SaveReports downloads and stores inspection reports on disk
-func (e *ReportExporter) SaveReports(ctx context.Context, apiClient api.Client, feed *InspectionFeed) error {
+func (e *ReportExporter) SaveReports(ctx context.Context, apiClient *api.Client, feed *InspectionFeed) error {
 	e.Logger.Info("Generating inspection reports")
 
 	format, err := e.getFormats()
@@ -155,7 +155,7 @@ func (e *ReportExporter) getFormats() (*reportExportFormat, error) {
 	return format, nil
 }
 
-func (e *ReportExporter) saveReport(ctx context.Context, apiClient api.Client, inspection *Inspection, format *reportExportFormat) *reportExport {
+func (e *ReportExporter) saveReport(ctx context.Context, apiClient *api.Client, inspection *Inspection, format *reportExportFormat) *reportExport {
 	exportPDF, exportWORD := format.PDF, format.WORD
 
 	report := &reportExport{}
@@ -208,7 +208,7 @@ func (e *ReportExporter) saveReport(ctx context.Context, apiClient api.Client, i
 	return report
 }
 
-func (e *ReportExporter) exportInspection(ctx context.Context, apiClient api.Client, inspection *Inspection, format string) error {
+func (e *ReportExporter) exportInspection(ctx context.Context, apiClient *api.Client, inspection *Inspection, format string) error {
 	messageID, err := apiClient.InitiateInspectionReportExport(ctx, inspection.ID, format, e.PreferenceID)
 	if err != nil {
 		return err
@@ -296,7 +296,7 @@ func saveReportResponse(resp io.ReadCloser, inspection *Inspection, path string,
 func sanitizeName(name string) string {
 	res := strings.ReplaceAll(name, " / ", "-")
 	res = strings.ReplaceAll(res, " // ", "-")
-	var rx = regexp.MustCompile(`[/\\?%*:|"<> ]`)
+	var rx = regexp.MustCompile(`[/\\?%*:|"<> \t\n]`)
 	res = rx.ReplaceAllString(res, "-")
 	return res
 }
