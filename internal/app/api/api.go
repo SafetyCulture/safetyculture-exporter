@@ -291,7 +291,12 @@ func (a *Client) do(doer HTTPDoer) (*http.Response, error) {
 // GetMedia fetches the media object from iAuditor.
 func (a *Client) GetMedia(ctx context.Context, request *GetMediaRequest) (*GetMediaResponse, error) {
 	baseURL := strings.TrimPrefix(request.URL, a.baseURL)
-	mediaID := strings.TrimPrefix(baseURL, fmt.Sprintf("/audits/%s/media/", request.AuditID))
+
+	// The mediaURL will be in the following format:
+	// https://api.eu.safetyculture.com/audits/audit_xxx/media/4c83fcf2-180b-4d3e-958f-389f7ac49777
+	// The string that is after the word "media/" is the ID of it.
+	mediaIDURL := strings.Split(request.URL, "/")
+	mediaID := mediaIDURL[len(mediaIDURL)-1]
 
 	sl := a.sling.New().Get(baseURL).
 		Set(string(Authorization), fmt.Sprintf("Bearer %s", a.accessToken)).
