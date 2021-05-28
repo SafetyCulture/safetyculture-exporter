@@ -140,7 +140,7 @@ func NewSQLExporter(dialect, connectionString string, autoMigrate bool, exportMe
 	logger := util.GetLogger()
 	gormLogger := &util.GormLogger{
 		SugaredLogger: logger,
-		SlowThreshold: time.Second,
+		SlowThreshold: 30 * time.Second,
 	}
 
 	var dialector gorm.Dialector
