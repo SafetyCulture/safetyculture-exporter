@@ -12,7 +12,7 @@ import (
 // Group represents a row from the groups feed
 type Group struct {
 	ID         string    `json:"id" csv:"group_id" gorm:"primarykey;column:group_id"`
-	Name       string    `json:"name" csv:"name"`
+	Name       string    `json:"name" csv:"name" gorm:"size:64000"`
 	ExportedAt time.Time `json:"exported_at" csv:"exported_at" gorm:"autoUpdateTime"`
 }
 

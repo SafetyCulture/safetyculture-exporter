@@ -24,11 +24,12 @@ type SQLExporter struct {
 	Logger          *zap.SugaredLogger
 	AutoMigrate     bool
 	ExportMediaPath string
+	DoUpsert        bool
 }
 
 // SupportsUpsert returns a bool if the exporter supports upserts
 func (e *SQLExporter) SupportsUpsert() bool {
-	return true
+	return e.DoUpsert
 }
 
 // ParameterLimit returns the number of parameters supported by the target DB
@@ -39,7 +40,11 @@ func (e *SQLExporter) ParameterLimit() int {
 	case "sqlite":
 		return 32768
 	}
-
+	// We can't tell the DB dialect here, so we will use the upsert-enabled flag to tell
+	// if we are on redshift (which has the same limit as sqlite)
+	if !e.DoUpsert {
+		return 32768
+	}
 	return 65536
 }
 
@@ -78,13 +83,17 @@ func (e *SQLExporter) WriteRows(feed Feed, rows interface{}) error {
 	for _, column := range feed.PrimaryKey() {
 		columns = append(columns, clause.Column{Name: column})
 	}
-
-	insert := e.DB.Table(feed.Name()).
-		Clauses(clause.OnConflict{
-			Columns:   columns,
-			DoUpdates: clause.AssignmentColumns(feed.Columns()),
-		}).
-		Create(rows)
+	var insert *gorm.DB
+	if e.SupportsUpsert() {
+		insert = e.DB.Table(feed.Name()).
+			Clauses(clause.OnConflict{
+				Columns:   columns,
+				DoUpdates: clause.AssignmentColumns(feed.Columns()),
+			}).
+			Create(rows)
+	} else {
+		insert = e.DB.Table(feed.Name()).Create(rows)
+	}
 	if insert.Error != nil {
 		return errors.Wrap(insert.Error, "Unable to insert rows")
 	}
@@ -144,12 +153,17 @@ func NewSQLExporter(dialect, connectionString string, autoMigrate bool, exportMe
 	}
 
 	var dialector gorm.Dialector
+	supportsUpsert := true
 	switch dialect {
 	case "mysql":
 		dialector = mysql.Open(connectionString)
 		break
 	case "postgres":
 		dialector = postgres.Open(connectionString)
+		break
+	case "redshift":
+		dialector = postgres.Open(connectionString)
+		supportsUpsert = false
 		break
 	case "sqlserver":
 		dialector = sqlserver.Open(connectionString)
@@ -173,5 +187,6 @@ func NewSQLExporter(dialect, connectionString string, autoMigrate bool, exportMe
 		Logger:          logger,
 		AutoMigrate:     autoMigrate,
 		ExportMediaPath: exportMediaPath,
+		DoUpsert:        supportsUpsert,
 	}, nil
 }

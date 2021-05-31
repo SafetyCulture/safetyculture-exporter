@@ -94,7 +94,7 @@ func configFlags() {
 	connectionFlags.String("proxy-url", "", "Proxy URL for making API requests through")
 
 	dbFlags = flag.NewFlagSet("db", flag.ContinueOnError)
-	dbFlags.String("db-dialect", "mysql", "Database dialect. mysql, postgres and sqlserver are the only valid options.")
+	dbFlags.String("db-dialect", "mysql", "Database dialect. mysql, postgres, sqlserver, and redshift are the only valid options.")
 	dbFlags.String("db-connection-string", "", "Database connection string")
 
 	exportFlags = flag.NewFlagSet("export", flag.ContinueOnError)

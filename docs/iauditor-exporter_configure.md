@@ -16,7 +16,7 @@ iauditor-exporter configure [flags]
   -t, --access-token string                 API Access Token
       --api-url string                      API URL (default "https://api.safetyculture.io")
       --db-connection-string string         Database connection string
-      --db-dialect string                   Database dialect. mysql, postgres and sqlserver are the only valid options. (default "mysql")
+      --db-dialect string                   Database dialect. mysql, postgres, sqlserver, and redshift are the only valid options. (default "mysql")
       --export-path string                  File Export Path (default "./export/")
   -h, --help                                help for configure
       --incremental                         Update inspections, inspection_items and templates tables incrementally (default true)

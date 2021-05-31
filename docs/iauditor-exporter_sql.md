@@ -23,7 +23,7 @@ iauditor-exporter sql --export-path /path/to/export/to
       --api-url string                      API URL (default "https://api.safetyculture.io")
       --create-schema-only                  Create schema only (default false)
       --db-connection-string string         Database connection string
-      --db-dialect string                   Database dialect. mysql, postgres and sqlserver are the only valid options. (default "mysql")
+      --db-dialect string                   Database dialect. mysql, postgres, sqlserver, and redshift are the only valid options. (default "mysql")
       --export-media                        Export media
       --export-media-path string            Media Export Path (default "./export/media/")
       --export-path string                  File Export Path (default "./export/")

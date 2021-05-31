@@ -12,7 +12,7 @@ import (
 // Site represents a row from the sites feed
 type Site struct {
 	ID             string    `json:"id" csv:"site_id" gorm:"primarykey;column:site_id"`
-	Name           string    `json:"name" csv:"name"`
+	Name           string    `json:"name" csv:"name" gorm:"size:64000"`
 	CreatorID      string    `json:"creator_id" csv:"creator_id"`
 	OrganisationID string    `json:"organisation_id" csv:"organisation_id"`
 	ExportedAt     time.Time `json:"exported_at" csv:"exported_at" gorm:"autoUpdateTime"`
