@@ -12,19 +12,19 @@ import (
 // Inspection represents a row from the inspections feed
 type Inspection struct {
 	ID              string     `json:"id" csv:"audit_id" gorm:"primarykey;column:audit_id"`
-	Name            string     `json:"name" csv:"name" gorm:"size:16383" gorm:"size:16383"`
+	Name            string     `json:"name" csv:"name" gorm:"size:500"`
 	Archived        bool       `json:"archived" csv:"archived"`
-	OwnerName       string     `json:"owner_name" csv:"owner_name" gorm:"size:16383"`
+	OwnerName       string     `json:"owner_name" csv:"owner_name" gorm:"size:500"`
 	OwnerID         string     `json:"owner_id" csv:"owner_id"`
-	AuthorName      string     `json:"author_name" csv:"author_name" gorm:"size:16383"`
+	AuthorName      string     `json:"author_name" csv:"author_name" gorm:"size:500"`
 	AuthorID        string     `json:"author_id" csv:"author_id"`
 	Score           float32    `json:"score" csv:"score"`
 	MaxScore        float32    `json:"max_score" csv:"max_score"`
 	ScorePercentage float32    `json:"score_percentage" csv:"score_percentage"`
 	Duration        int64      `json:"duration" csv:"duration"`
 	TemplateID      string     `json:"template_id" csv:"template_id"`
-	TemplateName    string     `json:"template_name" csv:"template_name" gorm:"size:16383"`
-	TemplateAuthor  string     `json:"template_author" csv:"template_author" gorm:"size:16383"`
+	TemplateName    string     `json:"template_name" csv:"template_name" gorm:"size:500"`
+	TemplateAuthor  string     `json:"template_author" csv:"template_author" gorm:"size:500"`
 	SiteID          string     `json:"site_id" csv:"site_id"`
 	DateStarted     time.Time  `json:"date_started" csv:"date_started"`
 	DateCompleted   *time.Time `json:"date_completed" csv:"date_completed"`
@@ -32,15 +32,15 @@ type Inspection struct {
 	CreatedAt       time.Time  `json:"created_at" csv:"created_at"`
 	ModifiedAt      time.Time  `json:"modified_at" csv:"modified_at"`
 	ExportedAt      time.Time  `json:"exported_at" csv:"exported_at" gorm:"autoUpdateTime"`
-	DocumentNo      string     `json:"document_no" csv:"document_no" gorm:"size:16383"`
-	PreparedBy      string     `json:"prepared_by" csv:"prepared_by" gorm:"size:16383"`
-	Location        string     `json:"location" csv:"location" gorm:"size:16383"`
+	DocumentNo      string     `json:"document_no" csv:"document_no" gorm:"size:500"`
+	PreparedBy      string     `json:"prepared_by" csv:"prepared_by" gorm:"size:500"`
+	Location        string     `json:"location" csv:"location" gorm:"size:500"`
 	ConductedOn     *time.Time `json:"conducted_on" csv:"conducted_on"`
-	Personnel       string     `json:"personnel" csv:"personnel" gorm:"size:16383"`
-	ClientSite      string     `json:"client_site" csv:"client_site" gorm:"size:16383"`
+	Personnel       string     `json:"personnel" csv:"personnel" gorm:"size:500"`
+	ClientSite      string     `json:"client_site" csv:"client_site" gorm:"size:500"`
 	Latitude        *float64   `json:"latitude" csv:"latitude"`
 	Longitude       *float64   `json:"longitude" csv:"longitude"`
-	WebReportLink   string     `json:"web_report_link" csv:"web_report_link" gorm:"size:16383"`
+	WebReportLink   string     `json:"web_report_link" csv:"web_report_link" gorm:"size:500"`
 }
 
 // InspectionFeed is a representation of the inspections feed

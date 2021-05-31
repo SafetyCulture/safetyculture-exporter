@@ -25,16 +25,16 @@ type InspectionItem struct {
 	CreatedAt               time.Time `json:"created_at" csv:"created_at"`
 	ModifiedAt              time.Time `json:"modified_at" csv:"modified_at"`
 	ExportedAt              time.Time `json:"exported_at" csv:"exported_at" gorm:"autoUpdateTime"`
-	Type                    string    `json:"type" csv:"type" gorm:"size:16383"`
-	Category                string    `json:"category" csv:"category" gorm:"size:16383"`
+	Type                    string    `json:"type" csv:"type"`
+	Category                string    `json:"category" csv:"category"`
 	CategoryID              string    `json:"category_id" csv:"category_id"`
 	ParentIDs               string    `json:"parent_ids" csv:"parent_ids" gorm:"size:16383"`
-	Label                   string    `json:"label" csv:"label" gorm:"size:16383"`
-	Response                string    `json:"response" csv:"response" gorm:"size:16383"`
-	ResponseID              string    `json:"response_id" csv:"response_id" gorm:"size:16383"`
-	ResponseSetID           string    `json:"response_set_id" csv:"response_set_id" gorm:"size:16383"`
+	Label                   string    `json:"label" csv:"label"`
+	Response                string    `json:"response" csv:"response" gorm:"size:1000"`
+	ResponseID              string    `json:"response_id" csv:"response_id"`
+	ResponseSetID           string    `json:"response_set_id" csv:"response_set_id"`
 	IsFailedResponse        bool      `json:"is_failed_response" csv:"is_failed_response"`
-	Comment                 string    `json:"comment" csv:"comment" gorm:"size:16383"`
+	Comment                 string    `json:"comment" csv:"comment"`
 	MediaFiles              string    `json:"media_files" csv:"media_files" gorm:"size:16383"`
 	MediaHypertextReference string    `json:"media_hypertext_reference" csv:"media_hypertext_reference" gorm:"size:16383"`
 	Score                   float32   `json:"score" csv:"score"`

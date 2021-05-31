@@ -12,22 +12,22 @@ import (
 // Action represents a row from the actions feed
 type Action struct {
 	ID              string    `json:"id" csv:"action_id" gorm:"primarykey;column:action_id"`
-	Title           string    `json:"title" csv:"title" gorm:"size:16383"`
+	Title           string    `json:"title" csv:"title" gorm:"size:500"`
 	Description     string    `json:"description" csv:"description" gorm:"size:16383"`
 	SiteID          string    `json:"site_id" csv:"site_id"`
 	Priority        string    `json:"priority" csv:"priority"`
-	Status          string    `json:"status" csv:"status" gorm:"size:16383"`
+	Status          string    `json:"status" csv:"status"`
 	DueDate         time.Time `json:"due_date" csv:"due_date"`
 	CreatedAt       time.Time `json:"created_at" csv:"created_at"`
 	ModifiedAt      time.Time `json:"modified_at" csv:"modified_at"`
 	ExportedAt      time.Time `json:"exported_at" csv:"exported_at" gorm:"autoUpdateTime"`
 	CreatorUserID   string    `json:"creator_user_id" csv:"creator_user_id"`
-	CreatorUserName string    `json:"creator_user_name" csv:"creator_user_name" gorm:"size:16383"`
+	CreatorUserName string    `json:"creator_user_name" csv:"creator_user_name"`
 	TemplateID      string    `json:"template_id" csv:"template_id"`
 	AuditID         string    `json:"audit_id" csv:"audit_id"`
 	AuditTitle      string    `json:"audit_title" csv:"audit_title" gorm:"size:16383"`
 	AuditItemID     string    `json:"audit_item_id" csv:"audit_item_id"`
-	AuditItemLabel  string    `json:"audit_item_label" csv:"audit_item_label" gorm:"size:16383"`
+	AuditItemLabel  string    `json:"audit_item_label" csv:"audit_item_label"`
 }
 
 // ActionFeed is a representation of the actions feed
