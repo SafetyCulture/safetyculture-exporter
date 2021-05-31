@@ -13,9 +13,9 @@ import (
 type User struct {
 	ID             string    `json:"id" csv:"user_id" gorm:"primarykey;column:user_id"`
 	OrganisationID string    `json:"organisation_id" csv:"organisation_id"`
-	Email          string    `json:"email" csv:"email" gorm:"size:64000"`
-	Firstname      string    `json:"firstname" csv:"firstname" gorm:"size:64000"`
-	Lastname       string    `json:"lastname" csv:"lastname" gorm:"size:64000"`
+	Email          string    `json:"email" csv:"email" gorm:"size:16383"`
+	Firstname      string    `json:"firstname" csv:"firstname" gorm:"size:16383"`
+	Lastname       string    `json:"lastname" csv:"lastname" gorm:"size:16383"`
 	Active         bool      `json:"active" csv:"active"`
 	ExportedAt     time.Time `json:"exported_at" csv:"exported_at" gorm:"autoUpdateTime"`
 }

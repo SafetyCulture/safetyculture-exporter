@@ -13,11 +13,11 @@ import (
 type Template struct {
 	ID          string    `json:"id" csv:"template_id" gorm:"primarykey;column:template_id"`
 	Archived    bool      `json:"archived" csv:"archived"`
-	Name        string    `json:"name" csv:"name" gorm:"size:64000"`
-	Description string    `json:"description" csv:"description" gorm:"size:64000"`
-	OwnerName   string    `json:"owner_name" csv:"owner_name" gorm:"size:64000"`
+	Name        string    `json:"name" csv:"name" gorm:"size:16383"`
+	Description string    `json:"description" csv:"description" gorm:"size:16383"`
+	OwnerName   string    `json:"owner_name" csv:"owner_name" gorm:"size:16383"`
 	OwnerID     string    `json:"owner_id" csv:"owner_id"`
-	AuthorName  string    `json:"author_name" csv:"author_name" gorm:"size:64000"`
+	AuthorName  string    `json:"author_name" csv:"author_name" gorm:"size:16383"`
 	AuthorID    string    `json:"author_id" csv:"author_id"`
 	CreatedAt   time.Time `json:"created_at" csv:"created_at"`
 	ModifiedAt  time.Time `json:"modified_at" csv:"modified_at"`

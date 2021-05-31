@@ -25,18 +25,18 @@ type InspectionItem struct {
 	CreatedAt               time.Time `json:"created_at" csv:"created_at"`
 	ModifiedAt              time.Time `json:"modified_at" csv:"modified_at"`
 	ExportedAt              time.Time `json:"exported_at" csv:"exported_at" gorm:"autoUpdateTime"`
-	Type                    string    `json:"type" csv:"type" gorm:"size:64000"`
-	Category                string    `json:"category" csv:"category" gorm:"size:64000"`
+	Type                    string    `json:"type" csv:"type" gorm:"size:16383"`
+	Category                string    `json:"category" csv:"category" gorm:"size:16383"`
 	CategoryID              string    `json:"category_id" csv:"category_id"`
-	ParentIDs               string    `json:"parent_ids" csv:"parent_ids" gorm:"size:64000"`
-	Label                   string    `json:"label" csv:"label" gorm:"size:64000"`
-	Response                string    `json:"response" csv:"response" gorm:"size:64000"`
-	ResponseID              string    `json:"response_id" csv:"response_id" gorm:"size:64000"`
-	ResponseSetID           string    `json:"response_set_id" csv:"response_set_id" gorm:"size:64000"`
+	ParentIDs               string    `json:"parent_ids" csv:"parent_ids" gorm:"size:16383"`
+	Label                   string    `json:"label" csv:"label" gorm:"size:16383"`
+	Response                string    `json:"response" csv:"response" gorm:"size:16383"`
+	ResponseID              string    `json:"response_id" csv:"response_id" gorm:"size:16383"`
+	ResponseSetID           string    `json:"response_set_id" csv:"response_set_id" gorm:"size:16383"`
 	IsFailedResponse        bool      `json:"is_failed_response" csv:"is_failed_response"`
-	Comment                 string    `json:"comment" csv:"comment" gorm:"size:64000"`
-	MediaFiles              string    `json:"media_files" csv:"media_files" gorm:"size:64000"`
-	MediaHypertextReference string    `json:"media_hypertext_reference" csv:"media_hypertext_reference" gorm:"size:64000"`
+	Comment                 string    `json:"comment" csv:"comment" gorm:"size:16383"`
+	MediaFiles              string    `json:"media_files" csv:"media_files" gorm:"size:16383"`
+	MediaHypertextReference string    `json:"media_hypertext_reference" csv:"media_hypertext_reference" gorm:"size:16383"`
 	Score                   float32   `json:"score" csv:"score"`
 	MaxScore                float32   `json:"max_score" csv:"max_score"`
 	ScorePercentage         float32   `json:"score_percentage" csv:"score_percentage"`

@@ -12,8 +12,8 @@ import (
 // Schedule represents a row from the schedules feed
 type Schedule struct {
 	ID              string     `json:"id" csv:"schedule_id" gorm:"primarykey;column:schedule_id"`
-	Description     string     `json:"description" csv:"description" gorm:"size:64000"`
-	Recurrence      string     `json:"recurrence" csv:"recurrence" gorm:"size:64000"`
+	Description     string     `json:"description" csv:"description" gorm:"size:16383"`
+	Recurrence      string     `json:"recurrence" csv:"recurrence" gorm:"size:16383"`
 	Duration        string     `json:"duration" csv:"duration"`
 	ModifiedAt      time.Time  `json:"modified_at" csv:"modified_at"`
 	ExportedAt      time.Time  `json:"exported_at" csv:"exported_at" gorm:"autoUpdateTime"`
@@ -22,7 +22,7 @@ type Schedule struct {
 	StartTimeHour   int        `json:"start_time_hour" csv:"start_time_hour"`
 	StartTimeMinute int        `json:"start_time_minute" csv:"start_time_minute"`
 	AllMustComplete bool       `json:"all_must_complete" csv:"all_must_complete"`
-	Status          string     `json:"status" csv:"status" gorm:"size:64000"`
+	Status          string     `json:"status" csv:"status" gorm:"size:16383"`
 	Timezone        string     `json:"timezone" csv:"timezone"`
 	CanLateSubmit   bool       `json:"can_late_submit" csv:"can_late_submit"`
 	SiteID          string     `json:"site_id" csv:"site_id"`
