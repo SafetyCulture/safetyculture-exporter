@@ -31,7 +31,7 @@ func getTemporaryCSVExporter() (*feed.CSVExporter, error) {
 		log.Fatal(err)
 	}
 
-	return feed.NewCSVExporter(dir, "")
+	return feed.NewCSVExporter(dir, "", 100000)
 }
 
 // getTemporaryReportExporter creates a ReportExporter that writes to a temp folder
@@ -52,7 +52,7 @@ func getTemporaryCSVExporterWithRealSQLExporter(sqlExporter *feed.SQLExporter) (
 		return nil, err
 	}
 
-	exporter, err := feed.NewCSVExporter(dir, "")
+	exporter, err := feed.NewCSVExporter(dir, "", 100000)
 	if err != nil {
 		return nil, err
 	}

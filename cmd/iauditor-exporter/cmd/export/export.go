@@ -154,7 +154,9 @@ func runCSV(cmd *cobra.Command, args []string) error {
 		util.Check(err, fmt.Sprintf("Failed to create directory %s", exportMediaPath))
 	}
 
-	exporter, err := feed.NewCSVExporter(exportPath, exportMediaPath)
+	maxRowsPerFile := viper.GetInt("csv.max_rows_per_file")
+
+	exporter, err := feed.NewCSVExporter(exportPath, exportMediaPath, maxRowsPerFile)
 	util.Check(err, "unable to create exporter")
 
 	if viper.GetBool("export.schema_only") {
