@@ -387,7 +387,6 @@ func TestCSVExporterFinaliseExport_should_write_rows_to_multiple_file(t *testing
 	assert.Nil(t, err)
 
 	content1String := dateRegex.ReplaceAllLiteralString(strings.TrimSpace(string(content1)), "--date--")
-
 	expected1 := `user_id,organisation_id,email,firstname,lastname,active,exported_at
 user_1,role_123,user.1@test.com,User 1,User 1,false,--date--
 user_2,role_123,user.2@test.com,User 2,User 2,false,--date--`
@@ -397,7 +396,6 @@ user_2,role_123,user.2@test.com,User 2,User 2,false,--date--`
 	assert.Nil(t, err)
 
 	content2String := dateRegex.ReplaceAllLiteralString(strings.TrimSpace(string(content2)), "--date--")
-
 	expected2 := `user_id,organisation_id,email,firstname,lastname,active,exported_at
 user_3,role_123,user.3@test.com,User 3,User 3,false,--date--`
 	assert.Equal(t, strings.TrimSpace(expected2), content2String)
