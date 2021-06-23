@@ -30,8 +30,8 @@ type Inspection struct {
 	DateCompleted   *time.Time `json:"date_completed" csv:"date_completed"`
 	DateModified    time.Time  `json:"date_modified" csv:"date_modified"`
 	CreatedAt       time.Time  `json:"created_at" csv:"created_at"`
-	ModifiedAt      time.Time  `json:"modified_at" csv:"modified_at"`
-	ExportedAt      time.Time  `json:"exported_at" csv:"exported_at" gorm:"autoUpdateTime"`
+	ModifiedAt      time.Time  `json:"modified_at" csv:"modified_at" gorm:"index:idx_ins_modified_at,sort:desc"`
+	ExportedAt      time.Time  `json:"exported_at" csv:"exported_at" gorm:"index:idx_ins_modified_at;autoUpdateTime"`
 	DocumentNo      string     `json:"document_no" csv:"document_no"`
 	PreparedBy      string     `json:"prepared_by" csv:"prepared_by"`
 	Location        string     `json:"location" csv:"location"`
