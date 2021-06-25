@@ -29,5 +29,5 @@ require (
 	gorm.io/driver/postgres v1.0.8
 	gorm.io/driver/sqlite v1.1.4
 	gorm.io/driver/sqlserver v1.0.8-0.20210416021650-0fd7ed913e43
-	gorm.io/gorm v1.21.8
+	gorm.io/gorm v1.21.11
 )
