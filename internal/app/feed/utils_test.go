@@ -31,7 +31,17 @@ func getTemporaryCSVExporter() (*feed.CSVExporter, error) {
 		log.Fatal(err)
 	}
 
-	return feed.NewCSVExporter(dir, "")
+	return feed.NewCSVExporter(dir, "", 100000)
+}
+
+// getTemporaryCSVExporterWithMaxRowsLimit creates a CSVExporter that writes to a temp folder with row limit
+func getTemporaryCSVExporterWithMaxRowsLimit(maxRowsPerFile int) (*feed.CSVExporter, error) {
+	dir, err := ioutil.TempDir("", "export")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return feed.NewCSVExporter(dir, "", maxRowsPerFile)
 }
 
 // getTemporaryReportExporter creates a ReportExporter that writes to a temp folder
@@ -52,7 +62,7 @@ func getTemporaryCSVExporterWithRealSQLExporter(sqlExporter *feed.SQLExporter) (
 		return nil, err
 	}
 
-	exporter, err := feed.NewCSVExporter(dir, "")
+	exporter, err := feed.NewCSVExporter(dir, "", 100000)
 	if err != nil {
 		return nil, err
 	}
