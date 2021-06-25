@@ -34,7 +34,7 @@ func getTemporaryCSVExporter() (*feed.CSVExporter, error) {
 	return feed.NewCSVExporter(dir, "", 100000)
 }
 
-// getTemporaryCSVExporterWithMaxRowsLimit creates a CSVExporter that writes to a temp folder
+// getTemporaryCSVExporterWithMaxRowsLimit creates a CSVExporter that writes to a temp folder with row limit
 func getTemporaryCSVExporterWithMaxRowsLimit(maxRowsPerFile int) (*feed.CSVExporter, error) {
 	dir, err := ioutil.TempDir("", "export")
 	if err != nil {
