@@ -23,8 +23,8 @@ type InspectionItem struct {
 	TemplateID              string    `json:"template_id" csv:"template_id"`
 	ParentID                string    `json:"parent_id" csv:"parent_id"`
 	CreatedAt               time.Time `json:"created_at" csv:"created_at"`
-	ModifiedAt              time.Time `json:"modified_at" csv:"modified_at"`
-	ExportedAt              time.Time `json:"exported_at" csv:"exported_at" gorm:"autoUpdateTime"`
+	ModifiedAt              time.Time `json:"modified_at" csv:"modified_at" gorm:"index:idx_ins_itm_modified_at,sort:desc"`
+	ExportedAt              time.Time `json:"exported_at" csv:"exported_at" gorm:"index:idx_ins_itm_modified_at;autoUpdateTime"`
 	Type                    string    `json:"type" csv:"type"`
 	Category                string    `json:"category" csv:"category"`
 	CategoryID              string    `json:"category_id" csv:"category_id"`

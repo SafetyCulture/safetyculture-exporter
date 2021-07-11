@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/gocarina/gocsv"
 
@@ -15,6 +16,8 @@ type CSVExporter struct {
 	*SQLExporter
 
 	ExportPath string
+
+	MaxRowsPerFile int
 
 	Logger *zap.SugaredLogger
 }
@@ -44,15 +47,18 @@ func (e *CSVExporter) CreateSchema(feed Feed, rows interface{}) error {
 func (e *CSVExporter) FinaliseExport(feed Feed, rows interface{}) error {
 	e.Logger.Infof("%s: writing out CSV file", feed.Name())
 
-	exportFilePath := filepath.Join(e.ExportPath, fmt.Sprintf("%s.csv", feed.Name()))
-	file, err := os.OpenFile(exportFilePath, os.O_RDWR|os.O_CREATE|os.O_APPEND|os.O_TRUNC, 0666)
+	err := e.cleanOldFiles(feed.Name())
 	if err != nil {
 		return err
 	}
 
-	first := true
 	limit := 10000
+	if limit > e.MaxRowsPerFile {
+		limit = e.MaxRowsPerFile
+	}
 	offset := 0
+	rowsAdded := 0
+	var file *os.File
 	for true {
 		resp := e.DB.Table(feed.Name()).
 			Order(feed.Order()).
@@ -67,31 +73,90 @@ func (e *CSVExporter) FinaliseExport(feed Feed, rows interface{}) error {
 			break
 		}
 
-		if first {
+		if file == nil || rowsAdded >= e.MaxRowsPerFile {
+			file, err = e.getExportFile(feed.Name())
+			if err != nil {
+				return err
+			}
+
 			err = gocsv.Marshal(rows, file)
+			if err != nil {
+				return err
+			}
+
+			rowsAdded = 0
 		} else {
 			err = gocsv.MarshalWithoutHeaders(rows, file)
+			if err != nil {
+				return err
+			}
 		}
-		if err != nil {
-			return err
-		}
+
 		offset = offset + limit
-		first = false
+		rowsAdded += int(resp.RowsAffected)
 	}
 
 	return nil
 }
 
+func (e *CSVExporter) getExportFile(feedName string) (*os.File, error) {
+	exportFilePath := filepath.Join(e.ExportPath, fmt.Sprintf("%s.csv", feedName))
+
+	fileExists, err := fileExists(exportFilePath)
+	if err != nil {
+		return nil, err
+	}
+
+	if fileExists {
+		newFilePath := filepath.Join(e.ExportPath, fmt.Sprintf("%s-%s.csv", feedName, time.Now().Format("20060102150405.999999")))
+		os.Rename(exportFilePath, newFilePath)
+	}
+
+	file, err := os.OpenFile(exportFilePath, os.O_RDWR|os.O_CREATE|os.O_APPEND|os.O_TRUNC, 0666)
+	if err != nil {
+		return nil, err
+	}
+
+	return file, nil
+}
+
+func (e *CSVExporter) cleanOldFiles(feedName string) error {
+	files, err := filepath.Glob(filepath.Join(e.ExportPath, fmt.Sprintf("%s*.csv", feedName)))
+	if err != nil {
+		return err
+	}
+
+	for _, f := range files {
+		err = os.Remove(f)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func fileExists(filename string) (bool, error) {
+	info, err := os.Stat(filename)
+	if os.IsNotExist(err) {
+		return false, nil
+	} else if err != nil {
+		return false, err
+	}
+	return !info.IsDir(), nil
+}
+
 // NewCSVExporter creates a new instance of CSVExporter
-func NewCSVExporter(exportPath, exportMediaPath string) (*CSVExporter, error) {
+func NewCSVExporter(exportPath, exportMediaPath string, maxRowsPerFile int) (*CSVExporter, error) {
 	sqlExporter, err := NewSQLExporter("sqlite", filepath.Join(exportPath, "sqlite.db"), true, exportMediaPath)
 	if err != nil {
 		return nil, err
 	}
 
 	return &CSVExporter{
-		SQLExporter: sqlExporter,
-		ExportPath:  exportPath,
-		Logger:      sqlExporter.Logger,
+		SQLExporter:    sqlExporter,
+		ExportPath:     exportPath,
+		MaxRowsPerFile: maxRowsPerFile,
+		Logger:         sqlExporter.Logger,
 	}, nil
 }

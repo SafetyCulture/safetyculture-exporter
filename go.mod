@@ -8,8 +8,8 @@ require (
 	github.com/gocarina/gocsv v0.0.0-20200925213129-04be9ee2e1a2
 	github.com/gofrs/uuid v3.4.0+incompatible
 	github.com/google/go-github v17.0.0+incompatible
-	github.com/gookit/color v1.3.8
-	github.com/hashicorp/go-version v1.2.1
+	github.com/gookit/color v1.4.2
+	github.com/hashicorp/go-version v1.3.0
 	github.com/jackc/pgproto3/v2 v2.0.7 // indirect
 	github.com/mattn/go-sqlite3 v1.14.6 // indirect
 	github.com/olekukonko/tablewriter v0.0.5
@@ -20,13 +20,14 @@ require (
 	github.com/spf13/viper v1.7.1
 	github.com/stretchr/testify v1.7.0
 	go.uber.org/zap v1.16.0
+	golang.org/x/crypto v0.0.0-20210415154028-4f45737414dc // indirect
 	golang.org/x/text v0.3.5 // indirect
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
-	google.golang.org/grpc v1.36.1
+	google.golang.org/grpc v1.37.0
 	gopkg.in/h2non/gock.v1 v1.0.16
 	gorm.io/driver/mysql v1.0.5
 	gorm.io/driver/postgres v1.0.8
 	gorm.io/driver/sqlite v1.1.4
-	gorm.io/driver/sqlserver v1.0.7
-	gorm.io/gorm v1.21.6
+	gorm.io/driver/sqlserver v1.0.8-0.20210416021650-0fd7ed913e43
+	gorm.io/gorm v1.21.8
 )

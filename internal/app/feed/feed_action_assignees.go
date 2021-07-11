@@ -16,8 +16,8 @@ type ActionAssignee struct {
 	AssigneeID string    `json:"assignee_id" csv:"assignee_id"`
 	Type       string    `json:"type" csv:"type"`
 	Name       string    `json:"name" csv:"name"`
-	ModifiedAt time.Time `json:"modified_at" csv:"modified_at"`
-	ExportedAt time.Time `json:"exported_at" csv:"exported_at" gorm:"autoUpdateTime"`
+	ModifiedAt time.Time `json:"modified_at" csv:"modified_at" gorm:"index:idx_act_asg_modified_at,sort:desc"`
+	ExportedAt time.Time `json:"exported_at" csv:"exported_at" gorm:"index:idx_act_asg_modified_at;autoUpdateTime"`
 }
 
 // ActionAssigneeFeed is a representation of the action_assignees feed

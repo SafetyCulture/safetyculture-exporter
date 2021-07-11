@@ -20,8 +20,8 @@ type Template struct {
 	AuthorName  string    `json:"author_name" csv:"author_name"`
 	AuthorID    string    `json:"author_id" csv:"author_id"`
 	CreatedAt   time.Time `json:"created_at" csv:"created_at"`
-	ModifiedAt  time.Time `json:"modified_at" csv:"modified_at"`
-	ExportedAt  time.Time `json:"exported_at" csv:"exported_at" gorm:"autoUpdateTime"`
+	ModifiedAt  time.Time `json:"modified_at" csv:"modified_at" gorm:"index:idx_tml_modified_at,sort:desc"`
+	ExportedAt  time.Time `json:"exported_at" csv:"exported_at" gorm:"index:idx_tml_modified_at;autoUpdateTime"`
 }
 
 // TemplateFeed is a representation of the templates feed

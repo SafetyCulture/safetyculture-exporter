@@ -19,8 +19,8 @@ type Action struct {
 	Status          string    `json:"status" csv:"status"`
 	DueDate         time.Time `json:"due_date" csv:"due_date"`
 	CreatedAt       time.Time `json:"created_at" csv:"created_at"`
-	ModifiedAt      time.Time `json:"modified_at" csv:"modified_at"`
-	ExportedAt      time.Time `json:"exported_at" csv:"exported_at" gorm:"autoUpdateTime"`
+	ModifiedAt      time.Time `json:"modified_at" csv:"modified_at" gorm:"index:idx_act_modified_at,sort:desc"`
+	ExportedAt      time.Time `json:"exported_at" csv:"exported_at" gorm:"index:idx_act_modified_at;autoUpdateTime"`
 	CreatorUserID   string    `json:"creator_user_id" csv:"creator_user_id"`
 	CreatorUserName string    `json:"creator_user_name" csv:"creator_user_name"`
 	TemplateID      string    `json:"template_id" csv:"template_id"`
