@@ -4,7 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
+	"os"
+	"path/filepath"
 	"testing"
 	"time"
 
@@ -90,9 +91,35 @@ func TestLastModifiedAtWithConfig(t *testing.T) {
 
 func TestLastModifiedAtAfterRestart(t *testing.T) {
 	dir, err := ioutil.TempDir("", "export")
-	if err != nil {
-		log.Fatal(err)
-	}
+	assert.NoError(t, err)
+
+	tmpExporter1 := exporter.NewJSONExporter(dir)
+	now := time.Now()
+	tmpExporter1.SetLastModifiedAt(now)
+
+	tmpExporter2 := exporter.NewJSONExporter(dir)
+	lastModified := tmpExporter2.GetLastModifiedAt(time.Time{})
+	assert.NotNil(t, lastModified)
+
+	expected := fmt.Sprintf("%d-%02d-%02dT%02d:%02d:%02d",
+		now.Year(), now.Month(), now.Day(),
+		now.Hour(), now.Minute(), now.Second())
+	actual := fmt.Sprintf("%d-%02d-%02dT%02d:%02d:%02d",
+		lastModified.Year(), lastModified.Month(), lastModified.Day(),
+		lastModified.Hour(), lastModified.Minute(), lastModified.Second())
+	assert.Equal(t, expected, actual)
+}
+
+func TestHandlesOverWrittingLongString(t *testing.T) {
+	dir, err := ioutil.TempDir("", "export")
+	assert.NoError(t, err)
+
+	exportFilePath := filepath.Join(dir, "last-modified")
+	lastModifiedFile, err := os.OpenFile(exportFilePath, os.O_RDWR|os.O_CREATE, 0666)
+	assert.NoError(t, err)
+
+	_, err = lastModifiedFile.Write([]byte("a-really-long-string-abc-123-456-789-longer-than-a-time-stamp"))
+	assert.NoError(t, err)
 
 	tmpExporter1 := exporter.NewJSONExporter(dir)
 	now := time.Now()
@@ -113,7 +140,7 @@ func TestLastModifiedAtAfterRestart(t *testing.T) {
 
 func TestWriteRow(t *testing.T) {
 	tmpExporter := getTemporaryJSONExporter()
-	str := "sample-string"
+	str := `{"abc": 123}`
 	var tmp json.RawMessage
 	tmp = []byte(str)
 	tmpExporter.WriteRow("tmp-file", &tmp)
