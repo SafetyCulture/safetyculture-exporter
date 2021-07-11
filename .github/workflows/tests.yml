@@ -28,7 +28,7 @@ jobs:
           curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
           chmod +x ./cc-test-reporter
           ./cc-test-reporter before-build
-          go test -coverprofile c.out ./...
+          go test -coverprofile c.out -coverpkg ./... ./...
           ./cc-test-reporter format-coverage -o codeclimate.json --prefix $(go list -m)
 
       - name: Upload Coverage Result Artifact
@@ -77,7 +77,7 @@ jobs:
           curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
           chmod +x ./cc-test-reporter
           ./cc-test-reporter before-build
-          go test -coverprofile c.out ./... -tags=sql
+          go test -coverprofile c.out -coverpkg ./... ./... -tags=sql
           ./cc-test-reporter format-coverage -o codeclimate.json --prefix $(go list -m)
 
       - name: Upload Coverage Result Artifact
@@ -123,7 +123,7 @@ jobs:
           curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
           chmod +x ./cc-test-reporter
           ./cc-test-reporter before-build
-          go test -coverprofile c.out ./... -tags=sql
+          go test -coverprofile c.out -coverpkg ./... ./... -tags=sql
           ./cc-test-reporter format-coverage -o codeclimate.json --prefix $(go list -m)
 
       - name: Upload Coverage Result Artifact
@@ -168,7 +168,7 @@ jobs:
           curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
           chmod +x ./cc-test-reporter
           ./cc-test-reporter before-build
-          go test -coverprofile c.out ./... -tags=sql
+          go test -coverprofile c.out -coverpkg ./... ./... -tags=sql
           ./cc-test-reporter format-coverage -o codeclimate.json --prefix $(go list -m)
 
       - name: Upload Coverage Result Artifact
