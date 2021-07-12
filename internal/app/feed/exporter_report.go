@@ -180,7 +180,7 @@ func (e *ReportExporter) saveReport(ctx context.Context, apiClient *api.Client, 
 	if exportPDF {
 		err = e.exportInspection(ctx, apiClient, inspection, "PDF")
 		if err != nil {
-			e.Logger.Errorf("PDF export failed for '%s'. Error: %s", inspection.Name, err)
+			e.Logger.Errorf("PDF export failed for '%s'. Error: %s", inspection.ID, err)
 			report.PDF = -1
 		} else {
 			report.PDF = 1
@@ -190,7 +190,7 @@ func (e *ReportExporter) saveReport(ctx context.Context, apiClient *api.Client, 
 	if exportWORD {
 		err = e.exportInspection(ctx, apiClient, inspection, "WORD")
 		if err != nil {
-			e.Logger.Errorf("WORD export failed for '%s'. Error: %s", inspection.Name, err)
+			e.Logger.Errorf("WORD export failed for '%s'. Error: %s", inspection.ID, err)
 			report.WORD = -1
 		} else {
 			report.WORD = 1
@@ -203,7 +203,7 @@ func (e *ReportExporter) saveReport(ctx context.Context, apiClient *api.Client, 
 	}).Create(&report)
 
 	if result.Error != nil {
-		e.Logger.Errorf("Failed to update save report status to local db for %s", inspection.Name)
+		e.Logger.Errorf("Failed to update save report status to local db for %s", inspection.ID)
 	}
 
 	return report
@@ -245,7 +245,7 @@ func (e *ReportExporter) exportInspection(ctx context.Context, apiClient *api.Cl
 		// make sure we stop checking after a while
 		tries++
 		if tries == 15 {
-			err = fmt.Errorf("%s report generation for %s terminated after %d tries", format, inspection.Name, tries)
+			err = fmt.Errorf("%s report generation for %s terminated after %d tries", format, inspection.ID, tries)
 			break
 		}
 	}
