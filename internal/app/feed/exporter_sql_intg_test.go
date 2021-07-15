@@ -60,10 +60,57 @@ func TestIntegrationDbSQLExporterLastModifiedAt_should_return_latest_modified_at
 	err = exporter.WriteRows(inspectionFeed, inspections)
 	assert.Nil(t, err)
 
-	lastModifiedAt, err := exporter.LastModifiedAt(inspectionFeed, time.Now().Add(time.Hour*-30000))
+	lastModifiedAt, err := exporter.LastModifiedAt(inspectionFeed, time.Now().Add(time.Hour*-30000), "role_123")
 	assert.Nil(t, err)
 	// Times are slightly lossy, convery to ISO string
 	assert.Equal(t, now.Format(time.RFC3339), lastModifiedAt.Format(time.RFC3339))
+
+	inspections = []feed.Inspection{
+		{
+			ID:             "audit_5",
+			DateStarted:    now,
+			DateModified:   now,
+			CreatedAt:      now,
+			ExportedAt:     now,
+			ModifiedAt:     now,
+			OrganisationID: "role_123",
+		},
+		{
+			ID:             "audit_6",
+			DateStarted:    now.Add(time.Hour * -128),
+			DateModified:   now.Add(time.Hour * -128),
+			CreatedAt:      now.Add(time.Hour * -128),
+			ExportedAt:     now.Add(time.Hour * -128),
+			ModifiedAt:     now.Add(time.Hour * -128),
+			OrganisationID: "role_123",
+		},
+		{
+			ID:             "audit_7",
+			DateStarted:    now.Add(time.Hour * -3000),
+			DateModified:   now.Add(time.Hour * -3000),
+			CreatedAt:      now.Add(time.Hour * -3000),
+			ExportedAt:     now.Add(time.Hour * -3000),
+			ModifiedAt:     now.Add(time.Hour * -3000),
+			OrganisationID: "role_1234",
+		},
+		{
+			ID:             "audit_8",
+			DateStarted:    now.Add(time.Hour * -2),
+			DateModified:   now.Add(time.Hour * -2),
+			CreatedAt:      now.Add(time.Hour * -2),
+			ExportedAt:     now.Add(time.Hour * -2),
+			ModifiedAt:     now.Add(time.Hour * -2),
+			OrganisationID: "role_1234",
+		},
+	}
+
+	err = exporter.WriteRows(inspectionFeed, inspections)
+	assert.Nil(t, err)
+
+	lastModifiedAt, err = exporter.LastModifiedAt(inspectionFeed, time.Now().Add(time.Hour*-30000), "role_1234")
+	assert.Nil(t, err)
+	// Times are slightly lossy, convery to ISO string
+	assert.Equal(t, now.Add(time.Hour*-2).Format(time.RFC3339), lastModifiedAt.Format(time.RFC3339))
 }
 
 func TestIntegrationDbSQLExporterInitFeed_integration_should_not_initialise_schemas_with_auto_migrate_disabled(t *testing.T) {
