@@ -9,35 +9,40 @@
       "schedule_id": "scheduleitem_1",
       "assignee_id": "user_1",
       "type": "user",
-      "name": "Dwight Schrute"
+      "name": "Dwight Schrute",
+      "organisation_id": "role_123"
     },
     {
       "id": "scheduleitem_1_user_4",
       "schedule_id": "scheduleitem_1",
       "assignee_id": "user_4",
       "type": "user",
-      "name": "Agnetha Fältskog"
+      "name": "Agnetha Fältskog",
+      "organisation_id": "role_123"
     },
     {
       "id": "scheduleitem_1_user_3",
       "schedule_id": "scheduleitem_1",
       "assignee_id": "user_3",
       "type": "user",
-      "name": "Stefani Joanne Angelina Germanotta"
+      "name": "Stefani Joanne Angelina Germanotta",
+      "organisation_id": "role_123"
     },
     {
       "id": "scheduleitem_2_user_1",
       "schedule_id": "scheduleitem_2",
       "assignee_id": "user_1",
       "type": "user",
-      "name": "Dwight Schrute"
+      "name": "Dwight Schrute",
+      "organisation_id": "role_123"
     },
     {
       "id": "scheduleitem_2_user_4",
       "schedule_id": "scheduleitem_2",
       "assignee_id": "user_4",
       "type": "user",
-      "name": "Agnetha Fältskog"
+      "name": "Agnetha Fältskog",
+      "organisation_id": "role_123"
     }
   ]
 }

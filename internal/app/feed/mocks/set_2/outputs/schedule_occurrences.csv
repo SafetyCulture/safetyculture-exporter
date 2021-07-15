@@ -1,4 +1,4 @@
-id,schedule_id,occurrence_id,template_id,miss_time,occurrence_status,audit_id,completed_at,exported_at,user_id,assignee_status
-scheduleitem_1_occurrence_1641027600000_user_1,scheduleitem_1,occurrence_1641027600000,template_1,--date--,TODO,,,--date--,user_1,TODO
-scheduleitem_2_occurrence_1641027600000_user_2,scheduleitem_2,occurrence_1641027600000,template_2,--date--,TODO,,,--date--,user_2,TODO
-scheduleitem_2_occurrence_1641027600000_user_3,scheduleitem_2,occurrence_1641027600000,template_2,,TODO,,,--date--,user_3,TODO
+id,schedule_id,occurrence_id,template_id,organisation_id,miss_time,occurrence_status,audit_id,completed_at,exported_at,user_id,assignee_status
+scheduleitem_1_occurrence_1641027600000_user_1,scheduleitem_1,occurrence_1641027600000,template_1,role_123,--date--,TODO,,,--date--,user_1,TODO
+scheduleitem_2_occurrence_1641027600000_user_2,scheduleitem_2,occurrence_1641027600000,template_2,role_123,--date--,TODO,,,--date--,user_2,TODO
+scheduleitem_2_occurrence_1641027600000_user_3,scheduleitem_2,occurrence_1641027600000,template_2,role_123,,TODO,,,--date--,user_3,TODO

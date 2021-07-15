@@ -5,6 +5,7 @@
 | schedule_id       | text     |             |
 | occurrence_id     | text     |             |
 | template_id       | text     |             |
+| organisation_id   | text     |             |
 | miss_time         | datetime |             |
 | occurrence_status | text     |             |
 | audit_id          | text     |             |

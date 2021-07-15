@@ -18,4 +18,5 @@
 | audit_title       | text     |             |
 | audit_item_id     | text     |             |
 | audit_item_label  | text     |             |
+| organisation_id   | text     |             |
 +-------------------+----------+-------------+

@@ -23,6 +23,7 @@ type Schedule struct {
 	StartTimeMinute int        `json:"start_time_minute" csv:"start_time_minute"`
 	AllMustComplete bool       `json:"all_must_complete" csv:"all_must_complete"`
 	Status          string     `json:"status" csv:"status"`
+	OrganisationID  string     `json:"organisation_id" csv:"organisation_id"`
 	Timezone        string     `json:"timezone" csv:"timezone"`
 	CanLateSubmit   bool       `json:"can_late_submit" csv:"can_late_submit"`
 	SiteID          string     `json:"site_id" csv:"site_id"`
@@ -88,11 +89,11 @@ func (f *ScheduleFeed) CreateSchema(exporter Exporter) error {
 }
 
 // Export exports the feed to the supplied exporter
-func (f *ScheduleFeed) Export(ctx context.Context, apiClient *api.Client, exporter Exporter) error {
+func (f *ScheduleFeed) Export(ctx context.Context, apiClient *api.Client, exporter Exporter, orgID string) error {
 	logger := util.GetLogger()
 	feedName := f.Name()
 
-	logger.Infof("%s: exporting", feedName)
+	logger.Infof("%s: exporting for org_id: %s", feedName, orgID)
 
 	exporter.InitFeed(f, &InitFeedOptions{
 		// Truncate files if upserts aren't supported.

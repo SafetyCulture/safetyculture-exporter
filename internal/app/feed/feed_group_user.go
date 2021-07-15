@@ -11,9 +11,10 @@ import (
 
 // GroupUser represents a row from the group_users feed
 type GroupUser struct {
-	UserID     string    `json:"user_id" csv:"user_id" gorm:"primaryKey"`
-	GroupID    string    `json:"group_id" csv:"group_id" gorm:"primaryKey"`
-	ExportedAt time.Time `json:"exported_at" csv:"exported_at" gorm:"autoUpdateTime"`
+	UserID         string    `json:"user_id" csv:"user_id" gorm:"primaryKey"`
+	GroupID        string    `json:"group_id" csv:"group_id" gorm:"primaryKey"`
+	OrganisationID string    `json:"organisation_id" csv:"organisation_id"`
+	ExportedAt     time.Time `json:"exported_at" csv:"exported_at" gorm:"autoUpdateTime"`
 }
 
 // GroupUserFeed is a representation of the group_users feed
@@ -59,11 +60,11 @@ func (f *GroupUserFeed) CreateSchema(exporter Exporter) error {
 }
 
 // Export exports the feed to the supplied exporter
-func (f *GroupUserFeed) Export(ctx context.Context, apiClient *api.Client, exporter Exporter) error {
+func (f *GroupUserFeed) Export(ctx context.Context, apiClient *api.Client, exporter Exporter, orgID string) error {
 	logger := util.GetLogger()
 	feedName := f.Name()
 
-	logger.Infof("%s: exporting", feedName)
+	logger.Infof("%s: exporting for org_id: %s", feedName, orgID)
 
 	exporter.InitFeed(f, &InitFeedOptions{
 		// Clear this table before loading data.

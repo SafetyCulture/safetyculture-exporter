@@ -219,10 +219,53 @@ func TestSQLExporterLastModifiedAt_should_return_latest_modified_at(t *testing.T
 	err = exporter.WriteRows(inspectionFeed, inspections)
 	assert.Nil(t, err)
 
-	lastModifiedAt, err := exporter.LastModifiedAt(inspectionFeed, time.Now().Add(time.Hour*-30000))
+	// Check the timestamp for the audits that doesn't have organisation_id
+	lastModifiedAt, err := exporter.LastModifiedAt(inspectionFeed, time.Now().Add(time.Hour*-30000), "role_123")
 	assert.Nil(t, err)
 	// Times are slightly lossy, convery to ISO string
 	assert.Equal(t, now.Format(time.RFC3339), lastModifiedAt.Format(time.RFC3339))
+
+	lastModifiedAt, err = exporter.LastModifiedAt(inspectionFeed, time.Now().Add(time.Hour*-30000), "role_1234")
+	assert.Nil(t, err)
+	// Times are slightly lossy, convery to ISO string
+	assert.Equal(t, now.Format(time.RFC3339), lastModifiedAt.Format(time.RFC3339))
+
+	inspections = []feed.Inspection{
+		{
+			ID:             "audit_5",
+			ModifiedAt:     now,
+			OrganisationID: "role_123",
+		},
+		{
+			ID:             "audit_6",
+			ModifiedAt:     now.Add(time.Hour * -128),
+			OrganisationID: "role_123",
+		},
+		{
+			ID:             "audit_7",
+			ModifiedAt:     now.Add(time.Hour * -3000),
+			OrganisationID: "role_1234",
+		},
+		{
+			ID:             "audit_8",
+			ModifiedAt:     now.Add(time.Hour * -2),
+			OrganisationID: "role_1234",
+		},
+	}
+
+	err = exporter.WriteRows(inspectionFeed, inspections)
+	assert.Nil(t, err)
+
+	// Check the timestamp for the audits that contains organisation_id
+	lastModifiedAt, err = exporter.LastModifiedAt(inspectionFeed, time.Now().Add(time.Hour*-30000), "role_123")
+	assert.Nil(t, err)
+	// Times are slightly lossy, convery to ISO string
+	assert.Equal(t, now.Format(time.RFC3339), lastModifiedAt.Format(time.RFC3339))
+
+	lastModifiedAt, err = exporter.LastModifiedAt(inspectionFeed, time.Now().Add(time.Hour*-30000), "role_1234")
+	assert.Nil(t, err)
+	// Times are slightly lossy, convery to ISO string
+	assert.Equal(t, now.Add(time.Hour*-2).Format(time.RFC3339), lastModifiedAt.Format(time.RFC3339))
 }
 
 func TestSQLExporterLastModifiedAt_should_return_modified_after_if_latest(t *testing.T) {
@@ -259,7 +302,50 @@ func TestSQLExporterLastModifiedAt_should_return_modified_after_if_latest(t *tes
 	err = exporter.WriteRows(inspectionFeed, inspections)
 	assert.Nil(t, err)
 
-	lastModifiedAt, err := exporter.LastModifiedAt(inspectionFeed, now.Add(time.Hour))
+	// Check the timestamp for the audits that doesn't have organisation_id
+	lastModifiedAt, err := exporter.LastModifiedAt(inspectionFeed, now.Add(time.Hour), "role_123")
+	assert.Nil(t, err)
+	// Times are slightly lossy, converting to ISO string
+	assert.Equal(t, now.Add(time.Hour).Format(time.RFC3339), lastModifiedAt.Format(time.RFC3339))
+
+	lastModifiedAt, err = exporter.LastModifiedAt(inspectionFeed, now.Add(time.Hour), "role_124")
+	assert.Nil(t, err)
+	// Times are slightly lossy, converting to ISO string
+	assert.Equal(t, now.Add(time.Hour).Format(time.RFC3339), lastModifiedAt.Format(time.RFC3339))
+
+	inspections = []feed.Inspection{
+		{
+			ID:             "audit_5",
+			ModifiedAt:     now,
+			OrganisationID: "role_123",
+		},
+		{
+			ID:             "audit_6",
+			ModifiedAt:     now.Add(time.Hour * -128),
+			OrganisationID: "role_123",
+		},
+		{
+			ID:             "audit_7",
+			ModifiedAt:     now.Add(time.Hour * -3000),
+			OrganisationID: "role_1234",
+		},
+		{
+			ID:             "audit_8",
+			ModifiedAt:     now.Add(time.Hour * -2),
+			OrganisationID: "role_1234",
+		},
+	}
+
+	err = exporter.WriteRows(inspectionFeed, inspections)
+	assert.Nil(t, err)
+
+	// Check the timestamp for the audits that contains organisation_id
+	lastModifiedAt, err = exporter.LastModifiedAt(inspectionFeed, now.Add(time.Hour), "role_123")
+	assert.Nil(t, err)
+	// Times are slightly lossy, converting to ISO string
+	assert.Equal(t, now.Add(time.Hour).Format(time.RFC3339), lastModifiedAt.Format(time.RFC3339))
+
+	lastModifiedAt, err = exporter.LastModifiedAt(inspectionFeed, now.Add(time.Hour), "role_124")
 	assert.Nil(t, err)
 	// Times are slightly lossy, converting to ISO string
 	assert.Equal(t, now.Add(time.Hour).Format(time.RFC3339), lastModifiedAt.Format(time.RFC3339))

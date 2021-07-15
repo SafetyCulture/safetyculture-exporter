@@ -32,7 +32,8 @@
       "client_site": null,
       "latitude": -33.8858784,
       "longitude": 151.2116864,
-      "web_report_link": "https://app.safetyculture.io/report/audit/audit_2"
+      "web_report_link": "https://app.safetyculture.io/report/audit/audit_2",
+      "organisation_id": "role_123"
     },
     {
       "id": "audit_3",
@@ -62,7 +63,8 @@
       "client_site": null,
       "latitude": null,
       "longitude": null,
-      "web_report_link": "https://app.safetyculture.io/report/audit/audit_3"
+      "web_report_link": "https://app.safetyculture.io/report/audit/audit_3",
+      "organisation_id": "role_123"
     }
   ]
 }

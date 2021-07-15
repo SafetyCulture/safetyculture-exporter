@@ -15,6 +15,7 @@ type ScheduleOccurrence struct {
 	ScheduleID       string     `json:"schedule_id" csv:"schedule_id"`
 	OccurrenceID     string     `json:"occurrence_id" csv:"occurrence_id"`
 	TemplateID       string     `json:"template_id" csv:"template_id"`
+	OrganisationID   string     `json:"organisation_id" csv:"organisation_id"`
 	MissTime         *time.Time `json:"miss_time" csv:"miss_time"`
 	OccurrenceStatus string     `json:"occurrence_status" csv:"occurrence_status"`
 	AuditID          *string    `json:"audit_id" csv:"audit_id"`
@@ -91,11 +92,11 @@ func (f *ScheduleOccurrenceFeed) writeRows(exporter Exporter, rows []*ScheduleOc
 }
 
 // Export exports the feed to the supplied exporter
-func (f *ScheduleOccurrenceFeed) Export(ctx context.Context, apiClient *api.Client, exporter Exporter) error {
+func (f *ScheduleOccurrenceFeed) Export(ctx context.Context, apiClient *api.Client, exporter Exporter, orgID string) error {
 	logger := util.GetLogger()
 	feedName := f.Name()
 
-	logger.Infof("%s: exporting", feedName)
+	logger.Infof("%s: exporting for org_id: %s", feedName, orgID)
 
 	exporter.InitFeed(f, &InitFeedOptions{
 		// Always truncate. This data must be refreshed in order to be accurate
