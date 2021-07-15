@@ -28,7 +28,7 @@ type Action struct {
 	AuditTitle      string    `json:"audit_title" csv:"audit_title"`
 	AuditItemID     string    `json:"audit_item_id" csv:"audit_item_id"`
 	AuditItemLabel  string    `json:"audit_item_label" csv:"audit_item_label"`
-	OrganisationID  string    `json:"organisation_id" csv:"organisation_id"`
+	OrganisationID  string    `json:"organisation_id" csv:"organisation_id" gorm:"index:idx_act_organisation_id"`
 }
 
 // ActionFeed is a representation of the actions feed
@@ -76,6 +76,7 @@ func (f *ActionFeed) Columns() []string {
 		"audit_title",
 		"audit_item_id",
 		"audit_item_label",
+		"organisation_id",
 	}
 }
 

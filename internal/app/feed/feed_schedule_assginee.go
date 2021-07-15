@@ -14,7 +14,7 @@ type ScheduleAssignee struct {
 	ID             string    `json:"id" csv:"id" gorm:"primarykey"`
 	ScheduleID     string    `json:"schedule_id" csv:"schedule_id"`
 	AssigneeID     string    `json:"assignee_id" csv:"assignee_id"`
-	OrganisationID string    `json:"organisation_id" csv:"organisation_id"`
+	OrganisationID string    `json:"organisation_id" csv:"organisation_id" gorm:"index:idx_sch_asg_organisation_id"`
 	Type           string    `json:"type" csv:"type"`
 	Name           string    `json:"name" csv:"name"`
 	ExportedAt     time.Time `json:"exported_at" csv:"exported_at" gorm:"autoUpdateTime"`
@@ -50,6 +50,7 @@ func (f *ScheduleAssigneeFeed) Columns() []string {
 	return []string{
 		"schedule_id",
 		"assignee_id",
+		"organisation_id",
 		"type",
 		"name",
 	}

@@ -28,7 +28,7 @@ type InspectionItem struct {
 	Type                    string    `json:"type" csv:"type"`
 	Category                string    `json:"category" csv:"category"`
 	CategoryID              string    `json:"category_id" csv:"category_id"`
-	OrganisationID          string    `json:"organisation_id" csv:"organisation_id"`
+	OrganisationID          string    `json:"organisation_id" csv:"organisation_id" gorm:"index:idx_ins_itm_organisation_id"`
 	ParentIDs               string    `json:"parent_ids" csv:"parent_ids"`
 	Label                   string    `json:"label" csv:"label"`
 	Response                string    `json:"response" csv:"response"`
@@ -91,6 +91,7 @@ func (f *InspectionItemFeed) Columns() []string {
 		"type",
 		"category",
 		"category_id",
+		"organisation_id",
 		"parent_ids",
 		"label",
 		"response",

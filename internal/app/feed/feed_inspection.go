@@ -23,7 +23,7 @@ type Inspection struct {
 	ScorePercentage float32    `json:"score_percentage" csv:"score_percentage"`
 	Duration        int64      `json:"duration" csv:"duration"`
 	TemplateID      string     `json:"template_id" csv:"template_id"`
-	OrganisationID  string     `json:"organisation_id" csv:"organisation_id"`
+	OrganisationID  string     `json:"organisation_id" csv:"organisation_id" gorm:"index:idx_ins_organisation_id"`
 	TemplateName    string     `json:"template_name" csv:"template_name"`
 	TemplateAuthor  string     `json:"template_author" csv:"template_author"`
 	SiteID          string     `json:"site_id" csv:"site_id"`
@@ -89,6 +89,7 @@ func (f *InspectionFeed) Columns() []string {
 		"score_percentage",
 		"duration",
 		"template_id",
+		"organisation_id",
 		"template_name",
 		"template_author",
 		"date_started",

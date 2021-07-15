@@ -15,7 +15,7 @@ type Template struct {
 	Archived       bool      `json:"archived" csv:"archived"`
 	Name           string    `json:"name" csv:"name"`
 	Description    string    `json:"description" csv:"description"`
-	OrganisationID string    `json:"organisation_id" csv:"organisation_id"`
+	OrganisationID string    `json:"organisation_id" csv:"organisation_id" gorm:"index:idx_tml_organisation_id"`
 	OwnerName      string    `json:"owner_name" csv:"owner_name"`
 	OwnerID        string    `json:"owner_id" csv:"owner_id"`
 	AuthorName     string    `json:"author_name" csv:"author_name"`
@@ -57,6 +57,7 @@ func (f *TemplateFeed) Columns() []string {
 		"archived",
 		"name",
 		"description",
+		"organisation_id",
 		"owner_name",
 		"owner_id",
 		"author_name",

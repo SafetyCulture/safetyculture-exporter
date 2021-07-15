@@ -13,7 +13,7 @@ import (
 type GroupUser struct {
 	UserID         string    `json:"user_id" csv:"user_id" gorm:"primaryKey"`
 	GroupID        string    `json:"group_id" csv:"group_id" gorm:"primaryKey"`
-	OrganisationID string    `json:"organisation_id" csv:"organisation_id"`
+	OrganisationID string    `json:"organisation_id" csv:"organisation_id" gorm:"index:idx_grp_usr_organisation_id"`
 	ExportedAt     time.Time `json:"exported_at" csv:"exported_at" gorm:"autoUpdateTime"`
 }
 
@@ -45,6 +45,7 @@ func (f *GroupUserFeed) Columns() []string {
 	return []string{
 		"user_id",
 		"group_id",
+		"organisation_id",
 		"exported_at",
 	}
 }
