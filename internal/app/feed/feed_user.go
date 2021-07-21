@@ -12,7 +12,7 @@ import (
 // User represents a row from the users feed
 type User struct {
 	ID             string    `json:"id" csv:"user_id" gorm:"primarykey;column:user_id"`
-	OrganisationID string    `json:"organisation_id" csv:"organisation_id" gorm:"index:idx_usr_organisation_id"`
+	OrganisationID string    `json:"organisation_id" csv:"organisation_id"`
 	Email          string    `json:"email" csv:"email"`
 	Firstname      string    `json:"firstname" csv:"firstname"`
 	Lastname       string    `json:"lastname" csv:"lastname"`

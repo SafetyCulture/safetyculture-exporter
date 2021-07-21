@@ -16,7 +16,7 @@ type TemplatePermission struct {
 	Permission     string `json:"permission" csv:"permission"`
 	AssigneeID     string `json:"assignee_id" csv:"assignee_id"`
 	AssigneeType   string `json:"assignee_type" csv:"assignee_type"`
-	OrganisationID string `json:"organisation_id" csv:"organisation_id" gorm:"index:idx_tml_prm_organisation_id"`
+	OrganisationID string `json:"organisation_id" csv:"organisation_id"`
 }
 
 // TemplatePermissionFeed is a representation of the template_permissions feed

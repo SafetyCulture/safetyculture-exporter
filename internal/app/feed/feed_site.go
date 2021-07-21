@@ -14,7 +14,7 @@ type Site struct {
 	ID             string    `json:"id" csv:"site_id" gorm:"primarykey;column:site_id"`
 	Name           string    `json:"name" csv:"name"`
 	CreatorID      string    `json:"creator_id" csv:"creator_id"`
-	OrganisationID string    `json:"organisation_id" csv:"organisation_id" gorm:"index:idx_ste_organisation_id"`
+	OrganisationID string    `json:"organisation_id" csv:"organisation_id"`
 	ExportedAt     time.Time `json:"exported_at" csv:"exported_at" gorm:"autoUpdateTime"`
 	Deleted        bool      `json:"deleted" csv:"deleted" gorm:"deleted"`
 }

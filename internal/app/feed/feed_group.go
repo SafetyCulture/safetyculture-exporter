@@ -13,7 +13,7 @@ import (
 type Group struct {
 	ID             string    `json:"id" csv:"group_id" gorm:"primarykey;column:group_id"`
 	Name           string    `json:"name" csv:"name"`
-	OrganisationID string    `json:"organisation_id" csv:"organisation_id" gorm:"index:idx_grp_organisation_id"`
+	OrganisationID string    `json:"organisation_id" csv:"organisation_id"`
 	ExportedAt     time.Time `json:"exported_at" csv:"exported_at" gorm:"autoUpdateTime"`
 }
 

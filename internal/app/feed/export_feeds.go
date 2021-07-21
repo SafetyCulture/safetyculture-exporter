@@ -125,9 +125,9 @@ func ExportFeeds(v *viper.Viper, apiClient *api.Client, exporter Exporter) error
 	// TODO. Should validate auth before doing anything
 
 	resp, err := apiClient.WhoAmI(ctx)
-	if err != nil {
-		util.Check(err, "failed to get details of the current user")
-	}
+	util.Check(err, "failed to get details of the current user")
+
+	logger.Infof("Exporting data by user: %s %s", resp.Firstname, resp.Lastname)
 
 	for _, feed := range GetFeeds(v) {
 		if tablesMap[feed.Name()] || len(tables) == 0 {
@@ -155,9 +155,9 @@ func ExportInspectionReports(v *viper.Viper, apiClient *api.Client, exporter *Re
 	ctx := context.Background()
 
 	resp, err := apiClient.WhoAmI(ctx)
-	if err != nil {
-		util.Check(err, "failed to get details of the current user")
-	}
+	util.Check(err, "failed to get details of the current user")
+
+	logger.Infof("Exporting inspection reports by user: %s %s", resp.Firstname, resp.Lastname)
 
 	feed := getInspectionFeed(v, config.GetInspectionConfig(v), getTemplateIDs(v))
 	err = feed.Export(ctx, apiClient, exporter, resp.OrganisationID)

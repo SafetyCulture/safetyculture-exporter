@@ -16,7 +16,7 @@ type ActionAssignee struct {
 	AssigneeID     string    `json:"assignee_id" csv:"assignee_id"`
 	Type           string    `json:"type" csv:"type"`
 	Name           string    `json:"name" csv:"name"`
-	OrganisationID string    `json:"organisation_id" csv:"organisation_id" gorm:"index:idx_act_asg_organisation_id"`
+	OrganisationID string    `json:"organisation_id" csv:"organisation_id" gorm:"index:idx_act_asg_modified_at"`
 	ModifiedAt     time.Time `json:"modified_at" csv:"modified_at" gorm:"index:idx_act_asg_modified_at,sort:desc"`
 	ExportedAt     time.Time `json:"exported_at" csv:"exported_at" gorm:"index:idx_act_asg_modified_at;autoUpdateTime"`
 }

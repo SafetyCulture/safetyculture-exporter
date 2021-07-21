@@ -23,7 +23,7 @@ type Schedule struct {
 	StartTimeMinute int        `json:"start_time_minute" csv:"start_time_minute"`
 	AllMustComplete bool       `json:"all_must_complete" csv:"all_must_complete"`
 	Status          string     `json:"status" csv:"status"`
-	OrganisationID  string     `json:"organisation_id" csv:"organisation_id" gorm:"index:idx_sch_organisation_id"`
+	OrganisationID  string     `json:"organisation_id" csv:"organisation_id"`
 	Timezone        string     `json:"timezone" csv:"timezone"`
 	CanLateSubmit   bool       `json:"can_late_submit" csv:"can_late_submit"`
 	SiteID          string     `json:"site_id" csv:"site_id"`

@@ -28,7 +28,7 @@ type Action struct {
 	AuditTitle      string    `json:"audit_title" csv:"audit_title"`
 	AuditItemID     string    `json:"audit_item_id" csv:"audit_item_id"`
 	AuditItemLabel  string    `json:"audit_item_label" csv:"audit_item_label"`
-	OrganisationID  string    `json:"organisation_id" csv:"organisation_id" gorm:"index:idx_act_organisation_id"`
+	OrganisationID  string    `json:"organisation_id" csv:"organisation_id" gorm:"index:idx_act_modified_at"`
 }
 
 // ActionFeed is a representation of the actions feed
