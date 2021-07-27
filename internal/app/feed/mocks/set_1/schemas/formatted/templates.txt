@@ -1,15 +1,16 @@
-+-------------+----------+-------------+
-|    NAME     |   TYPE   | PRIMARY KEY |
-+-------------+----------+-------------+
-| template_id | text     | true        |
-| archived    | numeric  |             |
-| name        | text     |             |
-| description | text     |             |
-| owner_name  | text     |             |
-| owner_id    | text     |             |
-| author_name | text     |             |
-| author_id   | text     |             |
-| created_at  | datetime |             |
-| modified_at | datetime |             |
-| exported_at | datetime |             |
-+-------------+----------+-------------+
++-----------------+----------+-------------+
+|      NAME       |   TYPE   | PRIMARY KEY |
++-----------------+----------+-------------+
+| template_id     | text     | true        |
+| archived        | numeric  |             |
+| name            | text     |             |
+| description     | text     |             |
+| organisation_id | text     |             |
+| owner_name      | text     |             |
+| owner_id        | text     |             |
+| author_name     | text     |             |
+| author_id       | text     |             |
+| created_at      | datetime |             |
+| modified_at     | datetime |             |
+| exported_at     | datetime |             |
++-----------------+----------+-------------+

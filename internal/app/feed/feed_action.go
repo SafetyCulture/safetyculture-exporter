@@ -28,6 +28,7 @@ type Action struct {
 	AuditTitle      string    `json:"audit_title" csv:"audit_title"`
 	AuditItemID     string    `json:"audit_item_id" csv:"audit_item_id"`
 	AuditItemLabel  string    `json:"audit_item_label" csv:"audit_item_label"`
+	OrganisationID  string    `json:"organisation_id" csv:"organisation_id" gorm:"index:idx_act_modified_at"`
 }
 
 // ActionFeed is a representation of the actions feed
@@ -75,6 +76,7 @@ func (f *ActionFeed) Columns() []string {
 		"audit_title",
 		"audit_item_id",
 		"audit_item_label",
+		"organisation_id",
 	}
 }
 
@@ -89,7 +91,7 @@ func (f *ActionFeed) CreateSchema(exporter Exporter) error {
 }
 
 // Export exports the feed to the supplied exporter
-func (f *ActionFeed) Export(ctx context.Context, apiClient *api.Client, exporter Exporter) error {
+func (f *ActionFeed) Export(ctx context.Context, apiClient *api.Client, exporter Exporter, orgID string) error {
 	logger := util.GetLogger()
 	feedName := f.Name()
 
@@ -99,10 +101,10 @@ func (f *ActionFeed) Export(ctx context.Context, apiClient *api.Client, exporter
 	})
 
 	var err error
-	f.ModifiedAfter, err = exporter.LastModifiedAt(f, f.ModifiedAfter)
+	f.ModifiedAfter, err = exporter.LastModifiedAt(f, f.ModifiedAfter, orgID)
 	util.Check(err, "unable to load modified after")
 
-	logger.Infof("%s: exporting since %s", feedName, f.ModifiedAfter.Format(time.RFC1123))
+	logger.Infof("%s: exporting for org_id: %s since: %s", feedName, orgID, f.ModifiedAfter.Format(time.RFC1123))
 
 	err = apiClient.DrainFeed(ctx, &api.GetFeedRequest{
 		InitialURL: "/feed/actions",

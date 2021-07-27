@@ -27,6 +27,8 @@ func getReportExportCompletionMessage(status string) string {
 }
 
 func TestExportReports_should_export_all_reports(t *testing.T) {
+	defer gock.Off()
+
 	exporter, err := getTemporaryReportExporter([]string{"PDF", "WORD"}, "", "INSPECTION_TITLE")
 	assert.Nil(t, err)
 
@@ -35,6 +37,18 @@ func TestExportReports_should_export_all_reports(t *testing.T) {
 	apiClient := api.GetTestClient()
 	defer resetMocks(apiClient.HTTPClient())
 	initMockFeedsSet1(apiClient.HTTPClient())
+
+	gock.New(mockAPIBaseURL).
+		Get("/accounts/user/v1/user:WhoAmI").
+		Reply(200).
+		BodyString(`
+		{
+			"user_id": "user_123",
+			"organisation_id": "role_123",
+			"firstname": "Test",
+			"lastname": "Test"
+		  }
+		`)
 
 	gock.New(mockAPIBaseURL).
 		Post(initiateReportURL).
@@ -67,6 +81,8 @@ func TestExportReports_should_export_all_reports(t *testing.T) {
 }
 
 func TestExportReports_should_export_all_reports_with_ID_filename(t *testing.T) {
+	defer gock.Off()
+
 	exporter, err := getTemporaryReportExporter([]string{"PDF", "WORD"}, "", "INSPECTION_ID")
 	assert.Nil(t, err)
 
@@ -75,6 +91,18 @@ func TestExportReports_should_export_all_reports_with_ID_filename(t *testing.T) 
 	apiClient := api.GetTestClient()
 	defer resetMocks(apiClient.HTTPClient())
 	initMockFeedsSet1(apiClient.HTTPClient())
+
+	gock.New(mockAPIBaseURL).
+		Get("/accounts/user/v1/user:WhoAmI").
+		Reply(200).
+		BodyString(`
+		{
+			"user_id": "user_123",
+			"organisation_id": "role_123",
+			"firstname": "Test",
+			"lastname": "Test"
+		  }
+		`)
 
 	gock.New(mockAPIBaseURL).
 		Post(initiateReportURL).
@@ -107,6 +135,8 @@ func TestExportReports_should_export_all_reports_with_ID_filename(t *testing.T) 
 }
 
 func TestExportReports_should_not_run_if_all_exported(t *testing.T) {
+	defer gock.Off()
+
 	exporter, err := getTemporaryReportExporter([]string{"PDF"}, "", "INSPECTION_TITLE")
 	assert.Nil(t, err)
 
@@ -118,6 +148,19 @@ func TestExportReports_should_not_run_if_all_exported(t *testing.T) {
 	initMockFeedsSet1(apiClient.HTTPClient())
 
 	// Making sure the endpoints have been called only 3 times
+	gock.New(mockAPIBaseURL).
+		Get("/accounts/user/v1/user:WhoAmI").
+		Times(3).
+		Reply(200).
+		BodyString(`
+		{
+			"user_id": "user_123",
+			"organisation_id": "role_123",
+			"firstname": "Test",
+			"lastname": "Test"
+		  }
+		`)
+
 	gock.New(mockAPIBaseURL).
 		Post(initiateReportURL).
 		Times(3).
@@ -168,6 +211,18 @@ func TestExportReports_should_take_care_of_invalid_file_names(t *testing.T) {
 	defer resetMocks(apiClient.HTTPClient())
 	gock.InterceptClient(apiClient.HTTPClient())
 
+	gock.New(mockAPIBaseURL).
+		Get("/accounts/user/v1/user:WhoAmI").
+		Reply(200).
+		BodyString(`
+		{
+			"user_id": "user_123",
+			"organisation_id": "role_123",
+			"firstname": "Test",
+			"lastname": "Test"
+		  }
+		`)
+
 	gock.New("http://localhost:9999").
 		Get("/feed/inspections").
 		Reply(200).
@@ -217,6 +272,18 @@ func TestExportReports_should_fail_after_retries(t *testing.T) {
 	initMockFeedsSet1(apiClient.HTTPClient())
 
 	gock.New(mockAPIBaseURL).
+		Get("/accounts/user/v1/user:WhoAmI").
+		Reply(200).
+		BodyString(`
+		{
+			"user_id": "user_123",
+			"organisation_id": "role_123",
+			"firstname": "Test",
+			"lastname": "Test"
+		  }
+		`)
+
+	gock.New(mockAPIBaseURL).
 		Post(initiateReportURL).
 		Times(3).
 		Reply(200).
@@ -243,6 +310,19 @@ func TestExportReports_should_fail_if_report_status_fails(t *testing.T) {
 	apiClient := api.GetTestClient()
 	defer resetMocks(apiClient.HTTPClient())
 	initMockFeedsSet1(apiClient.HTTPClient())
+
+	gock.New(mockAPIBaseURL).
+		Get("/accounts/user/v1/user:WhoAmI").
+		Times(3).
+		Reply(200).
+		BodyString(`
+		{
+			"user_id": "user_123",
+			"organisation_id": "role_123",
+			"firstname": "Test",
+			"lastname": "Test"
+		  }
+		`)
 
 	gock.New(mockAPIBaseURL).
 		Post(initiateReportURL).
@@ -272,6 +352,18 @@ func TestExportReports_should_fail_if_init_report_reply_is_not_success(t *testin
 	initMockFeedsSet1(apiClient.HTTPClient())
 
 	gock.New(mockAPIBaseURL).
+		Get("/accounts/user/v1/user:WhoAmI").
+		Reply(200).
+		BodyString(`
+		{
+			"user_id": "user_123",
+			"organisation_id": "role_123",
+			"firstname": "Test",
+			"lastname": "Test"
+		  }
+		`)
+
+	gock.New(mockAPIBaseURL).
 		Post(initiateReportURL).
 		Times(3).
 		Reply(500).
@@ -291,6 +383,19 @@ func TestExportReports_should_fail_if_report_completion_reply_is_not_success(t *
 	apiClient := api.GetTestClient()
 	defer resetMocks(apiClient.HTTPClient())
 	initMockFeedsSet1(apiClient.HTTPClient())
+
+	gock.New(mockAPIBaseURL).
+		Get("/accounts/user/v1/user:WhoAmI").
+		Times(3).
+		Reply(200).
+		BodyString(`
+		{
+			"user_id": "user_123",
+			"organisation_id": "role_123",
+			"firstname": "Test",
+			"lastname": "Test"
+		  }
+		`)
 
 	gock.New(mockAPIBaseURL).
 		Post(initiateReportURL).
@@ -318,6 +423,19 @@ func TestExportReports_should_fail_if_download_report_reply_is_not_success(t *te
 	apiClient := api.GetTestClient()
 	defer resetMocks(apiClient.HTTPClient())
 	initMockFeedsSet1(apiClient.HTTPClient())
+
+	gock.New(mockAPIBaseURL).
+		Get("/accounts/user/v1/user:WhoAmI").
+		Times(3).
+		Reply(200).
+		BodyString(`
+		{
+			"user_id": "user_123",
+			"organisation_id": "role_123",
+			"firstname": "Test",
+			"lastname": "Test"
+		  }
+		`)
 
 	gock.New(mockAPIBaseURL).
 		Post(initiateReportURL).
@@ -350,6 +468,18 @@ func TestExportReports_should_return_error_for_unsupported_format(t *testing.T) 
 
 	apiClient := api.GetTestClient()
 	initMockFeedsSet1(apiClient.HTTPClient())
+
+	gock.New(mockAPIBaseURL).
+		Get("/accounts/user/v1/user:WhoAmI").
+		Reply(200).
+		BodyString(`
+		{
+			"user_id": "user_123",
+			"organisation_id": "role_123",
+			"firstname": "Test",
+			"lastname": "Test"
+		  }
+		`)
 
 	err = feed.ExportInspectionReports(viperConfig, apiClient, exporter)
 	assert.EqualError(t, err, "No valid export format specified")

@@ -20,7 +20,8 @@
       "can_late_submit": false,
       "site_id": "site_1",
       "template_id": "template_1",
-      "creator_user_id": "user_3"
+      "creator_user_id": "user_3",
+      "organisation_id": "role_123"
     },
     {
       "id": "scheduleitem_2",
@@ -38,7 +39,8 @@
       "can_late_submit": false,
       "site_id": null,
       "template_id": "template_2",
-      "creator_user_id": "user_2"
+      "creator_user_id": "user_2",
+      "organisation_id": "role_123"
     }
   ]
 }

@@ -1,1 +1,1 @@
-schedule_id,description,recurrence,duration,modified_at,exported_at,from_date,to_date,start_time_hour,start_time_minute,all_must_complete,status,timezone,can_late_submit,site_id,template_id,creator_user_id
+schedule_id,description,recurrence,duration,modified_at,exported_at,from_date,to_date,start_time_hour,start_time_minute,all_must_complete,status,organisation_id,timezone,can_late_submit,site_id,template_id,creator_user_id

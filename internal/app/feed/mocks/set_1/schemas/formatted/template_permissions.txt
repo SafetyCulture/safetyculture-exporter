@@ -1,9 +1,10 @@
-+---------------+------+-------------+
-|     NAME      | TYPE | PRIMARY KEY |
-+---------------+------+-------------+
-| permission_id | text | true        |
-| template_id   | text |             |
-| permission    | text |             |
-| assignee_id   | text |             |
-| assignee_type | text |             |
-+---------------+------+-------------+
++-----------------+------+-------------+
+|      NAME       | TYPE | PRIMARY KEY |
++-----------------+------+-------------+
+| permission_id   | text | true        |
+| template_id     | text |             |
+| permission      | text |             |
+| assignee_id     | text |             |
+| assignee_type   | text |             |
+| organisation_id | text |             |
++-----------------+------+-------------+

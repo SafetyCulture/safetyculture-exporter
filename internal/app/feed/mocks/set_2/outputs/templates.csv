@@ -1,4 +1,4 @@
-template_id,archived,name,description,owner_name,owner_id,author_name,author_id,created_at,modified_at,exported_at
-template_1,true,Surgical Safety Checklist (First Edition),Reproduction of WHO list,Dwight Schrute,user_1,Dwight Schrute,user_1,2013-05-09T01:36:40.084Z,2013-05-09T01:36:33Z,2020-11-06T08:21:16.548933+11:00
-template_2,true,Test Template - All Items,,Abraham Lincoln,user_2,Dwight Schrute,user_1,2013-03-15T05:18:55.788Z,2013-11-14T03:34:19Z,2020-11-06T08:21:16.548933+11:00
-template_3,false,Template 1,Ahh a new template,Stefani Joanne Angelina Germanotta,user_3,Agnetha Fältskog,user_4,2014-04-11T07:14:38.36Z,2014-04-08T01:42:49Z,2020-11-06T08:21:16.548933+11:00
+template_id,archived,name,description,organisation_id,owner_name,owner_id,author_name,author_id,created_at,modified_at,exported_at
+template_1,true,Surgical Safety Checklist (First Edition),Reproduction of WHO list,role_123,Dwight Schrute,user_1,Dwight Schrute,user_1,--date--,--date--,--date--
+template_2,true,Test Template - All Items,,role_123,Abraham Lincoln,user_2,Dwight Schrute,user_1,--date--,--date--,--date--
+template_3,false,Template 1,Ahh a new template,role_123,Stefani Joanne Angelina Germanotta,user_3,Agnetha Fältskog,user_4,--date--,--date--,--date--
