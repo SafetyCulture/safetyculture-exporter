@@ -11,12 +11,12 @@ import (
 
 // ActionAssignee represents a row from the action_assignees feed
 type ActionAssignee struct {
-	ID             string    `json:"id" csv:"id" gorm:"primarykey"`
-	ActionID       string    `json:"action_id" csv:"action_id"`
-	AssigneeID     string    `json:"assignee_id" csv:"assignee_id"`
-	Type           string    `json:"type" csv:"type"`
+	ID             string    `json:"id" csv:"id" gorm:"primarykey;size:375"`
+	ActionID       string    `json:"action_id" csv:"action_id" gorm:"size:36"`
+	AssigneeID     string    `json:"assignee_id" csv:"assignee_id" gorm:"size:256"`
+	Type           string    `json:"type" csv:"type" gorm:"size:10"`
 	Name           string    `json:"name" csv:"name"`
-	OrganisationID string    `json:"organisation_id" csv:"organisation_id" gorm:"index:idx_act_asg_modified_at"`
+	OrganisationID string    `json:"organisation_id" csv:"organisation_id" gorm:"index:idx_act_asg_modified_at;size:37"`
 	ModifiedAt     time.Time `json:"modified_at" csv:"modified_at" gorm:"index:idx_act_asg_modified_at,sort:desc"`
 	ExportedAt     time.Time `json:"exported_at" csv:"exported_at" gorm:"index:idx_act_asg_modified_at;autoUpdateTime"`
 }

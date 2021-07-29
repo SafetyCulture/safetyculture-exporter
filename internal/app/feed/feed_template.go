@@ -11,15 +11,15 @@ import (
 
 // Template represents a row from the templates feed
 type Template struct {
-	ID             string    `json:"id" csv:"template_id" gorm:"primarykey;column:template_id"`
+	ID             string    `json:"id" csv:"template_id" gorm:"primarykey;column:template_id;size:100"`
 	Archived       bool      `json:"archived" csv:"archived"`
 	Name           string    `json:"name" csv:"name"`
 	Description    string    `json:"description" csv:"description"`
-	OrganisationID string    `json:"organisation_id" csv:"organisation_id" gorm:"index:idx_tml_modified_at"`
+	OrganisationID string    `json:"organisation_id" csv:"organisation_id" gorm:"index:idx_tml_modified_at;size:37"`
 	OwnerName      string    `json:"owner_name" csv:"owner_name"`
-	OwnerID        string    `json:"owner_id" csv:"owner_id"`
+	OwnerID        string    `json:"owner_id" csv:"owner_id" gorm:"size:37"`
 	AuthorName     string    `json:"author_name" csv:"author_name"`
-	AuthorID       string    `json:"author_id" csv:"author_id"`
+	AuthorID       string    `json:"author_id" csv:"author_id" gorm:"size:37"`
 	CreatedAt      time.Time `json:"created_at" csv:"created_at"`
 	ModifiedAt     time.Time `json:"modified_at" csv:"modified_at" gorm:"index:idx_tml_modified_at,sort:desc"`
 	ExportedAt     time.Time `json:"exported_at" csv:"exported_at" gorm:"index:idx_tml_modified_at;autoUpdateTime"`

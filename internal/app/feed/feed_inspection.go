@@ -11,22 +11,22 @@ import (
 
 // Inspection represents a row from the inspections feed
 type Inspection struct {
-	ID              string     `json:"id" csv:"audit_id" gorm:"primarykey;column:audit_id"`
+	ID              string     `json:"id" csv:"audit_id" gorm:"primarykey;column:audit_id;size:38"`
 	Name            string     `json:"name" csv:"name"`
 	Archived        bool       `json:"archived" csv:"archived"`
 	OwnerName       string     `json:"owner_name" csv:"owner_name"`
-	OwnerID         string     `json:"owner_id" csv:"owner_id"`
+	OwnerID         string     `json:"owner_id" csv:"owner_id" gorm:"size:37"`
 	AuthorName      string     `json:"author_name" csv:"author_name"`
-	AuthorID        string     `json:"author_id" csv:"author_id"`
+	AuthorID        string     `json:"author_id" csv:"author_id" gorm:"size:37"`
 	Score           float32    `json:"score" csv:"score"`
 	MaxScore        float32    `json:"max_score" csv:"max_score"`
 	ScorePercentage float32    `json:"score_percentage" csv:"score_percentage"`
 	Duration        int64      `json:"duration" csv:"duration"`
-	TemplateID      string     `json:"template_id" csv:"template_id"`
-	OrganisationID  string     `json:"organisation_id" csv:"organisation_id" gorm:"index:idx_ins_modified_at"`
+	TemplateID      string     `json:"template_id" csv:"template_id" gorm:"size:100"`
+	OrganisationID  string     `json:"organisation_id" csv:"organisation_id" gorm:"index:idx_ins_modified_at;size:37"`
 	TemplateName    string     `json:"template_name" csv:"template_name"`
 	TemplateAuthor  string     `json:"template_author" csv:"template_author"`
-	SiteID          string     `json:"site_id" csv:"site_id"`
+	SiteID          string     `json:"site_id" csv:"site_id" gorm:"size:41"`
 	DateStarted     time.Time  `json:"date_started" csv:"date_started"`
 	DateCompleted   *time.Time `json:"date_completed" csv:"date_completed"`
 	DateModified    time.Time  `json:"date_modified" csv:"date_modified"`

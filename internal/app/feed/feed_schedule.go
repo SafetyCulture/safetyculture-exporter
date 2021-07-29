@@ -11,10 +11,10 @@ import (
 
 // Schedule represents a row from the schedules feed
 type Schedule struct {
-	ID              string     `json:"id" csv:"schedule_id" gorm:"primarykey;column:schedule_id"`
+	ID              string     `json:"id" csv:"schedule_id" gorm:"primarykey;column:schedule_id;size:45"`
 	Description     string     `json:"description" csv:"description"`
-	Recurrence      string     `json:"recurrence" csv:"recurrence"`
-	Duration        string     `json:"duration" csv:"duration"`
+	Recurrence      string     `json:"recurrence" csv:"recurrence" gorm:"size:100"`
+	Duration        string     `json:"duration" csv:"duration" gorm:"size:50"`
 	ModifiedAt      time.Time  `json:"modified_at" csv:"modified_at"`
 	ExportedAt      time.Time  `json:"exported_at" csv:"exported_at" gorm:"autoUpdateTime"`
 	FromDate        time.Time  `json:"from_date" csv:"from_date"`
@@ -22,13 +22,13 @@ type Schedule struct {
 	StartTimeHour   int        `json:"start_time_hour" csv:"start_time_hour"`
 	StartTimeMinute int        `json:"start_time_minute" csv:"start_time_minute"`
 	AllMustComplete bool       `json:"all_must_complete" csv:"all_must_complete"`
-	Status          string     `json:"status" csv:"status"`
-	OrganisationID  string     `json:"organisation_id" csv:"organisation_id"`
+	Status          string     `json:"status" csv:"status" gorm:"size:10"`
+	OrganisationID  string     `json:"organisation_id" csv:"organisation_id" gorm:"size:37"`
 	Timezone        string     `json:"timezone" csv:"timezone"`
 	CanLateSubmit   bool       `json:"can_late_submit" csv:"can_late_submit"`
-	SiteID          string     `json:"site_id" csv:"site_id"`
-	TemplateID      string     `json:"template_id" csv:"template_id"`
-	CreatorUserID   string     `json:"creator_user_id" csv:"creator_user_id"`
+	SiteID          string     `json:"site_id" csv:"site_id" gorm:"size:41"`
+	TemplateID      string     `json:"template_id" csv:"template_id" gorm:"size:100"`
+	CreatorUserID   string     `json:"creator_user_id" csv:"creator_user_id" gorm:"size:37"`
 }
 
 // ScheduleFeed is a representation of the schedules feed

@@ -11,10 +11,10 @@ import (
 
 // Site represents a row from the sites feed
 type Site struct {
-	ID             string    `json:"id" csv:"site_id" gorm:"primarykey;column:site_id"`
+	ID             string    `json:"id" csv:"site_id" gorm:"primarykey;column:site_id;size:41"`
 	Name           string    `json:"name" csv:"name"`
-	CreatorID      string    `json:"creator_id" csv:"creator_id"`
-	OrganisationID string    `json:"organisation_id" csv:"organisation_id"`
+	CreatorID      string    `json:"creator_id" csv:"creator_id" gorm:"size:37"`
+	OrganisationID string    `json:"organisation_id" csv:"organisation_id" gorm:"size:37"`
 	ExportedAt     time.Time `json:"exported_at" csv:"exported_at" gorm:"autoUpdateTime"`
 	Deleted        bool      `json:"deleted" csv:"deleted" gorm:"deleted"`
 }

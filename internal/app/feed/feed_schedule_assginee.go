@@ -11,11 +11,11 @@ import (
 
 // ScheduleAssignee represents a row from the schedule_assignees feed
 type ScheduleAssignee struct {
-	ID             string    `json:"id" csv:"id" gorm:"primarykey"`
-	ScheduleID     string    `json:"schedule_id" csv:"schedule_id"`
-	AssigneeID     string    `json:"assignee_id" csv:"assignee_id"`
-	OrganisationID string    `json:"organisation_id" csv:"organisation_id"`
-	Type           string    `json:"type" csv:"type"`
+	ID             string    `json:"id" csv:"id" gorm:"primarykey;size:100"`
+	ScheduleID     string    `json:"schedule_id" csv:"schedule_id" gorm:"size:45"`
+	AssigneeID     string    `json:"assignee_id" csv:"assignee_id" gorm:"size:37"`
+	OrganisationID string    `json:"organisation_id" csv:"organisation_id" gorm:"size:37"`
+	Type           string    `json:"type" csv:"type" gorm:"size:10"`
 	Name           string    `json:"name" csv:"name"`
 	ExportedAt     time.Time `json:"exported_at" csv:"exported_at" gorm:"autoUpdateTime"`
 }

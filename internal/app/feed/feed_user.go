@@ -11,9 +11,9 @@ import (
 
 // User represents a row from the users feed
 type User struct {
-	ID             string    `json:"id" csv:"user_id" gorm:"primarykey;column:user_id"`
-	OrganisationID string    `json:"organisation_id" csv:"organisation_id"`
-	Email          string    `json:"email" csv:"email"`
+	ID             string    `json:"id" csv:"user_id" gorm:"primarykey;column:user_id;size:37"`
+	OrganisationID string    `json:"organisation_id" csv:"organisation_id" gorm:"size:37"`
+	Email          string    `json:"email" csv:"email" gorm:"size:256"`
 	Firstname      string    `json:"firstname" csv:"firstname"`
 	Lastname       string    `json:"lastname" csv:"lastname"`
 	Active         bool      `json:"active" csv:"active"`
