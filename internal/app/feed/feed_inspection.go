@@ -11,7 +11,7 @@ import (
 
 // Inspection represents a row from the inspections feed
 type Inspection struct {
-	ID              string     `json:"id" csv:"audit_id" gorm:"primarykey;column:audit_id;size:38"`
+	ID              string     `json:"id" csv:"audit_id" gorm:"primarykey;column:audit_id;size:100"`
 	Name            string     `json:"name" csv:"name"`
 	Archived        bool       `json:"archived" csv:"archived"`
 	OwnerName       string     `json:"owner_name" csv:"owner_name"`

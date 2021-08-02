@@ -18,7 +18,7 @@ const maxGoRoutines = 10
 type InspectionItem struct {
 	ID                      string    `json:"id" csv:"id" gorm:"primarykey;size:150"`
 	ItemID                  string    `json:"item_id" csv:"item_id" gorm:"size:100"`
-	AuditID                 string    `json:"audit_id" csv:"audit_id" gorm:"size:38"`
+	AuditID                 string    `json:"audit_id" csv:"audit_id" gorm:"size:100"`
 	ItemIndex               int64     `json:"item_index" csv:"item_index"`
 	TemplateID              string    `json:"template_id" csv:"template_id" gorm:"size:100"`
 	ParentID                string    `json:"parent_id" csv:"parent_id" gorm:"size:100"`

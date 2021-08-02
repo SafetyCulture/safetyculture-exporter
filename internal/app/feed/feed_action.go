@@ -24,7 +24,7 @@ type Action struct {
 	CreatorUserID   string    `json:"creator_user_id" csv:"creator_user_id" gorm:"size:37"`
 	CreatorUserName string    `json:"creator_user_name" csv:"creator_user_name"`
 	TemplateID      string    `json:"template_id" csv:"template_id" gorm:"size:100"`
-	AuditID         string    `json:"audit_id" csv:"audit_id" gorm:"size:38"`
+	AuditID         string    `json:"audit_id" csv:"audit_id" gorm:"size:100"`
 	AuditTitle      string    `json:"audit_title" csv:"audit_title"`
 	AuditItemID     string    `json:"audit_item_id" csv:"audit_item_id" gorm:"size:100"`
 	AuditItemLabel  string    `json:"audit_item_label" csv:"audit_item_label"`

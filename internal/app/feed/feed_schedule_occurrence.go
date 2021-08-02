@@ -18,7 +18,7 @@ type ScheduleOccurrence struct {
 	OrganisationID   string     `json:"organisation_id" csv:"organisation_id" gorm:"size:37"`
 	MissTime         *time.Time `json:"miss_time" csv:"miss_time"`
 	OccurrenceStatus string     `json:"occurrence_status" csv:"occurrence_status" gorm:"size:20"`
-	AuditID          *string    `json:"audit_id" csv:"audit_id" gorm:"size:38"`
+	AuditID          *string    `json:"audit_id" csv:"audit_id" gorm:"size:100"`
 	CompletedAt      *time.Time `json:"completed_at" csv:"completed_at"`
 	ExportedAt       time.Time  `json:"exported_at" csv:"exported_at" gorm:"autoUpdateTime"`
 	UserID           string     `json:"user_id" csv:"user_id" gorm:"size:37"`
