@@ -11,18 +11,18 @@ import (
 
 // ScheduleOccurrence represents a row from the schedule_occurrences feed
 type ScheduleOccurrence struct {
-	ID               string     `json:"id" csv:"id" gorm:"primarykey"`
-	ScheduleID       string     `json:"schedule_id" csv:"schedule_id"`
-	OccurrenceID     string     `json:"occurrence_id" csv:"occurrence_id"`
-	TemplateID       string     `json:"template_id" csv:"template_id"`
-	OrganisationID   string     `json:"organisation_id" csv:"organisation_id"`
+	ID               string     `json:"id" csv:"id" gorm:"primarykey;size:128"`
+	ScheduleID       string     `json:"schedule_id" csv:"schedule_id" gorm:"size:45"`
+	OccurrenceID     string     `json:"occurrence_id" csv:"occurrence_id" gorm:"size:30"`
+	TemplateID       string     `json:"template_id" csv:"template_id" gorm:"size:100"`
+	OrganisationID   string     `json:"organisation_id" csv:"organisation_id" gorm:"size:37"`
 	MissTime         *time.Time `json:"miss_time" csv:"miss_time"`
-	OccurrenceStatus string     `json:"occurrence_status" csv:"occurrence_status"`
-	AuditID          *string    `json:"audit_id" csv:"audit_id"`
+	OccurrenceStatus string     `json:"occurrence_status" csv:"occurrence_status" gorm:"size:20"`
+	AuditID          *string    `json:"audit_id" csv:"audit_id" gorm:"size:100"`
 	CompletedAt      *time.Time `json:"completed_at" csv:"completed_at"`
 	ExportedAt       time.Time  `json:"exported_at" csv:"exported_at" gorm:"autoUpdateTime"`
-	UserID           string     `json:"user_id" csv:"user_id"`
-	AssigneeStatus   string     `json:"assignee_status" csv:"assignee_status"`
+	UserID           string     `json:"user_id" csv:"user_id" gorm:"size:37"`
+	AssigneeStatus   string     `json:"assignee_status" csv:"assignee_status" gorm:"size:20"`
 }
 
 // ScheduleOccurrenceFeed is a representation of the schedule_occurrences feed

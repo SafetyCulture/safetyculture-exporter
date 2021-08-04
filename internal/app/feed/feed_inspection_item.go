@@ -16,24 +16,24 @@ const maxGoRoutines = 10
 
 // InspectionItem represents a row from the inspection_items feed
 type InspectionItem struct {
-	ID                      string    `json:"id" csv:"id" gorm:"primarykey"`
-	ItemID                  string    `json:"item_id" csv:"item_id"`
-	AuditID                 string    `json:"audit_id" csv:"audit_id"`
+	ID                      string    `json:"id" csv:"id" gorm:"primarykey;size:150"`
+	ItemID                  string    `json:"item_id" csv:"item_id" gorm:"size:100"`
+	AuditID                 string    `json:"audit_id" csv:"audit_id" gorm:"size:100"`
 	ItemIndex               int64     `json:"item_index" csv:"item_index"`
-	TemplateID              string    `json:"template_id" csv:"template_id"`
-	ParentID                string    `json:"parent_id" csv:"parent_id"`
+	TemplateID              string    `json:"template_id" csv:"template_id" gorm:"size:100"`
+	ParentID                string    `json:"parent_id" csv:"parent_id" gorm:"size:100"`
 	CreatedAt               time.Time `json:"created_at" csv:"created_at"`
 	ModifiedAt              time.Time `json:"modified_at" csv:"modified_at" gorm:"index:idx_ins_itm_modified_at,sort:desc"`
 	ExportedAt              time.Time `json:"exported_at" csv:"exported_at" gorm:"index:idx_ins_itm_modified_at;autoUpdateTime"`
-	Type                    string    `json:"type" csv:"type"`
+	Type                    string    `json:"type" csv:"type" gorm:"size:20"`
 	Category                string    `json:"category" csv:"category"`
-	CategoryID              string    `json:"category_id" csv:"category_id"`
-	OrganisationID          string    `json:"organisation_id" csv:"organisation_id" gorm:"index:idx_ins_itm_modified_at"`
+	CategoryID              string    `json:"category_id" csv:"category_id" gorm:"size:100"`
+	OrganisationID          string    `json:"organisation_id" csv:"organisation_id" gorm:"index:idx_ins_itm_modified_at;size:37"`
 	ParentIDs               string    `json:"parent_ids" csv:"parent_ids"`
 	Label                   string    `json:"label" csv:"label"`
 	Response                string    `json:"response" csv:"response"`
-	ResponseID              string    `json:"response_id" csv:"response_id"`
-	ResponseSetID           string    `json:"response_set_id" csv:"response_set_id"`
+	ResponseID              string    `json:"response_id" csv:"response_id" gorm:"size:100"`
+	ResponseSetID           string    `json:"response_set_id" csv:"response_set_id" gorm:"size:100"`
 	IsFailedResponse        bool      `json:"is_failed_response" csv:"is_failed_response"`
 	Comment                 string    `json:"comment" csv:"comment"`
 	MediaFiles              string    `json:"media_files" csv:"media_files"`

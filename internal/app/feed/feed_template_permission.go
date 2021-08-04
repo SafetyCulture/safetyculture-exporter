@@ -11,12 +11,12 @@ import (
 
 // TemplatePermission represents a row from the template_permissions feed
 type TemplatePermission struct {
-	ID             string `json:"id" csv:"permission_id" gorm:"primarykey;column:permission_id"`
-	TemplateID     string `json:"template_id" csv:"template_id"`
-	Permission     string `json:"permission" csv:"permission"`
-	AssigneeID     string `json:"assignee_id" csv:"assignee_id"`
-	AssigneeType   string `json:"assignee_type" csv:"assignee_type"`
-	OrganisationID string `json:"organisation_id" csv:"organisation_id"`
+	ID             string `json:"id" csv:"permission_id" gorm:"primarykey;column:permission_id;size:375"`
+	TemplateID     string `json:"template_id" csv:"template_id" gorm:"size:100"`
+	Permission     string `json:"permission" csv:"permission" gorm:"size:10"`
+	AssigneeID     string `json:"assignee_id" csv:"assignee_id" gorm:"size:256"`
+	AssigneeType   string `json:"assignee_type" csv:"assignee_type" gorm:"size:10"`
+	OrganisationID string `json:"organisation_id" csv:"organisation_id" gorm:"size:37"`
 }
 
 // TemplatePermissionFeed is a representation of the template_permissions feed

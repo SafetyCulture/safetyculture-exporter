@@ -11,9 +11,9 @@ import (
 
 // GroupUser represents a row from the group_users feed
 type GroupUser struct {
-	UserID         string    `json:"user_id" csv:"user_id" gorm:"primaryKey"`
-	GroupID        string    `json:"group_id" csv:"group_id" gorm:"primaryKey"`
-	OrganisationID string    `json:"organisation_id" csv:"organisation_id"`
+	UserID         string    `json:"user_id" csv:"user_id" gorm:"primaryKey;size:37"`
+	GroupID        string    `json:"group_id" csv:"group_id" gorm:"primaryKey;size:37"`
+	OrganisationID string    `json:"organisation_id" csv:"organisation_id" gorm:"size:37"`
 	ExportedAt     time.Time `json:"exported_at" csv:"exported_at" gorm:"autoUpdateTime"`
 }
 
