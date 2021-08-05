@@ -166,6 +166,7 @@ type GetFeedParams struct {
 	Completed       string    `url:"completed,omitempty"`
 	IncludeInactive bool      `url:"include_inactive,omitempty"`
 	Limit           int       `url:"limit,omitempty"`
+	WebReportLink   string    `url:"web_report_link,omitempty"`
 
 	// Applicable only for sites
 	IncludeDeleted bool `url:"include_deleted,omitempty"`
