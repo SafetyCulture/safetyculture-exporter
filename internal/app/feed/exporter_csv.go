@@ -59,7 +59,7 @@ func (e *CSVExporter) FinaliseExport(feed Feed, rows interface{}) error {
 	offset := 0
 	rowsAdded := 0
 	var file *os.File
-	for true {
+	for {
 		resp := e.DB.Table(feed.Name()).
 			Order(feed.Order()).
 			Limit(limit).

@@ -315,7 +315,7 @@ func getFileExtension(format string) string {
 
 func getFilePath(exportPath string, inspection *Inspection, format string, filenameConvention string) (string, error) {
 	dupIndex := 0
-	for true {
+	for {
 		fileName := sanitizeName(inspection.Name)
 		if strings.TrimSpace(fileName) == "" || filenameConvention == "INSPECTION_ID" {
 			fileName = inspection.ID
