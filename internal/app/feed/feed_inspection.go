@@ -53,6 +53,7 @@ type InspectionFeed struct {
 	Completed     string
 	Incremental   bool
 	Limit         int
+	WebReportLink string
 }
 
 // Name is the name of the feed
@@ -160,14 +161,14 @@ func (f *InspectionFeed) Export(ctx context.Context, apiClient *api.Client, expo
 
 	exporter.InitFeed(f, &InitFeedOptions{
 		// Delete data if incremental refresh is disabled so there is no duplicates
-		Truncate: f.Incremental == false,
+		Truncate: !f.Incremental,
 	})
 
 	var err error
 	f.ModifiedAfter, err = exporter.LastModifiedAt(f, f.ModifiedAfter, orgID)
 	util.Check(err, "unable to load modified after")
 
-	logger.Infof("%s: exporting for org_id: %s since: %s", feedName, orgID, f.ModifiedAfter.Format(time.RFC1123))
+	logger.Infof("%s: exporting for org_id: %s since: %s - %s", feedName, orgID, f.ModifiedAfter.Format(time.RFC1123), f.WebReportLink)
 
 	err = apiClient.DrainFeed(ctx, &api.GetFeedRequest{
 		InitialURL: "/feed/inspections",
@@ -177,6 +178,7 @@ func (f *InspectionFeed) Export(ctx context.Context, apiClient *api.Client, expo
 			Archived:      f.Archived,
 			Completed:     f.Completed,
 			Limit:         f.Limit,
+			WebReportLink: f.WebReportLink,
 		},
 	}, func(resp *api.GetFeedResponse) error {
 		rows := []*Inspection{}

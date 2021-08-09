@@ -116,6 +116,7 @@ func configFlags() {
 	inspectionFlags.String("inspection-archived", "false", "Return archived inspections, false, true or both")
 	inspectionFlags.String("inspection-completed", "true", "Return completed inspections, false, true or both")
 	inspectionFlags.Int("inspection-limit", 100, "Number of inspections fetched at once. Lower this number if the exporter fails to load the data")
+	inspectionFlags.String("inspection-web-report-link", "private", "Web report link format. Can be public or private")
 
 	templatesFlag = flag.NewFlagSet("templates", flag.ContinueOnError)
 	templatesFlag.StringSlice("template-ids", []string{}, "Template IDs to filter inspections and schedules by (default all)")
@@ -162,6 +163,7 @@ func bindFlags() {
 	util.Check(viper.BindPFlag("export.inspection.completed", inspectionFlags.Lookup("inspection-completed")), "while binding flag")
 	util.Check(viper.BindPFlag("export.inspection.skip_ids", inspectionFlags.Lookup("inspection-skip-ids")), "while binding flag")
 	util.Check(viper.BindPFlag("export.inspection.limit", inspectionFlags.Lookup("inspection-limit")), "while binding flag")
+	util.Check(viper.BindPFlag("export.inspection.web_report_link", inspectionFlags.Lookup("inspection-web-report-link")), "while binding flag")
 
 	util.Check(viper.BindPFlag("export.site.include_deleted", sitesFlags.Lookup("site-include-deleted")), "while binding flag")
 

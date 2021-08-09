@@ -72,6 +72,7 @@ func getInspectionFeed(v *viper.Viper, inspectionConfig *config.InspectionConfig
 		Completed:     inspectionConfig.Completed,
 		Incremental:   inspectionConfig.Incremental,
 		Limit:         inspectionConfig.Limit,
+		WebReportLink: inspectionConfig.WebReportLink,
 	}
 }
 

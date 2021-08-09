@@ -14,6 +14,7 @@ type InspectionConfig struct {
 	Completed     string
 	Incremental   bool
 	Limit         int
+	WebReportLink string
 }
 
 // GetInspectionConfig returns configurations that have been set for fetching inspections
@@ -25,5 +26,6 @@ func GetInspectionConfig(v *viper.Viper) *InspectionConfig {
 		Completed:     v.GetString("export.inspection.completed"),
 		Limit:         v.GetInt("export.inspection.limit"),
 		Incremental:   v.GetBool("export.incremental"),
+		WebReportLink: v.GetString("export.inspection.web_report_link"),
 	}
 }
