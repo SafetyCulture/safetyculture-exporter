@@ -467,6 +467,7 @@ func TestCSVExporterFinaliseExport_should_write_rows_to_multiple_file(t *testing
 	assert.Nil(t, err)
 
 	files, err := filepath.Glob(filepath.Join(exporter.ExportPath, "users*.csv"))
+	assert.Nil(t, err)
 	assert.Equal(t, 2, len(files))
 
 	content1, err := ioutil.ReadFile(files[0])

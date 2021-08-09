@@ -75,7 +75,7 @@ func (f *ActionAssigneeFeed) Export(ctx context.Context, apiClient *api.Client, 
 
 	exporter.InitFeed(f, &InitFeedOptions{
 		// Delete data if incremental refresh is disabled so there is no duplicates
-		Truncate: f.Incremental == false,
+		Truncate: !f.Incremental,
 	})
 
 	var err error

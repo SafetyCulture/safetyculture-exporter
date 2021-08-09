@@ -141,7 +141,6 @@ func TestHandlesOverWrittingLongString(t *testing.T) {
 func TestWriteRow(t *testing.T) {
 	tmpExporter := getTemporaryJSONExporter()
 	str := `{"abc": 123}`
-	var tmp json.RawMessage
-	tmp = []byte(str)
+	var tmp json.RawMessage = []byte(str)
 	tmpExporter.WriteRow("tmp-file", &tmp)
 }

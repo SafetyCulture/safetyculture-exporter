@@ -88,7 +88,6 @@ func getTestingSQLExporter() (*feed.SQLExporter, error) {
 	case "postgres", "mysql", "sqlserver":
 		dbResp := exporter.DB.Exec(fmt.Sprintf(`CREATE DATABASE %s;`, dbName))
 		err = dbResp.Error
-		break
 	case "sqlite":
 		return exporter, nil
 	default:

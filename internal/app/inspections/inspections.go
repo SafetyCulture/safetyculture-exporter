@@ -64,8 +64,6 @@ func throttleFunc(tfunc func(api.Inspection), inspection api.Inspection, guard c
 	guard <- struct{}{}
 	tfunc(inspection)
 	<-guard
-
-	return
 }
 
 func (client *inspectionClient) Export(ctx context.Context) error {

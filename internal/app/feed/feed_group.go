@@ -69,7 +69,7 @@ func (f *GroupFeed) Export(ctx context.Context, apiClient *api.Client, exporter 
 	exporter.InitFeed(f, &InitFeedOptions{
 		// Truncate files if upserts aren't supported.
 		// This ensure that the export does not contain duplicate rows
-		Truncate: exporter.SupportsUpsert() == false,
+		Truncate: !exporter.SupportsUpsert(),
 	})
 
 	err := apiClient.DrainFeed(ctx, &api.GetFeedRequest{

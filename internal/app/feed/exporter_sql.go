@@ -133,7 +133,7 @@ func (e *SQLExporter) FinaliseExport(feed Feed, rows interface{}) error {
 // WriteMedia writes the media to a file
 func (e *SQLExporter) WriteMedia(auditID, mediaID, contentType string, body []byte) error {
 
-	exportMediaDir := filepath.Join(e.ExportMediaPath, fmt.Sprintf("%s", auditID))
+	exportMediaDir := filepath.Join(e.ExportMediaPath, auditID)
 	err := os.MkdirAll(exportMediaDir, os.ModePerm)
 	util.Check(err, fmt.Sprintf("Failed to create directory %s", exportMediaDir))
 
@@ -162,16 +162,12 @@ func NewSQLExporter(dialect, connectionString string, autoMigrate bool, exportMe
 	switch dialect {
 	case "mysql":
 		dialector = mysql.Open(connectionString)
-		break
 	case "postgres":
 		dialector = postgres.Open(connectionString)
-		break
 	case "sqlserver":
 		dialector = sqlserver.Open(connectionString)
-		break
 	case "sqlite":
 		dialector = sqlite.Open(connectionString)
-		break
 	default:
 		return nil, fmt.Errorf("Invalid database dialect %s", dialect)
 	}
