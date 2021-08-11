@@ -19,8 +19,8 @@ type Action struct {
 	Status          string    `json:"status" csv:"status" gorm:"size:64000"`
 	DueDate         time.Time `json:"due_date" csv:"due_date"`
 	CreatedAt       time.Time `json:"created_at" csv:"created_at"`
-	ModifiedAt      time.Time `json:"modified_at" csv:"modified_at"`
-	ExportedAt      time.Time `json:"exported_at" csv:"exported_at" gorm:"autoUpdateTime"`
+	ModifiedAt      time.Time `json:"modified_at" csv:"modified_at" gorm:"index:idx_act_modified_at,sort:desc"`
+	ExportedAt      time.Time `json:"exported_at" csv:"exported_at" gorm:"index:idx_act_modified_at;autoUpdateTime"`
 	CreatorUserID   string    `json:"creator_user_id" csv:"creator_user_id"`
 	CreatorUserName string    `json:"creator_user_name" csv:"creator_user_name" gorm:"size:64000"`
 	TemplateID      string    `json:"template_id" csv:"template_id"`
@@ -28,6 +28,7 @@ type Action struct {
 	AuditTitle      string    `json:"audit_title" csv:"audit_title" gorm:"size:64000"`
 	AuditItemID     string    `json:"audit_item_id" csv:"audit_item_id"`
 	AuditItemLabel  string    `json:"audit_item_label" csv:"audit_item_label" gorm:"size:64000"`
+	OrganisationID  string    `json:"organisation_id" csv:"organisation_id" gorm:"index:idx_act_modified_at"`
 }
 
 // ActionFeed is a representation of the actions feed
@@ -75,6 +76,7 @@ func (f *ActionFeed) Columns() []string {
 		"audit_title",
 		"audit_item_id",
 		"audit_item_label",
+		"organisation_id",
 	}
 }
 
@@ -89,7 +91,7 @@ func (f *ActionFeed) CreateSchema(exporter Exporter) error {
 }
 
 // Export exports the feed to the supplied exporter
-func (f *ActionFeed) Export(ctx context.Context, apiClient *api.Client, exporter Exporter) error {
+func (f *ActionFeed) Export(ctx context.Context, apiClient *api.Client, exporter Exporter, orgID string) error {
 	logger := util.GetLogger()
 	feedName := f.Name()
 
@@ -99,10 +101,10 @@ func (f *ActionFeed) Export(ctx context.Context, apiClient *api.Client, exporter
 	})
 
 	var err error
-	f.ModifiedAfter, err = exporter.LastModifiedAt(f, f.ModifiedAfter)
+	f.ModifiedAfter, err = exporter.LastModifiedAt(f, f.ModifiedAfter, orgID)
 	util.Check(err, "unable to load modified after")
 
-	logger.Infof("%s: exporting since %s", feedName, f.ModifiedAfter.Format(time.RFC1123))
+	logger.Infof("%s: exporting for org_id: %s since: %s", feedName, orgID, f.ModifiedAfter.Format(time.RFC1123))
 
 	err = apiClient.DrainFeed(ctx, &api.GetFeedRequest{
 		InitialURL: "/feed/actions",

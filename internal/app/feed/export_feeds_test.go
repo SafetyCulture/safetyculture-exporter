@@ -6,6 +6,7 @@ import (
 
 	"github.com/SafetyCulture/iauditor-exporter/internal/app/api"
 	"github.com/SafetyCulture/iauditor-exporter/internal/app/feed"
+	"gopkg.in/h2non/gock.v1"
 
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
@@ -38,6 +39,8 @@ func TestCreateSchemas_should_create_all_schemas_to_file(t *testing.T) {
 }
 
 func TestExportFeeds_should_export_all_feeds_to_file(t *testing.T) {
+	defer gock.Off()
+
 	exporter, err := getTemporaryCSVExporter()
 	assert.Nil(t, err)
 
@@ -46,6 +49,18 @@ func TestExportFeeds_should_export_all_feeds_to_file(t *testing.T) {
 
 	apiClient := api.GetTestClient()
 	initMockFeedsSet1(apiClient.HTTPClient())
+
+	gock.New("http://localhost:9999").
+		Get("/accounts/user/v1/user:WhoAmI").
+		Reply(200).
+		BodyString(`
+		{
+			"user_id": "user_123",
+			"organisation_id": "role_123",
+			"firstname": "Test",
+			"lastname": "Test"
+		  }
+		`)
 
 	err = feed.ExportFeeds(viperConfig, apiClient, exporter)
 	assert.Nil(t, err)
@@ -72,6 +87,21 @@ func TestExportFeeds_should_export_all_feeds_to_file(t *testing.T) {
 // Expectation of this test is that group_users and schedule_assignees are truncated and refreshed
 // and that other tables are incrementally updated
 func TestExportFeeds_should_perform_incremental_update_on_second_run(t *testing.T) {
+	defer gock.Off()
+
+	gock.New("http://localhost:9999").
+		Get("/accounts/user/v1/user:WhoAmI").
+		Times(2).
+		Reply(200).
+		BodyString(`
+		{
+			"user_id": "user_123",
+			"organisation_id": "role_123",
+			"firstname": "Test",
+			"lastname": "Test"
+		  }
+		`)
+
 	exporter, err := getTemporaryCSVExporter()
 	assert.Nil(t, err)
 
@@ -110,6 +140,8 @@ func TestExportFeeds_should_perform_incremental_update_on_second_run(t *testing.
 }
 
 func TestExportFeeds_should_handle_lots_of_rows_ok(t *testing.T) {
+	defer gock.Off()
+
 	exporter, err := getTemporaryCSVExporter()
 	assert.Nil(t, err)
 
@@ -118,6 +150,18 @@ func TestExportFeeds_should_handle_lots_of_rows_ok(t *testing.T) {
 
 	apiClient := api.GetTestClient()
 	initMockFeedsSet3(apiClient.HTTPClient())
+
+	gock.New("http://localhost:9999").
+		Get("/accounts/user/v1/user:WhoAmI").
+		Reply(200).
+		BodyString(`
+		{
+			"user_id": "user_123",
+			"organisation_id": "role_123",
+			"firstname": "Test",
+			"lastname": "Test"
+		  }
+		`)
 
 	err = feed.ExportFeeds(viperConfig, apiClient, exporter)
 	assert.Nil(t, err)

@@ -11,17 +11,18 @@ import (
 
 // Template represents a row from the templates feed
 type Template struct {
-	ID          string    `json:"id" csv:"template_id" gorm:"primarykey;column:template_id"`
-	Archived    bool      `json:"archived" csv:"archived"`
-	Name        string    `json:"name" csv:"name" gorm:"size:64000"`
-	Description string    `json:"description" csv:"description" gorm:"size:64000"`
-	OwnerName   string    `json:"owner_name" csv:"owner_name" gorm:"size:64000"`
-	OwnerID     string    `json:"owner_id" csv:"owner_id"`
-	AuthorName  string    `json:"author_name" csv:"author_name" gorm:"size:64000"`
-	AuthorID    string    `json:"author_id" csv:"author_id"`
-	CreatedAt   time.Time `json:"created_at" csv:"created_at"`
-	ModifiedAt  time.Time `json:"modified_at" csv:"modified_at"`
-	ExportedAt  time.Time `json:"exported_at" csv:"exported_at" gorm:"autoUpdateTime"`
+	ID             string    `json:"id" csv:"template_id" gorm:"primarykey;column:template_id"`
+	Archived       bool      `json:"archived" csv:"archived"`
+	Name           string    `json:"name" csv:"name"`
+	Description    string    `json:"description" csv:"description" gorm:"size:64000"`
+	OrganisationID string    `json:"organisation_id" csv:"organisation_id" gorm:"index:idx_tml_modified_at"`
+	OwnerName      string    `json:"owner_name" csv:"owner_name" gorm:"size:64000"`
+	OwnerID        string    `json:"owner_id" csv:"owner_id"`
+	AuthorName     string    `json:"author_name" csv:"author_name" gorm:"size:64000"`
+	AuthorID       string    `json:"author_id" csv:"author_id"`
+	CreatedAt      time.Time `json:"created_at" csv:"created_at"`
+	ModifiedAt     time.Time `json:"modified_at" csv:"modified_at" gorm:"index:idx_tml_modified_at,sort:desc"`
+	ExportedAt     time.Time `json:"exported_at" csv:"exported_at" gorm:"index:idx_tml_modified_at;autoUpdateTime"`
 }
 
 // TemplateFeed is a representation of the templates feed
@@ -56,6 +57,7 @@ func (f *TemplateFeed) Columns() []string {
 		"archived",
 		"name",
 		"description",
+		"organisation_id",
 		"owner_name",
 		"owner_id",
 		"author_name",
@@ -77,7 +79,7 @@ func (f *TemplateFeed) CreateSchema(exporter Exporter) error {
 }
 
 // Export exports the feed to the supplied exporter
-func (f *TemplateFeed) Export(ctx context.Context, apiClient *api.Client, exporter Exporter) error {
+func (f *TemplateFeed) Export(ctx context.Context, apiClient *api.Client, exporter Exporter, orgID string) error {
 	logger := util.GetLogger()
 	feedName := f.Name()
 
@@ -87,10 +89,10 @@ func (f *TemplateFeed) Export(ctx context.Context, apiClient *api.Client, export
 	})
 
 	var err error
-	f.ModifiedAfter, err = exporter.LastModifiedAt(f, f.ModifiedAfter)
+	f.ModifiedAfter, err = exporter.LastModifiedAt(f, f.ModifiedAfter, orgID)
 	util.Check(err, "unable to load modified after")
 
-	logger.Infof("%s: exporting since %s", feedName, f.ModifiedAfter.Format(time.RFC1123))
+	logger.Infof("%s: exporting for org_id: %s since: %s", feedName, orgID, f.ModifiedAfter.Format(time.RFC1123))
 
 	err = apiClient.DrainFeed(ctx, &api.GetFeedRequest{
 		InitialURL: "/feed/templates",

@@ -32,29 +32,27 @@ func NewJSONExporter(exportPath string) Exporter {
 
 // SetLastModifiedAt writes last modified date to a file
 func (e *JSONExporter) SetLastModifiedAt(modifiedAt time.Time) {
-
-	exportFilePath := filepath.Join(e.exportPath, fmt.Sprintf("%s", lastModified))
+	exportFilePath := filepath.Join(e.exportPath, lastModified)
 	if e.lastModifiedFile == nil {
 		var err error
 		e.lastModifiedFile, err = os.OpenFile(exportFilePath, os.O_RDWR|os.O_CREATE, 0666)
 		util.Check(err, "Failed to open last-modified file")
 	}
 
-	str := fmt.Sprintf("%s", modifiedAt.Format(layout))
-	_, err := e.lastModifiedFile.WriteAt([]byte(str), 0)
+	err := e.lastModifiedFile.Truncate(0)
+	util.Check(err, "Failed to truncate last-modified to a file")
+	_, err = e.lastModifiedFile.WriteAt([]byte(modifiedAt.Format(layout)), 0)
 	util.Check(err, "Failed to write last-modified to a file")
 
 	err = e.lastModifiedFile.Sync()
 	util.Check(err, "Failed to write last-modified to a file")
-
-	return
 }
 
 // GetLastModifiedAt returns last modified timestamp
 // Value from config-path(modifiedAfter) -> (A)
 // Value from last-modified file -> (B)
 func (e *JSONExporter) GetLastModifiedAt(modifiedAfter time.Time) *time.Time {
-	exportFilePath := filepath.Join(e.exportPath, fmt.Sprintf("%s", lastModified))
+	exportFilePath := filepath.Join(e.exportPath, lastModified)
 	_, err := os.Stat(exportFilePath)
 	if os.IsNotExist(err) {
 		return &modifiedAfter
@@ -84,6 +82,7 @@ func (e *JSONExporter) GetLastModifiedAt(modifiedAfter time.Time) *time.Time {
 // WriteRow writes the json response into a file
 func (e *JSONExporter) WriteRow(name string, row *json.RawMessage) {
 	str, err := json.MarshalIndent(row, "", " ")
+	util.Check(err, "Failed to marshal inspection to JSON")
 
 	exportFilePath := filepath.Join(e.exportPath, fmt.Sprintf("%s.json", name))
 	file, err := os.OpenFile(exportFilePath, os.O_RDWR|os.O_CREATE, 0666)
@@ -92,6 +91,4 @@ func (e *JSONExporter) WriteRow(name string, row *json.RawMessage) {
 
 	_, err = file.WriteAt([]byte(str), 0)
 	util.Check(err, "Failed to write inspection to a file")
-
-	return
 }

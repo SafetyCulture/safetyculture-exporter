@@ -66,11 +66,11 @@ func (f *UserFeed) CreateSchema(exporter Exporter) error {
 }
 
 // Export exports the feed to the supplied exporter
-func (f *UserFeed) Export(ctx context.Context, apiClient *api.Client, exporter Exporter) error {
+func (f *UserFeed) Export(ctx context.Context, apiClient *api.Client, exporter Exporter, orgID string) error {
 	logger := util.GetLogger()
 	feedName := f.Name()
 
-	logger.Infof("%s: exporting", feedName)
+	logger.Infof("%s: exporting for org_id: %s", feedName, orgID)
 
 	exporter.InitFeed(f, &InitFeedOptions{
 		// Truncate files if upserts aren't supported.

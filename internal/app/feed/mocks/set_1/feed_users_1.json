@@ -10,7 +10,8 @@
       "email": "tests+dwight.schrute@safetyculture.io",
       "firstname": "Dwight",
       "lastname": "Schrute",
-      "active": true
+      "active": true,
+      "organisation_id": "role_123"
     },
     {
       "id": "user_2",
@@ -18,7 +19,8 @@
       "email": "tests+abraham.lincoln@safetyculture.io",
       "firstname": "Abraham",
       "lastname": "Lincoln",
-      "active": true
+      "active": true,
+      "organisation_id": "role_123"
     },
     {
       "id": "user_3",
@@ -26,7 +28,8 @@
       "email": "tests+stefani.joanne.angelina.germanotta@safetyculture.io",
       "firstname": "Stefani Joanne Angelina",
       "lastname": "Germanotta",
-      "active": true
+      "active": true,
+      "organisation_id": "role_123"
     },
     {
       "id": "user_4",
@@ -34,7 +37,8 @@
       "email": "tests+Agnetha.Fältskog@safetyculture.io",
       "firstname": "Agnetha",
       "lastname": "Fältskog",
-      "active": false
+      "active": false,
+      "organisation_id": "role_123"
     }
   ]
 }

@@ -14,7 +14,8 @@
       "author_name": "Dwight Schrute",
       "author_id": "user_1",
       "created_at": "2013-05-09T01:36:40.084Z",
-      "modified_at": "2013-05-09T01:36:33.000Z"
+      "modified_at": "2013-05-09T01:36:33.000Z",
+      "organisation_id": "role_123"
     },
     {
       "id": "template_2",
@@ -26,7 +27,8 @@
       "author_name": "Dwight Schrute",
       "author_id": "user_1",
       "created_at": "2013-03-15T05:18:55.788Z",
-      "modified_at": "2013-11-14T03:34:19.000Z"
+      "modified_at": "2013-11-14T03:34:19.000Z",
+      "organisation_id": "role_123"
     },
     {
       "id": "template_3",
@@ -38,7 +40,8 @@
       "author_name": "Agnetha Fältskog",
       "author_id": "user_4",
       "created_at": "2014-04-11T07:14:38.360Z",
-      "modified_at": "2014-04-08T01:42:49.000Z"
+      "modified_at": "2014-04-08T01:42:49.000Z",
+      "organisation_id": "role_123"
     }
   ]
 }

@@ -124,6 +124,11 @@ func ExportFeeds(v *viper.Viper, apiClient *api.Client, exporter Exporter) error
 
 	// TODO. Should validate auth before doing anything
 
+	resp, err := apiClient.WhoAmI(ctx)
+	util.Check(err, "failed to get details of the current user")
+
+	logger.Infof("Exporting data by user: %s %s", resp.Firstname, resp.Lastname)
+
 	for _, feed := range GetFeeds(v) {
 		if tablesMap[feed.Name()] || len(tables) == 0 {
 			wg.Add(1)
@@ -131,7 +136,7 @@ func ExportFeeds(v *viper.Viper, apiClient *api.Client, exporter Exporter) error
 			go func(f Feed) {
 				defer wg.Done()
 
-				err := f.Export(ctx, apiClient, exporter)
+				err := f.Export(ctx, apiClient, exporter, resp.OrganisationID)
 				util.Check(err, "failed to export")
 			}(feed)
 		}
@@ -149,8 +154,13 @@ func ExportInspectionReports(v *viper.Viper, apiClient *api.Client, exporter *Re
 	logger := util.GetLogger()
 	ctx := context.Background()
 
+	resp, err := apiClient.WhoAmI(ctx)
+	util.Check(err, "failed to get details of the current user")
+
+	logger.Infof("Exporting inspection reports by user: %s %s", resp.Firstname, resp.Lastname)
+
 	feed := getInspectionFeed(v, config.GetInspectionConfig(v), getTemplateIDs(v))
-	err := feed.Export(ctx, apiClient, exporter)
+	err = feed.Export(ctx, apiClient, exporter, resp.OrganisationID)
 	util.Check(err, "failed to export inspection feed")
 
 	err = exporter.SaveReports(ctx, apiClient, feed)

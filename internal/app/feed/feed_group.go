@@ -11,9 +11,10 @@ import (
 
 // Group represents a row from the groups feed
 type Group struct {
-	ID         string    `json:"id" csv:"group_id" gorm:"primarykey;column:group_id"`
-	Name       string    `json:"name" csv:"name" gorm:"size:64000"`
-	ExportedAt time.Time `json:"exported_at" csv:"exported_at" gorm:"autoUpdateTime"`
+	ID             string    `json:"id" csv:"group_id" gorm:"primarykey;column:group_id"`
+	Name           string    `json:"name" csv:"name" gorm:"size:64000"`
+	OrganisationID string    `json:"organisation_id" csv:"organisation_id"`
+	ExportedAt     time.Time `json:"exported_at" csv:"exported_at" gorm:"autoUpdateTime"`
 }
 
 // GroupFeed is a representation of the groups feed
@@ -43,6 +44,7 @@ func (f *GroupFeed) PrimaryKey() []string {
 func (f *GroupFeed) Columns() []string {
 	return []string{
 		"name",
+		"organisation_id",
 		"exported_at",
 	}
 }
@@ -58,11 +60,11 @@ func (f *GroupFeed) CreateSchema(exporter Exporter) error {
 }
 
 // Export exports the feed to the supplied exporter
-func (f *GroupFeed) Export(ctx context.Context, apiClient *api.Client, exporter Exporter) error {
+func (f *GroupFeed) Export(ctx context.Context, apiClient *api.Client, exporter Exporter, orgID string) error {
 	logger := util.GetLogger()
 	feedName := f.Name()
 
-	logger.Infof("%s: exporting", feedName)
+	logger.Infof("%s: exporting for org_id: %s", feedName, orgID)
 
 	exporter.InitFeed(f, &InitFeedOptions{
 		// Truncate files if upserts aren't supported.

@@ -23,11 +23,12 @@ type InspectionItem struct {
 	TemplateID              string    `json:"template_id" csv:"template_id"`
 	ParentID                string    `json:"parent_id" csv:"parent_id"`
 	CreatedAt               time.Time `json:"created_at" csv:"created_at"`
-	ModifiedAt              time.Time `json:"modified_at" csv:"modified_at"`
-	ExportedAt              time.Time `json:"exported_at" csv:"exported_at" gorm:"autoUpdateTime"`
+	ModifiedAt              time.Time `json:"modified_at" csv:"modified_at" gorm:"index:idx_ins_itm_modified_at,sort:desc"`
+	ExportedAt              time.Time `json:"exported_at" csv:"exported_at" gorm:"index:idx_ins_itm_modified_at;autoUpdateTime"`
 	Type                    string    `json:"type" csv:"type" gorm:"size:64000"`
 	Category                string    `json:"category" csv:"category" gorm:"size:64000"`
 	CategoryID              string    `json:"category_id" csv:"category_id"`
+	OrganisationID          string    `json:"organisation_id" csv:"organisation_id" gorm:"index:idx_ins_itm_modified_at"`
 	ParentIDs               string    `json:"parent_ids" csv:"parent_ids" gorm:"size:64000"`
 	Label                   string    `json:"label" csv:"label" gorm:"size:64000"`
 	Response                string    `json:"response" csv:"response" gorm:"size:64000"`
@@ -90,6 +91,7 @@ func (f *InspectionItemFeed) Columns() []string {
 		"type",
 		"category",
 		"category_id",
+		"organisation_id",
 		"parent_ids",
 		"label",
 		"response",
@@ -206,7 +208,7 @@ func (f *InspectionItemFeed) CreateSchema(exporter Exporter) error {
 }
 
 // Export exports the feed to the supplied exporter
-func (f *InspectionItemFeed) Export(ctx context.Context, apiClient *api.Client, exporter Exporter) error {
+func (f *InspectionItemFeed) Export(ctx context.Context, apiClient *api.Client, exporter Exporter, orgID string) error {
 	logger := util.GetLogger()
 	feedName := f.Name()
 
@@ -216,10 +218,10 @@ func (f *InspectionItemFeed) Export(ctx context.Context, apiClient *api.Client, 
 	})
 
 	var err error
-	f.ModifiedAfter, err = exporter.LastModifiedAt(f, f.ModifiedAfter)
+	f.ModifiedAfter, err = exporter.LastModifiedAt(f, f.ModifiedAfter, orgID)
 	util.Check(err, "unable to load modified after")
 
-	logger.Infof("%s: exporting since %s", feedName, f.ModifiedAfter.Format(time.RFC1123))
+	logger.Infof("%s: exporting for org_id: %s since: %s", feedName, orgID, f.ModifiedAfter.Format(time.RFC1123))
 
 	err = apiClient.DrainFeed(ctx, &api.GetFeedRequest{
 		InitialURL: "/feed/inspection_items",

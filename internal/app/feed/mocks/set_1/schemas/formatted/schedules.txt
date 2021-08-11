@@ -13,6 +13,7 @@
 | start_time_minute | integer  |             |
 | all_must_complete | numeric  |             |
 | status            | text     |             |
+| organisation_id   | text     |             |
 | timezone          | text     |             |
 | can_late_submit   | numeric  |             |
 | site_id           | text     |             |

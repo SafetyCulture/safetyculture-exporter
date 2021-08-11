@@ -220,10 +220,53 @@ func TestCSVExporterLastModifiedAt_should_return_latest_modified_at(t *testing.T
 	err = exporter.WriteRows(inspectionFeed, inspections)
 	assert.Nil(t, err)
 
-	lastModifiedAt, err := exporter.LastModifiedAt(inspectionFeed, time.Now().Add(time.Hour*-30000))
+	// Check the timestamp for the audits that doesn't have organisation_id
+	lastModifiedAt, err := exporter.LastModifiedAt(inspectionFeed, time.Now().Add(time.Hour*-30000), "role_123")
 	assert.Nil(t, err)
 	// Times are slightly lossy, convery to ISO string
 	assert.Equal(t, now.Format(time.RFC3339), lastModifiedAt.Format(time.RFC3339))
+
+	lastModifiedAt, err = exporter.LastModifiedAt(inspectionFeed, time.Now().Add(time.Hour*-30000), "role_1234")
+	assert.Nil(t, err)
+	// Times are slightly lossy, convery to ISO string
+	assert.Equal(t, now.Format(time.RFC3339), lastModifiedAt.Format(time.RFC3339))
+
+	inspections = []feed.Inspection{
+		{
+			ID:             "audit_5",
+			ModifiedAt:     now,
+			OrganisationID: "role_123",
+		},
+		{
+			ID:             "audit_6",
+			ModifiedAt:     now.Add(time.Hour * -128),
+			OrganisationID: "role_123",
+		},
+		{
+			ID:             "audit_7",
+			ModifiedAt:     now.Add(time.Hour * -3000),
+			OrganisationID: "role_1234",
+		},
+		{
+			ID:             "audit_8",
+			ModifiedAt:     now.Add(time.Hour * -2),
+			OrganisationID: "role_1234",
+		},
+	}
+
+	err = exporter.WriteRows(inspectionFeed, inspections)
+	assert.Nil(t, err)
+
+	// Check the timestamp for the audits that contains organisation_id
+	lastModifiedAt, err = exporter.LastModifiedAt(inspectionFeed, time.Now().Add(time.Hour*-30000), "role_123")
+	assert.Nil(t, err)
+	// Times are slightly lossy, convery to ISO string
+	assert.Equal(t, now.Format(time.RFC3339), lastModifiedAt.Format(time.RFC3339))
+
+	lastModifiedAt, err = exporter.LastModifiedAt(inspectionFeed, time.Now().Add(time.Hour*-30000), "role_1234")
+	assert.Nil(t, err)
+	// Times are slightly lossy, convery to ISO string
+	assert.Equal(t, now.Add(time.Hour*-2).Format(time.RFC3339), lastModifiedAt.Format(time.RFC3339))
 }
 
 func TestCSVExporterLastModifiedAt_should_return_modified_after_if_latest(t *testing.T) {
@@ -260,7 +303,50 @@ func TestCSVExporterLastModifiedAt_should_return_modified_after_if_latest(t *tes
 	err = exporter.WriteRows(inspectionFeed, inspections)
 	assert.Nil(t, err)
 
-	lastModifiedAt, err := exporter.LastModifiedAt(inspectionFeed, now.Add(time.Hour))
+	// Check the timestamp for the audits that doesn't have organisation_id
+	lastModifiedAt, err := exporter.LastModifiedAt(inspectionFeed, now.Add(time.Hour), "role_123")
+	assert.Nil(t, err)
+	// Times are slightly lossy, converting to ISO string
+	assert.Equal(t, now.Add(time.Hour).Format(time.RFC3339), lastModifiedAt.Format(time.RFC3339))
+
+	lastModifiedAt, err = exporter.LastModifiedAt(inspectionFeed, now.Add(time.Hour), "role_124")
+	assert.Nil(t, err)
+	// Times are slightly lossy, converting to ISO string
+	assert.Equal(t, now.Add(time.Hour).Format(time.RFC3339), lastModifiedAt.Format(time.RFC3339))
+
+	inspections = []feed.Inspection{
+		{
+			ID:             "audit_5",
+			ModifiedAt:     now,
+			OrganisationID: "role_123",
+		},
+		{
+			ID:             "audit_6",
+			ModifiedAt:     now.Add(time.Hour * -128),
+			OrganisationID: "role_123",
+		},
+		{
+			ID:             "audit_7",
+			ModifiedAt:     now.Add(time.Hour * -3000),
+			OrganisationID: "role_1234",
+		},
+		{
+			ID:             "audit_8",
+			ModifiedAt:     now.Add(time.Hour * -2),
+			OrganisationID: "role_1234",
+		},
+	}
+
+	err = exporter.WriteRows(inspectionFeed, inspections)
+	assert.Nil(t, err)
+
+	// Check the timestamp for the audits that contains organisation_id
+	lastModifiedAt, err = exporter.LastModifiedAt(inspectionFeed, now.Add(time.Hour), "role_123")
+	assert.Nil(t, err)
+	// Times are slightly lossy, converting to ISO string
+	assert.Equal(t, now.Add(time.Hour).Format(time.RFC3339), lastModifiedAt.Format(time.RFC3339))
+
+	lastModifiedAt, err = exporter.LastModifiedAt(inspectionFeed, now.Add(time.Hour), "role_124")
 	assert.Nil(t, err)
 	// Times are slightly lossy, converting to ISO string
 	assert.Equal(t, now.Add(time.Hour).Format(time.RFC3339), lastModifiedAt.Format(time.RFC3339))
@@ -337,4 +423,68 @@ user_1,role_123,user.1@test.com,User 1,User 1,false,--date--
 user_2,role_123,user.2@test.com,User 2,User 2,false,--date--
 user_3,role_123,user.3@test.com,User 3,User 3,false,--date--`
 	assert.Equal(t, strings.TrimSpace(expected), contentString)
+}
+
+func TestCSVExporterFinaliseExport_should_write_rows_to_multiple_file(t *testing.T) {
+	exporter, err := getTemporaryCSVExporterWithMaxRowsLimit(2)
+	assert.Nil(t, err)
+
+	userFeed := &feed.UserFeed{}
+
+	err = exporter.InitFeed(userFeed, &feed.InitFeedOptions{
+		Truncate: false,
+	})
+	assert.Nil(t, err)
+
+	users := []feed.User{
+		{
+			ID:             "user_1",
+			OrganisationID: "role_123",
+			Email:          "user.1@test.com",
+			Firstname:      "User 1",
+			Lastname:       "User 1",
+		},
+		{
+			ID:             "user_2",
+			OrganisationID: "role_123",
+			Email:          "user.2@test.com",
+			Firstname:      "User 2",
+			Lastname:       "User 2",
+		},
+		{
+			ID:             "user_3",
+			OrganisationID: "role_123",
+			Email:          "user.3@test.com",
+			Firstname:      "User 3",
+			Lastname:       "User 3",
+		},
+	}
+
+	err = exporter.WriteRows(userFeed, users)
+	assert.Nil(t, err)
+
+	err = exporter.FinaliseExport(userFeed, &[]feed.User{})
+	assert.Nil(t, err)
+
+	files, err := filepath.Glob(filepath.Join(exporter.ExportPath, "users*.csv"))
+	assert.Equal(t, 2, len(files))
+
+	content1, err := ioutil.ReadFile(files[0])
+	assert.Nil(t, err)
+
+	content1String := dateRegex.ReplaceAllLiteralString(strings.TrimSpace(string(content1)), "--date--")
+
+	expected1 := `user_id,organisation_id,email,firstname,lastname,active,exported_at
+user_1,role_123,user.1@test.com,User 1,User 1,false,--date--
+user_2,role_123,user.2@test.com,User 2,User 2,false,--date--`
+	assert.Equal(t, strings.TrimSpace(expected1), content1String)
+
+	content2, err := ioutil.ReadFile(files[1])
+	assert.Nil(t, err)
+
+	content2String := dateRegex.ReplaceAllLiteralString(strings.TrimSpace(string(content2)), "--date--")
+
+	expected2 := `user_id,organisation_id,email,firstname,lastname,active,exported_at
+user_3,role_123,user.3@test.com,User 3,User 3,false,--date--`
+	assert.Equal(t, strings.TrimSpace(expected2), content2String)
 }

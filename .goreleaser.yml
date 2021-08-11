@@ -88,6 +88,7 @@ archives:
         format: zip
     files:
       - README.md
+      - THIRD_PARTY_NOTICES.md
 release:
   # If set to true, will not auto-publish the release.
   draft: true

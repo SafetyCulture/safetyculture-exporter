@@ -601,3 +601,40 @@ func (a *Client) DownloadInspectionReportFile(ctx context.Context, url string) (
 
 	return res.Body, nil
 }
+
+// WhoAmIResponse represents the the response of  WhoAmI
+type WhoAmIResponse struct {
+	UserID         string `json:"user_id"`
+	OrganisationID string `json:"organisation_id"`
+	Firstname      string `json:"firstname"`
+	Lastname       string `json:"lastname"`
+}
+
+// WhoAmI returns the details for the user who is making the request
+func (a *Client) WhoAmI(ctx context.Context) (*WhoAmIResponse, error) {
+	var (
+		result *WhoAmIResponse
+		errMsg json.RawMessage
+	)
+
+	sl := a.sling.New().Get("accounts/user/v1/user:WhoAmI").
+		Set(string(Authorization), fmt.Sprintf("Bearer %s", a.accessToken)).
+		Set(string(IntegrationID), "iauditor-exporter").
+		Set(string(IntegrationVersion), version.GetVersion()).
+		Set(string(XRequestID), util.RequestIDFromContext(ctx))
+
+	req, _ := sl.Request()
+	req = req.WithContext(ctx)
+
+	_, err := a.do(&slingHTTPDoer{
+		sl:       sl,
+		req:      req,
+		successV: &result,
+		failureV: &errMsg,
+	})
+	if err != nil {
+		return nil, errors.Wrap(err, "Failed request to API")
+	}
+
+	return result, nil
+}

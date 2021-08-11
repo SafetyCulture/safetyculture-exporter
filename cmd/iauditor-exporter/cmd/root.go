@@ -19,7 +19,8 @@ import (
 )
 
 var cfgFile string
-var connectionFlags, dbFlags, exportFlags, mediaFlags, inspectionFlags, templatesFlag, tablesFlag, schemasFlag, reportFlags, sitesFlags *flag.FlagSet
+var connectionFlags, dbFlags, csvFlags, exportFlags, mediaFlags, inspectionFlags,
+	templatesFlag, tablesFlag, schemasFlag, reportFlags, sitesFlags *flag.FlagSet
 
 // RootCmd represents the base command when called without any subcommands.
 var RootCmd = &cobra.Command{
@@ -72,7 +73,7 @@ func init() {
 
 	// Add sub-commands
 	addCmd(export.SQLCmd(), connectionFlags, exportFlags, dbFlags, inspectionFlags, templatesFlag, tablesFlag, schemasFlag, mediaFlags, sitesFlags)
-	addCmd(export.CSVCmd(), connectionFlags, exportFlags, inspectionFlags, templatesFlag, tablesFlag, schemasFlag, mediaFlags, sitesFlags)
+	addCmd(export.CSVCmd(), connectionFlags, exportFlags, csvFlags, inspectionFlags, templatesFlag, tablesFlag, schemasFlag, mediaFlags, sitesFlags)
 	addCmd(export.InspectionJSONCmd(), exportFlags, connectionFlags, inspectionFlags, templatesFlag)
 	addCmd(export.ReportCmd(), connectionFlags, exportFlags, inspectionFlags, templatesFlag, reportFlags)
 	addCmd(export.PrintSchemaCmd())
@@ -96,6 +97,9 @@ func configFlags() {
 	dbFlags = flag.NewFlagSet("db", flag.ContinueOnError)
 	dbFlags.String("db-dialect", "mysql", "Database dialect. mysql, postgres, sqlserver, and redshift are the only valid options.")
 	dbFlags.String("db-connection-string", "", "Database connection string")
+
+	csvFlags = flag.NewFlagSet("csv", flag.ContinueOnError)
+	csvFlags.Int("max-rows-per-file", 1000000, "Maximum number of rows in a csv file. New files will be created when reaching this limit.")
 
 	exportFlags = flag.NewFlagSet("export", flag.ContinueOnError)
 	exportFlags.String("export-path", "./export/", "File Export Path")
@@ -141,6 +145,8 @@ func bindFlags() {
 
 	util.Check(viper.BindPFlag("db.dialect", dbFlags.Lookup("db-dialect")), "while binding flag")
 	util.Check(viper.BindPFlag("db.connection_string", dbFlags.Lookup("db-connection-string")), "while binding flag")
+
+	util.Check(viper.BindPFlag("csv.max_rows_per_file", csvFlags.Lookup("max-rows-per-file")), "while binding flag")
 
 	util.Check(viper.BindPFlag("export.path", exportFlags.Lookup("export-path")), "while binding flag")
 	util.Check(viper.BindPFlag("export.incremental", exportFlags.Lookup("incremental")), "while binding flag")

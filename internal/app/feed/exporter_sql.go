@@ -108,10 +108,25 @@ type modifiedAtRow struct {
 }
 
 // LastModifiedAt returns the latest stored modified at date for the feed
-func (e *SQLExporter) LastModifiedAt(feed Feed, modifiedAfter time.Time) (time.Time, error) {
+func (e *SQLExporter) LastModifiedAt(feed Feed, modifiedAfter time.Time, orgID string) (time.Time, error) {
 	latestRow := modifiedAtRow{}
 
-	result := e.DB.Table(feed.Name()).Order("modified_at DESC").Limit(1).First(&latestRow)
+	var result *gorm.DB
+	result = e.DB.Table(feed.Name()).
+		Where("organisation_id = ?", orgID).
+		Order("modified_at DESC").
+		Limit(1).
+		First(&latestRow)
+	if result.RowsAffected == 0 {
+		// This can happen when there is no org_id stored in the existing data.
+		// In this case try to get the latest modifiedAt timestamp  from the table
+		// where there is no org_id defined.
+		result = e.DB.Table(feed.Name()).
+			Where("organisation_id IS NULL OR organisation_id = ''").
+			Order("modified_at DESC").
+			Limit(1).
+			First(&latestRow)
+	}
 	if result.RowsAffected != 0 && modifiedAfter.Before(latestRow.ModifiedAt) {
 		return latestRow.ModifiedAt, nil
 	}
@@ -149,7 +164,7 @@ func NewSQLExporter(dialect, connectionString string, autoMigrate bool, exportMe
 	logger := util.GetLogger()
 	gormLogger := &util.GormLogger{
 		SugaredLogger: logger,
-		SlowThreshold: time.Second,
+		SlowThreshold: 30 * time.Second,
 	}
 
 	var dialector gorm.Dialector

@@ -8,6 +8,7 @@ import (
 
 	"github.com/SafetyCulture/iauditor-exporter/internal/app/api"
 	"github.com/SafetyCulture/iauditor-exporter/internal/app/feed"
+	"gopkg.in/h2non/gock.v1"
 
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
@@ -25,6 +26,19 @@ func TestIntegrationDbCreateSchema_should_create_all_schemas(t *testing.T) {
 	assert.Nil(t, err)
 
 	viperConfig := viper.New()
+
+	gock.New("http://localhost:9999").
+		Get("/accounts/user/v1/user:WhoAmI").
+		Times(2).
+		Reply(200).
+		BodyString(`
+		{
+			"user_id": "user_123",
+			"organisation_id": "role_123",
+			"firstname": "Test",
+			"lastname": "Test"
+		  }
+		`)
 
 	err = feed.CreateSchemas(viperConfig, exporter)
 	assert.Nil(t, err)
@@ -55,6 +69,19 @@ func TestIntegrationDbExportFeeds_should_export_all_feeds_to_file(t *testing.T) 
 
 	apiClient := api.GetTestClient()
 	initMockFeedsSet1(apiClient.HTTPClient())
+
+	gock.New("http://localhost:9999").
+		Get("/accounts/user/v1/user:WhoAmI").
+		Times(2).
+		Reply(200).
+		BodyString(`
+		{
+			"user_id": "user_123",
+			"organisation_id": "role_123",
+			"firstname": "Test",
+			"lastname": "Test"
+		  }
+		`)
 
 	err = feed.ExportFeeds(viperConfig, apiClient, exporter)
 	assert.Nil(t, err)

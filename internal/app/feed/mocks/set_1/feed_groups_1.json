@@ -6,31 +6,38 @@
   "data": [
     {
       "name": "Group 1",
-      "id": "role_group1"
+      "id": "role_group1",
+      "organisation_id": "role_123"
     },
     {
       "name": "Group 2",
-      "id": "role_group2"
+      "id": "role_group2",
+      "organisation_id": "role_123"
     },
     {
       "name": "Group 3",
-      "id": "role_group3"
+      "id": "role_group3",
+      "organisation_id": "role_123"
     },
     {
       "name": "Group 4",
-      "id": "role_group4"
+      "id": "role_group4",
+      "organisation_id": "role_123"
     },
     {
       "name": "Group 5",
-      "id": "role_group5"
+      "id": "role_group5",
+      "organisation_id": "role_123"
     },
     {
       "name": "Group 6",
-      "id": "role_group6"
+      "id": "role_group6",
+      "organisation_id": "role_123"
     },
     {
       "name": "Group 7",
-      "id": "role_group7"
+      "id": "role_group7",
+      "organisation_id": "role_123"
     }
   ]
 }

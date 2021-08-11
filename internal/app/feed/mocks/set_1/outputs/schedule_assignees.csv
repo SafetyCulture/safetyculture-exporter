@@ -1,6 +1,6 @@
-id,schedule_id,assignee_id,type,name,exported_at
-scheduleitem_1_user_1,scheduleitem_1,user_1,user,Dwight Schrute,2020-11-06T08:21:16.32717+11:00
-scheduleitem_1_user_3,scheduleitem_1,user_3,user,Stefani Joanne Angelina Germanotta,2020-11-06T08:21:16.32717+11:00
-scheduleitem_1_user_4,scheduleitem_1,user_4,user,Agnetha Fältskog,2020-11-06T08:21:16.32717+11:00
-scheduleitem_2_user_1,scheduleitem_2,user_1,user,Dwight Schrute,2020-11-06T08:21:16.32717+11:00
-scheduleitem_2_user_4,scheduleitem_2,user_4,user,Agnetha Fältskog,2020-11-06T08:21:16.32717+11:00
+id,schedule_id,assignee_id,organisation_id,type,name,exported_at
+scheduleitem_1_user_1,scheduleitem_1,user_1,role_123,user,Dwight Schrute,--date--
+scheduleitem_1_user_3,scheduleitem_1,user_3,role_123,user,Stefani Joanne Angelina Germanotta,--date--
+scheduleitem_1_user_4,scheduleitem_1,user_4,role_123,user,Agnetha Fältskog,--date--
+scheduleitem_2_user_1,scheduleitem_2,user_1,role_123,user,Dwight Schrute,--date--
+scheduleitem_2_user_4,scheduleitem_2,user_4,role_123,user,Agnetha Fältskog,--date--

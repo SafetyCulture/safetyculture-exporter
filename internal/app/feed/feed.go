@@ -18,7 +18,7 @@ type Feed interface {
 	Order() string
 
 	CreateSchema(exporter Exporter) error
-	Export(ctx context.Context, apiClient *api.Client, exporter Exporter) error
+	Export(ctx context.Context, apiClient *api.Client, exporter Exporter, orgID string) error
 }
 
 // InitFeedOptions contains the options used when initialising a feed
@@ -33,7 +33,7 @@ type Exporter interface {
 
 	WriteRows(feed Feed, rows interface{}) error
 	FinaliseExport(feed Feed, rows interface{}) error
-	LastModifiedAt(feed Feed, modifiedAfter time.Time) (time.Time, error)
+	LastModifiedAt(feed Feed, modifiedAfter time.Time, orgID string) (time.Time, error)
 	WriteMedia(auditID string, mediaID string, contentType string, body []byte) error
 
 	SupportsUpsert() bool

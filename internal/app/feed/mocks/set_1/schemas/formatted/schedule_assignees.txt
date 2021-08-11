@@ -1,10 +1,11 @@
-+-------------+----------+-------------+
-|    NAME     |   TYPE   | PRIMARY KEY |
-+-------------+----------+-------------+
-| id          | text     | true        |
-| schedule_id | text     |             |
-| assignee_id | text     |             |
-| type        | text     |             |
-| name        | text     |             |
-| exported_at | datetime |             |
-+-------------+----------+-------------+
++-----------------+----------+-------------+
+|      NAME       |   TYPE   | PRIMARY KEY |
++-----------------+----------+-------------+
+| id              | text     | true        |
+| schedule_id     | text     |             |
+| assignee_id     | text     |             |
+| organisation_id | text     |             |
+| type            | text     |             |
+| name            | text     |             |
+| exported_at     | datetime |             |
++-----------------+----------+-------------+
