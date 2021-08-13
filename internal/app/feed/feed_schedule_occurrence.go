@@ -16,6 +16,8 @@ type ScheduleOccurrence struct {
 	OccurrenceID     string     `json:"occurrence_id" csv:"occurrence_id" gorm:"size:30"`
 	TemplateID       string     `json:"template_id" csv:"template_id" gorm:"size:100"`
 	OrganisationID   string     `json:"organisation_id" csv:"organisation_id" gorm:"size:37"`
+	StartTime        *time.Time `json:"start_time" csv:"start_time"`
+	DueTime          *time.Time `json:"due_time" csv:"due_time"`
 	MissTime         *time.Time `json:"miss_time" csv:"miss_time"`
 	OccurrenceStatus string     `json:"occurrence_status" csv:"occurrence_status" gorm:"size:20"`
 	AuditID          *string    `json:"audit_id" csv:"audit_id" gorm:"size:100"`
@@ -57,6 +59,8 @@ func (f *ScheduleOccurrenceFeed) Columns() []string {
 		"occurrence_id",
 		"template_id",
 		"organisation_id",
+		"start_time",
+		"due_time",
 		"miss_time",
 		"occurrence_status",
 		"audit_id",

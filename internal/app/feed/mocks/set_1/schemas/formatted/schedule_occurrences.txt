@@ -6,6 +6,8 @@
 | occurrence_id     | text     |             |
 | template_id       | text     |             |
 | organisation_id   | text     |             |
+| start_time        | datetime |             |
+| due_time          | datetime |             |
 | miss_time         | datetime |             |
 | occurrence_status | text     |             |
 | audit_id          | text     |             |
