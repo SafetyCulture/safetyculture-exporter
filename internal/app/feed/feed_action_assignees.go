@@ -55,6 +55,8 @@ func (f *ActionAssigneeFeed) Columns() []string {
 		"type",
 		"name",
 		"organisation_id",
+		"modified_at",
+		"exported_at",
 	}
 }
 
