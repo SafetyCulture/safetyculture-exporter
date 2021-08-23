@@ -93,6 +93,7 @@ func (f *InspectionFeed) Columns() []string {
 		"organisation_id",
 		"template_name",
 		"template_author",
+		"site_id",
 		"date_started",
 		"date_completed",
 		"date_modified",

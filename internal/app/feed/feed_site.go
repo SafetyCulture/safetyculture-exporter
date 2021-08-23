@@ -51,6 +51,7 @@ func (f *SiteFeed) Columns() []string {
 		"creator_id",
 		"organisation_id",
 		"exported_at",
+		"deleted",
 	}
 }
 

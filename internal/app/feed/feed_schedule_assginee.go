@@ -53,6 +53,7 @@ func (f *ScheduleAssigneeFeed) Columns() []string {
 		"organisation_id",
 		"type",
 		"name",
+		"exported_at",
 	}
 }
 
