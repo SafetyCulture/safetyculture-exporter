@@ -164,3 +164,40 @@ func TestIntegrationDbExportFeeds_should_handle_lots_of_rows_ok(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, 230, inspectionItemsLines)
 }
+
+func TestIntegrationDbExportFeeds_should_update_action_assignees_on_second_run(t *testing.T) {
+	sqlExporter, err := getTestingSQLExporter()
+	assert.Nil(t, err)
+	exporter, err := getTemporaryCSVExporterWithRealSQLExporter(sqlExporter)
+	assert.Nil(t, err)
+
+	viperConfig := viper.New()
+	viperConfig.Set("export.incremental", true)
+
+	gock.New("http://localhost:9999").
+		Get("/accounts/user/v1/user:WhoAmI").
+		Times(2).
+		Reply(200).
+		BodyString(`
+		{
+			"user_id": "user_123",
+			"organisation_id": "role_123",
+			"firstname": "Test",
+			"lastname": "Test"
+		  }
+		`)
+
+	apiClient := api.GetTestClient()
+	initMockFeedsSet1(apiClient.HTTPClient())
+
+	err = feed.ExportFeeds(viperConfig, apiClient, exporter)
+	assert.Nil(t, err)
+
+	filesEqualish(t, "mocks/set_1/outputs/action_assignees.csv", filepath.Join(exporter.ExportPath, "action_assignees.csv"))
+
+	initMockFeedsSet2(apiClient.HTTPClient())
+
+	err = feed.ExportFeeds(viperConfig, apiClient, exporter)
+	assert.Nil(t, err)
+	filesEqualish(t, "mocks/set_2/outputs/action_assignees.csv", filepath.Join(exporter.ExportPath, "action_assignees.csv"))
+}
