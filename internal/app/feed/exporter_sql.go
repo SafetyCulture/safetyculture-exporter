@@ -72,6 +72,25 @@ func (e *SQLExporter) InitFeed(feed Feed, opts *InitFeedOptions) error {
 	return nil
 }
 
+// DeleteRowsIfExist will delete the rows if already exist
+func (e *SQLExporter) DeleteRowsIfExist(feed Feed, query string, args ...interface{}) error {
+	delete := e.DB.Table(feed.Name()).
+		Clauses(clause.Where{
+			Exprs: []clause.Expression{
+				clause.Expr{
+					SQL:  query,
+					Vars: args,
+				},
+			},
+		}).
+		Delete(feed.Model())
+	if delete.Error != nil {
+		return errors.Wrap(delete.Error, "Unable to delete rows")
+	}
+
+	return nil
+}
+
 // WriteRows writes out the rows to the DB
 func (e *SQLExporter) WriteRows(feed Feed, rows interface{}) error {
 	columns := []clause.Column{}
