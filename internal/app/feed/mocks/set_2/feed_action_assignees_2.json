@@ -1,0 +1,26 @@
+{
+    "metadata": {
+        "next_page": null,
+        "remaining_records": 12
+    },
+    "data": [
+		{
+            "id": "id2",
+            "action_id": "abc",
+            "assignee_id": "email_new@domain.com",
+            "modified_at": "2020-11-12T00:59:40.437Z",
+            "name": "email@domain.com",
+            "type": "email",
+            "organisation_id": "role_123"
+        },
+        {
+            "id": "456",
+            "action_id": "def",
+            "assignee_id": "user_123",
+            "modified_at": "2020-11-12T00:59:40.437Z",
+            "name": "User A",
+            "type": "user",
+            "organisation_id": "role_123"
+        }
+    ]
+}

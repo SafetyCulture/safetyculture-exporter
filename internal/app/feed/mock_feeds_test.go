@@ -152,7 +152,7 @@ func initMockFeedsSet2(httpClient *http.Client) {
 	gock.New("http://localhost:9999").
 		Get("/feed/action_assignees").
 		Reply(200).
-		File("mocks/set_1/feed_action_assignees_1.json")
+		File("mocks/set_2/feed_action_assignees_2.json")
 }
 
 func initMockFeedsSet3(httpClient *http.Client) {

@@ -35,6 +35,7 @@ type Exporter interface {
 	FinaliseExport(feed Feed, rows interface{}) error
 	LastModifiedAt(feed Feed, modifiedAfter time.Time, orgID string) (time.Time, error)
 	WriteMedia(auditID string, mediaID string, contentType string, body []byte) error
+	DeleteRowsIfExist(feed Feed, query string, args ...interface{}) error
 
 	SupportsUpsert() bool
 	ParameterLimit() int
