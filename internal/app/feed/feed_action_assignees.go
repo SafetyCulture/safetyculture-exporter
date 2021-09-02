@@ -80,7 +80,7 @@ func (f *ActionAssigneeFeed) writeRows(ctx context.Context, exporter Exporter, r
 			j = len(rows)
 		}
 		var actionIDs []string
-		for k := i; k < (i + j); k++ {
+		for k := i; k < (i+j) || k < len(rows); k++ {
 			actionIDs = append(actionIDs, rows[k].ActionID)
 		}
 
