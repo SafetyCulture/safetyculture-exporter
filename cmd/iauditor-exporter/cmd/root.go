@@ -19,7 +19,7 @@ import (
 )
 
 var cfgFile string
-var connectionFlags, dbFlags, csvFlags, exportFlags, mediaFlags, inspectionFlags,
+var connectionFlags, dbFlags, csvFlags, exportFlags, mediaFlags, inspectionFlags, actionFlags,
 	templatesFlag, tablesFlag, schemasFlag, reportFlags, sitesFlags *flag.FlagSet
 
 // RootCmd represents the base command when called without any subcommands.
@@ -72,12 +72,12 @@ func init() {
 	bindFlags()
 
 	// Add sub-commands
-	addCmd(export.SQLCmd(), connectionFlags, exportFlags, dbFlags, inspectionFlags, templatesFlag, tablesFlag, schemasFlag, mediaFlags, sitesFlags)
-	addCmd(export.CSVCmd(), connectionFlags, exportFlags, csvFlags, inspectionFlags, templatesFlag, tablesFlag, schemasFlag, mediaFlags, sitesFlags)
-	addCmd(export.InspectionJSONCmd(), exportFlags, connectionFlags, inspectionFlags, templatesFlag)
-	addCmd(export.ReportCmd(), connectionFlags, exportFlags, inspectionFlags, templatesFlag, reportFlags)
+	addCmd(export.SQLCmd(), connectionFlags, exportFlags, dbFlags, inspectionFlags, actionFlags, templatesFlag, tablesFlag, schemasFlag, mediaFlags, sitesFlags)
+	addCmd(export.CSVCmd(), connectionFlags, exportFlags, csvFlags, inspectionFlags, actionFlags, templatesFlag, tablesFlag, schemasFlag, mediaFlags, sitesFlags)
+	addCmd(export.InspectionJSONCmd(), exportFlags, connectionFlags, inspectionFlags, actionFlags, templatesFlag)
+	addCmd(export.ReportCmd(), connectionFlags, exportFlags, inspectionFlags, actionFlags, templatesFlag, reportFlags)
 	addCmd(export.PrintSchemaCmd())
-	addCmd(configure.Cmd(), connectionFlags, dbFlags, exportFlags, inspectionFlags, templatesFlag, tablesFlag)
+	addCmd(configure.Cmd(), connectionFlags, dbFlags, exportFlags, inspectionFlags, actionFlags, templatesFlag, tablesFlag)
 	RootCmd.AddCommand(&cobra.Command{
 		Hidden: true,
 		Use:    "docs",
@@ -117,6 +117,9 @@ func configFlags() {
 	inspectionFlags.String("inspection-completed", "true", "Return completed inspections, false, true or both")
 	inspectionFlags.Int("inspection-limit", 100, "Number of inspections fetched at once. Lower this number if the exporter fails to load the data")
 	inspectionFlags.String("inspection-web-report-link", "private", "Web report link format. Can be public or private")
+
+	actionFlags = flag.NewFlagSet("action", flag.ContinueOnError)
+	actionFlags.Int("action-limit", 100, "Number of actions fetched at once. Lower this number if the exporter fails to load the data")
 
 	templatesFlag = flag.NewFlagSet("templates", flag.ContinueOnError)
 	templatesFlag.StringSlice("template-ids", []string{}, "Template IDs to filter inspections and schedules by (default all)")
