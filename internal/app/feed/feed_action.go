@@ -35,6 +35,7 @@ type Action struct {
 type ActionFeed struct {
 	ModifiedAfter time.Time
 	Incremental   bool
+	Limit         int
 }
 
 // Name is the name of the feed
@@ -110,6 +111,7 @@ func (f *ActionFeed) Export(ctx context.Context, apiClient *api.Client, exporter
 		InitialURL: "/feed/actions",
 		Params: api.GetFeedParams{
 			ModifiedAfter: f.ModifiedAfter,
+			Limit:         f.Limit,
 		},
 	}, func(resp *api.GetFeedResponse) error {
 		rows := []*Action{}
