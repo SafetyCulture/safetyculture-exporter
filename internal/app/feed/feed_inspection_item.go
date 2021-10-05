@@ -37,6 +37,7 @@ type InspectionItem struct {
 	IsFailedResponse        bool      `json:"is_failed_response" csv:"is_failed_response"`
 	Comment                 string    `json:"comment" csv:"comment"`
 	MediaFiles              string    `json:"media_files" csv:"media_files"`
+	MediaIDs                string    `json:"media_ids" csv:"media_ids"`
 	MediaHypertextReference string    `json:"media_hypertext_reference" csv:"media_hypertext_reference"`
 	Score                   float32   `json:"score" csv:"score"`
 	MaxScore                float32   `json:"max_score" csv:"max_score"`
@@ -100,6 +101,7 @@ func (f *InspectionItemFeed) Columns() []string {
 		"is_failed_response",
 		"comment",
 		"media_files",
+		"media_ids",
 		"media_hypertext_reference",
 		"score",
 		"max_score",
