@@ -168,6 +168,8 @@ func bindFlags() {
 	util.Check(viper.BindPFlag("export.inspection.limit", inspectionFlags.Lookup("inspection-limit")), "while binding flag")
 	util.Check(viper.BindPFlag("export.inspection.web_report_link", inspectionFlags.Lookup("inspection-web-report-link")), "while binding flag")
 
+	util.Check(viper.BindPFlag("export.action.limit", actionFlags.Lookup("action-limit")), "while binding flag")
+
 	util.Check(viper.BindPFlag("export.site.include_deleted", sitesFlags.Lookup("site-include-deleted")), "while binding flag")
 
 	util.Check(viper.BindPFlag("report.format", reportFlags.Lookup("format")), "while binding flag")
