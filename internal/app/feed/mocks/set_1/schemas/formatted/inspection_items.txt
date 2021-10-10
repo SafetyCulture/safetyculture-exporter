@@ -22,6 +22,7 @@
 | is_failed_response        | numeric  |             |
 | comment                   | text     |             |
 | media_files               | text     |             |
+| media_ids                 | text     |             |
 | media_hypertext_reference | text     |             |
 | score                     | real     |             |
 | max_score                 | real     |             |

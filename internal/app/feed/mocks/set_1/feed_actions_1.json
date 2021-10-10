@@ -21,7 +21,8 @@
             "audit_title": "",
             "audit_item_id": null,
             "audit_item_label": null,
-            "organisation_id": "role_123"
+            "organisation_id": "role_123",
+            "competed_at": "2020-11-05T12:28:42.000Z"
         },
         {
             "id": "456",
@@ -40,7 +41,8 @@
             "audit_title": "Inspection title",
             "audit_item_id": "872",
             "audit_item_label": "Item title",
-            "organisation_id": "role_123"
+            "organisation_id": "role_123",
+            "completed_at": "2020-11-18T02:07:50.702Z"
         }
     ]
 }
