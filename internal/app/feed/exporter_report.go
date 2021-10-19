@@ -13,6 +13,7 @@ import (
 
 	"github.com/SafetyCulture/iauditor-exporter/internal/app/api"
 	"github.com/pkg/errors"
+	"github.com/spf13/viper"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -216,10 +217,19 @@ func (e *ReportExporter) exportInspection(ctx context.Context, apiClient *api.Cl
 	}
 
 	tries := 0
+	/*
+		- check for retryTimeout
+		- If present
+			- Is it less than 15? - then ignore it
+			- If it is more than 15 and less than 60 - then sleepDuration = time.Duration(retryTime/15)
+			- If it is more than 60 - we consider it 60?
+
+		- If not present then we retry every 1 second for 15 times i.e. the default behavior
+	*/
 
 	for {
-		// wait for a second before checking for report completion
-		time.Sleep(1 * time.Second)
+		// wait for stipulated time before checking for report completion
+		time.Sleep(getWaitTime() * time.Second)
 		rec, cErr := apiClient.CheckInspectionReportExportCompletion(ctx, inspection.ID, messageID)
 		if cErr != nil {
 			err = cErr
@@ -311,6 +321,18 @@ func getFileExtension(format string) string {
 	default:
 		return ""
 	}
+}
+
+func getWaitTime() time.Duration {
+	retryTime := viper.GetInt("report.retryTime")
+
+	if retryTime > 15 && retryTime <= 60 {
+		return time.Duration(retryTime / 15)
+	} else if retryTime > 60 {
+		return 4
+	}
+
+	return 1
 }
 
 func getFilePath(exportPath string, inspection *Inspection, format string, filenameConvention string) (string, error) {

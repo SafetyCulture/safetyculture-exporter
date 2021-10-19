@@ -23,6 +23,7 @@ iauditor-exporter report [flags]
       --export-path string                  File Export Path (default "./export/")
       --filename-convention string          The name of the report exported, either INSPECTION_TITLE or INSPECTION_ID (default "INSPECTION_TITLE")
       --format strings                      Export format (PDF,WORD) (default [PDF])
+      --retryTimeout int                    Retries timeout after the specificied interval (30, 45 or 60 seconds) (default 15 seconds)
   -h, --help                                help for report
       --incremental                         Update inspections, inspection_items and templates tables incrementally (default true)
       --inspection-archived string          Return archived inspections, false, true or both (default "false")
