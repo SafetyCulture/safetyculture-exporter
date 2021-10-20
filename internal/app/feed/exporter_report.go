@@ -217,19 +217,10 @@ func (e *ReportExporter) exportInspection(ctx context.Context, apiClient *api.Cl
 	}
 
 	tries := 0
-	/*
-		- check for retryTimeout
-		- If present
-			- Is it less than 15? - then ignore it
-			- If it is more than 15 and less than 60 - then sleepDuration = time.Duration(retryTime/15)
-			- If it is more than 60 - we consider it 60?
-
-		- If not present then we retry every 1 second for 15 times i.e. the default behavior
-	*/
 
 	for {
 		// wait for stipulated time before checking for report completion
-		time.Sleep(getWaitTime() * time.Second)
+		time.Sleep(time.Duration(getWaitTime()) * time.Second)
 		rec, cErr := apiClient.CheckInspectionReportExportCompletion(ctx, inspection.ID, messageID)
 		if cErr != nil {
 			err = cErr
@@ -323,16 +314,17 @@ func getFileExtension(format string) string {
 	}
 }
 
+// Default wait time is 1 second otherwise specified timeout/15. Can't be more than 4 seconds.
 func getWaitTime() time.Duration {
-	retryTime := viper.GetInt("report.retryTime")
+	retryTime := viper.GetInt("report.retry_timeout")
+	var waitTime = 1
 
 	if retryTime > 15 && retryTime <= 60 {
-		return time.Duration(retryTime / 15)
+		waitTime = retryTime / 15
 	} else if retryTime > 60 {
-		return 4
+		waitTime = 4
 	}
-
-	return 1
+	return time.Duration(waitTime)
 }
 
 func getFilePath(exportPath string, inspection *Inspection, format string, filenameConvention string) (string, error) {

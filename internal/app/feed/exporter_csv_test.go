@@ -418,10 +418,10 @@ func TestCSVExporterFinaliseExport_should_write_rows_out_to_file(t *testing.T) {
 
 	contentString := dateRegex.ReplaceAllLiteralString(strings.TrimSpace(string(content)), "--date--")
 
-	expected := `user_id,organisation_id,email,firstname,lastname,active,exported_at
-user_1,role_123,user.1@test.com,User 1,User 1,false,--date--
-user_2,role_123,user.2@test.com,User 2,User 2,false,--date--
-user_3,role_123,user.3@test.com,User 3,User 3,false,--date--`
+	expected := `user_id,organisation_id,email,firstname,lastname,active,last_seen_at,exported_at
+user_1,role_123,user.1@test.com,User 1,User 1,false,,--date--
+user_2,role_123,user.2@test.com,User 2,User 2,false,,--date--
+user_3,role_123,user.3@test.com,User 3,User 3,false,,--date--`
 	assert.Equal(t, strings.TrimSpace(expected), contentString)
 }
 
@@ -475,9 +475,9 @@ func TestCSVExporterFinaliseExport_should_write_rows_to_multiple_file(t *testing
 
 	content1String := dateRegex.ReplaceAllLiteralString(strings.TrimSpace(string(content1)), "--date--")
 
-	expected1 := `user_id,organisation_id,email,firstname,lastname,active,exported_at
-user_1,role_123,user.1@test.com,User 1,User 1,false,--date--
-user_2,role_123,user.2@test.com,User 2,User 2,false,--date--`
+	expected1 := `user_id,organisation_id,email,firstname,lastname,active,last_seen_at,exported_at
+user_1,role_123,user.1@test.com,User 1,User 1,false,,--date--
+user_2,role_123,user.2@test.com,User 2,User 2,false,,--date--`
 	assert.Equal(t, strings.TrimSpace(expected1), content1String)
 
 	content2, err := ioutil.ReadFile(files[1])
@@ -485,7 +485,7 @@ user_2,role_123,user.2@test.com,User 2,User 2,false,--date--`
 
 	content2String := dateRegex.ReplaceAllLiteralString(strings.TrimSpace(string(content2)), "--date--")
 
-	expected2 := `user_id,organisation_id,email,firstname,lastname,active,exported_at
-user_3,role_123,user.3@test.com,User 3,User 3,false,--date--`
+	expected2 := `user_id,organisation_id,email,firstname,lastname,active,last_seen_at,exported_at
+user_3,role_123,user.3@test.com,User 3,User 3,false,,--date--`
 	assert.Equal(t, strings.TrimSpace(expected2), content2String)
 }
