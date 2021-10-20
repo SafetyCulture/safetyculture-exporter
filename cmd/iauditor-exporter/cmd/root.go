@@ -134,6 +134,7 @@ func configFlags() {
 	reportFlags.StringSlice("format", []string{"PDF"}, "Export format (PDF,WORD)")
 	reportFlags.String("filename-convention", "INSPECTION_TITLE", "The name of the report exported, either INSPECTION_TITLE or INSPECTION_ID")
 	reportFlags.String("preference-id", "", "The report preference to apply to the document")
+	reportFlags.Int("retry-timeout", 15, "Retry timeout. Make it higher if the exporter fails and you want to allow more time to export. (30, 45, 60)")
 
 	sitesFlags = flag.NewFlagSet("sites", flag.ContinueOnError)
 	sitesFlags.Bool("site-include-deleted", false, "Include deleted sites in the sites table (default false)")
@@ -175,6 +176,7 @@ func bindFlags() {
 	util.Check(viper.BindPFlag("report.format", reportFlags.Lookup("format")), "while binding flag")
 	util.Check(viper.BindPFlag("report.filename_convention", reportFlags.Lookup("filename-convention")), "while binding flag")
 	util.Check(viper.BindPFlag("report.preference_id", reportFlags.Lookup("preference-id")), "while binding flag")
+	util.Check(viper.BindPFlag("report.retry_timeout", reportFlags.Lookup("retry-timeout")), "while binding flag")
 }
 
 func addCmd(cmd *cobra.Command, flags ...*flag.FlagSet) {

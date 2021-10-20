@@ -13,6 +13,7 @@ import (
 
 	"github.com/SafetyCulture/iauditor-exporter/internal/app/api"
 	"github.com/pkg/errors"
+	"github.com/spf13/viper"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -218,8 +219,8 @@ func (e *ReportExporter) exportInspection(ctx context.Context, apiClient *api.Cl
 	tries := 0
 
 	for {
-		// wait for a second before checking for report completion
-		time.Sleep(1 * time.Second)
+		// wait for stipulated time before checking for report completion
+		time.Sleep(time.Duration(getWaitTime()) * time.Second)
 		rec, cErr := apiClient.CheckInspectionReportExportCompletion(ctx, inspection.ID, messageID)
 		if cErr != nil {
 			err = cErr
@@ -311,6 +312,19 @@ func getFileExtension(format string) string {
 	default:
 		return ""
 	}
+}
+
+// Default wait time is 1 second otherwise specified timeout/15. Can't be more than 4 seconds.
+func getWaitTime() time.Duration {
+	retryTimeout := viper.GetInt("report.retry_timeout")
+	var waitTime = 1
+
+	if retryTimeout > 15 && retryTimeout <= 60 {
+		waitTime = retryTimeout / 15
+	} else if retryTimeout > 60 {
+		waitTime = 4
+	}
+	return time.Duration(waitTime)
 }
 
 func getFilePath(exportPath string, inspection *Inspection, format string, filenameConvention string) (string, error) {

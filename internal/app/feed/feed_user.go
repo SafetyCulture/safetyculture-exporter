@@ -11,13 +11,14 @@ import (
 
 // User represents a row from the users feed
 type User struct {
-	ID             string    `json:"id" csv:"user_id" gorm:"primarykey;column:user_id;size:37"`
-	OrganisationID string    `json:"organisation_id" csv:"organisation_id" gorm:"size:37"`
-	Email          string    `json:"email" csv:"email" gorm:"size:256"`
-	Firstname      string    `json:"firstname" csv:"firstname"`
-	Lastname       string    `json:"lastname" csv:"lastname"`
-	Active         bool      `json:"active" csv:"active"`
-	ExportedAt     time.Time `json:"exported_at" csv:"exported_at" gorm:"autoUpdateTime"`
+	ID             string     `json:"id" csv:"user_id" gorm:"primarykey;column:user_id;size:37"`
+	OrganisationID string     `json:"organisation_id" csv:"organisation_id" gorm:"size:37"`
+	Email          string     `json:"email" csv:"email" gorm:"size:256"`
+	Firstname      string     `json:"firstname" csv:"firstname"`
+	Lastname       string     `json:"lastname" csv:"lastname"`
+	Active         bool       `json:"active" csv:"active"`
+	LastSeenAt     *time.Time `json:"last_seen_at" csv:"last_seen_at"`
+	ExportedAt     time.Time  `json:"exported_at" csv:"exported_at" gorm:"autoUpdateTime"`
 }
 
 // UserFeed is a representation of the users feed
@@ -51,6 +52,7 @@ func (f *UserFeed) Columns() []string {
 		"firstname",
 		"lastname",
 		"active",
+		"last_seen_at",
 		"exported_at",
 	}
 }

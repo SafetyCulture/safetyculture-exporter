@@ -11,7 +11,8 @@
       "firstname": "Dwight",
       "lastname": "Schrute",
       "active": true,
-      "organisation_id": "role_123"
+      "organisation_id": "role_123",
+      "last_seen_at": "2020-10-29T12:28:42.000Z"
     },
     {
       "id": "user_2",
