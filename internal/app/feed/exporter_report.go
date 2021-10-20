@@ -316,12 +316,12 @@ func getFileExtension(format string) string {
 
 // Default wait time is 1 second otherwise specified timeout/15. Can't be more than 4 seconds.
 func getWaitTime() time.Duration {
-	retryTime := viper.GetInt("report.retry_timeout")
+	retryTimeout := viper.GetInt("report.retry_timeout")
 	var waitTime = 1
 
-	if retryTime > 15 && retryTime <= 60 {
-		waitTime = retryTime / 15
-	} else if retryTime > 60 {
+	if retryTimeout > 15 && retryTimeout <= 60 {
+		waitTime = retryTimeout / 15
+	} else if retryTimeout > 60 {
 		waitTime = 4
 	}
 	return time.Duration(waitTime)
