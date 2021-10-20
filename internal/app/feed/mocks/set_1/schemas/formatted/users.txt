@@ -7,5 +7,6 @@
 | firstname       | text     |             |
 | lastname        | text     |             |
 | active          | numeric  |             |
+| last_seen_at    | datetime |             |
 | exported_at     | datetime |             |
 +-----------------+----------+-------------+
