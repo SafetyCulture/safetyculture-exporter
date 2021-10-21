@@ -6,13 +6,13 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+	"time"
 
 	"github.com/SafetyCulture/iauditor-exporter/internal/app/api"
 	"github.com/SafetyCulture/iauditor-exporter/internal/app/feed"
-	"gopkg.in/h2non/gock.v1"
-
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
+	"gopkg.in/h2non/gock.v1"
 )
 
 const (
@@ -483,4 +483,13 @@ func TestExportReports_should_return_error_for_unsupported_format(t *testing.T) 
 
 	err = feed.ExportInspectionReports(viperConfig, apiClient, exporter)
 	assert.EqualError(t, err, "No valid export format specified")
+}
+
+func Test_GetWaitTime(t *testing.T) {
+	assert.Equal(t, time.Duration(1), feed.GetWaitTime(0))
+	assert.Equal(t, time.Duration(1), feed.GetWaitTime(10))
+	assert.Equal(t, time.Duration(2), feed.GetWaitTime(30))
+	assert.Equal(t, time.Duration(3), feed.GetWaitTime(50))
+	assert.Equal(t, time.Duration(4), feed.GetWaitTime(60))
+	assert.Equal(t, time.Duration(4), feed.GetWaitTime(90))
 }
