@@ -220,7 +220,7 @@ func (e *ReportExporter) exportInspection(ctx context.Context, apiClient *api.Cl
 
 	for {
 		// wait for stipulated time before checking for report completion
-		time.Sleep(time.Duration(getWaitTime()) * time.Second)
+		time.Sleep(getWaitTime() * time.Second)
 		rec, cErr := apiClient.CheckInspectionReportExportCompletion(ctx, inspection.ID, messageID)
 		if cErr != nil {
 			err = cErr
