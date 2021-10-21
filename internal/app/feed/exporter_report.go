@@ -219,11 +219,11 @@ func (e *ReportExporter) exportInspection(ctx context.Context, apiClient *api.Cl
 	tries := 0
 
 	for {
-		// wait for stipulated time before checking for report completion
 
 		retryTimeout := viper.GetInt("report.retry_timeout")
-
+		// wait for stipulated time before checking for report completion
 		time.Sleep(GetWaitTime(retryTimeout) * time.Second)
+
 		rec, cErr := apiClient.CheckInspectionReportExportCompletion(ctx, inspection.ID, messageID)
 		if cErr != nil {
 			err = cErr
