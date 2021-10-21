@@ -134,7 +134,7 @@ func configFlags() {
 	reportFlags.StringSlice("format", []string{"PDF"}, "Export format (PDF,WORD)")
 	reportFlags.String("filename-convention", "INSPECTION_TITLE", "The name of the report exported, either INSPECTION_TITLE or INSPECTION_ID")
 	reportFlags.String("preference-id", "", "The report preference to apply to the document")
-	reportFlags.Int("retry-timeout", 15, "Retry timeout. Make it higher if the exporter fails and you want to allow more time to export. (30, 45, 60)")
+	reportFlags.Int("retry-timeout", 15, "Specify the time in seconds spent retrieving each report. Values greater than 60 seconds will be treated as 60 seconds.")
 
 	sitesFlags = flag.NewFlagSet("sites", flag.ContinueOnError)
 	sitesFlags.Bool("site-include-deleted", false, "Include deleted sites in the sites table (default false)")
