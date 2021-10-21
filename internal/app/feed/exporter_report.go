@@ -317,7 +317,7 @@ func getFileExtension(format string) string {
 	}
 }
 
-// Default wait time is 1 second otherwise specified timeout/15. Can't be more than 4 seconds.
+// GetWaitTime - Default wait time is 1 second otherwise specified timeout/15. Can't be more than 4 seconds.
 func GetWaitTime(retryTimeout int) time.Duration {
 	var waitTime = 1
 
