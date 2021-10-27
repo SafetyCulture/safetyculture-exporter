@@ -139,6 +139,19 @@ func TestExportFeeds_should_perform_incremental_update_on_second_run(t *testing.
 	filesEqualish(t, "mocks/set_2/outputs/action_assignees.csv", filepath.Join(exporter.ExportPath, "action_assignees.csv"))
 }
 
+func TestGetActionLimit(t *testing.T) {
+	viperConfig := viper.New()
+
+	viperConfig.Set("export.action.limit", 200)
+	assert.Equal(t, 100, feed.GetActionLimit(viperConfig))
+
+	viperConfig.Set("export.action.limit", 20)
+	assert.Equal(t, 20, feed.GetActionLimit(viperConfig))
+
+	viperConfig.Set("export.action.limit", 100)
+	assert.Equal(t, 100, feed.GetActionLimit(viperConfig))
+}
+
 func TestExportFeeds_should_handle_lots_of_rows_ok(t *testing.T) {
 	defer gock.Off()
 
