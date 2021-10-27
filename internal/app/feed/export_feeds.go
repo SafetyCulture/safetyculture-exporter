@@ -14,6 +14,7 @@ import (
 func GetFeeds(v *viper.Viper) []Feed {
 	inspectionIncludeInactiveItems := v.GetBool("export.inspection.included_inactive_items")
 	templateIDs := getTemplateIDs(v)
+	actionLimit := getActionLimit(v)
 	inspectionConfig := config.GetInspectionConfig(v)
 	exportMedia := viper.GetBool("export.media")
 	sitesIncludeDeleted := viper.GetBool("export.site.include_deleted")
@@ -55,12 +56,21 @@ func GetFeeds(v *viper.Viper) []Feed {
 		&ActionFeed{
 			ModifiedAfter: inspectionConfig.ModifiedAfter,
 			Incremental:   inspectionConfig.Incremental,
+			Limit:         actionLimit,
 		},
 		&ActionAssigneeFeed{
 			ModifiedAfter: inspectionConfig.ModifiedAfter,
 			Incremental:   inspectionConfig.Incremental,
 		},
 	}
+}
+
+func getActionLimit(v *viper.Viper) int {
+	actionLimit := v.GetInt("export.action.limit")
+	if actionLimit <= 100 {
+		return actionLimit
+	}
+	return 100
 }
 
 func getInspectionFeed(v *viper.Viper, inspectionConfig *config.InspectionConfig, templateIDs []string) *InspectionFeed {
