@@ -11,7 +11,7 @@ iauditor-exporter report [flags]
 ```
 // Export PDF and Word inspection reports
 		iauditor-exporter report --export-path /path/to/export/to --format PDF,WORD
-		// Export PDF inspection reports with a custom report preference
+		// Export PDF inspection reports with a custom report layout
 		iauditor-exporter report --export-path /path/to/export/to --format PDF --preference-id abc
 ```
 
@@ -33,7 +33,7 @@ iauditor-exporter report [flags]
       --inspection-skip-ids strings         Skip storing these inspection IDs
       --inspection-web-report-link string   Web report link format. Can be public or private (default "private")
       --modified-after string               Return inspections modified after this date (see readme for supported formats)
-      --preference-id string                The report preference to apply to the document
+      --preference-id string                The report layout to apply to the document
       --proxy-url string                    Proxy URL for making API requests through
       --retry-timeout int                   Specify the time in seconds spent retrieving each report. Values greater than 60 seconds will be treated as 60 seconds. (default 15)
       --template-ids strings                Template IDs to filter inspections and schedules by (default all)
