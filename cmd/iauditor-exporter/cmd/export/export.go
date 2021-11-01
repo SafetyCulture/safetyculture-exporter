@@ -74,7 +74,7 @@ func ReportCmd() *cobra.Command {
 		Short: "Export inspection report",
 		Example: `// Export PDF and Word inspection reports
 		iauditor-exporter report --export-path /path/to/export/to --format PDF,WORD
-		// Export PDF inspection reports with a custom report preference
+		// Export PDF inspection reports with a custom report layout
 		iauditor-exporter report --export-path /path/to/export/to --format PDF --preference-id abc`,
 		RunE: runInspectionReports,
 	}

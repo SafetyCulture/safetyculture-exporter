@@ -133,7 +133,7 @@ func configFlags() {
 	reportFlags = flag.NewFlagSet("report", flag.ContinueOnError)
 	reportFlags.StringSlice("format", []string{"PDF"}, "Export format (PDF,WORD)")
 	reportFlags.String("filename-convention", "INSPECTION_TITLE", "The name of the report exported, either INSPECTION_TITLE or INSPECTION_ID")
-	reportFlags.String("preference-id", "", "The report preference to apply to the document")
+	reportFlags.String("preference-id", "", "The report layout to apply to the document")
 	reportFlags.Int("retry-timeout", 15, "Specify the time in seconds spent retrieving each report. Values greater than 60 seconds will be treated as 60 seconds.")
 
 	sitesFlags = flag.NewFlagSet("sites", flag.ContinueOnError)
