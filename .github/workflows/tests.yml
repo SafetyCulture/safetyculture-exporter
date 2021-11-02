@@ -180,6 +180,7 @@ jobs:
 
   Upload-Coverage:
     runs-on: ubuntu-latest
+    if: ${{ github.actor != 'dependabot[bot]' }}
     needs:
       - Unit-Tests
       - PostgreSQL-Integration-Tests
