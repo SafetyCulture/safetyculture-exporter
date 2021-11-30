@@ -325,16 +325,16 @@ func (a *Client) GetMedia(ctx context.Context, request *GetMediaRequest) (*GetMe
 		return nil, nil
 	}
 
-	contentType, ok := result.Header["Content-Type"]
-	if !ok {
-		return nil, fmt.Errorf("Failed to get content-type of media")
+	contentType := result.Header.Get("Content-Type")
+	if contentType == "" {
+		return nil, fmt.Errorf("failed to get content-type of media")
 	}
 
 	buf := new(bytes.Buffer)
 	buf.ReadFrom(result.Body)
 
 	resp := &GetMediaResponse{
-		ContentType: contentType[0],
+		ContentType: contentType,
 		Body:        buf.Bytes(),
 		MediaID:     mediaID,
 	}

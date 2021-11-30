@@ -1,9 +1,9 @@
 package api
 
 import (
+	"fmt"
 	"math"
 	"net/http"
-	"strconv"
 	"time"
 )
 
@@ -44,11 +44,11 @@ type Backoff func(min, max time.Duration, attemptNum int, resp *http.Response) t
 // seconds the server states it may be ready to process more requests from this client.
 func DefaultBackoff(min, max time.Duration, attemptNum int, resp *http.Response) time.Duration {
 	if resp != nil && resp.StatusCode == http.StatusTooManyRequests {
-		if s, ok := resp.Header[string(XRateLimitReset)]; ok {
-			if sleep, err := strconv.ParseInt(s[0], 10, 64); err == nil {
-				// Convert the times to UTC and allow 1 second of allowance.
-				now := time.Now().UTC()
-				return time.Unix(sleep/1000, 0).UTC().Sub(now) + 1*time.Second
+
+		if s := resp.Header.Get(string(XRateLimitReset)); s != "" {
+			if sleep, err := time.ParseDuration(fmt.Sprintf("%ss", s)); err == nil {
+				// Allow 1 second of allowance.
+				return sleep + 1
 			}
 		}
 	}
