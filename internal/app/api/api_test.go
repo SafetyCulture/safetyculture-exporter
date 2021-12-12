@@ -6,8 +6,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"net/http"
-	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -433,13 +431,11 @@ func TestGetMedia(t *testing.T) {
 	defer gock.Off()
 
 	result := `{id:"test-id"}`
-	header := make(http.Header)
-	header["Content-Type"] = []string{"test-content"}
-	req := gock.New("http://localhost:9999").
+	gock.New("http://localhost:9999").
 		Get("/audits/1234/media/12345").
 		Reply(200).
-		BodyString(result)
-	req.SetHeader("Content-Type", "test-content")
+		BodyString(result).
+		SetHeader("Content-Type", "test-content")
 
 	apiClient := api.GetTestClient()
 	gock.InterceptClient(apiClient.HTTPClient())
@@ -630,8 +626,7 @@ func TestAPIClientBackoff429TooManyRequest(t *testing.T) {
 	req := gock.New("http://localhost:9999").
 		Get(fmt.Sprintf("/audits/%s", "1234")).
 		Reply(429)
-	now := time.Now().Unix() * 1000
-	req.SetHeader("X-Rate-Limit-Reset", strconv.FormatInt(now, 10))
+	req.SetHeader("X-RateLimit-Reset", "1")
 
 	tests := []struct {
 		name string

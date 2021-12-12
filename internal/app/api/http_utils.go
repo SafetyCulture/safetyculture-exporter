@@ -16,7 +16,7 @@ const (
 	XRequestID         Header = "X-Request-ID"
 	IntegrationID      Header = "sc-integration-id"
 	IntegrationVersion Header = "sc-integration-version"
-	XRateLimitReset    Header = "X-Rate-Limit-Reset"
+	XRateLimitReset    Header = "X-RateLimit-Reset"
 )
 
 // HTTPDoer executes http requests.
