@@ -628,7 +628,7 @@ func TestAPIClientBackoff429TooManyRequest(t *testing.T) {
 		Get(fmt.Sprintf("/audits/%s", "1234")).
 		Reply(429)
 	now := time.Now().Unix() * 1000
-	req.SetHeader("X-Rate-Limit-Reset", strconv.FormatInt(now, 10))
+	req.SetHeader("X-RateLimit-Reset", strconv.FormatInt(now, 10))
 
 	tests := []struct {
 		name string
