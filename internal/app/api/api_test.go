@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -627,8 +626,7 @@ func TestAPIClientBackoff429TooManyRequest(t *testing.T) {
 	req := gock.New("http://localhost:9999").
 		Get(fmt.Sprintf("/audits/%s", "1234")).
 		Reply(429)
-	now := time.Now().Unix() * 1000
-	req.SetHeader("X-RateLimit-Reset", strconv.FormatInt(now, 10))
+	req.SetHeader("X-RateLimit-Reset", "1")
 
 	tests := []struct {
 		name string
