@@ -11,7 +11,7 @@ require (
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/gookit/color v1.5.0
 	github.com/hashicorp/go-version v1.3.0
-	github.com/jackc/pgx/v4 v4.13.0 // indirect
+	github.com/jackc/pgx/v4 v4.14.0 // indirect
 	github.com/kr/pretty v0.3.0 // indirect
 	github.com/mattn/go-runewidth v0.0.13 // indirect
 	github.com/mattn/go-sqlite3 v1.14.9 // indirect
@@ -29,7 +29,7 @@ require (
 	golang.org/x/text v0.3.7 // indirect
 	gopkg.in/h2non/gock.v1 v1.1.2
 	gorm.io/driver/mysql v1.2.1
-	gorm.io/driver/postgres v1.2.1
+	gorm.io/driver/postgres v1.2.3
 	gorm.io/driver/sqlite v1.2.3
 	gorm.io/driver/sqlserver v1.2.1
 	gorm.io/gorm v1.22.4
@@ -46,12 +46,12 @@ require (
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/jackc/chunkreader/v2 v2.0.1 // indirect
-	github.com/jackc/pgconn v1.10.0 // indirect
+	github.com/jackc/pgconn v1.10.1 // indirect
 	github.com/jackc/pgio v1.0.0 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
-	github.com/jackc/pgproto3/v2 v2.1.1 // indirect
+	github.com/jackc/pgproto3/v2 v2.2.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20200714003250-2b9c44734f2b // indirect
-	github.com/jackc/pgtype v1.8.1 // indirect
+	github.com/jackc/pgtype v1.9.0 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.3 // indirect
 	github.com/kr/text v0.2.0 // indirect
