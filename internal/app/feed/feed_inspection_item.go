@@ -42,6 +42,9 @@ type InspectionItem struct {
 	Score                   float32   `json:"score" csv:"score"`
 	MaxScore                float32   `json:"max_score" csv:"max_score"`
 	ScorePercentage         float32   `json:"score_percentage" csv:"score_percentage"`
+	CombinedScore           float32   `json:"combined_score" csv:"combined_score"`
+	CombinedMaxScore        float32   `json:"combined_max_score" csv:"combined_max_score"`
+	CombinedScorePercentage float32   `json:"combined_score_percentage" csv:"combined_score_percentage"`
 	Mandatory               bool      `json:"mandatory" csv:"mandatory"`
 	Inactive                bool      `json:"inactive" csv:"inactive"`
 	LocationLatitude        *float32  `json:"location_latitude" csv:"location_latitude"`
@@ -106,6 +109,9 @@ func (f *InspectionItemFeed) Columns() []string {
 		"score",
 		"max_score",
 		"score_percentage",
+		"combined_score",
+		"combined_max_score",
+		"combined_score_percentage",
 		"mandatory",
 		"inactive",
 		"location_latitude",
