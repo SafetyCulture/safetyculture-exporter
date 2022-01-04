@@ -27,6 +27,9 @@
 | score                     | real     |             |
 | max_score                 | real     |             |
 | score_percentage          | real     |             |
+| combined_score            | real     |             |
+| combined_max_score        | real     |             |
+| combined_score_percentage | real     |             |
 | mandatory                 | numeric  |             |
 | inactive                  | numeric  |             |
 | location_latitude         | real     |             |
