@@ -69,6 +69,12 @@ builds:
       - -buildmode=exe
     ldflags:
       - -s -w -X github.com/SafetyCulture/iauditor-exporter/internal/app/version.version={{.Version}}
+dockers:
+  - image_templates: ['goreleaser/goreleaser']
+    goos: linux
+    goarch: amd64
+    goarm: ''
+    dockerfile: '{{ .Env.DOCKERFILE }}'
 archives:
   - id: iauditor-exporter
     builds:
