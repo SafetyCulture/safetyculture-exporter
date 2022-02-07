@@ -68,9 +68,9 @@ func (f *GroupUserFeed) Export(ctx context.Context, apiClient *api.Client, expor
 	logger.Infof("%s: exporting for org_id: %s", feedName, orgID)
 
 	exporter.InitFeed(f, &InitFeedOptions{
-		// Clear this table before loading data.
-		// This table does not receive updates, it is only refreshed.
-		Truncate: true,
+		// Truncate files if upserts aren't supported.
+		// This ensure that the export does not contain duplicate rows
+		Truncate: !exporter.SupportsUpsert(),
 	})
 
 	err := apiClient.DrainFeed(ctx, &api.GetFeedRequest{
