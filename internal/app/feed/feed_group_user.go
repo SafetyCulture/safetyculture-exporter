@@ -74,7 +74,7 @@ func (f *GroupUserFeed) Export(ctx context.Context, apiClient *api.Client, expor
 	})
 
 	// Delete the actions if already exist
-	err := exporter.DeleteRowsIfExist(f, "organisation_id =?", orgID)
+	err := exporter.DeleteRowsIfExist(f, "organisation_id = ?", orgID)
 	util.Check(err, "Failed to delete rows in exporter")
 
 	err = apiClient.DrainFeed(ctx, &api.GetFeedRequest{
