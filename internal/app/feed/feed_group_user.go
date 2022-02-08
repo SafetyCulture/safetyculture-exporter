@@ -70,10 +70,14 @@ func (f *GroupUserFeed) Export(ctx context.Context, apiClient *api.Client, expor
 	exporter.InitFeed(f, &InitFeedOptions{
 		// Truncate files if upserts aren't supported.
 		// This ensure that the export does not contain duplicate rows
-		Truncate: !exporter.SupportsUpsert(),
+		Truncate: false,
 	})
 
-	err := apiClient.DrainFeed(ctx, &api.GetFeedRequest{
+	// Delete the actions if already exist
+	err := exporter.DeleteRowsIfExist(f, "organisation_id =?", orgID)
+	util.Check(err, "Failed to delete rows in exporter")
+
+	err = apiClient.DrainFeed(ctx, &api.GetFeedRequest{
 		InitialURL: "/feed/group_users",
 		Params:     api.GetFeedParams{},
 	}, func(resp *api.GetFeedResponse) error {

@@ -1,5 +1,5 @@
 user_id,group_id,organisation_id,exported_at
-user_1,role_group1,role_123,--date--
-user_2,role_group1,role_123,--date--
-user_1,role_group2,role_123,--date--
-user_2,role_group2,role_123,--date--
+user_1,role_group3,role_123,--date--
+user_2,role_group3,role_123,--date--
+user_1,role_group4,role_123,--date--
+user_2,role_group4,role_123,--date--
