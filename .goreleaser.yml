@@ -24,7 +24,6 @@ builds:
       - -mod=readonly
     ldflags:
       - -s -w -X github.com/SafetyCulture/iauditor-exporter/internal/app/version.version={{.Version}}
-    skip: true
   - id: darwin-arm64
     main: ./cmd/iauditor-exporter/main.go
     goos:
@@ -39,7 +38,6 @@ builds:
       - -mod=readonly
     ldflags:
       - -s -w -X github.com/SafetyCulture/iauditor-exporter/internal/app/version.version={{.Version}}
-    skip: true
   - id: linux-amd64
     main: ./cmd/iauditor-exporter/main.go
     goos:
@@ -71,7 +69,6 @@ builds:
       - -buildmode=exe
     ldflags:
       - -s -w -X github.com/SafetyCulture/iauditor-exporter/internal/app/version.version={{.Version}}
-    skip: true
 dockers:
   - image_templates:
      - "ghcr.io/safetyculture/iauditor-exporter:{{ .Tag }}"
