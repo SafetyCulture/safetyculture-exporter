@@ -224,6 +224,20 @@ func initMockFeedsSet3(httpClient *http.Client) {
 		File("mocks/set_1/feed_action_assignees_1.json")
 }
 
+func initMockIssuesFeed(httpClient *http.Client) {
+	gock.InterceptClient(httpClient)
+
+	gock.New("http://localhost:9999").
+		Get("/feed/issues").
+		Reply(200).
+		File("mocks/issues/feed_issues_1.json")
+
+	gock.New("http://localhost:9999/feed/issues?limit=20&next_page_token=QGI5Nzk5NzMtZWMxMy00YzVmLTk1NDQtMTI0YjQ1M2I2OWYp").
+		Get("/feed/issues").
+		Reply(200).
+		File("mocks/issues/feed_issues_2.json")
+}
+
 func resetMocks(httpClient *http.Client) {
 	gock.Off()
 	gock.Clean()
