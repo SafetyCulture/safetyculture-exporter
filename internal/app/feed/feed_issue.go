@@ -34,6 +34,7 @@ type Issue struct {
 	CategoryLabel   string     `json:"category_label" csv:"category_label"`
 }
 
+// IssueFeed is a representation of the issues feed
 type IssueFeed struct {
 	Limit       int
 	Incremental bool
