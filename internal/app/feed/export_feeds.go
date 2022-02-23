@@ -15,6 +15,7 @@ func GetFeeds(v *viper.Viper) []Feed {
 	inspectionIncludeInactiveItems := v.GetBool("export.inspection.included_inactive_items")
 	templateIDs := getTemplateIDs(v)
 	actionLimit := GetActionLimit(v)
+	issueLimit := GetIssueLimit(v)
 	inspectionConfig := config.GetInspectionConfig(v)
 	exportMedia := viper.GetBool("export.media")
 	sitesIncludeDeleted := viper.GetBool("export.site.include_deleted")
@@ -58,6 +59,10 @@ func GetFeeds(v *viper.Viper) []Feed {
 			Incremental:   inspectionConfig.Incremental,
 			Limit:         actionLimit,
 		},
+		&IssueFeed{
+			Incremental: false, //this was disabled on request. Issues API doesn't support modified After filters
+			Limit:       issueLimit,
+		},
 		&ActionAssigneeFeed{
 			ModifiedAfter: inspectionConfig.ModifiedAfter,
 			Incremental:   inspectionConfig.Incremental,
@@ -70,6 +75,14 @@ func GetActionLimit(v *viper.Viper) int {
 	actionLimit := v.GetInt("export.action.limit")
 	if actionLimit <= 100 {
 		return actionLimit
+	}
+	return 100
+}
+
+func GetIssueLimit(v *viper.Viper) int {
+	issueLimit := v.GetInt("export.issue.limit")
+	if issueLimit <= 100 {
+		return issueLimit
 	}
 	return 100
 }
