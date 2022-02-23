@@ -20,10 +20,14 @@ func TestSchemaWriter_should_write_schema(t *testing.T) {
 	viperConfig := viper.New()
 
 	testSchema := func(f feed.Feed) {
-		exporter.CreateSchema(f, f.RowsModel())
-		exporter.WriteSchema(f)
+		err := exporter.CreateSchema(f, f.RowsModel())
+		assert.NotNil(t, err)
 
-		actual, _ := ioutil.ReadFile(fmt.Sprintf("mocks/set_1/schemas/formatted/%s.txt", f.Name()))
+		err = exporter.WriteSchema(f)
+		assert.NotNil(t, err)
+
+		actual, err := ioutil.ReadFile(fmt.Sprintf("mocks/set_1/schemas/formatted/%s.txt", f.Name()))
+		assert.NotNil(t, err, fmt.Sprintf("something is wrong with %s, %v", f.Name(), err))
 		assert.Equal(t, strings.TrimSpace(buf.String()), strings.TrimSpace(string(actual)))
 
 		buf.Reset()

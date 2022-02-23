@@ -1,3 +1,4 @@
+//go:build sql
 // +build sql
 
 package feed_test
@@ -57,6 +58,8 @@ func TestIntegrationDbCreateSchema_should_create_all_schemas(t *testing.T) {
 	filesEqualish(t, "mocks/set_1/schemas/schedules.csv", filepath.Join(exporter.ExportPath, "schedules.csv"))
 	filesEqualish(t, "mocks/set_1/schemas/schedule_assignees.csv", filepath.Join(exporter.ExportPath, "schedule_assignees.csv"))
 	filesEqualish(t, "mocks/set_1/schemas/schedule_occurrences.csv", filepath.Join(exporter.ExportPath, "schedule_occurrences.csv"))
+
+	filesEqualish(t, "mocks/set_1/schemas/issues.csv", filepath.Join(exporter.ExportPath, "issues.csv"))
 }
 
 func TestIntegrationDbExportFeeds_should_export_all_feeds_to_file(t *testing.T) {
