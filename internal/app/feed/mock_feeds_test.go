@@ -78,6 +78,16 @@ func initMockFeedsSet1(httpClient *http.Client) {
 		Get("/feed/action_assignees").
 		Reply(200).
 		File("mocks/set_1/feed_action_assignees_1.json")
+
+	gock.New("http://localhost:9999").
+		Get("/feed/issues").
+		Reply(200).
+		File("mocks/set_1/feed_issues_1.json")
+
+	gock.New("http://localhost:9999/feed/issues?limit=20&next_page_token=QGI5Nzk5NzMtZWMxMy00YzVmLTk1NDQtMTI0YjQ1M2I2OWYp").
+		Get("/feed/issues").
+		Reply(200).
+		File("mocks/set_1/feed_issues_2.json")
 }
 
 func initMockFeedsSet2(httpClient *http.Client) {
@@ -153,6 +163,16 @@ func initMockFeedsSet2(httpClient *http.Client) {
 		Get("/feed/action_assignees").
 		Reply(200).
 		File("mocks/set_2/feed_action_assignees_2.json")
+
+	gock.New("http://localhost:9999").
+		Get("/feed/issues").
+		Reply(200).
+		File("mocks/set_1/feed_issues_1.json")
+
+	gock.New("http://localhost:9999/feed/issues?limit=20&next_page_token=QGI5Nzk5NzMtZWMxMy00YzVmLTk1NDQtMTI0YjQ1M2I2OWYp").
+		Get("/feed/issues").
+		Reply(200).
+		File("mocks/set_1/feed_issues_2.json")
 }
 
 func initMockFeedsSet3(httpClient *http.Client) {
@@ -222,6 +242,30 @@ func initMockFeedsSet3(httpClient *http.Client) {
 		Get("/feed/action_assignees").
 		Reply(200).
 		File("mocks/set_1/feed_action_assignees_1.json")
+
+	gock.New("http://localhost:9999").
+		Get("/feed/issues").
+		Reply(200).
+		File("mocks/set_1/feed_issues_1.json")
+
+	gock.New("http://localhost:9999/feed/issues?limit=20&next_page_token=QGI5Nzk5NzMtZWMxMy00YzVmLTk1NDQtMTI0YjQ1M2I2OWYp").
+		Get("/feed/issues").
+		Reply(200).
+		File("mocks/set_1/feed_issues_2.json")
+}
+
+func initMockIssuesFeed(httpClient *http.Client) {
+	gock.InterceptClient(httpClient)
+
+	gock.New("http://localhost:9999").
+		Get("/feed/issues").
+		Reply(200).
+		File("mocks/set_1/feed_issues_1.json")
+
+	gock.New("http://localhost:9999/feed/issues?limit=20&next_page_token=QGI5Nzk5NzMtZWMxMy00YzVmLTk1NDQtMTI0YjQ1M2I2OWYp").
+		Get("/feed/issues").
+		Reply(200).
+		File("mocks/set_1/feed_issues_2.json")
 }
 
 func resetMocks(httpClient *http.Client) {
