@@ -1,0 +1,21 @@
++-------------------+----------+-------------+
+|       NAME        |   TYPE   | PRIMARY KEY |
++-------------------+----------+-------------+
+| id                | text     | true        |
+| title             | text     |             |
+| description       | text     |             |
+| creator_id        | text     |             |
+| creator_user_name | text     |             |
+| created_at        | datetime |             |
+| due_at            | datetime |             |
+| priority          | text     |             |
+| status            | text     |             |
+| template_id       | text     |             |
+| inspection_id     | text     |             |
+| inspection_name   | text     |             |
+| site_id           | text     |             |
+| site_name         | text     |             |
+| location_name     | text     |             |
+| category_id       | text     |             |
+| category_label    | text     |             |
++-------------------+----------+-------------+

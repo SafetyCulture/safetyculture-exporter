@@ -15,23 +15,23 @@ const (
 
 // Issue represents a row from the issues feed
 type Issue struct {
-	ID              string    `json:"id" csv:"id" gorm:"primarykey;column:id;size:36"`
-	Title           string    `json:"title" csv:"title"`
-	Description     string    `json:"description" csv:"description"`
-	CreatorID       string    `json:"creator_id" csv:"creator_id"`
-	CreatorUserName string    `json:"creator_user_name"`
-	CreatedAt       time.Time `json:"created_at" csv:"created_at"`
-	DueAt           time.Time `json:"due_at" csv:"due_at"`
-	Priority        string    `json:"priority" csv:"priority"`
-	Status          string    `json:"status" csv:"status"`
-	TemplateID      string    `json:"template_id" csv:"template_id"`
-	InspectionID    string    `json:"inspection_id" csv:"inspection_id"`
-	InspectionName  string    `json:"inspection_name" csv:"inspection_name"`
-	SiteID          string    `json:"site_id" csv:"site_id"`
-	SiteName        string    `json:"site_name" csv:"site_name"`
-	LocationName    string    `json:"location_name" csv:"location_name"`
-	CategoryID      string    `json:"category_id" csv:"category_id"`
-	CategoryLabel   string    `json:"category_label" csv:"category_label"`
+	ID              string     `json:"id" csv:"id" gorm:"primarykey;column:id;size:36"`
+	Title           string     `json:"title" csv:"title"`
+	Description     string     `json:"description" csv:"description"`
+	CreatorID       string     `json:"creator_id" csv:"creator_id"`
+	CreatorUserName string     `json:"creator_user_name"`
+	CreatedAt       time.Time  `json:"created_at" csv:"created_at"`
+	DueAt           *time.Time `json:"due_at,omitempty" csv:"due_at"`
+	Priority        string     `json:"priority" csv:"priority"`
+	Status          string     `json:"status" csv:"status"`
+	TemplateID      string     `json:"template_id" csv:"template_id"`
+	InspectionID    string     `json:"inspection_id" csv:"inspection_id"`
+	InspectionName  string     `json:"inspection_name" csv:"inspection_name"`
+	SiteID          string     `json:"site_id" csv:"site_id"`
+	SiteName        string     `json:"site_name" csv:"site_name"`
+	LocationName    string     `json:"location_name" csv:"location_name"`
+	CategoryID      string     `json:"category_id" csv:"category_id"`
+	CategoryLabel   string     `json:"category_label" csv:"category_label"`
 }
 
 type IssueFeed struct {

@@ -21,20 +21,21 @@ func TestSchemaWriter_should_write_schema(t *testing.T) {
 
 	testSchema := func(f feed.Feed) {
 		err := exporter.CreateSchema(f, f.RowsModel())
-		assert.NotNil(t, err)
+		assert.Nil(t, err, fmt.Sprintf("something is wrong when creating schema: %s, %v", f.Name(), err))
 
 		err = exporter.WriteSchema(f)
-		assert.NotNil(t, err)
+		assert.Nil(t, err, fmt.Sprintf("something is wrong when writing schema %s, %v", f.Name(), err))
 
 		actual, err := ioutil.ReadFile(fmt.Sprintf("mocks/set_1/schemas/formatted/%s.txt", f.Name()))
-		assert.NotNil(t, err, fmt.Sprintf("something is wrong with %s, %v", f.Name(), err))
+		assert.Nil(t, err, fmt.Sprintf("something is wrong when reading file %s.txt, %v", f.Name(), err))
 		assert.Equal(t, strings.TrimSpace(buf.String()), strings.TrimSpace(string(actual)))
 
 		buf.Reset()
 	}
 
-	for _, feed := range feed.GetFeeds(viperConfig) {
-		testSchema(feed)
+	for _, f := range feed.GetFeeds(viperConfig) {
+		fmt.Printf("TESTING FEED: %s\n", f.Name())
+		testSchema(f)
 	}
 }
 

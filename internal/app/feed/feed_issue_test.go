@@ -45,7 +45,8 @@ func testAllNulls(t *testing.T, issue *feed.Issue) {
 	assert.NotEqual(t, time.Date(1, time.January, 1, 0, 0, 0, 0, time.UTC), issue.CreatedAt)
 
 	// not sure how correct is this approach
-	assert.Equal(t, time.Date(1, time.January, 1, 0, 0, 0, 0, time.UTC), issue.DueAt)
+	//assert.Equal(t, time.Date(1, time.January, 1, 0, 0, 0, 0, time.UTC), issue.DueAt)
+	assert.Nil(t, issue.DueAt)
 
 	assert.Equal(t, "", issue.Priority)
 	assert.Equal(t, "", issue.Status)
@@ -66,7 +67,8 @@ func testAllValues(t *testing.T, issue *feed.Issue) {
 	assert.Equal(t, "user_51d3dbc686eb4790980f6414513d1c05", issue.CreatorID)
 	assert.Equal(t, "🦄", issue.CreatorUserName)
 	assert.Equal(t, time.Date(2020, time.April, 14, 0, 36, 53, 304000000, time.UTC), issue.CreatedAt)
-	assert.Equal(t, time.Date(2020, time.April, 14, 0, 36, 53, 304000000, time.UTC), issue.DueAt)
+	expected := time.Date(2020, time.April, 14, 0, 36, 53, 304000000, time.UTC)
+	assert.Equal(t, &expected, issue.DueAt)
 	assert.Equal(t, "NONE", issue.Priority)
 	assert.Equal(t, "OPEN", issue.Status)
 	assert.Equal(t, "55bc5efa-2420-483d-bad1-27b35922c455", issue.TemplateID)

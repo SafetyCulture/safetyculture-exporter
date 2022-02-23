@@ -59,13 +59,13 @@ func GetFeeds(v *viper.Viper) []Feed {
 			Incremental:   inspectionConfig.Incremental,
 			Limit:         actionLimit,
 		},
-		&IssueFeed{
-			Incremental: false, //this was disabled on request. Issues API doesn't support modified After filters
-			Limit:       issueLimit,
-		},
 		&ActionAssigneeFeed{
 			ModifiedAfter: inspectionConfig.ModifiedAfter,
 			Incremental:   inspectionConfig.Incremental,
+		},
+		&IssueFeed{
+			Incremental: false, //this was disabled on request. Issues API doesn't support modified After filters
+			Limit:       issueLimit,
 		},
 	}
 }
