@@ -79,6 +79,7 @@ func GetActionLimit(v *viper.Viper) int {
 	return 100
 }
 
+// GetIssueLimit Return 100 (upper bound value) if param value > 100
 func GetIssueLimit(v *viper.Viper) int {
 	issueLimit := v.GetInt("export.issue.limit")
 	if issueLimit <= 100 {
