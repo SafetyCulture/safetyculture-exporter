@@ -21,6 +21,7 @@ For instructions on downloading and running the iAuditor Exporter, as well as in
     * [Organization](https://github.com/SafetyCulture/iauditor-exporter/wiki/Organization-data-sets)
     * [Schedules](https://github.com/SafetyCulture/iauditor-exporter/wiki/Schedules-data-sets)
     * [Actions](https://github.com/SafetyCulture/iauditor-exporter/wiki/Actions-data-sets)
+    * [Issues](https://github.com/SafetyCulture/iauditor-exporter/wiki/Issues-data-sets)
 
 > The [Python version of the iAuditor Exporter](https://github.com/SafetyCulture/iauditor-exporter/tree/v2) is no longer being maintained. We recommend downloading this latest version for faster exporting and additional data sets.
 
