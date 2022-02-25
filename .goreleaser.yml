@@ -73,10 +73,8 @@ dockers:
   - image_templates:
      - "ghcr.io/safetyculture/iauditor-exporter:{{ .Tag }}"
      - "ghcr.io/safetyculture/iauditor-exporter:latest"
-    goos:
-      - linux
-    goarch:
-      - amd64
+    goos: linux
+    goarch: amd64
     goarm: ''
 archives:
   - id: iauditor-exporter
