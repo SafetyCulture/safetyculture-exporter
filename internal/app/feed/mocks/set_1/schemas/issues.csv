@@ -1,1 +1,1 @@
-id,title,description,creator_id,CreatorUserName,created_at,due_at,priority,status,template_id,inspection_id,inspection_name,site_id,site_name,location_name,category_id,category_label
+id,title,description,creator_id,creator_user_name,created_at,due_at,priority,status,template_id,inspection_id,inspection_name,site_id,site_name,location_name,category_id,category_label
