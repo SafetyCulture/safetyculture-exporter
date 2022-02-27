@@ -1,4 +1,4 @@
-id,title,description,creator_id,CreatorUserName,created_at,due_at,priority,status,template_id,inspection_id,inspection_name,site_id,site_name,location_name,category_id,category_label
+id,title,description,creator_id,creator_user_name,created_at,due_at,priority,status,template_id,inspection_id,inspection_name,site_id,site_name,location_name,category_id,category_label
 500c4ffe-b247-41bb-ad51-d8d5f0168a26,"Another name - 21 Apr 2020, 16:50 PM",,user_5ba3178d5024431ea47b2a59c739dffa,Adam Taylor,--date--,,NONE,OPEN,,,,,,,52a419e3-5142-4fb3-a26c-31114dc80682,Hazard 2
 50a4464c-410b-4e08-9dca-5d9ca140bd37,"Employee Observation - 23 4月 2020, 03:44 下午",,user_53aa4faebbad4abf855029c683012796,William,--date--,--date--,MEDIUM,OPEN,,,,location_5fcc00de87ec4fca8e55648e76635618,3rd,,52a419e3-5142-4fb3-a26c-31114dc80682,Hazard 2
 50c0d7dd-6f27-4da5-8f8e-b71b7dbc6fe6,"Injury - 23 Apr 2020, 03:38 PM",,user_51d302e26f49435f944ebe8276f284b6,Santiago Del Sol,--date--,,NONE,OPEN,,,,,,,592ec130-90e0-4c0e-a1c0-1f37f12f5fbb,Tow Trucks
