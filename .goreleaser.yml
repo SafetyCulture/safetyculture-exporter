@@ -69,6 +69,13 @@ builds:
       - -buildmode=exe
     ldflags:
       - -s -w -X github.com/SafetyCulture/iauditor-exporter/internal/app/version.version={{.Version}}
+dockers:
+  - image_templates:
+      - "ghcr.io/safetyculture/iauditor-exporter:{{ .Tag }}"
+      - "ghcr.io/safetyculture/iauditor-exporter:latest"
+    goos: linux
+    goarch: amd64
+    goarm: ''
 archives:
   - id: iauditor-exporter
     builds:
