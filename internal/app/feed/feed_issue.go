@@ -19,7 +19,7 @@ type Issue struct {
 	Title           string     `json:"title" csv:"title"`
 	Description     string     `json:"description" csv:"description"`
 	CreatorID       string     `json:"creator_id" csv:"creator_id"`
-	CreatorUserName string     `json:"creator_user_name"`
+	CreatorUserName string     `json:"creator_user_name" csv:"creator_user_name"`
 	CreatedAt       time.Time  `json:"created_at" csv:"created_at"`
 	DueAt           *time.Time `json:"due_at,omitempty" csv:"due_at"`
 	Priority        string     `json:"priority" csv:"priority"`
