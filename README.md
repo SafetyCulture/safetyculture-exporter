@@ -30,6 +30,8 @@ For instructions on downloading and running the iAuditor Exporter, as well as in
 ## Development
 
 To develop the `iauditor-exporter`, you'll need the [latest version of Golang](https://golang.org/doc/install).
+When adding new columns in methods that implement `Columns() []string`, we need to make sure they are added at the end.
+This way we can preserve the CSV columns in the export files.
 
 ### Testing
 
