@@ -73,29 +73,30 @@ func (e *CSVExporter) FinaliseExport(feed Feed, rows interface{}) error {
 			break
 		}
 
-		if file == nil || rowsAdded >= e.MaxRowsPerFile {
-			/* 	IMPORTANT NOTE: this is important for `windows` builds. Linux/Unix handles this scenario differently.
-			If there is an existing handler for this file, the error will be:
-			`The process cannot access the file because it is being used by another process.`
-			Therefore, the `close` is important
-			FYI: https://github.com/golang/go/issues/8914
-			*/
-			if file != nil {
-				err := file.Close()
-				if err != nil {
-					return err
-				}
+		// creates a new file if it doesn't exist or needs to roll over the existing file
+		if shouldCreateNewFile(file, rowsAdded, e.MaxRowsPerFile) {
+			if file == nil {
+				file, err = e.createNewFile(feed.Name())
+			} else {
+				file, err = e.createRolloverFile(file, feed.Name())
+
 			}
-			file, err = e.getExportFile(feed.Name())
 			if err != nil {
 				return err
 			}
+		}
 
+		// write headers if the file is new
+		writeHeaders, err := shouldWriteCsvHeaders(file)
+		if err != nil {
+			return err
+		}
+		if writeHeaders {
+			// marshal with headers
 			err = gocsv.Marshal(rows, file)
 			if err != nil {
 				return err
 			}
-
 			rowsAdded = 0
 		} else {
 			err = gocsv.MarshalWithoutHeaders(rows, file)
@@ -111,28 +112,60 @@ func (e *CSVExporter) FinaliseExport(feed Feed, rows interface{}) error {
 	return nil
 }
 
-func (e *CSVExporter) getExportFile(feedName string) (*os.File, error) {
-	exportFilePath := filepath.Join(e.ExportPath, fmt.Sprintf("%s.csv", feedName))
+func shouldCreateNewFile(file *os.File, rowsAdded int, maxRowsPerFile int) bool {
+	return file == nil || rowsAdded >= maxRowsPerFile
+}
 
-	fileExists, err := fileExists(exportFilePath)
+func shouldWriteCsvHeaders(file *os.File) (bool, error) {
+	stats, err := file.Stat()
+	if err != nil {
+		return false, err
+	}
+	return stats.Size() == 0, nil
+}
+
+func (e *CSVExporter) createNewFile(feedName string) (*os.File, error) {
+	exportFilePath := filepath.Join(e.ExportPath, fmt.Sprintf("%s.csv", feedName))
+	file, err := os.OpenFile(exportFilePath, os.O_RDWR|os.O_CREATE|os.O_APPEND|os.O_TRUNC, 0666)
 	if err != nil {
 		return nil, err
 	}
+	return file, nil
+}
 
-	if fileExists {
-		newFilePath := filepath.Join(e.ExportPath, fmt.Sprintf("%s-%s.csv", feedName, time.Now().Format("20060102150405.999999")))
-		err = os.Rename(exportFilePath, newFilePath)
+func (e *CSVExporter) createRolloverFile(file *os.File, feedName string) (*os.File, error) {
+	/* 	IMPORTANT NOTE: this is important for `windows` builds. Linux/Unix handles this scenario differently.
+	If there is an existing handler for this file, the error will be:
+	`The process cannot access the file because it is being used by another process.`
+	Therefore, the `close` is important
+	FYI: https://github.com/golang/go/issues/8914
+	*/
+	if file != nil {
+		err := file.Close()
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	file, err := os.OpenFile(exportFilePath, os.O_RDWR|os.O_CREATE|os.O_APPEND|os.O_TRUNC, 0666)
+	exportFilePath := filepath.Join(e.ExportPath, fmt.Sprintf("%s.csv", feedName))
+	newFilePath := filepath.Join(e.ExportPath, fmt.Sprintf("%s-%s.csv", feedName, time.Now().Format("20060102150405.999999")))
+
+	_, err := fileExists(exportFilePath)
 	if err != nil {
 		return nil, err
 	}
 
-	return file, nil
+	err = os.Rename(exportFilePath, newFilePath)
+	if err != nil {
+		return nil, err
+	}
+
+	newFile, err := os.OpenFile(exportFilePath, os.O_RDWR|os.O_CREATE|os.O_APPEND|os.O_TRUNC, 0666)
+	if err != nil {
+		return nil, err
+	}
+
+	return newFile, nil
 }
 
 func (e *CSVExporter) cleanOldFiles(feedName string) error {
