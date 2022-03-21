@@ -13,7 +13,7 @@ import (
 )
 
 func TestCreateSchemas_should_create_all_schemas_to_file(t *testing.T) {
-	exporter, err := getTemporaryCSVExporter()
+	exporter, err := getTemporaryCSVExporter(100000)
 	assert.Nil(t, err)
 
 	viperConfig := viper.New()
@@ -41,7 +41,7 @@ func TestCreateSchemas_should_create_all_schemas_to_file(t *testing.T) {
 func TestExportFeeds_should_export_all_feeds_to_file(t *testing.T) {
 	defer gock.Off()
 
-	exporter, err := getTemporaryCSVExporter()
+	exporter, err := getTemporaryCSVExporter(100000)
 	assert.Nil(t, err)
 
 	viperConfig := viper.New()
@@ -102,7 +102,7 @@ func TestExportFeeds_should_perform_incremental_update_on_second_run(t *testing.
 		  }
 		`)
 
-	exporter, err := getTemporaryCSVExporter()
+	exporter, err := getTemporaryCSVExporter(100000)
 	assert.Nil(t, err)
 
 	viperConfig := viper.New()
@@ -168,7 +168,7 @@ func TestGetIssueLimit(t *testing.T) {
 func TestExportFeeds_should_handle_lots_of_rows_ok(t *testing.T) {
 	defer gock.Off()
 
-	exporter, err := getTemporaryCSVExporter()
+	exporter, err := getTemporaryCSVExporter(100000)
 	assert.Nil(t, err)
 
 	viperConfig := viper.New()
