@@ -102,7 +102,6 @@ func (e *CSVExporter) FinaliseExport(feed Feed, rows interface{}) error {
 		offset = offset + limit
 		rowsAdded += int(resp.RowsAffected)
 	}
-
 	return nil
 }
 
