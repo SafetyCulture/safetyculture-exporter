@@ -74,6 +74,18 @@ func (e *CSVExporter) FinaliseExport(feed Feed, rows interface{}) error {
 		}
 
 		if file == nil || rowsAdded >= e.MaxRowsPerFile {
+			/* 	IMPORTANT NOTE: this is important for `windows` builds. Linux/Unix handles this scenario differently.
+				If there is an existing handler for this file, the error will be:
+			  	`The process cannot access the file because it is being used by another process.`
+				Therefore, the `close` is important
+				FYI: https://github.com/golang/go/issues/8914
+			*/
+			if file != nil {
+				err := file.Close()
+				if err != nil {
+					return err
+				}
+			}
 			file, err = e.getExportFile(feed.Name())
 			if err != nil {
 				return err
@@ -109,7 +121,10 @@ func (e *CSVExporter) getExportFile(feedName string) (*os.File, error) {
 
 	if fileExists {
 		newFilePath := filepath.Join(e.ExportPath, fmt.Sprintf("%s-%s.csv", feedName, time.Now().Format("20060102150405.999999")))
-		os.Rename(exportFilePath, newFilePath)
+		err = os.Rename(exportFilePath, newFilePath)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	file, err := os.OpenFile(exportFilePath, os.O_RDWR|os.O_CREATE|os.O_APPEND|os.O_TRUNC, 0666)
