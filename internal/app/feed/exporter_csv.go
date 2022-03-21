@@ -75,10 +75,10 @@ func (e *CSVExporter) FinaliseExport(feed Feed, rows interface{}) error {
 
 		if file == nil || rowsAdded >= e.MaxRowsPerFile {
 			/* 	IMPORTANT NOTE: this is important for `windows` builds. Linux/Unix handles this scenario differently.
-				If there is an existing handler for this file, the error will be:
-			  	`The process cannot access the file because it is being used by another process.`
-				Therefore, the `close` is important
-				FYI: https://github.com/golang/go/issues/8914
+			If there is an existing handler for this file, the error will be:
+			`The process cannot access the file because it is being used by another process.`
+			Therefore, the `close` is important
+			FYI: https://github.com/golang/go/issues/8914
 			*/
 			if file != nil {
 				err := file.Close()
