@@ -13,6 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       packages: write
+      contents: write
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -24,9 +25,8 @@ jobs:
         with:
           go-version: 1.17
 
-      - name: Setup release environment
-        run: |-
-          echo 'GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}' >> .release-env
-
       - name: Run GoReleaser
-        run: make release
+        run: make release \
+          docker-user=docker \
+          docker-password=${{ secrets.GITHUB_TOKEN }} \
+          docker-host=ghcr.io
