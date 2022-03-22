@@ -13,14 +13,14 @@ import (
 )
 
 func TestCSVExporterSupportsUpsert_should_return_true(t *testing.T) {
-	exporter, err := getTemporaryCSVExporter(100000)
+	exporter, err := getTemporaryCSVExporter()
 	assert.Nil(t, err)
 
 	assert.True(t, exporter.SupportsUpsert())
 }
 
 func TestCSVExporterInitFeed_should_create_table_if_not_exists(t *testing.T) {
-	exporter, err := getTemporaryCSVExporter(100000)
+	exporter, err := getTemporaryCSVExporter()
 	assert.Nil(t, err)
 
 	userFeed := &feed.UserFeed{}
@@ -43,7 +43,7 @@ func TestCSVExporterInitFeed_should_create_table_if_not_exists(t *testing.T) {
 }
 
 func TestCSVExporterInitFeed_should_truncate_table_if_truncate_is_true(t *testing.T) {
-	exporter, err := getTemporaryCSVExporter(100000)
+	exporter, err := getTemporaryCSVExporter()
 	assert.Nil(t, err)
 
 	userFeed := &feed.UserFeed{}
@@ -76,7 +76,7 @@ func TestCSVExporterInitFeed_should_truncate_table_if_truncate_is_true(t *testin
 }
 
 func TestCSVExporterInitFeed_should_not_truncate_table_if_truncate_is_false(t *testing.T) {
-	exporter, err := getTemporaryCSVExporter(100000)
+	exporter, err := getTemporaryCSVExporter()
 	assert.Nil(t, err)
 
 	userFeed := &feed.UserFeed{}
@@ -109,7 +109,7 @@ func TestCSVExporterInitFeed_should_not_truncate_table_if_truncate_is_false(t *t
 }
 
 func TestCSVExporterWriteRows_should_write_rows(t *testing.T) {
-	exporter, err := getTemporaryCSVExporter(100000)
+	exporter, err := getTemporaryCSVExporter()
 	assert.Nil(t, err)
 
 	userFeed := &feed.UserFeed{}
@@ -145,7 +145,7 @@ func TestCSVExporterWriteRows_should_write_rows(t *testing.T) {
 }
 
 func TestCSVExporterWriteRows_should_update_rows(t *testing.T) {
-	exporter, err := getTemporaryCSVExporter(100000)
+	exporter, err := getTemporaryCSVExporter()
 	assert.Nil(t, err)
 
 	userFeed := &feed.UserFeed{}
@@ -188,7 +188,7 @@ func TestCSVExporterWriteRows_should_update_rows(t *testing.T) {
 }
 
 func TestCSVExporterLastModifiedAt_should_return_latest_modified_at(t *testing.T) {
-	exporter, err := getTemporaryCSVExporter(100000)
+	exporter, err := getTemporaryCSVExporter()
 	assert.Nil(t, err)
 
 	inspectionFeed := &feed.InspectionFeed{}
@@ -271,7 +271,7 @@ func TestCSVExporterLastModifiedAt_should_return_latest_modified_at(t *testing.T
 }
 
 func TestCSVExporterLastModifiedAt_should_return_modified_after_if_latest(t *testing.T) {
-	exporter, err := getTemporaryCSVExporter(100000)
+	exporter, err := getTemporaryCSVExporter()
 	assert.Nil(t, err)
 
 	inspectionFeed := &feed.InspectionFeed{}
@@ -360,7 +360,7 @@ func TestCSVExporter_should_fail_if_path_is_wrong(t *testing.T) {
 }
 
 func TestCSVExporter_should_do_rollover_files(t *testing.T) {
-	exporter, err := getTemporaryCSVExporter(1)
+	exporter, err := getTemporaryCSVExporterWithMaxRowsLimit(1)
 	require.Nil(t, err)
 
 	userFeed := &feed.UserFeed{}
@@ -404,7 +404,7 @@ user_2,role_123,user.2@test.com,User 2,User 2,false,,--date--`
 }
 
 func TestCSVExporterFinaliseExport_should_write_rows_out_to_file(t *testing.T) {
-	exporter, err := getTemporaryCSVExporter(100000)
+	exporter, err := getTemporaryCSVExporter()
 	assert.Nil(t, err)
 
 	userFeed := &feed.UserFeed{}

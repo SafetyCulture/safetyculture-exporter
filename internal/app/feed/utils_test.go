@@ -25,13 +25,13 @@ func getInmemorySQLExporter(exportMediaPath string) (*feed.SQLExporter, error) {
 }
 
 // getTemporaryCSVExporter creates a CSVExporter that writes to a temp folder
-func getTemporaryCSVExporter(maxRowsPerFile int) (*feed.CSVExporter, error) {
+func getTemporaryCSVExporter() (*feed.CSVExporter, error) {
 	dir, err := ioutil.TempDir("", "export")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	return feed.NewCSVExporter(dir, "", maxRowsPerFile)
+	return feed.NewCSVExporter(dir, "", 100000)
 }
 
 // getTemporaryCSVExporterWithMaxRowsLimit creates a CSVExporter that writes to a temp folder with row limit
