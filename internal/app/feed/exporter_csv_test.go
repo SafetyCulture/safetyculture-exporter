@@ -353,7 +353,7 @@ func TestCSVExporterLastModifiedAt_should_return_modified_after_if_latest(t *tes
 	assert.Equal(t, now.Add(time.Hour).Format(time.RFC3339), lastModifiedAt.Format(time.RFC3339))
 }
 
-func TestCSVExporter_should_rollover_files(t *testing.T) {
+func TestCSVExporter_should_do_rollover_files(t *testing.T) {
 	exporter, err := getTemporaryCSVExporter(1)
 	require.Nil(t, err)
 
