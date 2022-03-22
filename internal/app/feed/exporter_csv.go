@@ -73,8 +73,16 @@ func (e *CSVExporter) FinaliseExport(feed Feed, rows interface{}) error {
 			break
 		}
 
-		if file == nil || rowsAdded >= e.MaxRowsPerFile {
-			file, err = e.getExportFile(feed.Name())
+		if rowsAdded >= e.MaxRowsPerFile {
+			err = e.createRolloverFile(file, feed.Name())
+			if err != nil {
+				return err
+			}
+			file = nil
+		}
+
+		if file == nil {
+			file, err = e.createNewFile(feed.Name())
 			if err != nil {
 				return err
 			}
@@ -83,7 +91,6 @@ func (e *CSVExporter) FinaliseExport(feed Feed, rows interface{}) error {
 			if err != nil {
 				return err
 			}
-
 			rowsAdded = 0
 		} else {
 			err = gocsv.MarshalWithoutHeaders(rows, file)
@@ -95,29 +102,46 @@ func (e *CSVExporter) FinaliseExport(feed Feed, rows interface{}) error {
 		offset = offset + limit
 		rowsAdded += int(resp.RowsAffected)
 	}
-
 	return nil
 }
 
-func (e *CSVExporter) getExportFile(feedName string) (*os.File, error) {
+func (e *CSVExporter) createNewFile(feedName string) (*os.File, error) {
 	exportFilePath := filepath.Join(e.ExportPath, fmt.Sprintf("%s.csv", feedName))
-
-	fileExists, err := fileExists(exportFilePath)
-	if err != nil {
-		return nil, err
-	}
-
-	if fileExists {
-		newFilePath := filepath.Join(e.ExportPath, fmt.Sprintf("%s-%s.csv", feedName, time.Now().Format("20060102150405.999999")))
-		os.Rename(exportFilePath, newFilePath)
-	}
-
 	file, err := os.OpenFile(exportFilePath, os.O_RDWR|os.O_CREATE|os.O_APPEND|os.O_TRUNC, 0666)
 	if err != nil {
 		return nil, err
 	}
-
 	return file, nil
+}
+
+func (e *CSVExporter) createRolloverFile(file *os.File, feedName string) error {
+	/* 	IMPORTANT NOTE: this is important for `windows` builds. Linux/Unix handles this scenario differently.
+	If there is an existing handler for this file, the error will be:
+	`The process cannot access the file because it is being used by another process.`
+	Therefore, the `close` is important
+	FYI: https://github.com/golang/go/issues/8914
+	*/
+	if file != nil {
+		err := file.Close()
+		if err != nil {
+			return err
+		}
+	}
+
+	exportFilePath := filepath.Join(e.ExportPath, fmt.Sprintf("%s.csv", feedName))
+	newFilePath := filepath.Join(e.ExportPath, fmt.Sprintf("%s-%s.csv", feedName, time.Now().Format("20060102150405.999999")))
+
+	_, err := fileExists(exportFilePath)
+	if err != nil {
+		return err
+	}
+
+	err = os.Rename(exportFilePath, newFilePath)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (e *CSVExporter) cleanOldFiles(feedName string) error {
