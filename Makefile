@@ -1,5 +1,5 @@
 PACKAGE_NAME        	:= "github.com/safetyculture/iauditor-exporter"
-GOLANG_VERSION        ?= 1.17.8
+GOLANG_VERSION        ?= 1.18.0
 GOLANG_CROSS_VERSION  := v$(GOLANG_VERSION)
 
 .PHONY: help
@@ -43,14 +43,12 @@ release-dry-run:
 
 .PHONY: release
 release:
-	@if [ ! -f ".release-env" ]; then \
-		echo "\033[91m.release-env is required for release\033[0m";\
-		exit 1;\
-	fi
 	docker run \
 		--rm \
 		--privileged \
-		--env-file .release-env \
+		--env DOCKER_USERNAME=$(docker-user) \
+		--env DOCKER_PASSWORD=$(docker-password) \
+		--env DOCKER_HOST=$(docker-host) \
 		-v /var/run/docker.sock:/var/run/docker.sock \
 		-v `pwd`:/go/src/$(PACKAGE_NAME) \
 		-w /go/src/$(PACKAGE_NAME) \
