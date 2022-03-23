@@ -10,21 +10,22 @@ env:
   - CGO_ENABLED=1
   - GOPROXY=https://proxy.golang.org
 builds:
-  - id: darwin-amd64
+  - id: linux-amd64
     main: ./cmd/iauditor-exporter/main.go
     goos:
-      - darwin
+      - linux
     goarch:
       - amd64
     env:
-      - CC=o64-clang
-      - CXX=o64-clang++
+      - CC=gcc
+      - CXX=g++
     flags:
       - -tags=netgo  # Force using the go network stack
+      - -trimpath
       - -mod=readonly
     ldflags:
       - -s -w -X github.com/SafetyCulture/iauditor-exporter/internal/app/version.version={{.Version}}
-
+      - -extldflags "-lc -lrt -lpthread --static"
 dockers:
   - image_templates:
       - "ghcr.io/safetyculture/iauditor-exporter:{{ .Tag }}"
@@ -35,7 +36,7 @@ dockers:
 archives:
   - id: iauditor-exporter
     builds:
-      - darwin-amd64
+      - linux-amd64
     replacements:
       darwin: macOS
       linux: Linux
