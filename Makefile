@@ -46,9 +46,10 @@ release:
 	docker run \
 		--rm \
 		--privileged \
-		--env-file .release-env \
+		--entrypoint ./goreleaser_entry.sh \
+		-e GITHUB_TOKEN=$(github_token) \
 		-v /var/run/docker.sock:/var/run/docker.sock \
 		-v `pwd`:/go/src/$(PACKAGE_NAME) \
 		-w /go/src/$(PACKAGE_NAME) \
 		goreleaser/goreleaser-cross:${GOLANG_CROSS_VERSION} \
-		-f .goreleaser.yml release --rm-dist
+		-f .goreleaser.yml release --rm-dist --skip-validate
