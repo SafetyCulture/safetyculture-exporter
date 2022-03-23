@@ -8,6 +8,8 @@ on:
   pull_request:
     types: [opened]
   push:
+    tags:
+      - '*'
 
 permissions: write-all
 
