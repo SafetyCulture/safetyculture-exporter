@@ -47,7 +47,7 @@ release:
 		--rm \
 		--privileged \
 		--entrypoint ./goreleaser_entry.sh \
-		-e GITHUB_TOKEN=$(github_token) \
+		--env-file .release-env \
 		-v /var/run/docker.sock:/var/run/docker.sock \
 		-v `pwd`:/go/src/$(PACKAGE_NAME) \
 		-w /go/src/$(PACKAGE_NAME) \
