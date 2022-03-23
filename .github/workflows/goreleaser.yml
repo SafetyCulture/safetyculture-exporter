@@ -37,4 +37,6 @@ jobs:
           echo 'GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}' >> .release-env
 
       - name: Run GoReleaser
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: make release
