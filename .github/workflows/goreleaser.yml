@@ -25,12 +25,16 @@ jobs:
         with:
           go-version: 1.17
 
+      - name: Login to Docker Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: docker
+          password: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Setup release environment
         run: |-
           echo 'GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}' >> .release-env
 
       - name: Run GoReleaser
-        run: make release \
-          docker-user=docker \
-          docker-password=${{ secrets.GITHUB_TOKEN }} \
-          docker-host=ghcr.io
+        run: make release
