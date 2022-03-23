@@ -49,6 +49,7 @@ release:
 		--env DOCKER_USERNAME=$(docker-user) \
 		--env DOCKER_PASSWORD=$(docker-password) \
 		--env DOCKER_HOST=$(docker-host) \
+		--env-file .release-env \
 		-v /var/run/docker.sock:/var/run/docker.sock \
 		-v `pwd`:/go/src/$(PACKAGE_NAME) \
 		-w /go/src/$(PACKAGE_NAME) \

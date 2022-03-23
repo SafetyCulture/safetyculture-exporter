@@ -25,6 +25,10 @@ jobs:
         with:
           go-version: 1.17
 
+      - name: Setup release environment
+        run: |-
+          echo 'GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}' >> .release-env
+
       - name: Run GoReleaser
         run: make release \
           docker-user=docker \
