@@ -43,6 +43,9 @@ release-dry-run:
 
 .PHONY: release
 release:
+	@echo "xxxxxx"
+	@cat .release-env
+	@echo "xxxxxx"
 	docker run \
 		--rm \
 		--privileged \
