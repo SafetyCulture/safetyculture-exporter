@@ -32,15 +32,15 @@ jobs:
         with:
           registry: ghcr.io
           username: docker
-          password: ${{ secrets.GITHUB_TOKEN }}
+          password: ${{ secrets.DEPLOY_DOCKER_KEY }}
 
       - name: Setup release environment
         run: |-
-          echo 'GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}' >> .release-env
+          echo 'GITHUB_TOKEN=${{ secrets.DEPLOY_DOCKER_KEY }}' >> .release-env
 
       - name: Run GoReleaser
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.DEPLOY_DOCKER_KEY }}
           DOCKER_USERNAME: docker
           DOCKER_PASSWORD: ${{ secrets.DEPLOY_DOCKER_KEY }}
         run: make release
