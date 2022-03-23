@@ -41,5 +41,4 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           DOCKER_USERNAME: docker
           DOCKER_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
-          DOCKER_HOST: ghcr.io
         run: make release
