@@ -9,6 +9,21 @@ env:
   - GO111MODULE=on
   - CGO_ENABLED=1
   - GOPROXY=https://proxy.golang.org
+builds:
+  - id: darwin-amd64
+    main: ./cmd/iauditor-exporter/main.go
+    goos:
+      - darwin
+    goarch:
+      - amd64
+    env:
+      - CC=o64-clang
+      - CXX=o64-clang++
+    flags:
+      - -tags=netgo  # Force using the go network stack
+      - -mod=readonly
+    ldflags:
+      - -s -w -X github.com/SafetyCulture/iauditor-exporter/internal/app/version.version={{.Version}}
 dockers:
   - image_templates:
       - "ghcr.io/safetyculture/iauditor-exporter:latest"
