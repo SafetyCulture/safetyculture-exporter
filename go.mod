@@ -28,11 +28,11 @@ require (
 	go.uber.org/zap v1.20.0
 	golang.org/x/text v0.3.7 // indirect
 	gopkg.in/h2non/gock.v1 v1.1.2
-	gorm.io/driver/mysql v1.2.3
+	gorm.io/driver/mysql v1.3.3
 	gorm.io/driver/postgres v1.2.3
 	gorm.io/driver/sqlite v1.2.6
 	gorm.io/driver/sqlserver v1.2.1
-	gorm.io/gorm v1.22.5
+	gorm.io/gorm v1.23.1
 )
 
 require (
