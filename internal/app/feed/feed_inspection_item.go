@@ -150,6 +150,7 @@ func fetchAndWriteMedia(ctx context.Context, apiClient *api.Client, exporter Exp
 }
 
 func (f *InspectionItemFeed) writeRows(ctx context.Context, exporter Exporter, rows []*InspectionItem, apiClient *api.Client) error {
+	logger := util.GetLogger()
 	skipIDs := map[string]bool{}
 	for _, id := range f.SkipIDs {
 		skipIDs[id] = true
@@ -185,6 +186,10 @@ func (f *InspectionItemFeed) writeRows(ctx context.Context, exporter Exporter, r
 			}
 
 			mediaURLList := strings.Split(row.MediaHypertextReference, "\n")
+			if len(mediaURLList) > 0 {
+				logger.Infof(" downloading media for inspection item %s", row.ItemID)
+			}
+
 			for _, mediaURL := range mediaURLList {
 				wg.Add(1)
 
