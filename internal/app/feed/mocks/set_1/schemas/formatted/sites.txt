@@ -1,10 +1,10 @@
 +-----------------+----------+-------------+
 |      NAME       |   TYPE   | PRIMARY KEY |
 +-----------------+----------+-------------+
-| site_id         | text     | true        |
-| name            | text     |             |
-| creator_id      | text     |             |
-| organisation_id | text     |             |
+| site_id         | TEXT     | true        |
+| name            | TEXT     |             |
+| creator_id      | TEXT     |             |
+| organisation_id | TEXT     |             |
 | exported_at     | datetime |             |
 | deleted         | numeric  |             |
 +-----------------+----------+-------------+

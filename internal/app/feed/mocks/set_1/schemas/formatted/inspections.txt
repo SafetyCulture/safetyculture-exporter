@@ -1,35 +1,35 @@
 +------------------+----------+-------------+
 |       NAME       |   TYPE   | PRIMARY KEY |
 +------------------+----------+-------------+
-| audit_id         | text     | true        |
-| name             | text     |             |
+| audit_id         | TEXT     | true        |
+| name             | TEXT     |             |
 | archived         | numeric  |             |
-| owner_name       | text     |             |
-| owner_id         | text     |             |
-| author_name      | text     |             |
-| author_id        | text     |             |
-| score            | real     |             |
-| max_score        | real     |             |
-| score_percentage | real     |             |
-| duration         | integer  |             |
-| template_id      | text     |             |
-| organisation_id  | text     |             |
-| template_name    | text     |             |
-| template_author  | text     |             |
-| site_id          | text     |             |
+| owner_name       | TEXT     |             |
+| owner_id         | TEXT     |             |
+| author_name      | TEXT     |             |
+| author_id        | TEXT     |             |
+| score            | REAL     |             |
+| max_score        | REAL     |             |
+| score_percentage | REAL     |             |
+| duration         | INTEGER  |             |
+| template_id      | TEXT     |             |
+| organisation_id  | TEXT     |             |
+| template_name    | TEXT     |             |
+| template_author  | TEXT     |             |
+| site_id          | TEXT     |             |
 | date_started     | datetime |             |
 | date_completed   | datetime |             |
 | date_modified    | datetime |             |
 | created_at       | datetime |             |
 | modified_at      | datetime |             |
 | exported_at      | datetime |             |
-| document_no      | text     |             |
-| prepared_by      | text     |             |
-| location         | text     |             |
+| document_no      | TEXT     |             |
+| prepared_by      | TEXT     |             |
+| location         | TEXT     |             |
 | conducted_on     | datetime |             |
-| personnel        | text     |             |
-| client_site      | text     |             |
-| latitude         | real     |             |
-| longitude        | real     |             |
-| web_report_link  | text     |             |
+| personnel        | TEXT     |             |
+| client_site      | TEXT     |             |
+| latitude         | REAL     |             |
+| longitude        | REAL     |             |
+| web_report_link  | TEXT     |             |
 +------------------+----------+-------------+
