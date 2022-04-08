@@ -9,8 +9,8 @@
 | exported_at       | datetime |             |
 | from_date         | datetime |             |
 | to_date           | datetime |             |
-| start_time_hour   | integer  |             |
-| start_time_minute | integer  |             |
+| start_time_hour   | INTEGER  |             |
+| start_time_minute | INTEGER  |             |
 | all_must_complete | numeric  |             |
 | status            | TEXT     |             |
 | organisation_id   | TEXT     |             |

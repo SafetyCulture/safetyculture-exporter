@@ -8,10 +8,10 @@
 | owner_id         | TEXT     |             |
 | author_name      | TEXT     |             |
 | author_id        | TEXT     |             |
-| score            | real     |             |
-| max_score        | real     |             |
-| score_percentage | real     |             |
-| duration         | integer  |             |
+| score            | REAL     |             |
+| max_score        | REAL     |             |
+| score_percentage | REAL     |             |
+| duration         | INTEGER  |             |
 | template_id      | TEXT     |             |
 | organisation_id  | TEXT     |             |
 | template_name    | TEXT     |             |
@@ -29,7 +29,7 @@
 | conducted_on     | datetime |             |
 | personnel        | TEXT     |             |
 | client_site      | TEXT     |             |
-| latitude         | real     |             |
-| longitude        | real     |             |
+| latitude         | REAL     |             |
+| longitude        | REAL     |             |
 | web_report_link  | TEXT     |             |
 +------------------+----------+-------------+

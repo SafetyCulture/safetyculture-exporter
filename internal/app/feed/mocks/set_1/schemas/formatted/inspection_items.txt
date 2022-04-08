@@ -4,7 +4,7 @@
 | id                        | TEXT     | true        |
 | item_id                   | TEXT     |             |
 | audit_id                  | TEXT     |             |
-| item_index                | integer  |             |
+| item_index                | INTEGER  |             |
 | template_id               | TEXT     |             |
 | parent_id                 | TEXT     |             |
 | created_at                | datetime |             |
@@ -24,14 +24,14 @@
 | media_files               | TEXT     |             |
 | media_ids                 | TEXT     |             |
 | media_hypertext_reference | TEXT     |             |
-| score                     | real     |             |
-| max_score                 | real     |             |
-| score_percentage          | real     |             |
-| combined_score            | real     |             |
-| combined_max_score        | real     |             |
-| combined_score_percentage | real     |             |
+| score                     | REAL     |             |
+| max_score                 | REAL     |             |
+| score_percentage          | REAL     |             |
+| combined_score            | REAL     |             |
+| combined_max_score        | REAL     |             |
+| combined_score_percentage | REAL     |             |
 | mandatory                 | numeric  |             |
 | inactive                  | numeric  |             |
-| location_latitude         | real     |             |
-| location_longitude        | real     |             |
+| location_latitude         | REAL     |             |
+| location_longitude        | REAL     |             |
 +---------------------------+----------+-------------+
