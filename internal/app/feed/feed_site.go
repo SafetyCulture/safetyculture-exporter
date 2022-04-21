@@ -17,6 +17,7 @@ type Site struct {
 	OrganisationID string    `json:"organisation_id" csv:"organisation_id" gorm:"size:37"`
 	ExportedAt     time.Time `json:"exported_at" csv:"exported_at" gorm:"autoUpdateTime"`
 	Deleted        bool      `json:"deleted" csv:"deleted" gorm:"deleted"`
+	SiteUUID       string    `json:"site_uuid" csv:"site_uuid"`
 }
 
 // SiteFeed is a representation of the sites feed
@@ -52,6 +53,7 @@ func (f *SiteFeed) Columns() []string {
 		"organisation_id",
 		"exported_at",
 		"deleted",
+		"site_uuid",
 	}
 }
 
