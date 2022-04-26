@@ -2,13 +2,14 @@ package feed
 
 import (
 	"context"
-	"sync"
-
 	"github.com/SafetyCulture/iauditor-exporter/internal/app/api"
 	"github.com/SafetyCulture/iauditor-exporter/internal/app/config"
 	"github.com/SafetyCulture/iauditor-exporter/internal/app/util"
 	"github.com/spf13/viper"
+	"sync"
 )
+
+const maxConcurrentGoRoutines = 10
 
 // GetFeeds returns list of all available data feeds
 func GetFeeds(v *viper.Viper) []Feed {
@@ -155,15 +156,18 @@ func ExportFeeds(v *viper.Viper, apiClient *api.Client, exporter Exporter) error
 
 	logger.Infof("Exporting data by user: %s %s", resp.Firstname, resp.Lastname)
 
+	semaphore := make(chan int, maxConcurrentGoRoutines)
 	for _, feed := range GetFeeds(v) {
 		if tablesMap[feed.Name()] || len(tables) == 0 {
+			semaphore <- 1
 			wg.Add(1)
 
 			go func(f Feed) {
+				logger.Infof(" ... queueing %s\n", f.Name())
 				defer wg.Done()
-
 				err := f.Export(ctx, apiClient, exporter, resp.OrganisationID)
 				util.Check(err, "failed to export")
+				<-semaphore
 			}(feed)
 		}
 	}
