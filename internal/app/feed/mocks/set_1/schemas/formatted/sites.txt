@@ -7,4 +7,5 @@
 | organisation_id | TEXT     |             |
 | exported_at     | datetime |             |
 | deleted         | numeric  |             |
+| site_uuid       | TEXT     |             |
 +-----------------+----------+-------------+

@@ -1,6 +1,6 @@
-site_id,name,creator_id,organisation_id,exported_at,deleted
-location_1,"42 Wallaby Way, Sydney",user_1,role_1,2020-11-06T08:21:16.399249+11:00,false
-location_2,Schrute Farms,user_2,role_1,2020-11-06T08:21:16.399249+11:00,false
-location_3,"Jönköping, Sweden",user_4,role_1,2020-11-06T08:21:16.399249+11:00,true
-location_4,"Lenox Hill, New York, United States",user_3,role_1,2020-11-06T08:21:16.399249+11:00,true
-locaton_5,"Kentucky, United States",user_2,role_1,2020-11-06T08:21:16.399249+11:00,true
+site_id,name,creator_id,organisation_id,exported_at,deleted,site_uuid
+location_1,"42 Wallaby Way, Sydney",user_1,role_1,2020-11-06T08:21:16.399249+11:00,false,location_1_uuid
+location_2,Schrute Farms,user_2,role_1,2020-11-06T08:21:16.399249+11:00,false,location_2_uuid
+location_3,"Jönköping, Sweden",user_4,role_1,2020-11-06T08:21:16.399249+11:00,true,location_3_uuid
+location_4,"Lenox Hill, New York, United States",user_3,role_1,2020-11-06T08:21:16.399249+11:00,true,location_4_uuid
+location_5,"Kentucky, United States",user_2,role_1,2020-11-06T08:21:16.399249+11:00,true,location_5_uuid
