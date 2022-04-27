@@ -17,7 +17,7 @@ type Site struct {
 	OrganisationID string    `json:"organisation_id" csv:"organisation_id" gorm:"size:37"`
 	ExportedAt     time.Time `json:"exported_at" csv:"exported_at" gorm:"autoUpdateTime"`
 	Deleted        bool      `json:"deleted" csv:"deleted" gorm:"deleted"`
-	SiteUUID       string    `json:"site_uuid" csv:"site_uuid"`
+	SiteUUID       string    `json:"site_uuid" csv:"site_uuid" gorm:"size:36"`
 }
 
 // SiteFeed is a representation of the sites feed
