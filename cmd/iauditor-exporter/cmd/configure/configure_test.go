@@ -1,4 +1,4 @@
-package cmd_test
+package configure_test
 
 import (
 	"bytes"

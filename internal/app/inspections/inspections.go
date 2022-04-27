@@ -16,7 +16,7 @@ import (
 
 const maxGoRoutines = 10
 
-type inspectionClient struct {
+type Client struct {
 	*zap.SugaredLogger
 
 	apiClient     *api.Client
@@ -39,7 +39,7 @@ func NewInspectionClient(v *viper.Viper, apiClient *api.Client, exporter exporte
 	inspectionConfig := config.GetInspectionConfig(v)
 	templateIDs := v.GetStringSlice("export.template_ids")
 
-	return &inspectionClient{
+	return &Client{
 		apiClient:     apiClient,
 		exporter:      exporter,
 		SkipIDs:       inspectionConfig.SkipIDs,
@@ -52,7 +52,7 @@ func NewInspectionClient(v *viper.Viper, apiClient *api.Client, exporter exporte
 	}
 }
 
-func (client *inspectionClient) Name() string {
+func (client *Client) Name() string {
 	return "inspections"
 }
 
@@ -66,7 +66,7 @@ func throttleFunc(tfunc func(api.Inspection), inspection api.Inspection, guard c
 	<-guard
 }
 
-func (client *inspectionClient) Export(ctx context.Context) error {
+func (client *Client) Export(ctx context.Context) error {
 	var wg sync.WaitGroup
 
 	skipIDs := map[string]bool{}

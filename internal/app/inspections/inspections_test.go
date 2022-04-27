@@ -2,6 +2,7 @@ package inspections_test
 
 import (
 	"context"
+	"github.com/stretchr/testify/require"
 	"net/http"
 	"testing"
 
@@ -56,4 +57,19 @@ func TestInspectionsExport(t *testing.T) {
 	)
 	err := inspectionClient.Export(context.Background())
 	assert.Nil(t, err)
+}
+
+func TestNewInspectionClient(t *testing.T) {
+	v := viper.GetViper()
+	require.NotNil(t, v)
+
+	res := inspections.NewInspectionClient(v, nil, nil)
+	require.NotNil(t, res)
+
+	client, ok := res.(*inspections.Client)
+	require.True(t, ok)
+	require.NotNil(t, client)
+
+	assert.EqualValues(t, "inspections", client.Name())
+	assert.False(t, client.Incremental)
 }
