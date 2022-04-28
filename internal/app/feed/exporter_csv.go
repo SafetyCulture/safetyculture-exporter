@@ -176,6 +176,9 @@ func NewCSVExporter(exportPath, exportMediaPath string, maxRowsPerFile int) (*CS
 	if err != nil {
 		return nil, err
 	}
+	if res := sqlExporter.DB.Exec("PRAGMA busy_timeout = 20000"); res.Error != nil {
+		return nil, res.Error
+	}
 
 	return &CSVExporter{
 		SQLExporter:    sqlExporter,
