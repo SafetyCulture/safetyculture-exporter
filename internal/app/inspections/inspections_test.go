@@ -2,8 +2,10 @@ package inspections_test
 
 import (
 	"context"
+	"github.com/stretchr/testify/require"
 	"net/http"
 	"testing"
+	"time"
 
 	"github.com/SafetyCulture/iauditor-exporter/internal/app/api"
 	exportermock "github.com/SafetyCulture/iauditor-exporter/internal/app/exporter/mocks"
@@ -56,4 +58,57 @@ func TestInspectionsExport(t *testing.T) {
 	)
 	err := inspectionClient.Export(context.Background())
 	assert.Nil(t, err)
+}
+
+func TestInspectionsExport_WhenSkipID(t *testing.T) {
+	viperConfig := viper.New()
+	apiClient := api.GetTestClient()
+	initMockInspections(apiClient.HTTPClient())
+
+	exporterMock := new(exportermock.Exporter)
+	exporterMock.On("WriteRow", mock.Anything, mock.Anything)
+	exporterMock.On("SetLastModifiedAt", mock.Anything)
+	exporterMock.On("GetLastModifiedAt", mock.Anything).Return(nil)
+
+	inspectionClient := inspections.NewInspectionClient(
+		viperConfig,
+		apiClient,
+		exporterMock,
+	)
+	inspectionClient.(*inspections.Client).SkipIDs = []string{"audit_d7e2f55b95094bd48fac601850e1db63"}
+	err := inspectionClient.Export(context.Background())
+	assert.Nil(t, err)
+}
+
+func TestInspectionsExport_WhenModifiedAtIsNotNil(t *testing.T) {
+	viperConfig := viper.New()
+	apiClient := api.GetTestClient()
+	initMockInspections(apiClient.HTTPClient())
+
+	exporterMock := new(exportermock.Exporter)
+	exporterMock.On("WriteRow", mock.Anything, mock.Anything)
+	exporterMock.On("SetLastModifiedAt", mock.Anything)
+	exporterMock.On("GetLastModifiedAt", mock.Anything).Return(&time.Time{})
+
+	inspectionClient := inspections.NewInspectionClient(
+		viperConfig,
+		apiClient,
+		exporterMock,
+	)
+	err := inspectionClient.Export(context.Background())
+	assert.Nil(t, err)
+}
+
+func TestNewInspectionClient(t *testing.T) {
+	v := viper.GetViper()
+	require.NotNil(t, v)
+
+	res := inspections.NewInspectionClient(v, nil, nil)
+	require.NotNil(t, res)
+
+	client, ok := res.(*inspections.Client)
+	require.True(t, ok)
+	require.NotNil(t, client)
+
+	assert.EqualValues(t, "inspections", client.Name())
 }

@@ -188,7 +188,7 @@ func NewSQLExporter(dialect, connectionString string, autoMigrate bool, exportMe
 	case "sqlite":
 		dialector = sqlite.Open(connectionString)
 	default:
-		return nil, fmt.Errorf("Invalid database dialect %s", dialect)
+		return nil, fmt.Errorf("invalid database dialect %s", dialect)
 	}
 
 	db, err := gorm.Open(dialector, &gorm.Config{

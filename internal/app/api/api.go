@@ -95,6 +95,11 @@ func (a *Client) HTTPClient() *http.Client {
 	return a.httpClient
 }
 
+// HTTPTransport returns the http Transport used by APIClient
+func (a *Client) HTTPTransport() *http.Transport {
+	return a.httpTransport
+}
+
 // OptSetTimeout sets the timeout for the request
 func OptSetTimeout(t time.Duration) Opt {
 	return func(a *Client) {
