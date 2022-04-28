@@ -26,7 +26,7 @@ func Check(currentVersion string) *ReleaseInfo {
 	}
 
 	v := res.GetTagName()
-	if versionGreaterThanOrEqual(currentVersion, v) {
+	if VersionGreaterThanOrEqual(currentVersion, v) {
 		return nil
 	}
 
@@ -36,7 +36,8 @@ func Check(currentVersion string) *ReleaseInfo {
 	}
 }
 
-func versionGreaterThanOrEqual(v, w string) bool {
+// VersionGreaterThanOrEqual returns true if version is greater or equal
+func VersionGreaterThanOrEqual(v, w string) bool {
 	vv, ve := version.NewVersion(v)
 	vw, we := version.NewVersion(w)
 

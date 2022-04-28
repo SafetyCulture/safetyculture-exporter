@@ -166,6 +166,16 @@ func TestClient_OptSetTimeout(t *testing.T) {
 	assert.EqualValues(t, time.Second*10, client.HTTPClient().Timeout)
 }
 
+func TestClient_OptAddTLSCert_WhenEmptyPath(t *testing.T) {
+	client := api.NewClient("fake_addr", "fake_token")
+	require.NotNil(t, client)
+
+	opt := api.OptAddTLSCert("")
+	opt(client)
+	require.NotNil(t, opt)
+	assert.Nil(t, client.HTTPTransport().TLSClientConfig)
+}
+
 func TestClient_OptSetProxy(t *testing.T) {
 	client := api.NewClient("fake_addr", "fake_token")
 	require.NotNil(t, client)
