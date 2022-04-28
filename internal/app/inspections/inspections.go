@@ -16,6 +16,7 @@ import (
 
 const maxGoRoutines = 10
 
+// Client to be used with inspections
 type Client struct {
 	*zap.SugaredLogger
 
@@ -52,6 +53,7 @@ func NewInspectionClient(v *viper.Viper, apiClient *api.Client, exporter exporte
 	}
 }
 
+// Name returns the name of the client
 func (client *Client) Name() string {
 	return "inspections"
 }
@@ -66,6 +68,7 @@ func throttleFunc(tfunc func(api.Inspection), inspection api.Inspection, guard c
 	<-guard
 }
 
+// Export triggers the export
 func (client *Client) Export(ctx context.Context) error {
 	var wg sync.WaitGroup
 
