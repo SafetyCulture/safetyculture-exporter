@@ -71,5 +71,4 @@ func TestNewInspectionClient(t *testing.T) {
 	require.NotNil(t, client)
 
 	assert.EqualValues(t, "inspections", client.Name())
-	assert.False(t, client.Incremental)
 }
