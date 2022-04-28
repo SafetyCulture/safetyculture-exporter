@@ -169,7 +169,8 @@ type GetFeedParams struct {
 	WebReportLink   string    `url:"web_report_link,omitempty"`
 
 	// Applicable only for sites
-	IncludeDeleted bool `url:"include_deleted,omitempty"`
+	IncludeDeleted    bool  `url:"include_deleted,omitempty"`
+	ShowOnlyLeafNodes *bool `url:"show_only_leaf_nodes,omitempty"`
 }
 
 // GetFeedRequest has all the data needed to make a request to get a feed

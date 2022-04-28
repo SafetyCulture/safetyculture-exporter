@@ -18,11 +18,14 @@ type Site struct {
 	ExportedAt     time.Time `json:"exported_at" csv:"exported_at" gorm:"autoUpdateTime"`
 	Deleted        bool      `json:"deleted" csv:"deleted" gorm:"deleted"`
 	SiteUUID       string    `json:"site_uuid" csv:"site_uuid" gorm:"size:36"`
+	MetaLabel      string    `json:"meta_label" csv:"meta_label" gorm:"size:36"`
+	ParentID       string    `json:"parent_id" csv:"parent_id" gorm:"size:41"`
 }
 
 // SiteFeed is a representation of the sites feed
 type SiteFeed struct {
-	IncludeDeleted bool
+	IncludeDeleted       bool
+	IncludeFullHierarchy bool
 }
 
 // Name is the name of the feed
@@ -54,6 +57,8 @@ func (f *SiteFeed) Columns() []string {
 		"exported_at",
 		"deleted",
 		"site_uuid",
+		"meta_label",
+		"parent_id",
 	}
 }
 
@@ -80,10 +85,12 @@ func (f *SiteFeed) Export(ctx context.Context, apiClient *api.Client, exporter E
 		Truncate: !exporter.SupportsUpsert(),
 	})
 
+	showOnlyLeafNodes := !f.IncludeFullHierarchy
 	err := apiClient.DrainFeed(ctx, &api.GetFeedRequest{
 		InitialURL: "/feed/sites",
 		Params: api.GetFeedParams{
-			IncludeDeleted: f.IncludeDeleted,
+			IncludeDeleted:    f.IncludeDeleted,
+			ShowOnlyLeafNodes: &showOnlyLeafNodes,
 		},
 	}, func(resp *api.GetFeedResponse) error {
 		rows := []*Site{}

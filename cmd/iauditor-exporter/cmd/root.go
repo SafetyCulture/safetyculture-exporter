@@ -138,6 +138,7 @@ func configFlags() {
 
 	sitesFlags = flag.NewFlagSet("sites", flag.ContinueOnError)
 	sitesFlags.Bool("site-include-deleted", false, "Include deleted sites in the sites table (default false)")
+	sitesFlags.Bool("site-include-full-hierarchy", false, "Include full sites hierarchy in table e.g. areas, regions, etc (default false)")
 }
 
 func bindFlags() {
@@ -172,6 +173,7 @@ func bindFlags() {
 	util.Check(viper.BindPFlag("export.action.limit", actionFlags.Lookup("action-limit")), "while binding flag")
 
 	util.Check(viper.BindPFlag("export.site.include_deleted", sitesFlags.Lookup("site-include-deleted")), "while binding flag")
+	util.Check(viper.BindPFlag("export.site.include_full_hierarchy", sitesFlags.Lookup("site-include-full-hierarchy")), "while binding flag")
 
 	util.Check(viper.BindPFlag("report.format", reportFlags.Lookup("format")), "while binding flag")
 	util.Check(viper.BindPFlag("report.filename_convention", reportFlags.Lookup("filename-convention")), "while binding flag")

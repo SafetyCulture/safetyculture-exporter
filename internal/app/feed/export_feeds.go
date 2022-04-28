@@ -19,6 +19,7 @@ func GetFeeds(v *viper.Viper) []Feed {
 	inspectionConfig := config.GetInspectionConfig(v)
 	exportMedia := viper.GetBool("export.media")
 	sitesIncludeDeleted := viper.GetBool("export.site.include_deleted")
+	sitesIncludeFullHierarchy := viper.GetBool("export.site.include_full_hierarchy")
 
 	return []Feed{
 		getInspectionFeed(v, inspectionConfig, templateIDs),
@@ -40,7 +41,8 @@ func GetFeeds(v *viper.Viper) []Feed {
 			Incremental: inspectionConfig.Incremental,
 		},
 		&SiteFeed{
-			IncludeDeleted: sitesIncludeDeleted,
+			IncludeDeleted:       sitesIncludeDeleted,
+			IncludeFullHierarchy: sitesIncludeFullHierarchy,
 		},
 		&UserFeed{},
 		&GroupFeed{},
