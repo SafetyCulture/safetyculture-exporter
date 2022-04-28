@@ -59,6 +59,26 @@ func TestInspectionsExport(t *testing.T) {
 	assert.Nil(t, err)
 }
 
+func TestInspectionsExport_WhenSkipID(t *testing.T) {
+	viperConfig := viper.New()
+	apiClient := api.GetTestClient()
+	initMockInspections(apiClient.HTTPClient())
+
+	exporterMock := new(exportermock.Exporter)
+	exporterMock.On("WriteRow", mock.Anything, mock.Anything)
+	exporterMock.On("SetLastModifiedAt", mock.Anything)
+	exporterMock.On("GetLastModifiedAt", mock.Anything).Return(nil)
+
+	inspectionClient := inspections.NewInspectionClient(
+		viperConfig,
+		apiClient,
+		exporterMock,
+	)
+	inspectionClient.(*inspections.Client).SkipIDs = []string{"audit_d7e2f55b95094bd48fac601850e1db63"}
+	err := inspectionClient.Export(context.Background())
+	assert.Nil(t, err)
+}
+
 func TestNewInspectionClient(t *testing.T) {
 	v := viper.GetViper()
 	require.NotNil(t, v)
