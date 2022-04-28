@@ -198,25 +198,10 @@ func NewSQLExporter(dialect, connectionString string, autoMigrate bool, exportMe
 		return nil, errors.Wrap(err, "Unable to connect to DB")
 	}
 
-	if dialect == "sqlite" {
-		if err := configureSQLite(db); err != nil {
-			return nil, err
-		}
-	}
-
 	return &SQLExporter{
 		DB:              db,
 		Logger:          logger,
 		AutoMigrate:     autoMigrate,
 		ExportMediaPath: exportMediaPath,
 	}, nil
-}
-
-func configureSQLite(db *gorm.DB) error {
-	// https://www.sqlite.org/pragma.html#pragma_busy_timeout
-	if res := db.Exec("PRAGMA busy_timeout = 20000"); res.Error != nil {
-		return res.Error
-	}
-
-	return nil
 }
