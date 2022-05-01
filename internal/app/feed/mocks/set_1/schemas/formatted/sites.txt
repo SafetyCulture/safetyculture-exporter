@@ -8,4 +8,6 @@
 | exported_at     | datetime |             |
 | deleted         | numeric  |             |
 | site_uuid       | TEXT     |             |
+| meta_label      | TEXT     |             |
+| parent_id       | TEXT     |             |
 +-----------------+----------+-------------+

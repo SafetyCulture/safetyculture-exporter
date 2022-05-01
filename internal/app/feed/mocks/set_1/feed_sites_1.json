@@ -11,7 +11,9 @@
       "creator_id": "user_1",
       "organisation_id": "role_1",
       "deleted": false,
-      "site_uuid": "location_1_uuid"
+      "site_uuid": "location_1_uuid",
+      "meta_label": "area",
+      "parent_id": null
     },
     {
       "id": "location_2",
@@ -19,7 +21,9 @@
       "creator_id": "user_2",
       "organisation_id": "role_1",
       "deleted": false,
-      "site_uuid": "location_2_uuid"
+      "site_uuid": "location_2_uuid",
+      "meta_label": "location",
+      "parent_id": "location_1_uuid"
     },
     {
       "id": "location_3",
@@ -27,7 +31,9 @@
       "creator_id": "user_4",
       "organisation_id": "role_1",
       "deleted": true,
-      "site_uuid": "location_3_uuid"
+      "site_uuid": "location_3_uuid",
+      "meta_label": "region",
+      "parent_id": "location_2_uuid"
     },
     {
       "id": "location_4",
@@ -35,7 +41,9 @@
       "creator_id": "user_3",
       "organisation_id": "role_1",
       "deleted": true,
-      "site_uuid": "location_4_uuid"
+      "site_uuid": "location_4_uuid",
+      "meta_label": "country",
+      "parent_id": "location_3_uuid"
     },
     {
       "id": "location_5",
@@ -43,7 +51,9 @@
       "creator_id": "user_2",
       "organisation_id": "role_1",
       "deleted": true,
-      "site_uuid": "location_5_uuid"
+      "site_uuid": "location_5_uuid",
+      "meta_label": "area",
+      "parent_id": ""
     }
   ]
 }
