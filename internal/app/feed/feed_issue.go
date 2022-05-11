@@ -117,7 +117,7 @@ func (f *IssueFeed) Export(ctx context.Context, apiClient *api.Client, exporter 
 			}
 		}
 
-		logger.Infof("%s: %d remaining", f.Name(), resp.Metadata.RemainingRecords)
+		logger.Infof("%s: %d remaining. Last call was %dms", f.Name(), resp.Metadata.RemainingRecords, apiClient.Duration.Milliseconds())
 		return nil
 	}
 
