@@ -39,6 +39,7 @@ type Client struct {
 	httpClient    *http.Client
 	httpTransport *http.Transport
 
+	Duration      time.Duration
 	CheckForRetry CheckForRetry
 	Backoff       Backoff
 	RetryMax      int
@@ -76,6 +77,7 @@ func NewClient(addr string, accessToken string, opts ...Opt) *Client {
 		httpTransport: httpTransport,
 		sling:         sling.New().Client(httpClient).Base(addr),
 		accessToken:   accessToken,
+		Duration:      0,
 		CheckForRetry: DefaultRetryPolicy,
 		Backoff:       DefaultBackoff,
 		RetryMax:      defaultRetryMax,
@@ -231,28 +233,22 @@ func (a *Client) do(doer HTTPDoer) (*http.Response, error) {
 	url := doer.URL()
 
 	for iter := 0; ; iter++ {
-		a.logger.Debugw("http request",
-			"url", url,
-		)
+		a.logger.Debugw("http request", "url", url)
 
+		start := time.Now()
 		resp, err := doer.Do()
+		a.Duration = time.Since(start)
+
 		status := ""
 		if resp != nil {
 			status = resp.Status
 		}
 
 		if err != nil {
-			a.logger.Errorw("http request error",
-				"url", url,
-				"status", status,
-				"err", err,
-			)
+			a.logger.Errorw("http request error", "url", url, "status", status, "err", err)
 		}
 
-		a.logger.Debugw("http response",
-			"url", url,
-			"status", status,
-		)
+		a.logger.Debugw("http response", "url", url, "status", status)
 
 		// Check if we should continue with the retries
 		shouldRetry, _ := a.CheckForRetry(resp, err)
@@ -354,12 +350,12 @@ func (a *Client) GetFeed(ctx context.Context, request *GetFeedRequest) (*GetFeed
 		errMsg json.RawMessage
 	)
 
-	url := request.InitialURL
+	initialURL := request.InitialURL
 	if request.URL != "" {
-		url = request.URL
+		initialURL = request.URL
 	}
 
-	sl := a.sling.New().Get(url).
+	sl := a.sling.New().Get(initialURL).
 		Set(string(Authorization), "Bearer "+a.accessToken).
 		Set(string(IntegrationID), "iauditor-exporter").
 		Set(string(IntegrationVersion), version.GetVersion()).

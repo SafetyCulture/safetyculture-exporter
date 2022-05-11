@@ -192,7 +192,7 @@ func (f *InspectionFeed) Export(ctx context.Context, apiClient *api.Client, expo
 			util.Check(err, "Failed to write data to exporter")
 		}
 
-		logger.Infof("%s: %d remaining", feedName, resp.Metadata.RemainingRecords)
+		logger.Infof("%s: %d remaining. Last call was %dms", feedName, resp.Metadata.RemainingRecords, apiClient.Duration.Milliseconds())
 		return nil
 	})
 	util.Check(err, "Failed to export feed")
