@@ -2,6 +2,7 @@ package feed
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/SafetyCulture/iauditor-exporter/internal/app/api"
@@ -36,7 +37,38 @@ type Exporter interface {
 	LastModifiedAt(feed Feed, modifiedAfter time.Time, orgID string) (time.Time, error)
 	WriteMedia(auditID string, mediaID string, contentType string, body []byte) error
 	DeleteRowsIfExist(feed Feed, query string, args ...interface{}) error
+	GetDuration() time.Duration
 
 	SupportsUpsert() bool
 	ParameterLimit() int
+}
+
+// LogStringConfig is the config for GetLogString function
+type LogStringConfig struct {
+	RemainingRecords int64
+	HTTPDuration     time.Duration
+	ExporterDuration time.Duration
+}
+
+// GetLogString build a log string based on input arguments
+func GetLogString(feedName string, cfg *LogStringConfig) string {
+	var args = []any{feedName}
+	var format = "%s: "
+
+	if cfg != nil {
+		format = format + "%d remaining."
+		args = append(args, cfg.RemainingRecords)
+
+		if cfg.HTTPDuration.Milliseconds() != 0 {
+			format = format + " Last http call was %dms."
+			args = append(args, cfg.HTTPDuration.Milliseconds())
+		}
+
+		if cfg.ExporterDuration.Milliseconds() != 0 {
+			format = format + " Last export operation was %dms."
+			args = append(args, cfg.ExporterDuration.Milliseconds())
+		}
+	}
+
+	return fmt.Sprintf(format, args...)
 }

@@ -23,7 +23,7 @@ func GetFeeds(v *viper.Viper) []Feed {
 	sitesIncludeFullHierarchy := viper.GetBool("export.site.include_full_hierarchy")
 
 	return []Feed{
-		getInspectionFeed(v, inspectionConfig, templateIDs),
+		getInspectionFeed(inspectionConfig, templateIDs),
 		&InspectionItemFeed{
 			SkipIDs:         inspectionConfig.SkipIDs,
 			ModifiedAfter:   inspectionConfig.ModifiedAfter,
@@ -91,7 +91,7 @@ func GetIssueLimit(v *viper.Viper) int {
 	return 100
 }
 
-func getInspectionFeed(v *viper.Viper, inspectionConfig *config.InspectionConfig, templateIDs []string) *InspectionFeed {
+func getInspectionFeed(inspectionConfig *config.InspectionConfig, templateIDs []string) *InspectionFeed {
 	return &InspectionFeed{
 		SkipIDs:       inspectionConfig.SkipIDs,
 		ModifiedAfter: inspectionConfig.ModifiedAfter,
@@ -191,7 +191,7 @@ func ExportInspectionReports(v *viper.Viper, apiClient *api.Client, exporter *Re
 
 	logger.Infof("Exporting inspection reports by user: %s %s", resp.Firstname, resp.Lastname)
 
-	feed := getInspectionFeed(v, config.GetInspectionConfig(v), getTemplateIDs(v))
+	feed := getInspectionFeed(config.GetInspectionConfig(v), getTemplateIDs(v))
 	err = feed.Export(ctx, apiClient, exporter, resp.OrganisationID)
 	util.Check(err, "failed to export inspection feed")
 

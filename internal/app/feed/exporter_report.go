@@ -210,6 +210,12 @@ func (e *ReportExporter) saveReport(ctx context.Context, apiClient *api.Client, 
 	return report
 }
 
+// GetDuration will return the duration for exporting a batch
+func (e *ReportExporter) GetDuration() time.Duration {
+	// NOT IMPLEMENTED
+	return 0
+}
+
 func (e *ReportExporter) exportInspection(ctx context.Context, apiClient *api.Client, inspection *Inspection, format string) error {
 	messageID, err := apiClient.InitiateInspectionReportExport(ctx, inspection.ID, format, e.PreferenceID)
 	if err != nil {
@@ -358,8 +364,6 @@ func getFilePath(exportPath string, inspection *Inspection, format string, filen
 			return "", err
 		}
 	}
-
-	return "", nil
 }
 
 // NewReportExporter returns a new instance of ReportExporter
