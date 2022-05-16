@@ -73,6 +73,7 @@ func (e *SQLExporter) InitFeed(feed Feed, opts *InitFeedOptions) error {
 	return nil
 }
 
+// GetDuration will return the duration for exporting a batch
 func (e *SQLExporter) GetDuration() time.Duration {
 	return e.duration
 }

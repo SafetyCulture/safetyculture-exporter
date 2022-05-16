@@ -158,7 +158,9 @@ func (e *CSVExporter) cleanOldFiles(feedName string) error {
 	return nil
 }
 
+// GetDuration will return the duration for exporting a batch
 func (e *CSVExporter) GetDuration() time.Duration {
+	// NOT IMPLEMENTED
 	return e.duration
 }
 

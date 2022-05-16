@@ -210,6 +210,7 @@ func (e *ReportExporter) saveReport(ctx context.Context, apiClient *api.Client, 
 	return report
 }
 
+// GetDuration will return the duration for exporting a batch
 func (e *ReportExporter) GetDuration() time.Duration {
 	// NOT IMPLEMENTED
 	return 0

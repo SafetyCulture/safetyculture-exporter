@@ -55,6 +55,7 @@ func (e *SchemaExporter) WriteSchema(feed Feed) error {
 	return nil
 }
 
+// GetDuration will return the duration for exporting a batch
 func (e *SchemaExporter) GetDuration() time.Duration {
 	// NOT IMPLEMENTED
 	return 0
