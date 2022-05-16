@@ -136,7 +136,11 @@ func (f *ActionFeed) Export(ctx context.Context, apiClient *api.Client, exporter
 			}
 		}
 
-		logger.Infof("%s: %d remaining. Last call was %dms", feedName, resp.Metadata.RemainingRecords, apiClient.Duration.Milliseconds())
+		logger.Info(GetLogString(f.Name(), &LogStringConfig{
+			RemainingRecords: resp.Metadata.RemainingRecords,
+			HttpDuration:     apiClient.Duration,
+			ExporterDuration: exporter.GetDuration(),
+		}))
 		return nil
 	})
 	util.Check(err, "Failed to export feed")

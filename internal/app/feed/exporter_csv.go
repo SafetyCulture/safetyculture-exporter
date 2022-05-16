@@ -14,12 +14,10 @@ import (
 // CSVExporter is an interface to export data feeds to CSV files
 type CSVExporter struct {
 	*SQLExporter
-
-	ExportPath string
-
+	ExportPath     string
 	MaxRowsPerFile int
-
-	Logger *zap.SugaredLogger
+	Logger         *zap.SugaredLogger
+	duration       time.Duration
 }
 
 // CreateSchema generated schema for a feed in csv format
@@ -160,6 +158,10 @@ func (e *CSVExporter) cleanOldFiles(feedName string) error {
 	return nil
 }
 
+func (e *CSVExporter) GetDuration() time.Duration {
+	return e.duration
+}
+
 func fileExists(filename string) (bool, error) {
 	info, err := os.Stat(filename)
 	if os.IsNotExist(err) {
@@ -185,5 +187,6 @@ func NewCSVExporter(exportPath, exportMediaPath string, maxRowsPerFile int) (*CS
 		ExportPath:     exportPath,
 		MaxRowsPerFile: maxRowsPerFile,
 		Logger:         sqlExporter.Logger,
+		duration:       0,
 	}, nil
 }

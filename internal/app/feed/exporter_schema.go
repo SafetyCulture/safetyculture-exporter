@@ -3,6 +3,7 @@ package feed
 import (
 	"fmt"
 	"io"
+	"time"
 
 	"github.com/olekukonko/tablewriter"
 
@@ -52,6 +53,11 @@ func (e *SchemaExporter) WriteSchema(feed Feed) error {
 	table.Render()
 
 	return nil
+}
+
+func (e *SchemaExporter) GetDuration() time.Duration {
+	// NOT IMPLEMENTED
+	return 0
 }
 
 // NewSchemaExporter creates a new instance of SchemaExporter

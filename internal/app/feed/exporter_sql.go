@@ -24,6 +24,7 @@ type SQLExporter struct {
 	Logger          *zap.SugaredLogger
 	AutoMigrate     bool
 	ExportMediaPath string
+	duration        time.Duration
 }
 
 // SupportsUpsert returns a bool if the exporter supports upserts
@@ -44,7 +45,7 @@ func (e *SQLExporter) ParameterLimit() int {
 }
 
 // CreateSchema creates the schema on the DB for the supplied feed
-func (e *SQLExporter) CreateSchema(feed Feed, rows interface{}) error {
+func (e *SQLExporter) CreateSchema(feed Feed, _ interface{}) error {
 	return e.InitFeed(feed, &InitFeedOptions{
 		Truncate: false,
 	})
@@ -72,9 +73,13 @@ func (e *SQLExporter) InitFeed(feed Feed, opts *InitFeedOptions) error {
 	return nil
 }
 
+func (e *SQLExporter) GetDuration() time.Duration {
+	return e.duration
+}
+
 // DeleteRowsIfExist will delete the rows if already exist
 func (e *SQLExporter) DeleteRowsIfExist(feed Feed, query string, args ...interface{}) error {
-	delete := e.DB.Table(feed.Name()).
+	del := e.DB.Table(feed.Name()).
 		Clauses(clause.Where{
 			Exprs: []clause.Expression{
 				clause.Expr{
@@ -84,8 +89,8 @@ func (e *SQLExporter) DeleteRowsIfExist(feed Feed, query string, args ...interfa
 			},
 		}).
 		Delete(feed.Model())
-	if delete.Error != nil {
-		return errors.Wrap(delete.Error, "Unable to delete rows")
+	if del.Error != nil {
+		return errors.Wrap(del.Error, "Unable to delete rows")
 	}
 
 	return nil
@@ -98,12 +103,14 @@ func (e *SQLExporter) WriteRows(feed Feed, rows interface{}) error {
 		columns = append(columns, clause.Column{Name: column})
 	}
 
+	start := time.Now()
 	insert := e.DB.Table(feed.Name()).
 		Clauses(clause.OnConflict{
 			Columns:   columns,
 			DoUpdates: clause.AssignmentColumns(feed.Columns()),
 		}).
 		Create(rows)
+	e.duration = time.Since(start)
 	if insert.Error != nil {
 		return errors.Wrap(insert.Error, "Unable to insert rows")
 	}
@@ -145,7 +152,7 @@ func (e *SQLExporter) LastModifiedAt(feed Feed, modifiedAfter time.Time, orgID s
 }
 
 // FinaliseExport closes out an export
-func (e *SQLExporter) FinaliseExport(feed Feed, rows interface{}) error {
+func (e *SQLExporter) FinaliseExport(Feed, interface{}) error {
 	return nil
 }
 
@@ -203,5 +210,6 @@ func NewSQLExporter(dialect, connectionString string, autoMigrate bool, exportMe
 		Logger:          logger,
 		AutoMigrate:     autoMigrate,
 		ExportMediaPath: exportMediaPath,
+		duration:        0,
 	}, nil
 }
