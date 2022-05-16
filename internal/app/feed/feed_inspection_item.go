@@ -259,7 +259,7 @@ func (f *InspectionItemFeed) Export(ctx context.Context, apiClient *api.Client, 
 
 		logger.Info(GetLogString(f.Name(), &LogStringConfig{
 			RemainingRecords: resp.Metadata.RemainingRecords,
-			HttpDuration:     apiClient.Duration,
+			HTTPDuration:     apiClient.Duration,
 			ExporterDuration: exporter.GetDuration(),
 		}))
 		return nil

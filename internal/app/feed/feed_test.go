@@ -21,7 +21,7 @@ func TestGetLogString_WhenMinimumArgumentsArePassed(t *testing.T) {
 func TestGetLogString_WhenHTTPDuration(t *testing.T) {
 	cfg := feed.LogStringConfig{
 		RemainingRecords: 40,
-		HttpDuration:     time.Second * 5,
+		HTTPDuration:     time.Second * 5,
 	}
 	result := feed.GetLogString("TEST_FEED", &cfg)
 	assert.EqualValues(t, "TEST_FEED: 40 remaining. Last http call was 5000ms.", result)
@@ -40,7 +40,7 @@ func TestGetLogString_WhenAllDataIsPresent(t *testing.T) {
 	cfg := feed.LogStringConfig{
 		RemainingRecords: 50,
 		ExporterDuration: time.Second * 1,
-		HttpDuration:     time.Millisecond * 44,
+		HTTPDuration:     time.Millisecond * 44,
 	}
 	result := feed.GetLogString("TEST_FEED", &cfg)
 	assert.EqualValues(t, "TEST_FEED: 50 remaining. Last http call was 44ms. Last export operation was 1000ms.", result)

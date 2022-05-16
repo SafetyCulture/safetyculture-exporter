@@ -138,7 +138,7 @@ func (f *ActionFeed) Export(ctx context.Context, apiClient *api.Client, exporter
 
 		logger.Info(GetLogString(f.Name(), &LogStringConfig{
 			RemainingRecords: resp.Metadata.RemainingRecords,
-			HttpDuration:     apiClient.Duration,
+			HTTPDuration:     apiClient.Duration,
 			ExporterDuration: exporter.GetDuration(),
 		}))
 		return nil

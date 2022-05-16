@@ -46,7 +46,7 @@ type Exporter interface {
 // LogStringConfig is the config for GetLogString function
 type LogStringConfig struct {
 	RemainingRecords int64
-	HttpDuration     time.Duration
+	HTTPDuration     time.Duration
 	ExporterDuration time.Duration
 }
 
@@ -59,9 +59,9 @@ func GetLogString(feedName string, cfg *LogStringConfig) string {
 		format = format + "%d remaining."
 		args = append(args, cfg.RemainingRecords)
 
-		if cfg.HttpDuration.Milliseconds() != 0 {
+		if cfg.HTTPDuration.Milliseconds() != 0 {
 			format = format + " Last http call was %dms."
-			args = append(args, cfg.HttpDuration.Milliseconds())
+			args = append(args, cfg.HTTPDuration.Milliseconds())
 		}
 
 		if cfg.ExporterDuration.Milliseconds() != 0 {
