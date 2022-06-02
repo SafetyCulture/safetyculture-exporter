@@ -1,0 +1,33 @@
+{
+  "metadata": {
+    "next_page": null,
+    "locations_enabled": true,
+    "remaining_records": 0
+  },
+  "data": [
+    {
+      "site_id": "location_1",
+      "member_id": "user_1"
+    },
+    {
+      "site_id": "location_2",
+      "member_id": "user_1"
+    },
+    {
+      "site_id": "location_1",
+      "member_id": "user_2"
+    },
+    {
+      "site_id": "location_2",
+      "member_id": "user_2"
+    },
+    {
+      "site_id": "location_2",
+      "member_id": "user_3"
+    },
+    {
+      "site_id": "location_1",
+      "member_id": "user_3"
+    }
+  ]
+}
