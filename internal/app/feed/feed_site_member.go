@@ -8,7 +8,7 @@ import (
 	"github.com/SafetyCulture/iauditor-exporter/internal/app/util"
 )
 
-// Site represents a row from the sites feed
+// SiteMember represents a row from the site members feed
 type SiteMember struct {
 	ID       string `json:"site_id" csv:"site_id" gorm:"primarykey;column:site_id;size:41"`
 	MemberID string `json:"member_id" csv:"member_id" gorm:"primarykey;column:member_id;size:37"`
