@@ -3,6 +3,7 @@ package feed
 import (
 	"context"
 	"encoding/json"
+	"time"
 
 	"github.com/SafetyCulture/iauditor-exporter/internal/app/api"
 	"github.com/SafetyCulture/iauditor-exporter/internal/app/util"
@@ -10,8 +11,9 @@ import (
 
 // SiteMember represents a row from the site members feed
 type SiteMember struct {
-	ID       string `json:"site_id" csv:"site_id" gorm:"primarykey;column:site_id;size:41"`
-	MemberID string `json:"member_id" csv:"member_id" gorm:"primarykey;column:member_id;size:37"`
+	SiteID     string    `json:"site_id" csv:"site_id" gorm:"primarykey;column:site_id;size:41"`
+	MemberID   string    `json:"member_id" csv:"member_id" gorm:"primarykey;column:member_id;size:37"`
+	ExportedAt time.Time `json:"exported_at" csv:"exported_at" gorm:"autoUpdateTime"`
 }
 
 // SiteMemberFeed is a representation of the sites feed
@@ -40,7 +42,7 @@ func (f *SiteMemberFeed) PrimaryKey() []string {
 
 // Columns returns the columns of the row
 func (f *SiteMemberFeed) Columns() []string {
-	return []string{}
+	return []string{"exported_at"}
 }
 
 // Order returns the ordering when retrieving an export
