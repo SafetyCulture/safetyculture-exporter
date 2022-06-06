@@ -2,11 +2,12 @@ package feed
 
 import (
 	"context"
+	"sync"
+
 	"github.com/SafetyCulture/iauditor-exporter/internal/app/api"
 	"github.com/SafetyCulture/iauditor-exporter/internal/app/config"
 	"github.com/SafetyCulture/iauditor-exporter/internal/app/util"
 	"github.com/spf13/viper"
-	"sync"
 )
 
 const maxConcurrentGoRoutines = 10
@@ -45,6 +46,7 @@ func GetFeeds(v *viper.Viper) []Feed {
 			IncludeDeleted:       sitesIncludeDeleted,
 			IncludeFullHierarchy: sitesIncludeFullHierarchy,
 		},
+		&SiteMemberFeed{},
 		&UserFeed{},
 		&GroupFeed{},
 		&GroupUserFeed{},
