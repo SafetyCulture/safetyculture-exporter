@@ -69,6 +69,105 @@ func TestClient_DrainDeletedInspections(t *testing.T) {
 	assert.EqualValues(t, "d722fc86-defa-4de2-b8d7-c0a3e0ec6ce4", deletedIds[3])
 }
 
+func TestClient_DrainDeletedInspections_WhenApiReturnsError(t *testing.T) {
+	defer gock.Off()
+
+	gock.New("http://localhost:9999").
+		Persist().
+		Post("/accounts/history/v1/activity_log/list").
+		Reply(http.StatusInternalServerError).
+		JSON(`{"error": "something bad happened"}`)
+
+	apiClient := api.GetTestClient()
+	gock.InterceptClient(apiClient.HTTPClient())
+
+	req := api.GetAccountsActivityLogRequest{
+		URL: "/accounts/history/v1/activity_log/list",
+		Params: api.AccountsActivityLogRequestParams{
+			OrgID:    "",
+			PageSize: 14,
+			Filters: &api.AccountsActivityLogFilter{
+				Limit:      14,
+				Offset:     0,
+				EventTypes: []string{"inspection.archived"},
+			},
+		},
+	}
+
+	fn := func(res *api.GetAccountsActivityLogResponse) error {
+		return nil
+	}
+	err := apiClient.DrainDeletedInspections(context.TODO(), &req, fn)
+	require.NotNil(t, err)
+	assert.EqualValues(t, "Failed request to API: http://localhost:9999/accounts/history/v1/activity_log/list giving up after 2 attempt(s)", err.Error())
+}
+
+func TestClient_DrainDeletedInspections_WhenFeedFnReturnsError(t *testing.T) {
+	defer gock.Off()
+
+	gock.New("http://localhost:9999").
+		Post("/accounts/history/v1/activity_log/list").
+		BodyString(`{"org_id":"","page_size":4,"filters":{"event_types":["inspection.archived"],"limit":4,"offset":0}}`).
+		Reply(http.StatusOK).
+		File(path.Join("fixtures", "inspections_deleted_page_1.json"))
+
+	apiClient := api.GetTestClient()
+	gock.InterceptClient(apiClient.HTTPClient())
+
+	req := api.GetAccountsActivityLogRequest{
+		URL: "/accounts/history/v1/activity_log/list",
+		Params: api.AccountsActivityLogRequestParams{
+			OrgID:    "",
+			PageSize: 4,
+			Filters: &api.AccountsActivityLogFilter{
+				Limit:      4,
+				Offset:     0,
+				EventTypes: []string{"inspection.archived"},
+			},
+		},
+	}
+
+	fn := func(res *api.GetAccountsActivityLogResponse) error {
+		return fmt.Errorf("ERROR_GetAccountsActivityLogResponse")
+	}
+	err := apiClient.DrainDeletedInspections(context.TODO(), &req, fn)
+	require.NotNil(t, err)
+	assert.EqualValues(t, "ERROR_GetAccountsActivityLogResponse", err.Error())
+}
+
+func TestClient_DrainDeletedInspections_WhenNextTokenIsCorrupted(t *testing.T) {
+	defer gock.Off()
+	//gock.Observe(gock.DumpRequest)
+	gock.New("http://localhost:9999").
+		Post("/accounts/history/v1/activity_log/list").
+		BodyString(`{"org_id":"","page_size":4,"filters":{"event_types":["inspection.archived"],"limit":4,"offset":0}}`).
+		Reply(http.StatusOK).
+		File(path.Join("fixtures", "inspections_deleted_corrupt.json"))
+
+	apiClient := api.GetTestClient()
+	gock.InterceptClient(apiClient.HTTPClient())
+
+	req := api.GetAccountsActivityLogRequest{
+		URL: "/accounts/history/v1/activity_log/list",
+		Params: api.AccountsActivityLogRequestParams{
+			OrgID:    "",
+			PageSize: 4,
+			Filters: &api.AccountsActivityLogFilter{
+				Limit:      4,
+				Offset:     0,
+				EventTypes: []string{"inspection.archived"},
+			},
+		},
+	}
+
+	fn := func(res *api.GetAccountsActivityLogResponse) error {
+		return nil
+	}
+	err := apiClient.DrainDeletedInspections(context.TODO(), &req, fn)
+	require.NotNil(t, err)
+	assert.EqualValues(t, "invalid character '\\x17' in string literal", err.Error())
+}
+
 func TestAPIClientDrainFeed_should_return_for_as_long_next_page_set(t *testing.T) {
 	defer gock.Off()
 

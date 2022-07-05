@@ -438,7 +438,7 @@ func (a *Client) DrainFeed(ctx context.Context, request *GetFeedRequest, feedFn 
 }
 
 // GetDeletedInspections returns response from AccountsActivityLog or error
-func (a *Client) GetDeletedInspections(ctx context.Context, request *GetAccountsActivityLogRequest) (*GetAccountsActivityLogResponse, error) {
+func (a *Client) GetDeletedInspections(ctx context.Context, request GetAccountsActivityLogRequest) (*GetAccountsActivityLogResponse, error) {
 	sl := a.sling.New().
 		Post(request.URL).
 		Set(string(Authorization), "Bearer "+a.accessToken).
@@ -468,7 +468,7 @@ func (a *Client) GetDeletedInspections(ctx context.Context, request *GetAccounts
 // DrainDeletedInspections cycle throgh GetAccountsActivityLogResponse and adapts the filter whule there is a next page
 func (a *Client) DrainDeletedInspections(ctx context.Context, req *GetAccountsActivityLogRequest, feedFn func(*GetAccountsActivityLogResponse) error) error {
 	for {
-		res, err := a.GetDeletedInspections(ctx, req)
+		res, err := a.GetDeletedInspections(ctx, *req)
 		if err != nil {
 			return err
 		}
