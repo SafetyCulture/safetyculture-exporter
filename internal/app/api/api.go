@@ -5,7 +5,6 @@ import (
 	"context"
 	"crypto/tls"
 	"crypto/x509"
-	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -209,16 +208,16 @@ type GetAccountsActivityLogResponse struct {
 
 // AccountsActivityLogRequestParams params used for POST request of AccountsActivityLog
 type AccountsActivityLogRequestParams struct {
-	OrgID    string                     `json:"org_id"`
-	PageSize int                        `json:"page_size"`
-	Filters  *AccountsActivityLogFilter `json:"filters"`
+	OrgID     string                    `json:"org_id"`
+	PageSize  int                       `json:"page_size"`
+	PageToken string                    `json:"page_token"`
+	Filters   AccountsActivityLogFilter `json:"filters"`
 }
 
 // AccountsActivityLogFilter filter for AccountsActivityLog
 type AccountsActivityLogFilter struct {
 	EventTypes []string `json:"event_types"`
 	Limit      int      `json:"limit"`
-	Offset     int      `json:"offset"`
 }
 
 type activityResponse struct {
@@ -479,32 +478,12 @@ func (a *Client) DrainDeletedInspections(ctx context.Context, req *GetAccountsAc
 		}
 
 		if res.NextPageToken != "" {
-			filter, err := extractNextPageToken(res.NextPageToken)
-			if err != nil {
-				return err
-			}
-			req.Params.Filters = filter
+			req.Params.PageToken = res.NextPageToken
 		} else {
 			break
 		}
 	}
 	return nil
-}
-
-func extractNextPageToken(b64 string) (*AccountsActivityLogFilter, error) {
-	// extract the BASE64
-	res, err := base64.StdEncoding.DecodeString(b64)
-	if err != nil {
-		return nil, err
-	}
-
-	// map to the filter obj
-	var filter AccountsActivityLogFilter
-	err = json.Unmarshal(res, &filter)
-	if err != nil {
-		return nil, err
-	}
-	return &filter, nil
 }
 
 // ListInspections retrieves the list of inspections from iAuditor

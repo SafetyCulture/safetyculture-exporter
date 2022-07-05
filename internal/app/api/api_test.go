@@ -21,18 +21,30 @@ import (
 
 func TestClient_DrainDeletedInspections(t *testing.T) {
 	defer gock.Off()
-	//gock.Observe(gock.DumpRequest)
+	gock.Observe(gock.DumpRequest)
 	gock.New("http://localhost:9999").
 		Post("/accounts/history/v1/activity_log/list").
-		BodyString(`{"org_id":"","page_size":4,"filters":{"event_types":["inspection.archived"],"limit":4,"offset":0}}`).
+		BodyString(`{"org_id":"","page_size":4,"page_token":"","filters":{"event_types":["inspection.archived"],"limit":4}}`).
 		Reply(http.StatusOK).
 		File(path.Join("fixtures", "inspections_deleted_page_1.json"))
 
 	gock.New("http://localhost:9999").
 		Post("/accounts/history/v1/activity_log/list").
-		BodyString(`{"org_id":"","page_size":4,"filters":{"event_types":["inspection.archived"],"limit":4,"offset":4}}`).
+		BodyString(`{"org_id":"","page_size":4,"page_token":"eyJldmVudF90eXBlcyI6WyJpbnNwZWN0aW9uLmFyY2hpdmVkIl0sImxpbWl0Ijo0LCJvZmZzZXQiOjR9","filters":{"event_types":["inspection.archived"],"limit":4}}`).
 		Reply(http.StatusOK).
 		File(path.Join("fixtures", "inspections_deleted_page_2.json"))
+
+	gock.New("http://localhost:9999").
+		Post("/accounts/history/v1/activity_log/list").
+		BodyString(`{"org_id":"","page_size":4,"page_token":"eyJldmVudF90eXBlcyI6WyJpbnNwZWN0aW9uLmFyY2hpdmVkIl0sImxpbWl0Ijo0LCJvZmZzZXQiOjh9","filters":{"event_types":["inspection.archived"],"limit":4}}`).
+		Reply(http.StatusOK).
+		File(path.Join("fixtures", "inspections_deleted_page_3.json"))
+
+	gock.New("http://localhost:9999").
+		Post("/accounts/history/v1/activity_log/list").
+		BodyString(`{"org_id":"","page_size":4,"page_token":"eyJldmVudF90eXBlcyI6WyJpbnNwZWN0aW9uLmFyY2hpdmVkIl0sImxpbWl0Ijo0LCJvZmZzZXQiOjEyfQ==","filters":{"event_types":["inspection.archived"],"limit":4}}`).
+		Reply(http.StatusOK).
+		File(path.Join("fixtures", "inspections_deleted_page_4.json"))
 
 	apiClient := api.GetTestClient()
 	gock.InterceptClient(apiClient.HTTPClient())
@@ -42,16 +54,15 @@ func TestClient_DrainDeletedInspections(t *testing.T) {
 		Params: api.AccountsActivityLogRequestParams{
 			OrgID:    "",
 			PageSize: 4,
-			Filters: &api.AccountsActivityLogFilter{
+			Filters: api.AccountsActivityLogFilter{
 				Limit:      4,
-				Offset:     0,
 				EventTypes: []string{"inspection.archived"},
 			},
 		},
 	}
 
 	calls := 0
-	var deletedIds = make([]string, 0, 10)
+	var deletedIds = make([]string, 0, 15)
 	fn := func(res *api.GetAccountsActivityLogResponse) error {
 		calls++
 		for _, a := range res.Activities {
@@ -61,12 +72,23 @@ func TestClient_DrainDeletedInspections(t *testing.T) {
 	}
 	err := apiClient.DrainDeletedInspections(context.TODO(), &req, fn)
 	require.Nil(t, err)
-	assert.EqualValues(t, 2, calls)
-	require.EqualValues(t, 4, len(deletedIds))
+	assert.EqualValues(t, 4, calls)
+	require.EqualValues(t, 15, len(deletedIds))
 	assert.EqualValues(t, "3b8ac4f4-e904-453e-b5a0-b5cceedb0ee1", deletedIds[0])
 	assert.EqualValues(t, "4b3bc1d5-3011-4f81-94d4-125d2bce7ca8", deletedIds[1])
 	assert.EqualValues(t, "6bd628a6-5188-425f-89ef-81f9dfcdf5cd", deletedIds[2])
 	assert.EqualValues(t, "d722fc86-defa-4de2-b8d7-c0a3e0ec6ce4", deletedIds[3])
+	assert.EqualValues(t, "ed8b3911-4141-41c4-946c-167bb6f61109", deletedIds[4])
+	assert.EqualValues(t, "fd95cb4b-e1e7-488b-ba58-93fecd2379dc", deletedIds[5])
+	assert.EqualValues(t, "1878c1e2-8a42-4f63-9e07-2e605f76762b", deletedIds[6])
+	assert.EqualValues(t, "9e28ab2c-ce8c-44a7-81d3-76d0ac47dc91", deletedIds[7])
+	assert.EqualValues(t, "48d61915-98c8-4d05-b786-4948dad199be", deletedIds[8])
+	assert.EqualValues(t, "331727d2-4976-45da-857a-6d080dc645a9", deletedIds[9])
+	assert.EqualValues(t, "1f2c9c1b-6f35-4bae-9b38-4094b40e13c1", deletedIds[10])
+	assert.EqualValues(t, "35583d49-6421-40a8-a6f5-591c718c6025", deletedIds[11])
+	assert.EqualValues(t, "eb49e9f8-4a3c-4b8f-a180-7ba0d171e93d", deletedIds[12])
+	assert.EqualValues(t, "47ac0dce-16f9-4d73-b517-8372368af162", deletedIds[13])
+	assert.EqualValues(t, "6d2f8bd5-a965-4046-b2b4-ccdf8341c9f0", deletedIds[14])
 }
 
 func TestClient_DrainDeletedInspections_WhenApiReturnsError(t *testing.T) {
@@ -86,9 +108,8 @@ func TestClient_DrainDeletedInspections_WhenApiReturnsError(t *testing.T) {
 		Params: api.AccountsActivityLogRequestParams{
 			OrgID:    "",
 			PageSize: 14,
-			Filters: &api.AccountsActivityLogFilter{
+			Filters: api.AccountsActivityLogFilter{
 				Limit:      14,
-				Offset:     0,
 				EventTypes: []string{"inspection.archived"},
 			},
 		},
@@ -107,7 +128,7 @@ func TestClient_DrainDeletedInspections_WhenFeedFnReturnsError(t *testing.T) {
 
 	gock.New("http://localhost:9999").
 		Post("/accounts/history/v1/activity_log/list").
-		BodyString(`{"org_id":"","page_size":4,"filters":{"event_types":["inspection.archived"],"limit":4,"offset":0}}`).
+		BodyString(`{"org_id":"","page_size":4,"page_token":"","filters":{"event_types":["inspection.archived"],"limit":4}}`).
 		Reply(http.StatusOK).
 		File(path.Join("fixtures", "inspections_deleted_page_1.json"))
 
@@ -119,9 +140,8 @@ func TestClient_DrainDeletedInspections_WhenFeedFnReturnsError(t *testing.T) {
 		Params: api.AccountsActivityLogRequestParams{
 			OrgID:    "",
 			PageSize: 4,
-			Filters: &api.AccountsActivityLogFilter{
+			Filters: api.AccountsActivityLogFilter{
 				Limit:      4,
-				Offset:     0,
 				EventTypes: []string{"inspection.archived"},
 			},
 		},
@@ -133,39 +153,6 @@ func TestClient_DrainDeletedInspections_WhenFeedFnReturnsError(t *testing.T) {
 	err := apiClient.DrainDeletedInspections(context.TODO(), &req, fn)
 	require.NotNil(t, err)
 	assert.EqualValues(t, "ERROR_GetAccountsActivityLogResponse", err.Error())
-}
-
-func TestClient_DrainDeletedInspections_WhenNextTokenIsCorrupted(t *testing.T) {
-	defer gock.Off()
-	//gock.Observe(gock.DumpRequest)
-	gock.New("http://localhost:9999").
-		Post("/accounts/history/v1/activity_log/list").
-		BodyString(`{"org_id":"","page_size":4,"filters":{"event_types":["inspection.archived"],"limit":4,"offset":0}}`).
-		Reply(http.StatusOK).
-		File(path.Join("fixtures", "inspections_deleted_corrupt.json"))
-
-	apiClient := api.GetTestClient()
-	gock.InterceptClient(apiClient.HTTPClient())
-
-	req := api.GetAccountsActivityLogRequest{
-		URL: "/accounts/history/v1/activity_log/list",
-		Params: api.AccountsActivityLogRequestParams{
-			OrgID:    "",
-			PageSize: 4,
-			Filters: &api.AccountsActivityLogFilter{
-				Limit:      4,
-				Offset:     0,
-				EventTypes: []string{"inspection.archived"},
-			},
-		},
-	}
-
-	fn := func(res *api.GetAccountsActivityLogResponse) error {
-		return nil
-	}
-	err := apiClient.DrainDeletedInspections(context.TODO(), &req, fn)
-	require.NotNil(t, err)
-	assert.EqualValues(t, "invalid character '\\x17' in string literal", err.Error())
 }
 
 func TestAPIClientDrainFeed_should_return_for_as_long_next_page_set(t *testing.T) {
