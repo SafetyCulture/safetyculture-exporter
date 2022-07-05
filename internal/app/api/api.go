@@ -5,6 +5,7 @@ import (
 	"context"
 	"crypto/tls"
 	"crypto/x509"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -194,6 +195,37 @@ type GetFeedResponse struct {
 	Data json.RawMessage `json:"data"`
 }
 
+// GetAccountsActivityLogRequest contains fields required to make a post request to activity log history api
+type GetAccountsActivityLogRequest struct {
+	URL    string
+	Params AccountsActivityLogRequestParams
+}
+
+// GetAccountsActivityLogResponse is the response from activity log history api
+type GetAccountsActivityLogResponse struct {
+	Activities    []activityResponse
+	NextPageToken string `json:"next_page_token"`
+}
+
+// AccountsActivityLogRequestParams params used for POST request of AccountsActivityLog
+type AccountsActivityLogRequestParams struct {
+	OrgID    string                     `json:"org_id"`
+	PageSize int                        `json:"page_size"`
+	Filters  *AccountsActivityLogFilter `json:"filters"`
+}
+
+// AccountsActivityLogFilter filter for AccountsActivityLog
+type AccountsActivityLogFilter struct {
+	EventTypes []string `json:"event_types"`
+	Limit      int      `json:"limit"`
+	Offset     int      `json:"offset"`
+}
+
+type activityResponse struct {
+	Type     string            `json:"type"`
+	Metadata map[string]string `json:"metadata"`
+}
+
 // GetMediaRequest has all the data needed to make a request to get a media
 type GetMediaRequest struct {
 	URL     string
@@ -216,7 +248,7 @@ type ListInspectionsParams struct {
 	Limit         int       `url:"limit,omitempty"`
 }
 
-// Inspection represents some of the properties present in an inspection
+// Inspection represents some properties present in an inspection
 type Inspection struct {
 	ID         string    `json:"audit_id"`
 	ModifiedAt time.Time `json:"modified_at"`
@@ -355,7 +387,8 @@ func (a *Client) GetFeed(ctx context.Context, request *GetFeedRequest) (*GetFeed
 		initialURL = request.URL
 	}
 
-	sl := a.sling.New().Get(initialURL).
+	sl := a.sling.New().
+		Get(initialURL).
 		Set(string(Authorization), "Bearer "+a.accessToken).
 		Set(string(IntegrationID), "iauditor-exporter").
 		Set(string(IntegrationVersion), version.GetVersion()).
@@ -402,6 +435,76 @@ func (a *Client) DrainFeed(ctx context.Context, request *GetFeedRequest, feedFn 
 	}
 
 	return nil
+}
+
+// GetDeletedInspections returns response from AccountsActivityLog or error
+func (a *Client) GetDeletedInspections(ctx context.Context, request *GetAccountsActivityLogRequest) (*GetAccountsActivityLogResponse, error) {
+	sl := a.sling.New().
+		Post(request.URL).
+		Set(string(Authorization), "Bearer "+a.accessToken).
+		Set(string(IntegrationID), "iauditor-exporter").
+		Set(string(IntegrationVersion), version.GetVersion()).
+		Set(string(XRequestID), util.RequestIDFromContext(ctx)).
+		BodyJSON(request.Params)
+
+	req, _ := sl.Request()
+	req = req.WithContext(ctx)
+
+	var res GetAccountsActivityLogResponse
+	var errMsg json.RawMessage
+	_, err := a.do(&slingHTTPDoer{
+		sl:       sl,
+		req:      req,
+		successV: &res,
+		failureV: &errMsg,
+	})
+	if err != nil {
+		return nil, errors.Wrap(err, "Failed request to API")
+	}
+
+	return &res, nil
+}
+
+// DrainDeletedInspections cycle throgh GetAccountsActivityLogResponse and adapts the filter whule there is a next page
+func (a *Client) DrainDeletedInspections(ctx context.Context, req *GetAccountsActivityLogRequest, feedFn func(*GetAccountsActivityLogResponse) error) error {
+	for {
+		res, err := a.GetDeletedInspections(ctx, req)
+		if err != nil {
+			return err
+		}
+
+		err = feedFn(res)
+		if err != nil {
+			return err
+		}
+
+		if res.NextPageToken != "" {
+			filter, err := extractNextPageToken(res.NextPageToken)
+			if err != nil {
+				return err
+			}
+			req.Params.Filters = filter
+		} else {
+			break
+		}
+	}
+	return nil
+}
+
+func extractNextPageToken(b64 string) (*AccountsActivityLogFilter, error) {
+	// extract the BASE64
+	res, err := base64.StdEncoding.DecodeString(b64)
+	if err != nil {
+		return nil, err
+	}
+
+	// map to the filter obj
+	var filter AccountsActivityLogFilter
+	err = json.Unmarshal(res, &filter)
+	if err != nil {
+		return nil, err
+	}
+	return &filter, nil
 }
 
 // ListInspections retrieves the list of inspections from iAuditor
@@ -605,7 +708,7 @@ func (a *Client) DownloadInspectionReportFile(ctx context.Context, url string) (
 	return res.Body, nil
 }
 
-// WhoAmIResponse represents the the response of  WhoAmI
+// WhoAmIResponse represents the response of  WhoAmI
 type WhoAmIResponse struct {
 	UserID         string `json:"user_id"`
 	OrganisationID string `json:"organisation_id"`

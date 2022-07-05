@@ -7,7 +7,9 @@ import (
 	"errors"
 	"fmt"
 	"github.com/stretchr/testify/require"
+	"net/http"
 	"net/url"
+	"path"
 	"strings"
 	"testing"
 	"time"
@@ -16,6 +18,56 @@ import (
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/h2non/gock.v1"
 )
+
+func TestClient_DrainDeletedInspections(t *testing.T) {
+	defer gock.Off()
+	//gock.Observe(gock.DumpRequest)
+	gock.New("http://localhost:9999").
+		Post("/accounts/history/v1/activity_log/list").
+		BodyString(`{"org_id":"","page_size":4,"filters":{"event_types":["inspection.archived"],"limit":4,"offset":0}}`).
+		Reply(http.StatusOK).
+		File(path.Join("fixtures", "inspections_deleted_page_1.json"))
+
+	gock.New("http://localhost:9999").
+		Post("/accounts/history/v1/activity_log/list").
+		BodyString(`{"org_id":"","page_size":4,"filters":{"event_types":["inspection.archived"],"limit":4,"offset":4}}`).
+		Reply(http.StatusOK).
+		File(path.Join("fixtures", "inspections_deleted_page_2.json"))
+
+	apiClient := api.GetTestClient()
+	gock.InterceptClient(apiClient.HTTPClient())
+
+	req := api.GetAccountsActivityLogRequest{
+		URL: "/accounts/history/v1/activity_log/list",
+		Params: api.AccountsActivityLogRequestParams{
+			OrgID:    "",
+			PageSize: 4,
+			Filters: &api.AccountsActivityLogFilter{
+				Limit:      4,
+				Offset:     0,
+				EventTypes: []string{"inspection.archived"},
+			},
+		},
+	}
+
+	calls := 0
+	var deletedIds = make([]string, 0, 10)
+	fn := func(res *api.GetAccountsActivityLogResponse) error {
+		calls++
+		for _, a := range res.Activities {
+			deletedIds = append(deletedIds, a.Metadata["inspection_id"])
+		}
+		return nil
+	}
+	err := apiClient.DrainDeletedInspections(context.TODO(), &req, fn)
+	require.Nil(t, err)
+	assert.EqualValues(t, 2, calls)
+	require.EqualValues(t, 4, len(deletedIds))
+	assert.EqualValues(t, "3b8ac4f4-e904-453e-b5a0-b5cceedb0ee1", deletedIds[0])
+	assert.EqualValues(t, "4b3bc1d5-3011-4f81-94d4-125d2bce7ca8", deletedIds[1])
+	assert.EqualValues(t, "6bd628a6-5188-425f-89ef-81f9dfcdf5cd", deletedIds[2])
+	assert.EqualValues(t, "d722fc86-defa-4de2-b8d7-c0a3e0ec6ce4", deletedIds[3])
+}
 
 func TestAPIClientDrainFeed_should_return_for_as_long_next_page_set(t *testing.T) {
 	defer gock.Off()

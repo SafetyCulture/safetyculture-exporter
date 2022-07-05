@@ -117,7 +117,7 @@ func (f *InspectionFeed) Order() string {
 	return "modified_at ASC, audit_id"
 }
 
-func (f *InspectionFeed) writeRows(exporter Exporter, rows []*Inspection) error {
+func (f *InspectionFeed) writeRows(exporter Exporter, rows []Inspection) error {
 	skipIDs := map[string]bool{}
 	for _, id := range f.SkipIDs {
 		skipIDs[id] = true
@@ -133,7 +133,7 @@ func (f *InspectionFeed) writeRows(exporter Exporter, rows []*Inspection) error 
 
 		// Some audits in production have the same item ID multiple times
 		// We can't insert them simultaneously. This means we are dropping data, which sucks.
-		rowsToInsert := []*Inspection{}
+		var rowsToInsert []Inspection
 		for _, row := range rows[i:j] {
 			skip := skipIDs[row.ID]
 			if !skip {
@@ -171,7 +171,7 @@ func (f *InspectionFeed) Export(ctx context.Context, apiClient *api.Client, expo
 
 	logger.Infof("%s: exporting for org_id: %s since: %s - %s", feedName, orgID, f.ModifiedAfter.Format(time.RFC1123), f.WebReportLink)
 
-	err = apiClient.DrainFeed(ctx, &api.GetFeedRequest{
+	req := api.GetFeedRequest{
 		InitialURL: "/feed/inspections",
 		Params: api.GetFeedParams{
 			ModifiedAfter: f.ModifiedAfter,
@@ -181,8 +181,10 @@ func (f *InspectionFeed) Export(ctx context.Context, apiClient *api.Client, expo
 			Limit:         f.Limit,
 			WebReportLink: f.WebReportLink,
 		},
-	}, func(resp *api.GetFeedResponse) error {
-		rows := []*Inspection{}
+	}
+
+	feedFn := func(resp *api.GetFeedResponse) error {
+		var rows []Inspection
 
 		err := json.Unmarshal(resp.Data, &rows)
 		util.Check(err, "Failed to unmarshal inspections data to struct")
@@ -198,8 +200,15 @@ func (f *InspectionFeed) Export(ctx context.Context, apiClient *api.Client, expo
 			ExporterDuration: exporter.GetDuration(),
 		}))
 		return nil
-	})
+	}
+
+	err = apiClient.DrainFeed(ctx, &req, feedFn)
 	util.Check(err, "Failed to export feed")
+
+	//reqDel := api.GetFeedRequest{
+	//	InitialURL: "/accounts/history/v1/activity_log/list",
+	//	Params: api.GetFeedParams{}
+	//}
 
 	return exporter.FinaliseExport(f, &[]*Inspection{})
 }
