@@ -175,6 +175,18 @@ func (f *InspectionFeed) Export(ctx context.Context, apiClient *api.Client, expo
 	logger.Infof("%s: exporting for org_id: %s since: %s - %s", feedName, orgID, f.ModifiedAfter.Format(time.RFC1123), f.WebReportLink)
 
 	// Process Inspections
+	err = f.processNewInspections(ctx, apiClient, exporter)
+	util.Check(err, "Failed to export feed")
+
+	// Process Deleted Inspections
+	err = f.processDeletedInspections(ctx, apiClient, exporter)
+	util.Check(err, "Failed to export deleted inspections feed")
+
+	return exporter.FinaliseExport(f, &[]*Inspection{})
+}
+
+func (f *InspectionFeed) processNewInspections(ctx context.Context, apiClient *api.Client, exporter Exporter) error {
+	lg := util.GetLogger()
 	req := api.GetFeedRequest{
 		InitialURL: "/feed/inspections",
 		Params: api.GetFeedParams{
@@ -194,20 +206,24 @@ func (f *InspectionFeed) Export(ctx context.Context, apiClient *api.Client, expo
 
 		if len(rows) != 0 {
 			err = f.writeRows(exporter, rows)
-			util.Check(err, "Failed to write data to exporter")
+			if err != nil {
+				return err
+			}
 		}
 
-		logger.Info(GetLogString(f.Name(), &LogStringConfig{
+		lg.Info(GetLogString(f.Name(), &LogStringConfig{
 			RemainingRecords: resp.Metadata.RemainingRecords,
 			HTTPDuration:     apiClient.Duration,
 			ExporterDuration: exporter.GetDuration(),
 		}))
 		return nil
 	}
-	err = apiClient.DrainFeed(ctx, &req, feedFn)
-	util.Check(err, "Failed to export feed")
 
-	// Process Deleted Inspections
+	return apiClient.DrainFeed(ctx, &req, feedFn)
+}
+
+func (f *InspectionFeed) processDeletedInspections(ctx context.Context, apiClient *api.Client, exporter Exporter) error {
+	lg := util.GetLogger()
 	dreq := api.NewGetAccountsActivityLogRequest(f.Limit, f.ModifiedAfter)
 	delFn := func(resp *api.GetAccountsActivityLogResponse) error {
 		var pkeys = make([]string, 0, len(resp.Activities))
@@ -219,15 +235,15 @@ func (f *InspectionFeed) Export(ctx context.Context, apiClient *api.Client, expo
 		}
 		if len(pkeys) > 0 {
 			rowsUpdated, err := exporter.BulkUpdateRows(f, pkeys, map[string]interface{}{"deleted": true})
-			util.Check(err, "Failed to write data to exporter")
-			logger.Infof("there were %d rows marked as deleted", rowsUpdated)
+			if err != nil {
+				return err
+			}
+			lg.Infof("there were %d rows marked as deleted", rowsUpdated)
 		}
 
 		return nil
 	}
-	err = apiClient.DrainDeletedInspections(ctx, dreq, delFn)
-
-	return exporter.FinaliseExport(f, &[]*Inspection{})
+	return apiClient.DrainDeletedInspections(ctx, dreq, delFn)
 }
 
 func getPrefixID(id string) (string, error) {
