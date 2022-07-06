@@ -194,8 +194,8 @@ type GetFeedResponse struct {
 	Data json.RawMessage `json:"data"`
 }
 
-// getAccountsActivityLogRequest contains fields required to make a post request to activity log history api
-type getAccountsActivityLogRequest struct {
+// GetAccountsActivityLogRequest contains fields required to make a post request to activity log history api
+type GetAccountsActivityLogRequest struct {
 	URL    string
 	Params accountsActivityLogRequestParams
 }
@@ -221,8 +221,8 @@ type timeFrame struct {
 
 // NewGetAccountsActivityLogRequest build a request for AccountsActivityLog
 // for now it serves the purposes only for inspection.deleted. If we need later, we can change this builder
-func NewGetAccountsActivityLogRequest(pageSize int, from time.Time) *getAccountsActivityLogRequest {
-	return &getAccountsActivityLogRequest{
+func NewGetAccountsActivityLogRequest(pageSize int, from time.Time) *GetAccountsActivityLogRequest {
+	return &GetAccountsActivityLogRequest{
 		URL: "/accounts/history/v1/activity_log/list",
 		Params: accountsActivityLogRequestParams{
 			PageSize: pageSize,
@@ -460,7 +460,7 @@ func (a *Client) DrainFeed(ctx context.Context, request *GetFeedRequest, feedFn 
 }
 
 // GetDeletedInspections returns response from AccountsActivityLog or error
-func (a *Client) GetDeletedInspections(ctx context.Context, request *getAccountsActivityLogRequest) (*GetAccountsActivityLogResponse, error) {
+func (a *Client) GetDeletedInspections(ctx context.Context, request *GetAccountsActivityLogRequest) (*GetAccountsActivityLogResponse, error) {
 	sl := a.sling.New().
 		Post(request.URL).
 		Set(string(Authorization), "Bearer "+a.accessToken).
@@ -488,7 +488,7 @@ func (a *Client) GetDeletedInspections(ctx context.Context, request *getAccounts
 }
 
 // DrainDeletedInspections cycle throgh GetAccountsActivityLogResponse and adapts the filter whule there is a next page
-func (a *Client) DrainDeletedInspections(ctx context.Context, req *getAccountsActivityLogRequest, feedFn func(*GetAccountsActivityLogResponse) error) error {
+func (a *Client) DrainDeletedInspections(ctx context.Context, req *GetAccountsActivityLogRequest, feedFn func(*GetAccountsActivityLogResponse) error) error {
 	for {
 		res, err := a.GetDeletedInspections(ctx, req)
 		if err != nil {
