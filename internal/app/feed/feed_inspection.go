@@ -3,7 +3,7 @@ package feed
 import (
 	"context"
 	"encoding/json"
-	"fmt"
+	"sc-go.io/pkg/s12id"
 	"time"
 
 	"github.com/SafetyCulture/iauditor-exporter/internal/app/api"
@@ -43,6 +43,7 @@ type Inspection struct {
 	Latitude        *float64   `json:"latitude" csv:"latitude"`
 	Longitude       *float64   `json:"longitude" csv:"longitude"`
 	WebReportLink   string     `json:"web_report_link" csv:"web_report_link"`
+	Deleted         bool       `json:"deleted" csv:"deleted"`
 }
 
 // InspectionFeed is a representation of the inspections feed
@@ -82,6 +83,7 @@ func (f *InspectionFeed) Columns() []string {
 	return []string{
 		"name",
 		"archived",
+		"deleted",
 		"owner_name",
 		"owner_id",
 		"author_name",
@@ -172,6 +174,7 @@ func (f *InspectionFeed) Export(ctx context.Context, apiClient *api.Client, expo
 
 	logger.Infof("%s: exporting for org_id: %s since: %s - %s", feedName, orgID, f.ModifiedAfter.Format(time.RFC1123), f.WebReportLink)
 
+	// Process Inspections
 	req := api.GetFeedRequest{
 		InitialURL: "/feed/inspections",
 		Params: api.GetFeedParams{
@@ -183,7 +186,6 @@ func (f *InspectionFeed) Export(ctx context.Context, apiClient *api.Client, expo
 			WebReportLink: f.WebReportLink,
 		},
 	}
-
 	feedFn := func(resp *api.GetFeedResponse) error {
 		var rows []Inspection
 
@@ -202,20 +204,40 @@ func (f *InspectionFeed) Export(ctx context.Context, apiClient *api.Client, expo
 		}))
 		return nil
 	}
-
 	err = apiClient.DrainFeed(ctx, &req, feedFn)
 	util.Check(err, "Failed to export feed")
 
+	// Process Deleted Inspections
 	dreq := api.NewGetAccountsActivityLogRequest(f.Limit, f.ModifiedAfter)
 	delFn := func(resp *api.GetAccountsActivityLogResponse) error {
+		var pkeys = make([]string, 0, len(resp.Activities))
 		for _, a := range resp.Activities {
-			fmt.Println(a.Type)
-			fmt.Println(a.Metadata["inspection_id"])
-			fmt.Println("--- --- --- ---")
+			uid, err := getPrefixID(a.Metadata["inspection_id"])
+			if err == nil && uid != "" {
+				pkeys = append(pkeys, uid)
+			}
 		}
+		if len(pkeys) > 0 {
+			rowsUpdated, err := exporter.BulkUpdateRows(f, pkeys, map[string]interface{}{"deleted": true})
+			util.Check(err, "Failed to write data to exporter")
+			logger.Infof("there were %d rows marked as deleted", rowsUpdated)
+		}
+
 		return nil
 	}
 	err = apiClient.DrainDeletedInspections(ctx, dreq, delFn)
 
 	return exporter.FinaliseExport(f, &[]*Inspection{})
+}
+
+func getPrefixID(id string) (string, error) {
+	uid, err := s12id.ToUUID(s12id.ID(id))
+	if err != nil {
+		return "", err
+	}
+	oid, err := s12id.ToS12ID(s12id.PrefixAudit, uid)
+	if err != nil {
+		return "", err
+	}
+	return string(oid), nil
 }

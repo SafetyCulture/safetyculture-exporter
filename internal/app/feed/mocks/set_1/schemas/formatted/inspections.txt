@@ -32,4 +32,5 @@
 | latitude         | REAL     |             |
 | longitude        | REAL     |             |
 | web_report_link  | TEXT     |             |
+| deleted          | numeric  |             |
 +------------------+----------+-------------+

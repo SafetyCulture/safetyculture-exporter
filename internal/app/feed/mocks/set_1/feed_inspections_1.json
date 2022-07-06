@@ -5,7 +5,7 @@
   },
   "data": [
     {
-      "id": "audit_1",
+      "id": "audit_47ac0dce16f94d73b5178372368af162",
       "name": "My Audit",
       "archived": true,
       "owner_name": "A User",
@@ -32,11 +32,11 @@
       "client_site": null,
       "latitude": null,
       "longitude": null,
-      "web_report_link": "https://app.safetyculture.io/report/audit/audit_1",
+      "web_report_link": "https://app.safetyculture.io/report/audit/audit_47ac0dce16f94d73b5178372368af162",
       "organisation_id": "role_123"
     },
     {
-      "id": "audit_2",
+      "id": "audit_4e28ab2cce8c44a781d376d0ac47dc92",
       "name": "",
       "archived": true,
       "owner_name": "A User",
@@ -63,7 +63,7 @@
       "client_site": null,
       "latitude": -33.8858784,
       "longitude": 151.2116864,
-      "web_report_link": "https://app.safetyculture.io/report/audit/audit_2",
+      "web_report_link": "https://app.safetyculture.io/report/audit/audit_4e28ab2cce8c44a781d376d0ac47dc92",
       "organisation_id": "role_123"
     }
   ]

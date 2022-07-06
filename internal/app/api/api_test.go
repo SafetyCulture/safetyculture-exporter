@@ -21,6 +21,7 @@ import (
 
 func TestClient_DrainDeletedInspections(t *testing.T) {
 	defer gock.Off()
+
 	gock.New("http://localhost:9999").
 		Post("/accounts/history/v1/activity_log/list").
 		BodyString(`{"org_id":"","page_size":4,"page_token":"","filters":{"timeframe":{"from":"2022-06-30T10:43:17Z"},"event_types":["inspection.deleted"],"limit":4}}`).

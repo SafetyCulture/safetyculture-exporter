@@ -119,6 +119,19 @@ func (e *SQLExporter) WriteRows(feed Feed, rows interface{}) error {
 	return nil
 }
 
+// BulkUpdateRows batch updates. Returns number of rows updated or error
+func (e *SQLExporter) BulkUpdateRows(feed Feed, primaryKeys []string, element map[string]interface{}) (int64, error) {
+	result := e.DB.
+		Table(feed.Name()).
+		Where(fmt.Sprintf("%s in ?", feed.PrimaryKey()), primaryKeys).
+		Updates(element)
+	if result.Error != nil {
+		return 0, errors.Wrap(result.Error, "Unable to update rows")
+	}
+
+	return result.RowsAffected, nil
+}
+
 type modifiedAtRow struct {
 	// ExportedAt is here so gorm has an additional field to sort on in SQL Server
 	ExportedAt time.Time
