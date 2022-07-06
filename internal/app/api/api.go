@@ -194,30 +194,53 @@ type GetFeedResponse struct {
 	Data json.RawMessage `json:"data"`
 }
 
-// GetAccountsActivityLogRequest contains fields required to make a post request to activity log history api
-type GetAccountsActivityLogRequest struct {
+// getAccountsActivityLogRequest contains fields required to make a post request to activity log history api
+type getAccountsActivityLogRequest struct {
 	URL    string
-	Params AccountsActivityLogRequestParams
+	Params accountsActivityLogRequestParams
+}
+
+// accountsActivityLogRequestParams params used for POST request of AccountsActivityLog
+type accountsActivityLogRequestParams struct {
+	OrgID     string                    `json:"org_id"`
+	PageSize  int                       `json:"page_size"`
+	PageToken string                    `json:"page_token"`
+	Filters   accountsActivityLogFilter `json:"filters"`
+}
+
+// accountsActivityLogFilter filter for AccountsActivityLog
+type accountsActivityLogFilter struct {
+	Timeframe  timeFrame `json:"timeframe,omitempty"`
+	EventTypes []string  `json:"event_types"`
+	Limit      int       `json:"limit"`
+}
+
+type timeFrame struct {
+	From time.Time `json:"from"`
+}
+
+// NewGetAccountsActivityLogRequest build a request for AccountsActivityLog
+// for now it serves the purposes only for inspection.deleted. If we need later, we can change this builder
+func NewGetAccountsActivityLogRequest(pageSize int, from time.Time) *getAccountsActivityLogRequest {
+	return &getAccountsActivityLogRequest{
+		URL: "/accounts/history/v1/activity_log/list",
+		Params: accountsActivityLogRequestParams{
+			PageSize: pageSize,
+			Filters: accountsActivityLogFilter{
+				Timeframe: timeFrame{
+					From: from,
+				},
+				Limit:      pageSize,
+				EventTypes: []string{"inspection.deleted"},
+			},
+		},
+	}
 }
 
 // GetAccountsActivityLogResponse is the response from activity log history api
 type GetAccountsActivityLogResponse struct {
 	Activities    []activityResponse
 	NextPageToken string `json:"next_page_token"`
-}
-
-// AccountsActivityLogRequestParams params used for POST request of AccountsActivityLog
-type AccountsActivityLogRequestParams struct {
-	OrgID     string                    `json:"org_id"`
-	PageSize  int                       `json:"page_size"`
-	PageToken string                    `json:"page_token"`
-	Filters   AccountsActivityLogFilter `json:"filters"`
-}
-
-// AccountsActivityLogFilter filter for AccountsActivityLog
-type AccountsActivityLogFilter struct {
-	EventTypes []string `json:"event_types"`
-	Limit      int      `json:"limit"`
 }
 
 type activityResponse struct {
@@ -437,7 +460,7 @@ func (a *Client) DrainFeed(ctx context.Context, request *GetFeedRequest, feedFn 
 }
 
 // GetDeletedInspections returns response from AccountsActivityLog or error
-func (a *Client) GetDeletedInspections(ctx context.Context, request GetAccountsActivityLogRequest) (*GetAccountsActivityLogResponse, error) {
+func (a *Client) GetDeletedInspections(ctx context.Context, request *getAccountsActivityLogRequest) (*GetAccountsActivityLogResponse, error) {
 	sl := a.sling.New().
 		Post(request.URL).
 		Set(string(Authorization), "Bearer "+a.accessToken).
@@ -465,9 +488,9 @@ func (a *Client) GetDeletedInspections(ctx context.Context, request GetAccountsA
 }
 
 // DrainDeletedInspections cycle throgh GetAccountsActivityLogResponse and adapts the filter whule there is a next page
-func (a *Client) DrainDeletedInspections(ctx context.Context, req *GetAccountsActivityLogRequest, feedFn func(*GetAccountsActivityLogResponse) error) error {
+func (a *Client) DrainDeletedInspections(ctx context.Context, req *getAccountsActivityLogRequest, feedFn func(*GetAccountsActivityLogResponse) error) error {
 	for {
-		res, err := a.GetDeletedInspections(ctx, *req)
+		res, err := a.GetDeletedInspections(ctx, req)
 		if err != nil {
 			return err
 		}

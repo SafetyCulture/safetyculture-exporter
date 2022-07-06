@@ -21,45 +21,36 @@ import (
 
 func TestClient_DrainDeletedInspections(t *testing.T) {
 	defer gock.Off()
-	gock.Observe(gock.DumpRequest)
 	gock.New("http://localhost:9999").
 		Post("/accounts/history/v1/activity_log/list").
-		BodyString(`{"org_id":"","page_size":4,"page_token":"","filters":{"event_types":["inspection.archived"],"limit":4}}`).
+		BodyString(`{"org_id":"","page_size":4,"page_token":"","filters":{"timeframe":{"from":"2022-06-30T10:43:17Z"},"event_types":["inspection.deleted"],"limit":4}}`).
 		Reply(http.StatusOK).
 		File(path.Join("fixtures", "inspections_deleted_page_1.json"))
 
 	gock.New("http://localhost:9999").
 		Post("/accounts/history/v1/activity_log/list").
-		BodyString(`{"org_id":"","page_size":4,"page_token":"eyJldmVudF90eXBlcyI6WyJpbnNwZWN0aW9uLmFyY2hpdmVkIl0sImxpbWl0Ijo0LCJvZmZzZXQiOjR9","filters":{"event_types":["inspection.archived"],"limit":4}}`).
+		BodyString(`{"org_id":"","page_size":4,"page_token":"eyJldmVudF90eXBlcyI6WyJpbnNwZWN0aW9uLmFyY2hpdmVkIl0sImxpbWl0Ijo0LCJvZmZzZXQiOjR9","filters":{"timeframe":{"from":"2022-06-30T10:43:17Z"},"event_types":["inspection.deleted"],"limit":4}}`).
 		Reply(http.StatusOK).
 		File(path.Join("fixtures", "inspections_deleted_page_2.json"))
 
 	gock.New("http://localhost:9999").
 		Post("/accounts/history/v1/activity_log/list").
-		BodyString(`{"org_id":"","page_size":4,"page_token":"eyJldmVudF90eXBlcyI6WyJpbnNwZWN0aW9uLmFyY2hpdmVkIl0sImxpbWl0Ijo0LCJvZmZzZXQiOjh9","filters":{"event_types":["inspection.archived"],"limit":4}}`).
+		BodyString(`{"org_id":"","page_size":4,"page_token":"eyJldmVudF90eXBlcyI6WyJpbnNwZWN0aW9uLmFyY2hpdmVkIl0sImxpbWl0Ijo0LCJvZmZzZXQiOjh9","filters":{"timeframe":{"from":"2022-06-30T10:43:17Z"},"event_types":["inspection.deleted"],"limit":4}}`).
 		Reply(http.StatusOK).
 		File(path.Join("fixtures", "inspections_deleted_page_3.json"))
 
 	gock.New("http://localhost:9999").
 		Post("/accounts/history/v1/activity_log/list").
-		BodyString(`{"org_id":"","page_size":4,"page_token":"eyJldmVudF90eXBlcyI6WyJpbnNwZWN0aW9uLmFyY2hpdmVkIl0sImxpbWl0Ijo0LCJvZmZzZXQiOjEyfQ==","filters":{"event_types":["inspection.archived"],"limit":4}}`).
+		BodyString(`{"org_id":"","page_size":4,"page_token":"eyJldmVudF90eXBlcyI6WyJpbnNwZWN0aW9uLmFyY2hpdmVkIl0sImxpbWl0Ijo0LCJvZmZzZXQiOjEyfQ==","filters":{"timeframe":{"from":"2022-06-30T10:43:17Z"},"event_types":["inspection.deleted"],"limit":4}}`).
 		Reply(http.StatusOK).
 		File(path.Join("fixtures", "inspections_deleted_page_4.json"))
 
 	apiClient := api.GetTestClient()
 	gock.InterceptClient(apiClient.HTTPClient())
 
-	req := api.GetAccountsActivityLogRequest{
-		URL: "/accounts/history/v1/activity_log/list",
-		Params: api.AccountsActivityLogRequestParams{
-			OrgID:    "",
-			PageSize: 4,
-			Filters: api.AccountsActivityLogFilter{
-				Limit:      4,
-				EventTypes: []string{"inspection.archived"},
-			},
-		},
-	}
+	fakeTime, err := time.Parse(time.RFC3339, "2022-06-30T10:43:17Z")
+	require.Nil(t, err)
+	req := api.NewGetAccountsActivityLogRequest(4, fakeTime)
 
 	calls := 0
 	var deletedIds = make([]string, 0, 15)
@@ -70,7 +61,7 @@ func TestClient_DrainDeletedInspections(t *testing.T) {
 		}
 		return nil
 	}
-	err := apiClient.DrainDeletedInspections(context.TODO(), &req, fn)
+	err = apiClient.DrainDeletedInspections(context.TODO(), req, fn)
 	require.Nil(t, err)
 	assert.EqualValues(t, 4, calls)
 	require.EqualValues(t, 15, len(deletedIds))
@@ -103,22 +94,13 @@ func TestClient_DrainDeletedInspections_WhenApiReturnsError(t *testing.T) {
 	apiClient := api.GetTestClient()
 	gock.InterceptClient(apiClient.HTTPClient())
 
-	req := api.GetAccountsActivityLogRequest{
-		URL: "/accounts/history/v1/activity_log/list",
-		Params: api.AccountsActivityLogRequestParams{
-			OrgID:    "",
-			PageSize: 14,
-			Filters: api.AccountsActivityLogFilter{
-				Limit:      14,
-				EventTypes: []string{"inspection.archived"},
-			},
-		},
-	}
-
+	fakeTime, err := time.Parse(time.RFC3339, "2022-06-30T10:43:17Z")
+	require.Nil(t, err)
+	req := api.NewGetAccountsActivityLogRequest(14, fakeTime)
 	fn := func(res *api.GetAccountsActivityLogResponse) error {
 		return nil
 	}
-	err := apiClient.DrainDeletedInspections(context.TODO(), &req, fn)
+	err = apiClient.DrainDeletedInspections(context.TODO(), req, fn)
 	require.NotNil(t, err)
 	assert.EqualValues(t, "Failed request to API: http://localhost:9999/accounts/history/v1/activity_log/list giving up after 2 attempt(s)", err.Error())
 }
@@ -128,29 +110,21 @@ func TestClient_DrainDeletedInspections_WhenFeedFnReturnsError(t *testing.T) {
 
 	gock.New("http://localhost:9999").
 		Post("/accounts/history/v1/activity_log/list").
-		BodyString(`{"org_id":"","page_size":4,"page_token":"","filters":{"event_types":["inspection.archived"],"limit":4}}`).
+		BodyString(`{"org_id":"","page_size":4,"page_token":"","filters":{"timeframe":{"from":"2022-06-30T10:43:17Z"},"event_types":["inspection.deleted"],"limit":4}}`).
 		Reply(http.StatusOK).
 		File(path.Join("fixtures", "inspections_deleted_page_1.json"))
 
 	apiClient := api.GetTestClient()
 	gock.InterceptClient(apiClient.HTTPClient())
 
-	req := api.GetAccountsActivityLogRequest{
-		URL: "/accounts/history/v1/activity_log/list",
-		Params: api.AccountsActivityLogRequestParams{
-			OrgID:    "",
-			PageSize: 4,
-			Filters: api.AccountsActivityLogFilter{
-				Limit:      4,
-				EventTypes: []string{"inspection.archived"},
-			},
-		},
-	}
+	fakeTime, err := time.Parse(time.RFC3339, "2022-06-30T10:43:17Z")
+	require.Nil(t, err)
+	req := api.NewGetAccountsActivityLogRequest(4, fakeTime)
 
 	fn := func(res *api.GetAccountsActivityLogResponse) error {
 		return fmt.Errorf("ERROR_GetAccountsActivityLogResponse")
 	}
-	err := apiClient.DrainDeletedInspections(context.TODO(), &req, fn)
+	err = apiClient.DrainDeletedInspections(context.TODO(), req, fn)
 	require.NotNil(t, err)
 	assert.EqualValues(t, "ERROR_GetAccountsActivityLogResponse", err.Error())
 }

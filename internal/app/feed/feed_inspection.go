@@ -3,6 +3,7 @@ package feed
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"time"
 
 	"github.com/SafetyCulture/iauditor-exporter/internal/app/api"
@@ -205,10 +206,16 @@ func (f *InspectionFeed) Export(ctx context.Context, apiClient *api.Client, expo
 	err = apiClient.DrainFeed(ctx, &req, feedFn)
 	util.Check(err, "Failed to export feed")
 
-	//reqDel := api.GetFeedRequest{
-	//	InitialURL: "/accounts/history/v1/activity_log/list",
-	//	Params: api.GetFeedParams{}
-	//}
+	dreq := api.NewGetAccountsActivityLogRequest(f.Limit, f.ModifiedAfter)
+	delFn := func(resp *api.GetAccountsActivityLogResponse) error {
+		for _, a := range resp.Activities {
+			fmt.Println(a.Type)
+			fmt.Println(a.Metadata["inspection_id"])
+			fmt.Println("--- --- --- ---")
+		}
+		return nil
+	}
+	err = apiClient.DrainDeletedInspections(ctx, dreq, delFn)
 
 	return exporter.FinaliseExport(f, &[]*Inspection{})
 }
