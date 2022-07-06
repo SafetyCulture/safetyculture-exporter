@@ -1,9 +1,8 @@
 package feed_test
 
 import (
-	"net/http"
-
 	"gopkg.in/h2non/gock.v1"
+	"net/http"
 )
 
 func initMockFeedsSet1(httpClient *http.Client) {
