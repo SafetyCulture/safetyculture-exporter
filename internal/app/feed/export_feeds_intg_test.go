@@ -244,6 +244,12 @@ func TestIntegrationDbExportFeeds_should_update_action_assignees_on_second_run(t
 		Reply(http.StatusOK).
 		File(path.Join("mocks", "set_1", "inspections_deleted_single_page.json"))
 
+	gock.New("http://localhost:9999").
+		Post("/accounts/history/v1/activity_log/list").
+		BodyString(`{"org_id":"","page_size":0,"page_token":"","filters":{"timeframe":{"from":"2014-03-17T00:35:40Z"},"event_types":["inspection.deleted"],"limit":0}}`).
+		Reply(http.StatusOK).
+		File(path.Join("mocks", "set_1", "inspections_deleted_single_page.json"))
+
 	err = feed.ExportFeeds(viperConfig, apiClient, exporter)
 	assert.Nil(t, err)
 
