@@ -52,7 +52,6 @@ func TestExportFeeds_should_export_all_feeds_to_file(t *testing.T) {
 
 	apiClient := api.GetTestClient()
 	initMockFeedsSet1(apiClient.HTTPClient())
-	gock.Observe(gock.DumpRequest)
 
 	gock.New("http://localhost:9999").
 		Get("/accounts/user/v1/user:WhoAmI").
