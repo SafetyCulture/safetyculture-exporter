@@ -181,7 +181,9 @@ func (f *InspectionFeed) Export(ctx context.Context, apiClient *api.Client, expo
 
 	// Process Deleted Inspections
 	err = f.processDeletedInspections(ctx, apiClient, exporter)
-	util.Check(err, "Failed to export deleted inspections feed")
+	if err != nil {
+		logger.Errorf("failed to process deleted inspections. %v", err.Error())
+	}
 
 	return exporter.FinaliseExport(f, &[]*Inspection{})
 }
