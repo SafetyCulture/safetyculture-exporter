@@ -3,7 +3,8 @@ package feed
 import (
 	"context"
 	"encoding/json"
-	"sc-go.io/pkg/s12id"
+	"fmt"
+	"strings"
 	"time"
 
 	"github.com/SafetyCulture/iauditor-exporter/internal/app/api"
@@ -228,8 +229,8 @@ func (f *InspectionFeed) processDeletedInspections(ctx context.Context, apiClien
 	delFn := func(resp *api.GetAccountsActivityLogResponse) error {
 		var pkeys = make([]string, 0, len(resp.Activities))
 		for _, a := range resp.Activities {
-			uid, err := getPrefixID(a.Metadata["inspection_id"])
-			if err == nil && uid != "" {
+			uid := getPrefixID(a.Metadata["inspection_id"])
+			if uid != "" {
 				pkeys = append(pkeys, uid)
 			}
 		}
@@ -246,14 +247,6 @@ func (f *InspectionFeed) processDeletedInspections(ctx context.Context, apiClien
 	return apiClient.DrainDeletedInspections(ctx, dreq, delFn)
 }
 
-func getPrefixID(id string) (string, error) {
-	uid, err := s12id.ToUUID(s12id.ID(id))
-	if err != nil {
-		return "", err
-	}
-	oid, err := s12id.ToS12ID(s12id.PrefixAudit, uid)
-	if err != nil {
-		return "", err
-	}
-	return string(oid), nil
+func getPrefixID(id string) string {
+	return fmt.Sprintf("audit_%s", strings.Replace(id, "-", "", -1))
 }

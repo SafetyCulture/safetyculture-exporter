@@ -23,7 +23,6 @@ require (
 	gorm.io/driver/sqlite v1.3.5
 	gorm.io/driver/sqlserver v1.3.2
 	gorm.io/gorm v1.23.7
-	sc-go.io/pkg/s12id v1.1.0
 )
 
 require (
