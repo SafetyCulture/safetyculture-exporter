@@ -156,8 +156,6 @@ func TestIntegrationDbExportFeeds_should_perform_incremental_update_on_second_ru
 		Reply(http.StatusOK).
 		File(path.Join("mocks", "set_2", "inspections_deleted_single_page.json"))
 
-	gock.Observe(gock.DumpRequest)
-
 	err = feed.ExportFeeds(viperConfig, apiClient, exporter)
 	assert.Nil(t, err)
 
