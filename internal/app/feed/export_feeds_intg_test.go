@@ -141,9 +141,8 @@ func TestIntegrationDbExportFeeds_should_perform_incremental_update_on_second_ru
 
 	gock.New("http://localhost:9999").
 		Post("/accounts/history/v1/activity_log/list").
-		BodyString(`{"org_id":"","page_size":0,"page_token":"","filters":{"timeframe":{"from":"2014-03-17T11:35:40+11:00"},"event_types":["inspection.deleted"],"limit":0}}`).
 		Reply(http.StatusOK).
-		File(path.Join("mocks", "set_2", "inspections_deleted_single_page.json"))
+		BodyString(`{"activites": []}`)
 
 	err = feed.ExportFeeds(viperConfig, apiClient, exporter)
 	assert.Nil(t, err)
