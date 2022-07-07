@@ -114,6 +114,7 @@ func TestIntegrationDbExportFeeds_should_export_all_feeds_to_file(t *testing.T) 
 // Expectation of this test is that group_users and schedule_assignees are truncated and refreshed
 // and that other tables are incrementally updated
 func TestIntegrationDbExportFeeds_should_perform_incremental_update_on_second_run(t *testing.T) {
+	gock.Observe(gock.DumpRequest)
 	sqlExporter, err := getTestingSQLExporter()
 	assert.Nil(t, err)
 	exporter, err := getTemporaryCSVExporterWithRealSQLExporter(sqlExporter)
