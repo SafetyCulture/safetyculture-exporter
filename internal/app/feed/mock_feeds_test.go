@@ -3,6 +3,7 @@ package feed_test
 import (
 	"gopkg.in/h2non/gock.v1"
 	"net/http"
+	"path"
 )
 
 func initMockFeedsSet1(httpClient *http.Client) {
@@ -92,6 +93,12 @@ func initMockFeedsSet1(httpClient *http.Client) {
 		Get("/feed/issues").
 		Reply(200).
 		File("mocks/set_1/feed_issues_2.json")
+
+	gock.New("http://localhost:9999").
+		Post("/accounts/history/v1/activity_log/list").
+		BodyString(`{"org_id":"","page_size":0,"page_token":"","filters":{"timeframe":{"from":"0001-01-01T00:00:00Z"},"event_types":["inspection.deleted"],"limit":0}}`).
+		Reply(http.StatusOK).
+		File(path.Join("mocks", "set_1", "inspections_deleted_single_page.json"))
 }
 
 func initMockFeedsSet2(httpClient *http.Client) {

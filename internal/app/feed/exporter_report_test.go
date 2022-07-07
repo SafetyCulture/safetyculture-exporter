@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net/http"
 	"os"
-	"path"
 	"path/filepath"
 	"testing"
 	"time"
@@ -39,12 +38,6 @@ func TestExportReports_should_export_all_reports(t *testing.T) {
 	apiClient := api.GetTestClient()
 	defer resetMocks(apiClient.HTTPClient())
 	initMockFeedsSet1(apiClient.HTTPClient())
-
-	gock.New("http://localhost:9999").
-		Post("/accounts/history/v1/activity_log/list").
-		BodyString(`{"org_id":"","page_size":0,"page_token":"","filters":{"timeframe":{"from":"0001-01-01T00:00:00Z"},"event_types":["inspection.deleted"],"limit":0}}`).
-		Reply(http.StatusOK).
-		File(path.Join("mocks", "set_1", "inspections_deleted_single_page.json"))
 
 	gock.New(mockAPIBaseURL).
 		Get("/accounts/user/v1/user:WhoAmI").
@@ -130,12 +123,6 @@ func TestExportReports_should_export_all_reports_with_ID_filename(t *testing.T) 
 		Reply(200).
 		Body(bytes.NewBuffer([]byte(`file content`)))
 
-	gock.New("http://localhost:9999").
-		Post("/accounts/history/v1/activity_log/list").
-		BodyString(`{"org_id":"","page_size":0,"page_token":"","filters":{"timeframe":{"from":"0001-01-01T00:00:00Z"},"event_types":["inspection.deleted"],"limit":0}}`).
-		Reply(http.StatusOK).
-		BodyString(`{"activites": []}`)
-
 	err = feed.ExportInspectionReports(viperConfig, apiClient, exporter)
 	assert.Nil(t, err)
 
@@ -178,12 +165,6 @@ func TestExportReports_should_not_run_if_all_exported(t *testing.T) {
 	gock.New("http://localhost:9999").
 		Post("/accounts/history/v1/activity_log/list").
 		BodyString(`{"org_id":"","page_size":0,"page_token":"","filters":{"timeframe":{"from":"2014-03-17T00:35:40Z"},"event_types":["inspection.deleted"],"limit":0}}`).
-		Reply(http.StatusOK).
-		BodyString(`{"activites": []}`)
-
-	gock.New("http://localhost:9999").
-		Post("/accounts/history/v1/activity_log/list").
-		BodyString(`{"org_id":"","page_size":0,"page_token":"","filters":{"timeframe":{"from":"0001-01-01T00:00:00Z"},"event_types":["inspection.deleted"],"limit":0}}`).
 		Reply(http.StatusOK).
 		BodyString(`{"activites": []}`)
 
@@ -328,12 +309,6 @@ func TestExportReports_should_fail_after_retries(t *testing.T) {
 		Reply(200).
 		JSON(getReportExportCompletionMessage("IN_PROGRESS"))
 
-	gock.New("http://localhost:9999").
-		Post("/accounts/history/v1/activity_log/list").
-		BodyString(`{"org_id":"","page_size":0,"page_token":"","filters":{"timeframe":{"from":"0001-01-01T00:00:00Z"},"event_types":["inspection.deleted"],"limit":0}}`).
-		Reply(http.StatusOK).
-		BodyString(`{"activites": []}`)
-
 	err = feed.ExportInspectionReports(viperConfig, apiClient, exporter)
 	assert.NotNil(t, err)
 	assert.Contains(t, err.Error(), "Failed to generate 3 PDF reports and 0 WORD reports")
@@ -374,12 +349,6 @@ func TestExportReports_should_fail_if_report_status_fails(t *testing.T) {
 		Reply(200).
 		JSON(getReportExportCompletionMessage("FAILED"))
 
-	gock.New("http://localhost:9999").
-		Post("/accounts/history/v1/activity_log/list").
-		BodyString(`{"org_id":"","page_size":0,"page_token":"","filters":{"timeframe":{"from":"0001-01-01T00:00:00Z"},"event_types":["inspection.deleted"],"limit":0}}`).
-		Reply(http.StatusOK).
-		BodyString(`{"activites": []}`)
-
 	err = feed.ExportInspectionReports(viperConfig, apiClient, exporter)
 	assert.NotNil(t, err)
 	assert.Contains(t, err.Error(), "Failed to generate 0 PDF reports and 3 WORD reports")
@@ -406,12 +375,6 @@ func TestExportReports_should_fail_if_init_report_reply_is_not_success(t *testin
 			"lastname": "Test"
 		  }
 		`)
-
-	gock.New("http://localhost:9999").
-		Post("/accounts/history/v1/activity_log/list").
-		BodyString(`{"org_id":"","page_size":0,"page_token":"","filters":{"timeframe":{"from":"0001-01-01T00:00:00Z"},"event_types":["inspection.deleted"],"limit":0}}`).
-		Reply(http.StatusOK).
-		BodyString(`{"activites": []}`)
 
 	gock.New(mockAPIBaseURL).
 		Post(initiateReportURL).
@@ -446,12 +409,6 @@ func TestExportReports_should_fail_if_report_completion_reply_is_not_success(t *
 			"lastname": "Test"
 		  }
 		`)
-
-	gock.New("http://localhost:9999").
-		Post("/accounts/history/v1/activity_log/list").
-		BodyString(`{"org_id":"","page_size":0,"page_token":"","filters":{"timeframe":{"from":"0001-01-01T00:00:00Z"},"event_types":["inspection.deleted"],"limit":0}}`).
-		Reply(http.StatusOK).
-		BodyString(`{"activites": []}`)
 
 	gock.New(mockAPIBaseURL).
 		Post(initiateReportURL).
@@ -511,12 +468,6 @@ func TestExportReports_should_fail_if_download_report_reply_is_not_success(t *te
 		Reply(500).
 		JSON(`{"error": "something went wrong"}`)
 
-	gock.New("http://localhost:9999").
-		Post("/accounts/history/v1/activity_log/list").
-		BodyString(`{"org_id":"","page_size":0,"page_token":"","filters":{"timeframe":{"from":"0001-01-01T00:00:00Z"},"event_types":["inspection.deleted"],"limit":0}}`).
-		Reply(http.StatusOK).
-		BodyString(`{"activites": []}`)
-
 	err = feed.ExportInspectionReports(viperConfig, apiClient, exporter)
 	assert.NotNil(t, err)
 	assert.Contains(t, err.Error(), "Failed to generate 3 PDF reports and 0 WORD reports")
@@ -542,12 +493,6 @@ func TestExportReports_should_return_error_for_unsupported_format(t *testing.T) 
 			"lastname": "Test"
 		  }
 		`)
-
-	gock.New("http://localhost:9999").
-		Post("/accounts/history/v1/activity_log/list").
-		BodyString(`{"org_id":"","page_size":0,"page_token":"","filters":{"timeframe":{"from":"0001-01-01T00:00:00Z"},"event_types":["inspection.deleted"],"limit":0}}`).
-		Reply(http.StatusOK).
-		BodyString(`{"activites": []}`)
 
 	err = feed.ExportInspectionReports(viperConfig, apiClient, exporter)
 	assert.EqualError(t, err, "No valid export format specified")

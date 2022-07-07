@@ -52,6 +52,7 @@ func TestExportFeeds_should_export_all_feeds_to_file(t *testing.T) {
 
 	apiClient := api.GetTestClient()
 	initMockFeedsSet1(apiClient.HTTPClient())
+	gock.Observe(gock.DumpRequest)
 
 	gock.New("http://localhost:9999").
 		Get("/accounts/user/v1/user:WhoAmI").
@@ -64,11 +65,6 @@ func TestExportFeeds_should_export_all_feeds_to_file(t *testing.T) {
 			"lastname": "Test"
 		  }
 		`)
-	gock.New("http://localhost:9999").
-		Post("/accounts/history/v1/activity_log/list").
-		BodyString(`{"org_id":"","page_size":0,"page_token":"","filters":{"timeframe":{"from":"0001-01-01T00:00:00Z"},"event_types":["inspection.deleted"],"limit":0}}`).
-		Reply(http.StatusOK).
-		File(path.Join("mocks", "set_1", "inspections_deleted_single_page.json"))
 
 	err = feed.ExportFeeds(viperConfig, apiClient, exporter)
 	assert.Nil(t, err)

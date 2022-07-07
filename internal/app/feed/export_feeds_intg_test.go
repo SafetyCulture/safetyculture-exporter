@@ -77,12 +77,6 @@ func TestIntegrationDbExportFeeds_should_export_all_feeds_to_file(t *testing.T) 
 	initMockFeedsSet1(apiClient.HTTPClient())
 
 	gock.New("http://localhost:9999").
-		Post("/accounts/history/v1/activity_log/list").
-		BodyString(`{"org_id":"","page_size":0,"page_token":"","filters":{"timeframe":{"from":"0001-01-01T00:00:00Z"},"event_types":["inspection.deleted"],"limit":0}}`).
-		Reply(http.StatusOK).
-		File(path.Join("mocks", "set_1", "inspections_deleted_single_page.json"))
-
-	gock.New("http://localhost:9999").
 		Get("/accounts/user/v1/user:WhoAmI").
 		Times(2).
 		Reply(200).
@@ -143,12 +137,6 @@ func TestIntegrationDbExportFeeds_should_perform_incremental_update_on_second_ru
 			"lastname": "Test"
 		  }
 		`)
-
-	gock.New("http://localhost:9999").
-		Post("/accounts/history/v1/activity_log/list").
-		BodyString(`{"org_id":"","page_size":0,"page_token":"","filters":{"timeframe":{"from":"0001-01-01T00:00:00Z"},"event_types":["inspection.deleted"],"limit":0}}`).
-		Reply(http.StatusOK).
-		File(path.Join("mocks", "set_2", "inspections_deleted_single_page.json"))
 
 	gock.New("http://localhost:9999").
 		Post("/accounts/history/v1/activity_log/list").
@@ -250,12 +238,11 @@ func TestIntegrationDbExportFeeds_should_update_action_assignees_on_second_run(t
 
 	apiClient := api.GetTestClient()
 	initMockFeedsSet1(apiClient.HTTPClient())
-
 	gock.New("http://localhost:9999").
-		Persist().
 		Post("/accounts/history/v1/activity_log/list").
+		BodyString(`{"org_id":"","page_size":0,"page_token":"","filters":{"timeframe":{"from":"2014-03-17T11:35:40+11:00"},"event_types":["inspection.deleted"],"limit":0}}`).
 		Reply(http.StatusOK).
-		BodyString(`{"activites": []}`)
+		File(path.Join("mocks", "set_1", "inspections_deleted_single_page.json"))
 
 	err = feed.ExportFeeds(viperConfig, apiClient, exporter)
 	assert.Nil(t, err)
