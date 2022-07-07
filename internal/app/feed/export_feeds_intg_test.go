@@ -142,7 +142,7 @@ func TestIntegrationDbExportFeeds_should_perform_incremental_update_on_second_ru
 	gock.New("http://localhost:9999").
 		Post("/accounts/history/v1/activity_log/list").
 		Reply(http.StatusOK).
-		BodyString(`{"activites": []}`)
+		File(path.Join("mocks", "set_2", "inspections_deleted_single_page.json"))
 
 	err = feed.ExportFeeds(viperConfig, apiClient, exporter)
 	assert.Nil(t, err)
