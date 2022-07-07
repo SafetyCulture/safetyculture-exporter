@@ -4,6 +4,8 @@
 package feed_test
 
 import (
+	"net/http"
+	"path"
 	"path/filepath"
 	"testing"
 
@@ -75,6 +77,12 @@ func TestIntegrationDbExportFeeds_should_export_all_feeds_to_file(t *testing.T) 
 	initMockFeedsSet1(apiClient.HTTPClient())
 
 	gock.New("http://localhost:9999").
+		Post("/accounts/history/v1/activity_log/list").
+		BodyString(`{"org_id":"","page_size":0,"page_token":"","filters":{"timeframe":{"from":"0001-01-01T00:00:00Z"},"event_types":["inspection.deleted"],"limit":0}}`).
+		Reply(http.StatusOK).
+		File(path.Join("mocks", "set_1", "inspections_deleted_single_page.json"))
+
+	gock.New("http://localhost:9999").
 		Get("/accounts/user/v1/user:WhoAmI").
 		Times(2).
 		Reply(200).
@@ -107,7 +115,6 @@ func TestIntegrationDbExportFeeds_should_export_all_feeds_to_file(t *testing.T) 
 	filesEqualish(t, "mocks/set_1/outputs/schedule_occurrences.csv", filepath.Join(exporter.ExportPath, "schedule_occurrences.csv"))
 
 	filesEqualish(t, "mocks/set_1/outputs/issues.csv", filepath.Join(exporter.ExportPath, "issues.csv"))
-
 }
 
 // Expectation of this test is that group_users and schedule_assignees are truncated and refreshed
@@ -123,6 +130,33 @@ func TestIntegrationDbExportFeeds_should_perform_incremental_update_on_second_ru
 
 	apiClient := api.GetTestClient()
 	initMockFeedsSet1(apiClient.HTTPClient())
+
+	gock.New("http://localhost:9999").
+		Get("/accounts/user/v1/user:WhoAmI").
+		Times(2).
+		Reply(200).
+		BodyString(`
+		{
+			"user_id": "user_123",
+			"organisation_id": "role_123",
+			"firstname": "Test",
+			"lastname": "Test"
+		  }
+		`)
+
+	gock.New("http://localhost:9999").
+		Post("/accounts/history/v1/activity_log/list").
+		BodyString(`{"org_id":"","page_size":0,"page_token":"","filters":{"timeframe":{"from":"0001-01-01T00:00:00Z"},"event_types":["inspection.deleted"],"limit":0}}`).
+		Reply(http.StatusOK).
+		File(path.Join("mocks", "set_2", "inspections_deleted_single_page.json"))
+
+	gock.New("http://localhost:9999").
+		Post("/accounts/history/v1/activity_log/list").
+		BodyString(`{"org_id":"","page_size":0,"page_token":"","filters":{"timeframe":{"from":"2014-03-17T11:35:40+11:00"},"event_types":["inspection.deleted"],"limit":0}}`).
+		Reply(http.StatusOK).
+		File(path.Join("mocks", "set_2", "inspections_deleted_single_page.json"))
+
+	gock.Observe(gock.DumpRequest)
 
 	err = feed.ExportFeeds(viperConfig, apiClient, exporter)
 	assert.Nil(t, err)
@@ -163,6 +197,25 @@ func TestIntegrationDbExportFeeds_should_handle_lots_of_rows_ok(t *testing.T) {
 	apiClient := api.GetTestClient()
 	initMockFeedsSet3(apiClient.HTTPClient())
 
+	gock.New("http://localhost:9999").
+		Post("/accounts/history/v1/activity_log/list").
+		BodyString(`{"org_id":"","page_size":0,"page_token":"","filters":{"timeframe":{"from":"0001-01-01T00:00:00Z"},"event_types":["inspection.deleted"],"limit":0}}`).
+		Reply(http.StatusOK).
+		BodyString(`{"activites": []}`)
+
+	gock.New("http://localhost:9999").
+		Get("/accounts/user/v1/user:WhoAmI").
+		Times(2).
+		Reply(200).
+		BodyString(`
+		{
+			"user_id": "user_123",
+			"organisation_id": "role_123",
+			"firstname": "Test",
+			"lastname": "Test"
+		  }
+		`)
+
 	err = feed.ExportFeeds(viperConfig, apiClient, exporter)
 	assert.Nil(t, err)
 
@@ -199,6 +252,12 @@ func TestIntegrationDbExportFeeds_should_update_action_assignees_on_second_run(t
 
 	apiClient := api.GetTestClient()
 	initMockFeedsSet1(apiClient.HTTPClient())
+
+	gock.New("http://localhost:9999").
+		Persist().
+		Post("/accounts/history/v1/activity_log/list").
+		Reply(http.StatusOK).
+		BodyString(`{"activites": []}`)
 
 	err = feed.ExportFeeds(viperConfig, apiClient, exporter)
 	assert.Nil(t, err)

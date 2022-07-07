@@ -119,11 +119,11 @@ func (e *SQLExporter) WriteRows(feed Feed, rows interface{}) error {
 	return nil
 }
 
-// BulkUpdateRows batch updates. Returns number of rows updated or error
+// BulkUpdateRows batch updates. Returns number of rows updated or error. Works with single PKey, not with composed PKeys
 func (e *SQLExporter) BulkUpdateRows(feed Feed, primaryKeys []string, element map[string]interface{}) (int64, error) {
 	result := e.DB.
 		Table(feed.Name()).
-		Where(fmt.Sprintf("%s in ?", feed.PrimaryKey()), primaryKeys).
+		Where(fmt.Sprintf("%s in ?", feed.PrimaryKey()[0]), primaryKeys).
 		Updates(element)
 	if result.Error != nil {
 		return 0, errors.Wrap(result.Error, "Unable to update rows")
