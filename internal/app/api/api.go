@@ -197,6 +197,10 @@ func (a *Client) do(doer HTTPDoer) (*http.Response, error) {
 					)
 					return resp, nil
 
+				case status == http.StatusForbidden:
+					a.logger.Debugw("no access to this resource", "url", url, "status", status)
+					return resp, nil
+
 				default:
 					a.logger.Errorw("http request error status",
 						"url", url,
