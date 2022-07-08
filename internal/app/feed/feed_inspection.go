@@ -84,7 +84,6 @@ func (f *InspectionFeed) Columns() []string {
 	return []string{
 		"name",
 		"archived",
-		"deleted",
 		"owner_name",
 		"owner_id",
 		"author_name",
@@ -113,6 +112,7 @@ func (f *InspectionFeed) Columns() []string {
 		"latitude",
 		"longitude",
 		"web_report_link",
+		"deleted",
 	}
 }
 
