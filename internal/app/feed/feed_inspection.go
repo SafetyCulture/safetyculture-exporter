@@ -250,5 +250,5 @@ func (f *InspectionFeed) processDeletedInspections(ctx context.Context, apiClien
 }
 
 func getPrefixID(id string) string {
-	return fmt.Sprintf("audit_%s", strings.Replace(id, "-", "", -1))
+	return fmt.Sprintf("audit_%s", strings.ReplaceAll(id, "-", ""))
 }
