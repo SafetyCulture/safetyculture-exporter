@@ -7,18 +7,15 @@ import (
 
 // NewGetAccountsActivityLogRequest build a request for AccountsActivityLog
 // for now it serves the purposes only for inspection.deleted. If we need later, we can change this builder
-func NewGetAccountsActivityLogRequest(pageSize int, from time.Time) *GetAccountsActivityLogRequest {
-	return &GetAccountsActivityLogRequest{
-		URL: "/accounts/history/v1/activity_log/list",
-		Params: accountsActivityLogRequestParams{
-			PageSize: pageSize,
-			Filters: accountsActivityLogFilter{
-				Timeframe: timeFrame{
-					From: from,
-				},
-				Limit:      pageSize,
-				EventTypes: []string{"inspection.deleted"},
+func NewGetAccountsActivityLogRequest(pageSize int, from time.Time) *GetAccountsActivityLogRequestParams {
+	return &GetAccountsActivityLogRequestParams{
+		PageSize: pageSize,
+		Filters: accountsActivityLogFilter{
+			Timeframe: timeFrame{
+				From: from,
 			},
+			Limit:      pageSize,
+			EventTypes: []string{"inspection.deleted"},
 		},
 	}
 }
@@ -58,14 +55,8 @@ type GetFeedResponse struct {
 	Data json.RawMessage `json:"data"`
 }
 
-// GetAccountsActivityLogRequest contains fields required to make a post request to activity log history api
-type GetAccountsActivityLogRequest struct {
-	URL    string
-	Params accountsActivityLogRequestParams
-}
-
-// accountsActivityLogRequestParams params used for POST request of AccountsActivityLog
-type accountsActivityLogRequestParams struct {
+// GetAccountsActivityLogRequestParams contains fields required to make a post request to activity log history api
+type GetAccountsActivityLogRequestParams struct {
 	OrgID     string                    `json:"org_id"`
 	PageSize  int                       `json:"page_size"`
 	PageToken string                    `json:"page_token"`

@@ -62,7 +62,7 @@ func TestClient_DrainDeletedInspections(t *testing.T) {
 		}
 		return nil
 	}
-	err = apiClient.DrainDeletedInspections(context.TODO(), req, fn)
+	err = apiClient.DrainAccountActivityHistoryLog(context.TODO(), req, fn)
 	require.Nil(t, err)
 	assert.EqualValues(t, 4, calls)
 	require.EqualValues(t, 15, len(deletedIds))
@@ -101,7 +101,7 @@ func TestClient_DrainDeletedInspections_WhenApiReturnsError(t *testing.T) {
 	fn := func(res *api.GetAccountsActivityLogResponse) error {
 		return nil
 	}
-	err = apiClient.DrainDeletedInspections(context.TODO(), req, fn)
+	err = apiClient.DrainAccountActivityHistoryLog(context.TODO(), req, fn)
 	require.NotNil(t, err)
 	assert.EqualValues(t, "Failed request to API: http://localhost:9999/accounts/history/v1/activity_log/list giving up after 2 attempt(s)", err.Error())
 }
@@ -125,7 +125,7 @@ func TestClient_DrainDeletedInspections_WhenFeedFnReturnsError(t *testing.T) {
 	fn := func(res *api.GetAccountsActivityLogResponse) error {
 		return fmt.Errorf("ERROR_GetAccountsActivityLogResponse")
 	}
-	err = apiClient.DrainDeletedInspections(context.TODO(), req, fn)
+	err = apiClient.DrainAccountActivityHistoryLog(context.TODO(), req, fn)
 	require.NotNil(t, err)
 	assert.EqualValues(t, "ERROR_GetAccountsActivityLogResponse", err.Error())
 }

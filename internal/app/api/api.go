@@ -30,6 +30,8 @@ var (
 	defaultRetryMax     = 4
 )
 
+const activityHistoryLogURL = "/accounts/history/v1/activity_log/list"
+
 // Client is used to with iAuditor API's.
 type Client struct {
 	logger        *zap.SugaredLogger
@@ -335,15 +337,15 @@ func (a *Client) DrainFeed(ctx context.Context, request *GetFeedRequest, feedFn 
 	return nil
 }
 
-// GetDeletedInspections returns response from AccountsActivityLog or error
-func (a *Client) GetDeletedInspections(ctx context.Context, request *GetAccountsActivityLogRequest) (*GetAccountsActivityLogResponse, error) {
+// ListOrganisationActivityLog returns response from AccountsActivityLog or error
+func (a *Client) ListOrganisationActivityLog(ctx context.Context, request *GetAccountsActivityLogRequestParams) (*GetAccountsActivityLogResponse, error) {
 	sl := a.sling.New().
-		Post(request.URL).
+		Post(activityHistoryLogURL).
 		Set(string(Authorization), "Bearer "+a.accessToken).
 		Set(string(IntegrationID), "iauditor-exporter").
 		Set(string(IntegrationVersion), version.GetVersion()).
 		Set(string(XRequestID), util.RequestIDFromContext(ctx)).
-		BodyJSON(request.Params)
+		BodyJSON(request)
 
 	req, _ := sl.Request()
 	req = req.WithContext(ctx)
@@ -363,10 +365,10 @@ func (a *Client) GetDeletedInspections(ctx context.Context, request *GetAccounts
 	return &res, nil
 }
 
-// DrainDeletedInspections cycle throgh GetAccountsActivityLogResponse and adapts the filter whule there is a next page
-func (a *Client) DrainDeletedInspections(ctx context.Context, req *GetAccountsActivityLogRequest, feedFn func(*GetAccountsActivityLogResponse) error) error {
+// DrainAccountActivityHistoryLog cycle throgh GetAccountsActivityLogResponse and adapts the filter whule there is a next page
+func (a *Client) DrainAccountActivityHistoryLog(ctx context.Context, req *GetAccountsActivityLogRequestParams, feedFn func(*GetAccountsActivityLogResponse) error) error {
 	for {
-		res, err := a.GetDeletedInspections(ctx, req)
+		res, err := a.ListOrganisationActivityLog(ctx, req)
 		if err != nil {
 			return err
 		}
@@ -377,7 +379,7 @@ func (a *Client) DrainDeletedInspections(ctx context.Context, req *GetAccountsAc
 		}
 
 		if res.NextPageToken != "" {
-			req.Params.PageToken = res.NextPageToken
+			req.PageToken = res.NextPageToken
 		} else {
 			break
 		}

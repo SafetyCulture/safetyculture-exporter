@@ -237,7 +237,7 @@ func (f *InspectionFeed) processDeletedInspections(ctx context.Context, apiClien
 			}
 		}
 		if len(pkeys) > 0 {
-			rowsUpdated, err := exporter.BulkUpdateRows(f, pkeys, map[string]interface{}{"deleted": true})
+			rowsUpdated, err := exporter.UpdateRows(f, pkeys, map[string]interface{}{"deleted": true})
 			if err != nil {
 				return err
 			}
@@ -246,7 +246,7 @@ func (f *InspectionFeed) processDeletedInspections(ctx context.Context, apiClien
 
 		return nil
 	}
-	return apiClient.DrainDeletedInspections(ctx, dreq, delFn)
+	return apiClient.DrainAccountActivityHistoryLog(ctx, dreq, delFn)
 }
 
 func getPrefixID(id string) string {
