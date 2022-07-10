@@ -33,6 +33,8 @@ type Exporter interface {
 	CreateSchema(feed Feed, rows interface{}) error
 
 	WriteRows(feed Feed, rows interface{}) error
+	UpdateRows(feed Feed, primaryKeys []string, element map[string]interface{}) (int64, error)
+
 	FinaliseExport(feed Feed, rows interface{}) error
 	LastModifiedAt(feed Feed, modifiedAfter time.Time, orgID string) (time.Time, error)
 	WriteMedia(auditID string, mediaID string, contentType string, body []byte) error

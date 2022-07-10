@@ -1,0 +1,37 @@
+{
+  "activities": [
+    {
+      "id": "24fbaead-6d4b-4cd8-992c-8f71d67a90f4",
+      "event_at": "2022-07-04T03:48:05.044Z",
+      "type": "inspection.deleted",
+      "user_id": "7d4f9200-bf23-4642-941b-248623bb586e",
+      "org_id": "30bafca8-9f56-4cbe-9e20-b2f4e586f238",
+      "client_class": "",
+      "agent": "",
+      "trace_id": "",
+      "metadata": {
+        "inspection_id": "47ac0dce-16f9-4d73-b517-8372368af162",
+        "inspection_name": "4 Jul 2022 / #3 M S"
+      },
+      "remote_ip": "",
+      "initiator": "INITIATOR_USER"
+    },
+    {
+      "id": "ca54b734-75ee-44db-8ac5-7d629e5f234d",
+      "event_at": "2022-07-04T03:47:44.810Z",
+      "type": "inspection.deleted",
+      "user_id": "7d4f9200-bf23-4642-941b-248623bb586e",
+      "org_id": "30bafca8-9f56-4cbe-9e20-b2f4e586f238",
+      "client_class": "",
+      "agent": "",
+      "trace_id": "",
+      "metadata": {
+        "inspection_id": "4d2f8bd5-a965-4046-b2b4-ccdf8341c9f2",
+        "inspection_name": "4 Jul 2022 / #2 M S"
+      },
+      "remote_ip": "",
+      "initiator": "INITIATOR_USER"
+    }
+  ],
+  "next_page_token": ""
+}

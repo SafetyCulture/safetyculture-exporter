@@ -30,6 +30,8 @@ var (
 	defaultRetryMax     = 4
 )
 
+const activityHistoryLogURL = "/accounts/history/v1/activity_log/list"
+
 // Client is used to with iAuditor API's.
 type Client struct {
 	logger        *zap.SugaredLogger
@@ -159,76 +161,6 @@ func OptAddTLSCert(certPath string) Opt {
 	}
 }
 
-// FeedMetadata is a representation of the metadata returned when fetching a feed
-type FeedMetadata struct {
-	NextPage         string `json:"next_page"`
-	RemainingRecords int64  `json:"remaining_records"`
-}
-
-// GetFeedParams is a list of all parameters we can set when fetching a feed
-type GetFeedParams struct {
-	ModifiedAfter   time.Time `url:"modified_after,omitempty"`
-	TemplateIDs     []string  `url:"template,omitempty"`
-	Archived        string    `url:"archived,omitempty"`
-	Completed       string    `url:"completed,omitempty"`
-	IncludeInactive bool      `url:"include_inactive,omitempty"`
-	Limit           int       `url:"limit,omitempty"`
-	WebReportLink   string    `url:"web_report_link,omitempty"`
-
-	// Applicable only for sites
-	IncludeDeleted    bool  `url:"include_deleted,omitempty"`
-	ShowOnlyLeafNodes *bool `url:"show_only_leaf_nodes,omitempty"`
-}
-
-// GetFeedRequest has all the data needed to make a request to get a feed
-type GetFeedRequest struct {
-	URL        string
-	InitialURL string
-	Params     GetFeedParams
-}
-
-// GetFeedResponse is a representation of the data returned when fetching a feed
-type GetFeedResponse struct {
-	Metadata FeedMetadata `json:"metadata"`
-
-	Data json.RawMessage `json:"data"`
-}
-
-// GetMediaRequest has all the data needed to make a request to get a media
-type GetMediaRequest struct {
-	URL     string
-	AuditID string
-}
-
-// GetMediaResponse is a representation of the data returned when fetching media
-type GetMediaResponse struct {
-	ContentType string
-	Body        []byte
-	MediaID     string
-}
-
-// ListInspectionsParams is a list of all parameters we can set when fetching inspections
-type ListInspectionsParams struct {
-	ModifiedAfter time.Time `url:"modified_after,omitempty"`
-	TemplateIDs   []string  `url:"template,omitempty"`
-	Archived      string    `url:"archived,omitempty"`
-	Completed     string    `url:"completed,omitempty"`
-	Limit         int       `url:"limit,omitempty"`
-}
-
-// Inspection represents some of the properties present in an inspection
-type Inspection struct {
-	ID         string    `json:"audit_id"`
-	ModifiedAt time.Time `json:"modified_at"`
-}
-
-// ListInspectionsResponse represents the response of listing inspections
-type ListInspectionsResponse struct {
-	Count       int          `json:"count"`
-	Total       int          `json:"total"`
-	Inspections []Inspection `json:"audits"`
-}
-
 func (a *Client) do(doer HTTPDoer) (*http.Response, error) {
 	url := doer.URL()
 
@@ -263,6 +195,10 @@ func (a *Client) do(doer HTTPDoer) (*http.Response, error) {
 						"url", url,
 						"status", status,
 					)
+					return resp, nil
+
+				case status == http.StatusForbidden:
+					a.logger.Debugw("no access to this resource", "url", url, "status", status)
 					return resp, nil
 
 				default:
@@ -355,7 +291,8 @@ func (a *Client) GetFeed(ctx context.Context, request *GetFeedRequest) (*GetFeed
 		initialURL = request.URL
 	}
 
-	sl := a.sling.New().Get(initialURL).
+	sl := a.sling.New().
+		Get(initialURL).
 		Set(string(Authorization), "Bearer "+a.accessToken).
 		Set(string(IntegrationID), "iauditor-exporter").
 		Set(string(IntegrationVersion), version.GetVersion()).
@@ -401,6 +338,56 @@ func (a *Client) DrainFeed(ctx context.Context, request *GetFeedRequest, feedFn 
 		}
 	}
 
+	return nil
+}
+
+// ListOrganisationActivityLog returns response from AccountsActivityLog or error
+func (a *Client) ListOrganisationActivityLog(ctx context.Context, request *GetAccountsActivityLogRequestParams) (*GetAccountsActivityLogResponse, error) {
+	sl := a.sling.New().
+		Post(activityHistoryLogURL).
+		Set(string(Authorization), "Bearer "+a.accessToken).
+		Set(string(IntegrationID), "iauditor-exporter").
+		Set(string(IntegrationVersion), version.GetVersion()).
+		Set(string(XRequestID), util.RequestIDFromContext(ctx)).
+		BodyJSON(request)
+
+	req, _ := sl.Request()
+	req = req.WithContext(ctx)
+
+	var res GetAccountsActivityLogResponse
+	var errMsg json.RawMessage
+	_, err := a.do(&slingHTTPDoer{
+		sl:       sl,
+		req:      req,
+		successV: &res,
+		failureV: &errMsg,
+	})
+	if err != nil {
+		return nil, errors.Wrap(err, "Failed request to API")
+	}
+
+	return &res, nil
+}
+
+// DrainAccountActivityHistoryLog cycle throgh GetAccountsActivityLogResponse and adapts the filter whule there is a next page
+func (a *Client) DrainAccountActivityHistoryLog(ctx context.Context, req *GetAccountsActivityLogRequestParams, feedFn func(*GetAccountsActivityLogResponse) error) error {
+	for {
+		res, err := a.ListOrganisationActivityLog(ctx, req)
+		if err != nil {
+			return err
+		}
+
+		err = feedFn(res)
+		if err != nil {
+			return err
+		}
+
+		if res.NextPageToken != "" {
+			req.PageToken = res.NextPageToken
+		} else {
+			break
+		}
+	}
 	return nil
 }
 
@@ -499,15 +486,6 @@ func (a *Client) DrainInspections(
 	return nil
 }
 
-type initiateInspectionReportExportRequest struct {
-	Format       string `json:"format"`
-	PreferenceID string `json:"preference_id,omitempty"`
-}
-
-type initiateInspectionReportExportResponse struct {
-	MessageID string `json:"messageId"`
-}
-
 // InitiateInspectionReportExport export the report of the given auditID.
 func (a *Client) InitiateInspectionReportExport(ctx context.Context, auditID string, format string, preferenceID string) (string, error) {
 	var (
@@ -542,12 +520,6 @@ func (a *Client) InitiateInspectionReportExport(ctx context.Context, auditID str
 	}
 
 	return result.MessageID, nil
-}
-
-// InspectionReportExportCompletionResponse represents the response of report export completion status
-type InspectionReportExportCompletionResponse struct {
-	Status string `json:"status"`
-	URL    string `json:"url,omitempty"`
 }
 
 // CheckInspectionReportExportCompletion checks if the report export is complete.
@@ -603,14 +575,6 @@ func (a *Client) DownloadInspectionReportFile(ctx context.Context, url string) (
 	}
 
 	return res.Body, nil
-}
-
-// WhoAmIResponse represents the the response of  WhoAmI
-type WhoAmIResponse struct {
-	UserID         string `json:"user_id"`
-	OrganisationID string `json:"organisation_id"`
-	Firstname      string `json:"firstname"`
-	Lastname       string `json:"lastname"`
 }
 
 // WhoAmI returns the details for the user who is making the request

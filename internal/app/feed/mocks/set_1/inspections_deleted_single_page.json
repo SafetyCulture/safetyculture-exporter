@@ -1,0 +1,21 @@
+{
+  "activities": [
+    {
+      "id": "a7f7990e-a3d8-4985-b3c1-fb137b192a2c",
+      "event_at": "2022-07-05T01:02:10.887Z",
+      "type": "inspection.deleted",
+      "user_id": "7d4f9200-bf23-4642-941b-248623bb586e",
+      "org_id": "30bafca8-9f56-4cbe-9e20-b2f4e586f238",
+      "client_class": "",
+      "agent": "",
+      "trace_id": "",
+      "metadata": {
+        "inspection_id": "47ac0dce-16f9-4d73-b517-8372368af162",
+        "inspection_name": "5 Jul 2022 / #4 M S"
+      },
+      "remote_ip": "",
+      "initiator": "INITIATOR_USER"
+    }
+  ],
+  "next_page_token": ""
+}

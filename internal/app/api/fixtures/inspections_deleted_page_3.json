@@ -1,0 +1,69 @@
+{
+  "activities": [
+    {
+      "id": "b3ff8746-7121-4602-bb0f-7b8c625fb9d2",
+      "event_at": "2022-07-05T01:02:17.263Z",
+      "type": "inspection.deleted",
+      "user_id": "7d4f9200-bf23-4642-941b-248623bb586e",
+      "org_id": "30bafca8-9f56-4cbe-9e20-b2f4e586f238",
+      "client_class": "",
+      "agent": "",
+      "trace_id": "",
+      "metadata": {
+        "inspection_id": "48d61915-98c8-4d05-b786-4948dad199be",
+        "inspection_name": "5 Jul 2022 / #5 M S"
+      },
+      "remote_ip": "",
+      "initiator": "INITIATOR_USER"
+    },
+    {
+      "id": "3089609c-8351-4225-ac6b-71236b62e7d3",
+      "event_at": "2022-07-05T01:02:15.941Z",
+      "type": "inspection.deleted",
+      "user_id": "7d4f9200-bf23-4642-941b-248623bb586e",
+      "org_id": "30bafca8-9f56-4cbe-9e20-b2f4e586f238",
+      "client_class": "",
+      "agent": "",
+      "trace_id": "",
+      "metadata": {
+        "inspection_id": "331727d2-4976-45da-857a-6d080dc645a9",
+        "inspection_name": "5 Jul 2022 / #7 M S"
+      },
+      "remote_ip": "",
+      "initiator": "INITIATOR_USER"
+    },
+    {
+      "id": "09723ba3-bb85-4f41-9057-10cbad397bbf",
+      "event_at": "2022-07-05T01:02:14.487Z",
+      "type": "inspection.deleted",
+      "user_id": "7d4f9200-bf23-4642-941b-248623bb586e",
+      "org_id": "30bafca8-9f56-4cbe-9e20-b2f4e586f238",
+      "client_class": "",
+      "agent": "",
+      "trace_id": "",
+      "metadata": {
+        "inspection_id": "1f2c9c1b-6f35-4bae-9b38-4094b40e13c1",
+        "inspection_name": "5 Jul 2022 / #8 M S"
+      },
+      "remote_ip": "",
+      "initiator": "INITIATOR_USER"
+    },
+    {
+      "id": "35ffb060-2705-44a7-b070-9690ee036c85",
+      "event_at": "2022-07-05T01:02:12.643Z",
+      "type": "inspection.deleted",
+      "user_id": "7d4f9200-bf23-4642-941b-248623bb586e",
+      "org_id": "30bafca8-9f56-4cbe-9e20-b2f4e586f238",
+      "client_class": "",
+      "agent": "",
+      "trace_id": "",
+      "metadata": {
+        "inspection_id": "35583d49-6421-40a8-a6f5-591c718c6025",
+        "inspection_name": "5 Jul 2022 / #6 M S"
+      },
+      "remote_ip": "",
+      "initiator": "INITIATOR_USER"
+    }
+  ],
+  "next_page_token": "eyJldmVudF90eXBlcyI6WyJpbnNwZWN0aW9uLmFyY2hpdmVkIl0sImxpbWl0Ijo0LCJvZmZzZXQiOjEyfQ=="
+}

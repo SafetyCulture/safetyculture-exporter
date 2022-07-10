@@ -3,6 +3,7 @@ package feed_test
 import (
 	"bytes"
 	"fmt"
+	"net/http"
 	"os"
 	"path/filepath"
 	"testing"
@@ -72,12 +73,12 @@ func TestExportReports_should_export_all_reports(t *testing.T) {
 	assert.Nil(t, err)
 
 	fileExists(t, filepath.Join(exporter.ExportPath, "My-Audit.pdf"))
-	fileExists(t, filepath.Join(exporter.ExportPath, "audit_2.pdf"))
-	fileExists(t, filepath.Join(exporter.ExportPath, "audit_3.pdf"))
+	fileExists(t, filepath.Join(exporter.ExportPath, "audit_4e28ab2cce8c44a781d376d0ac47dc92.pdf"))
+	fileExists(t, filepath.Join(exporter.ExportPath, "audit_4d95cb4be1e7488bba5893fecd2379d2.pdf"))
 
 	fileExists(t, filepath.Join(exporter.ExportPath, "My-Audit.docx"))
-	fileExists(t, filepath.Join(exporter.ExportPath, "audit_2.docx"))
-	fileExists(t, filepath.Join(exporter.ExportPath, "audit_3.docx"))
+	fileExists(t, filepath.Join(exporter.ExportPath, "audit_4e28ab2cce8c44a781d376d0ac47dc92.docx"))
+	fileExists(t, filepath.Join(exporter.ExportPath, "audit_4d95cb4be1e7488bba5893fecd2379d2.docx"))
 }
 
 func TestExportReports_should_export_all_reports_with_ID_filename(t *testing.T) {
@@ -125,13 +126,13 @@ func TestExportReports_should_export_all_reports_with_ID_filename(t *testing.T) 
 	err = feed.ExportInspectionReports(viperConfig, apiClient, exporter)
 	assert.Nil(t, err)
 
-	fileExists(t, filepath.Join(exporter.ExportPath, "audit_1.pdf"))
-	fileExists(t, filepath.Join(exporter.ExportPath, "audit_2.pdf"))
-	fileExists(t, filepath.Join(exporter.ExportPath, "audit_3.pdf"))
+	fileExists(t, filepath.Join(exporter.ExportPath, "audit_47ac0dce16f94d73b5178372368af162.pdf"))
+	fileExists(t, filepath.Join(exporter.ExportPath, "audit_4e28ab2cce8c44a781d376d0ac47dc92.pdf"))
+	fileExists(t, filepath.Join(exporter.ExportPath, "audit_4d95cb4be1e7488bba5893fecd2379d2.pdf"))
 
-	fileExists(t, filepath.Join(exporter.ExportPath, "audit_1.docx"))
-	fileExists(t, filepath.Join(exporter.ExportPath, "audit_2.docx"))
-	fileExists(t, filepath.Join(exporter.ExportPath, "audit_3.docx"))
+	fileExists(t, filepath.Join(exporter.ExportPath, "audit_47ac0dce16f94d73b5178372368af162.docx"))
+	fileExists(t, filepath.Join(exporter.ExportPath, "audit_4e28ab2cce8c44a781d376d0ac47dc92.docx"))
+	fileExists(t, filepath.Join(exporter.ExportPath, "audit_4d95cb4be1e7488bba5893fecd2379d2.docx"))
 }
 
 func TestExportReports_should_not_run_if_all_exported(t *testing.T) {
@@ -160,6 +161,12 @@ func TestExportReports_should_not_run_if_all_exported(t *testing.T) {
 			"lastname": "Test"
 		  }
 		`)
+
+	gock.New("http://localhost:9999").
+		Post("/accounts/history/v1/activity_log/list").
+		BodyString(`{"org_id":"","page_size":0,"page_token":"","filters":{"timeframe":{"from":"2014-03-17T00:35:40Z"},"event_types":["inspection.deleted"],"limit":0}}`).
+		Reply(http.StatusOK).
+		BodyString(`{"activites": []}`)
 
 	gock.New(mockAPIBaseURL).
 		Post(initiateReportURL).
@@ -246,6 +253,12 @@ func TestExportReports_should_take_care_of_invalid_file_names(t *testing.T) {
 		Times(3).
 		Reply(200).
 		Body(bytes.NewBuffer([]byte(`file content`)))
+
+	gock.New("http://localhost:9999").
+		Post("/accounts/history/v1/activity_log/list").
+		BodyString(`{"org_id":"","page_size":0,"page_token":"","filters":{"timeframe":{"from":"0001-01-01T00:00:00Z"},"event_types":["inspection.deleted"],"limit":0}}`).
+		Reply(http.StatusOK).
+		BodyString(`{"activites": []}`)
 
 	err = feed.ExportInspectionReports(viperConfig, apiClient, exporter)
 	assert.Nil(t, err)

@@ -3,6 +3,8 @@ package feed
 import (
 	"context"
 	"encoding/json"
+	"fmt"
+	"strings"
 	"time"
 
 	"github.com/SafetyCulture/iauditor-exporter/internal/app/api"
@@ -42,6 +44,7 @@ type Inspection struct {
 	Latitude        *float64   `json:"latitude" csv:"latitude"`
 	Longitude       *float64   `json:"longitude" csv:"longitude"`
 	WebReportLink   string     `json:"web_report_link" csv:"web_report_link"`
+	Deleted         bool       `json:"deleted" csv:"deleted"`
 }
 
 // InspectionFeed is a representation of the inspections feed
@@ -109,6 +112,7 @@ func (f *InspectionFeed) Columns() []string {
 		"latitude",
 		"longitude",
 		"web_report_link",
+		"deleted",
 	}
 }
 
@@ -117,7 +121,7 @@ func (f *InspectionFeed) Order() string {
 	return "modified_at ASC, audit_id"
 }
 
-func (f *InspectionFeed) writeRows(exporter Exporter, rows []*Inspection) error {
+func (f *InspectionFeed) writeRows(exporter Exporter, rows []Inspection) error {
 	skipIDs := map[string]bool{}
 	for _, id := range f.SkipIDs {
 		skipIDs[id] = true
@@ -133,7 +137,7 @@ func (f *InspectionFeed) writeRows(exporter Exporter, rows []*Inspection) error 
 
 		// Some audits in production have the same item ID multiple times
 		// We can't insert them simultaneously. This means we are dropping data, which sucks.
-		rowsToInsert := []*Inspection{}
+		var rowsToInsert []Inspection
 		for _, row := range rows[i:j] {
 			skip := skipIDs[row.ID]
 			if !skip {
@@ -171,7 +175,22 @@ func (f *InspectionFeed) Export(ctx context.Context, apiClient *api.Client, expo
 
 	logger.Infof("%s: exporting for org_id: %s since: %s - %s", feedName, orgID, f.ModifiedAfter.Format(time.RFC1123), f.WebReportLink)
 
-	err = apiClient.DrainFeed(ctx, &api.GetFeedRequest{
+	// Process Inspections
+	err = f.processNewInspections(ctx, apiClient, exporter)
+	util.Check(err, "Failed to export feed")
+
+	// Process Deleted Inspections
+	err = f.processDeletedInspections(ctx, apiClient, exporter)
+	if err != nil {
+		logger.Errorf("failed to process deleted inspections. %v", err.Error())
+	}
+
+	return exporter.FinaliseExport(f, &[]*Inspection{})
+}
+
+func (f *InspectionFeed) processNewInspections(ctx context.Context, apiClient *api.Client, exporter Exporter) error {
+	lg := util.GetLogger()
+	req := api.GetFeedRequest{
 		InitialURL: "/feed/inspections",
 		Params: api.GetFeedParams{
 			ModifiedAfter: f.ModifiedAfter,
@@ -181,25 +200,55 @@ func (f *InspectionFeed) Export(ctx context.Context, apiClient *api.Client, expo
 			Limit:         f.Limit,
 			WebReportLink: f.WebReportLink,
 		},
-	}, func(resp *api.GetFeedResponse) error {
-		rows := []*Inspection{}
+	}
+	feedFn := func(resp *api.GetFeedResponse) error {
+		var rows []Inspection
 
 		err := json.Unmarshal(resp.Data, &rows)
 		util.Check(err, "Failed to unmarshal inspections data to struct")
 
 		if len(rows) != 0 {
 			err = f.writeRows(exporter, rows)
-			util.Check(err, "Failed to write data to exporter")
+			if err != nil {
+				return err
+			}
 		}
 
-		logger.Info(GetLogString(f.Name(), &LogStringConfig{
+		lg.Info(GetLogString(f.Name(), &LogStringConfig{
 			RemainingRecords: resp.Metadata.RemainingRecords,
 			HTTPDuration:     apiClient.Duration,
 			ExporterDuration: exporter.GetDuration(),
 		}))
 		return nil
-	})
-	util.Check(err, "Failed to export feed")
+	}
 
-	return exporter.FinaliseExport(f, &[]*Inspection{})
+	return apiClient.DrainFeed(ctx, &req, feedFn)
+}
+
+func (f *InspectionFeed) processDeletedInspections(ctx context.Context, apiClient *api.Client, exporter Exporter) error {
+	lg := util.GetLogger()
+	dreq := api.NewGetAccountsActivityLogRequest(f.Limit, f.ModifiedAfter)
+	delFn := func(resp *api.GetAccountsActivityLogResponse) error {
+		var pkeys = make([]string, 0, len(resp.Activities))
+		for _, a := range resp.Activities {
+			uid := getPrefixID(a.Metadata["inspection_id"])
+			if uid != "" {
+				pkeys = append(pkeys, uid)
+			}
+		}
+		if len(pkeys) > 0 {
+			rowsUpdated, err := exporter.UpdateRows(f, pkeys, map[string]interface{}{"deleted": true})
+			if err != nil {
+				return err
+			}
+			lg.Infof("there were %d rows marked as deleted", rowsUpdated)
+		}
+
+		return nil
+	}
+	return apiClient.DrainAccountActivityHistoryLog(ctx, dreq, delFn)
+}
+
+func getPrefixID(id string) string {
+	return fmt.Sprintf("audit_%s", strings.ReplaceAll(id, "-", ""))
 }

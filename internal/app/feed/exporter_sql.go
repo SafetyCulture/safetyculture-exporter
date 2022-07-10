@@ -119,6 +119,19 @@ func (e *SQLExporter) WriteRows(feed Feed, rows interface{}) error {
 	return nil
 }
 
+// UpdateRows batch updates. Returns number of rows updated or error. Works with single PKey, not with composed PKeys
+func (e *SQLExporter) UpdateRows(feed Feed, primaryKeys []string, element map[string]interface{}) (int64, error) {
+	result := e.DB.
+		Model(feed.Model()).
+		Where(primaryKeys).
+		Updates(element)
+	if result.Error != nil {
+		return 0, errors.Wrap(result.Error, "Unable to update rows")
+	}
+
+	return result.RowsAffected, nil
+}
+
 type modifiedAtRow struct {
 	// ExportedAt is here so gorm has an additional field to sort on in SQL Server
 	ExportedAt time.Time
@@ -179,12 +192,6 @@ func (e *SQLExporter) WriteMedia(auditID, mediaID, contentType string, body []by
 
 // NewSQLExporter creates a new instance of the SQLExporter
 func NewSQLExporter(dialect, connectionString string, autoMigrate bool, exportMediaPath string) (*SQLExporter, error) {
-	logger := util.GetLogger()
-	gormLogger := &util.GormLogger{
-		SugaredLogger: logger,
-		SlowThreshold: 30 * time.Second,
-	}
-
 	var dialector gorm.Dialector
 	switch dialect {
 	case "mysql":
@@ -199,16 +206,25 @@ func NewSQLExporter(dialect, connectionString string, autoMigrate bool, exportMe
 		return nil, fmt.Errorf("invalid database dialect %s", dialect)
 	}
 
-	db, err := gorm.Open(dialector, &gorm.Config{
-		Logger: gormLogger,
-	})
+	l := util.GetLogger()
+	gormLogger := &util.GormLogger{
+		SugaredLogger: l,
+		SlowThreshold: 30 * time.Second,
+	}
+
+	gormConfig := gorm.Config{
+		Logger: gormLogger, //use logger.Default.LogMode(logger.Info) for checking the statements (gorm.io/logger)
+	}
+
+	db, err := gorm.Open(dialector, &gormConfig)
+
 	if err != nil {
 		return nil, errors.Wrap(err, "Unable to connect to DB")
 	}
 
 	return &SQLExporter{
 		DB:              db,
-		Logger:          logger,
+		Logger:          l,
 		AutoMigrate:     autoMigrate,
 		ExportMediaPath: exportMediaPath,
 		duration:        0,
