@@ -314,7 +314,7 @@ func (a *Client) GetFeed(ctx context.Context, request *GetFeedRequest) (*GetFeed
 	if err != nil {
 		return nil, errors.Wrap(err, "Failed request to API")
 	}
-	if errMsg != nil && len(errMsg) > 0 {
+	if len(errMsg) != 0 {
 		return nil, fmt.Errorf(string(errMsg))
 	}
 
