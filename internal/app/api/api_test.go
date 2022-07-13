@@ -226,6 +226,26 @@ func TestAPIClientDrainFeed_should_bubble_up_errors_from_callback(t *testing.T) 
 	assert.Equal(t, expectedErr, err)
 }
 
+func TestClient_DrainFeed_WhenApiReturns403Error(t *testing.T) {
+	defer gock.Off()
+	gock.Observe(gock.DumpRequest)
+
+	gock.New("http://localhost:9999").
+		Get("/feed/inspections").
+		Reply(403).
+		BodyString(`{"statusCode":403,"error":"Forbidden","message":"The caller does not have permission to execute the specified operation"}`)
+
+	apiClient := api.GetTestClient()
+	gock.InterceptClient(apiClient.HTTPClient())
+
+	err := apiClient.DrainFeed(context.Background(), &api.GetFeedRequest{
+		InitialURL: "/feed/inspections",
+	}, func(data *api.GetFeedResponse) error {
+		return nil
+	})
+	assert.EqualValues(t, `{"statusCode":403,"error":"Forbidden","message":"The caller does not have permission to execute the specified operation"}`, err.Error())
+}
+
 func TestAPIClientDrainFeed_should_return_api_errors(t *testing.T) {
 	defer gock.Off()
 
