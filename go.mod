@@ -16,7 +16,7 @@ require (
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.12.0
 	github.com/stretchr/testify v1.8.0
-	go.uber.org/zap v1.22.0
+	go.uber.org/zap v1.23.0
 	gopkg.in/h2non/gock.v1 v1.1.2
 	gorm.io/driver/mysql v1.3.6
 	gorm.io/driver/postgres v1.3.9
