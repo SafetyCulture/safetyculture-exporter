@@ -8,7 +8,7 @@ require (
 	github.com/gocarina/gocsv v0.0.0-20220310154401-d4df709ca055
 	github.com/gofrs/uuid v4.2.0+incompatible
 	github.com/google/go-github v17.0.0+incompatible
-	github.com/gookit/color v1.5.1
+	github.com/gookit/color v1.5.2
 	github.com/hashicorp/go-version v1.6.0
 	github.com/olekukonko/tablewriter v0.0.5
 	github.com/pkg/errors v0.9.1
