@@ -3,7 +3,7 @@ package feed_test
 import (
 	"bytes"
 	"fmt"
-	"io/ioutil"
+	"os"
 	"strings"
 	"testing"
 
@@ -26,7 +26,7 @@ func TestSchemaWriter_should_write_schema(t *testing.T) {
 		err = exporter.WriteSchema(f)
 		assert.Nil(t, err, fmt.Sprintf("something is wrong when writing schema %s, %v", f.Name(), err))
 
-		actual, err := ioutil.ReadFile(fmt.Sprintf("mocks/set_1/schemas/formatted/%s.txt", f.Name()))
+		actual, err := os.ReadFile(fmt.Sprintf("mocks/set_1/schemas/formatted/%s.txt", f.Name()))
 		assert.Nil(t, err, fmt.Sprintf("something is wrong when reading file %s.txt, %v", f.Name(), err))
 		assert.Equal(t, strings.TrimSpace(buf.String()), strings.TrimSpace(string(actual)))
 

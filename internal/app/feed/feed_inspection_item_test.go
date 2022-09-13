@@ -2,7 +2,7 @@ package feed_test
 
 import (
 	"context"
-	"io/ioutil"
+	"os"
 	"testing"
 	"time"
 
@@ -40,7 +40,7 @@ func TestInspectionItemFeedExport_should_export_rows_to_sql_db(t *testing.T) {
 }
 
 func TestInspectionItemFeedExportWithMedia(t *testing.T) {
-	dir, err := ioutil.TempDir("", "export")
+	dir, err := os.MkdirTemp("", "export")
 	assert.Nil(t, err)
 
 	exporter, err := getInmemorySQLExporter(dir)

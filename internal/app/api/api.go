@@ -8,11 +8,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"net"
 	"net/http"
 	"net/url"
+	"os"
 	"strings"
 	"time"
 
@@ -147,7 +147,7 @@ func OptAddTLSCert(certPath string) Opt {
 		}
 
 		// Read in the cert file
-		certs, err := ioutil.ReadFile(certPath)
+		certs, err := os.ReadFile(certPath)
 		if err != nil {
 			log.Fatalf("Failed to append %q to RootCAs: %v", certPath, err)
 		}

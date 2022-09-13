@@ -1,8 +1,8 @@
 package feed_test
 
 import (
-	"io/ioutil"
 	"log"
+	"os"
 	"testing"
 	"time"
 
@@ -371,7 +371,7 @@ func TestNewSQLExporter_should_return_error_for_connection_errors(t *testing.T) 
 }
 
 func TestSQLExporterWriteMedia(t *testing.T) {
-	dir, err := ioutil.TempDir("", "export")
+	dir, err := os.MkdirTemp("", "export")
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -2,7 +2,7 @@ package configure_test
 
 import (
 	"bytes"
-	"io/ioutil"
+	"io"
 	"testing"
 
 	"github.com/SafetyCulture/iauditor-exporter/cmd/iauditor-exporter/cmd"
@@ -13,7 +13,7 @@ func TestCommandConfigure_should_not_throw_error(t *testing.T) {
 	cmd.RootCmd.SetOut(b)
 	cmd.RootCmd.SetArgs([]string{"configure"})
 	cmd.Execute()
-	_, err := ioutil.ReadAll(b)
+	_, err := io.ReadAll(b)
 	if err != nil {
 		t.Fatal(err)
 	}
