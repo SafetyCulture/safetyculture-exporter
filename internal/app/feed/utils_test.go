@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"os"
 	"regexp"
@@ -26,7 +25,7 @@ func getInmemorySQLExporter(exportMediaPath string) (*feed.SQLExporter, error) {
 
 // getTemporaryCSVExporter creates a CSVExporter that writes to a temp folder
 func getTemporaryCSVExporter() (*feed.CSVExporter, error) {
-	dir, err := ioutil.TempDir("", "export")
+	dir, err := os.MkdirTemp("", "export")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -36,7 +35,7 @@ func getTemporaryCSVExporter() (*feed.CSVExporter, error) {
 
 // getTemporaryCSVExporterWithMaxRowsLimit creates a CSVExporter that writes to a temp folder with row limit
 func getTemporaryCSVExporterWithMaxRowsLimit(maxRowsPerFile int) (*feed.CSVExporter, error) {
-	dir, err := ioutil.TempDir("", "export")
+	dir, err := os.MkdirTemp("", "export")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -46,7 +45,7 @@ func getTemporaryCSVExporterWithMaxRowsLimit(maxRowsPerFile int) (*feed.CSVExpor
 
 // getTemporaryReportExporter creates a ReportExporter that writes to a temp folder
 func getTemporaryReportExporter(format []string, preferenceID string, filename string) (*feed.ReportExporter, error) {
-	dir, err := ioutil.TempDir("", "export")
+	dir, err := os.MkdirTemp("", "export")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -57,7 +56,7 @@ func getTemporaryReportExporter(format []string, preferenceID string, filename s
 // getTemporaryCSVExporterWithRealSQLExporter creates a CSV exporter that writes a temporary folder
 // but also uses a real DB as an intermediary
 func getTemporaryCSVExporterWithRealSQLExporter(sqlExporter *feed.SQLExporter) (*feed.CSVExporter, error) {
-	dir, err := ioutil.TempDir("", "export")
+	dir, err := os.MkdirTemp("", "export")
 	if err != nil {
 		return nil, err
 	}
@@ -105,10 +104,10 @@ func getTestingSQLExporter() (*feed.SQLExporter, error) {
 
 // filesEqualish checks if files are equal enough (ignoring dates)
 func filesEqualish(t *testing.T, expectedPath, actualPath string) {
-	expectedFile, err := ioutil.ReadFile(expectedPath)
+	expectedFile, err := os.ReadFile(expectedPath)
 	assert.Nil(t, err)
 
-	actualFile, err := ioutil.ReadFile(actualPath)
+	actualFile, err := os.ReadFile(actualPath)
 	assert.Nil(t, err)
 
 	assert.Equal(t,

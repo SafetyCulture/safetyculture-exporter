@@ -2,7 +2,7 @@ package feed_test
 
 import (
 	"github.com/stretchr/testify/require"
-	"io/ioutil"
+	"os"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -393,7 +393,7 @@ func TestCSVExporter_should_do_rollover_files(t *testing.T) {
 	err = exporter.FinaliseExport(userFeed, &[]feed.User{})
 	assert.Nil(t, err)
 
-	content, err := ioutil.ReadFile(filepath.Join(exporter.ExportPath, "users.csv"))
+	content, err := os.ReadFile(filepath.Join(exporter.ExportPath, "users.csv"))
 	assert.Nil(t, err)
 
 	contentString := dateRegex.ReplaceAllLiteralString(strings.TrimSpace(string(content)), "--date--")
@@ -464,7 +464,7 @@ func TestCSVExporterFinaliseExport_should_write_rows_out_to_file(t *testing.T) {
 	err = exporter.FinaliseExport(userFeed, &[]feed.User{})
 	assert.Nil(t, err)
 
-	content, err := ioutil.ReadFile(filepath.Join(exporter.ExportPath, "users.csv"))
+	content, err := os.ReadFile(filepath.Join(exporter.ExportPath, "users.csv"))
 	assert.Nil(t, err)
 
 	contentString := dateRegex.ReplaceAllLiteralString(strings.TrimSpace(string(content)), "--date--")
@@ -521,7 +521,7 @@ func TestCSVExporterFinaliseExport_should_write_rows_to_multiple_file(t *testing
 	assert.Nil(t, err)
 	assert.Equal(t, 2, len(files))
 
-	content1, err := ioutil.ReadFile(files[0])
+	content1, err := os.ReadFile(files[0])
 	assert.Nil(t, err)
 
 	content1String := dateRegex.ReplaceAllLiteralString(strings.TrimSpace(string(content1)), "--date--")
@@ -531,7 +531,7 @@ user_1,role_123,user.1@test.com,User 1,User 1,false,,--date--
 user_2,role_123,user.2@test.com,User 2,User 2,false,,--date--`
 	assert.Equal(t, strings.TrimSpace(expected1), content1String)
 
-	content2, err := ioutil.ReadFile(files[1])
+	content2, err := os.ReadFile(files[1])
 	assert.Nil(t, err)
 
 	content2String := dateRegex.ReplaceAllLiteralString(strings.TrimSpace(string(content2)), "--date--")

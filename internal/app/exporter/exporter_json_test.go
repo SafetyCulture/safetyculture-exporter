@@ -3,7 +3,6 @@ package exporter_test
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
@@ -90,7 +89,7 @@ func TestLastModifiedAtWithConfig(t *testing.T) {
 }
 
 func TestLastModifiedAtAfterRestart(t *testing.T) {
-	dir, err := ioutil.TempDir("", "export")
+	dir, err := os.MkdirTemp("", "export")
 	assert.NoError(t, err)
 
 	tmpExporter1 := exporter.NewJSONExporter(dir)
@@ -111,7 +110,7 @@ func TestLastModifiedAtAfterRestart(t *testing.T) {
 }
 
 func TestHandlesOverWrittingLongString(t *testing.T) {
-	dir, err := ioutil.TempDir("", "export")
+	dir, err := os.MkdirTemp("", "export")
 	assert.NoError(t, err)
 
 	exportFilePath := filepath.Join(dir, "last-modified")
