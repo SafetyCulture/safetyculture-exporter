@@ -1,3 +1,5 @@
+# DO NOT USE. This package is deprecated, please see https://github.com/SafetyCulture/iauditor-exporter for the latest version of iAuditor Exporter.
+
 # Overview
 The iAuditor Exporter tool is the primary way to bulk export iAuditor information for use in BI tools such as PowerBI. The tool is coded in the Python programming language and can be ran simply and easily on any computer with Python installed.
 
