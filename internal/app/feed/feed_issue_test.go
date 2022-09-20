@@ -79,4 +79,7 @@ func testAllValues(t *testing.T, issue *feed.Issue) {
 	assert.Equal(t, "88bc5efa-2420-483d-bad1-27b35922c488", issue.LocationName)
 	assert.Equal(t, "592ec130-90e0-4c0e-a1c0-1f37f12f5fb5", issue.CategoryID)
 	assert.Equal(t, "Tow Trucks", issue.CategoryLabel)
+
+	modifiedAt := time.Date(2020, time.April, 14, 2, 40, 23, 304000000, time.UTC)
+	assert.Equal(t, modifiedAt, issue.ModifiedAt)
 }

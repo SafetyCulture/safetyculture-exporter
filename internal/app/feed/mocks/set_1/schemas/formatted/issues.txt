@@ -18,4 +18,5 @@
 | location_name     | TEXT     |             |
 | category_id       | TEXT     |             |
 | category_label    | TEXT     |             |
+| modified_at       | datetime |             |
 +-------------------+----------+-------------+

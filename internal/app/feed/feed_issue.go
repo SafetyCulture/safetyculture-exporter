@@ -32,6 +32,7 @@ type Issue struct {
 	LocationName    string     `json:"location_name" csv:"location_name"`
 	CategoryID      string     `json:"category_id" csv:"category_id"`
 	CategoryLabel   string     `json:"category_label" csv:"category_label"`
+	ModifiedAt      time.Time  `json:"modified_at" csv:"modified_at"`
 }
 
 // IssueFeed is a representation of the issues feed
@@ -66,7 +67,7 @@ func (f *IssueFeed) Columns() []string {
 		"id", "title", "description", "creator_id", "creator_user_name",
 		"created_at", "due_at", "priority", "status", "template_id",
 		"inspection_id", "inspection_name", "site_id", "site_name",
-		"location_name", "category_id", "category_label",
+		"location_name", "category_id", "category_label", "modified_at",
 	}
 }
 
