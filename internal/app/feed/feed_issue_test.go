@@ -45,7 +45,7 @@ func testAllNulls(t *testing.T, issue *feed.Issue) {
 	assert.NotEqual(t, time.Date(1, time.January, 1, 0, 0, 0, 0, time.UTC), issue.CreatedAt)
 
 	// not sure how correct is this approach
-	//assert.Equal(t, time.Date(1, time.January, 1, 0, 0, 0, 0, time.UTC), issue.DueAt)
+	// assert.Equal(t, time.Date(1, time.January, 1, 0, 0, 0, 0, time.UTC), issue.DueAt)
 	assert.Nil(t, issue.DueAt)
 
 	assert.Equal(t, "", issue.Priority)
@@ -79,4 +79,5 @@ func testAllValues(t *testing.T, issue *feed.Issue) {
 	assert.Equal(t, "88bc5efa-2420-483d-bad1-27b35922c488", issue.LocationName)
 	assert.Equal(t, "592ec130-90e0-4c0e-a1c0-1f37f12f5fb5", issue.CategoryID)
 	assert.Equal(t, "Tow Trucks", issue.CategoryLabel)
+	assert.Equal(t, time.Date(2020, time.April, 14, 2, 36, 53, 304000000, time.UTC), issue.ModifiedAt)
 }
