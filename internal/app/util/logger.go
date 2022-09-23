@@ -102,7 +102,9 @@ func GetLogger() *zap.SugaredLogger {
 		return slg
 	}
 
-	logFileEncoder := zapcore.NewJSONEncoder(zap.NewProductionEncoderConfig())
+	prodConfig := zap.NewProductionEncoderConfig()
+	prodConfig.EncodeTime = zapcore.ISO8601TimeEncoder
+	logFileEncoder := zapcore.NewJSONEncoder(prodConfig)
 	consoleEncoder := zapcore.NewConsoleEncoder(zap.NewDevelopmentEncoderConfig())
 
 	file, err := os.OpenFile("logs.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
