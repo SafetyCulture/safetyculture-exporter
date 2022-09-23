@@ -97,8 +97,10 @@ func (f *ActionAssigneeFeed) writeRows(ctx context.Context, exporter Exporter, r
 
 // Export exports the feed to the supplied exporter
 func (f *ActionAssigneeFeed) Export(ctx context.Context, apiClient *api.Client, exporter Exporter, orgID string) error {
-	logger := util.GetLogger()
-	feedName := f.Name()
+	logger := util.GetLogger().With(
+		"feed", f.Name(),
+		"org_id", orgID,
+	)
 
 	exporter.InitFeed(f, &InitFeedOptions{
 		// Delete data if incremental refresh is disabled so there is no duplicates
@@ -109,7 +111,9 @@ func (f *ActionAssigneeFeed) Export(ctx context.Context, apiClient *api.Client, 
 	f.ModifiedAfter, err = exporter.LastModifiedAt(f, f.ModifiedAfter, orgID)
 	util.Check(err, "unable to load modified after")
 
-	logger.Infof("%s: exporting for org_id: %s since: %s", feedName, orgID, f.ModifiedAfter.Format(time.RFC1123))
+	logger.With(
+		"modified_after", f.ModifiedAfter.Format(time.RFC1123),
+	).Info("exporting")
 
 	err = apiClient.DrainFeed(ctx, &api.GetFeedRequest{
 		InitialURL: "/feed/action_assignees",
@@ -127,7 +131,11 @@ func (f *ActionAssigneeFeed) Export(ctx context.Context, apiClient *api.Client, 
 			util.Check(err, "Failed to write data to exporter")
 		}
 
-		logger.Infof("%s: %d remaining", feedName, resp.Metadata.RemainingRecords)
+		logger.With(
+			"estimated_remaining", resp.Metadata.RemainingRecords,
+			"duration_ms", apiClient.Duration.Milliseconds(),
+			"export_duration_ms", exporter.GetDuration().Milliseconds(),
+		).Info("export batch complete")
 		return nil
 	})
 	util.Check(err, "Failed to export feed")

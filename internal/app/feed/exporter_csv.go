@@ -22,7 +22,10 @@ type CSVExporter struct {
 
 // CreateSchema generated schema for a feed in csv format
 func (e *CSVExporter) CreateSchema(feed Feed, rows interface{}) error {
-	e.Logger.Infof("%s: writing out CSV schema file", feed.Name())
+	logger := e.Logger.With(
+		"feed", feed.Name(),
+	)
+	logger.Info("writing out CSV schema file")
 
 	exportFilePath := filepath.Join(e.ExportPath, fmt.Sprintf("%s.csv", feed.Name()))
 	_, err := os.Stat(exportFilePath)
@@ -36,14 +39,17 @@ func (e *CSVExporter) CreateSchema(feed Feed, rows interface{}) error {
 		return gocsv.Marshal(rows, file)
 	}
 
-	e.Logger.Infof("%s: skipping. CSV file already exists.", feed.Name())
+	logger.Info("CSV file already exists, skipping")
 
 	return nil
 }
 
 // FinaliseExport closes out an export
 func (e *CSVExporter) FinaliseExport(feed Feed, rows interface{}) error {
-	e.Logger.Infof("%s: writing out CSV file", feed.Name())
+	logger := e.Logger.With(
+		"feed", feed.Name(),
+	)
+	logger.Info("writing out CSV file")
 
 	err := e.cleanOldFiles(feed.Name())
 	if err != nil {
@@ -58,6 +64,7 @@ func (e *CSVExporter) FinaliseExport(feed Feed, rows interface{}) error {
 	rowsAdded := 0
 	var file *os.File
 	for {
+		preTime := time.Now()
 		resp := e.DB.Table(feed.Name()).
 			Order(feed.Order()).
 			Limit(limit).
@@ -66,6 +73,7 @@ func (e *CSVExporter) FinaliseExport(feed Feed, rows interface{}) error {
 		if resp.Error != nil {
 			return resp.Error
 		}
+		postQueryTime := time.Now()
 
 		if resp.RowsAffected == 0 || resp.RowsAffected == -1 {
 			break
@@ -97,9 +105,20 @@ func (e *CSVExporter) FinaliseExport(feed Feed, rows interface{}) error {
 			}
 		}
 
+		postWriteTime := time.Now()
+
 		offset = offset + limit
 		rowsAdded += int(resp.RowsAffected)
+
+		logger.With(
+			"rows_added", resp.RowsAffected,
+			"total_time_ms", postWriteTime.Sub(preTime).Milliseconds(),
+			"query_time_ms", postQueryTime.Sub(preTime).Milliseconds(),
+			"write_time_ms", postWriteTime.Sub(postQueryTime).Milliseconds(),
+		).Info("writing out CSV batch")
 	}
+
+	logger.Info("CSV exported")
 	return nil
 }
 

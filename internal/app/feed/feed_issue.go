@@ -3,9 +3,10 @@ package feed
 import (
 	"context"
 	"encoding/json"
+	"time"
+
 	"github.com/SafetyCulture/iauditor-exporter/internal/app/api"
 	"github.com/SafetyCulture/iauditor-exporter/internal/app/util"
-	"time"
 )
 
 const (
@@ -117,7 +118,11 @@ func (f *IssueFeed) Export(ctx context.Context, apiClient *api.Client, exporter 
 			}
 		}
 
-		logger.Infof("%s: %d remaining. Last call was %dms", f.Name(), resp.Metadata.RemainingRecords, apiClient.Duration.Milliseconds())
+		logger.With(
+			"estimated_remaining", resp.Metadata.RemainingRecords,
+			"duration_ms", apiClient.Duration.Milliseconds(),
+			"export_duration_ms", exporter.GetDuration().Milliseconds(),
+		).Info("export batch complete")
 		return nil
 	}
 

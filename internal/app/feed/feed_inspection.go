@@ -161,8 +161,10 @@ func (f *InspectionFeed) CreateSchema(exporter Exporter) error {
 
 // Export exports the feed to the supplied exporter
 func (f *InspectionFeed) Export(ctx context.Context, apiClient *api.Client, exporter Exporter, orgID string) error {
-	logger := util.GetLogger()
-	feedName := f.Name()
+	logger := util.GetLogger().With(
+		"feed", f.Name(),
+		"org_id", orgID,
+	)
 
 	exporter.InitFeed(f, &InitFeedOptions{
 		// Delete data if incremental refresh is disabled so there is no duplicates
@@ -173,7 +175,10 @@ func (f *InspectionFeed) Export(ctx context.Context, apiClient *api.Client, expo
 	f.ModifiedAfter, err = exporter.LastModifiedAt(f, f.ModifiedAfter, orgID)
 	util.Check(err, "unable to load modified after")
 
-	logger.Infof("%s: exporting for org_id: %s since: %s - %s", feedName, orgID, f.ModifiedAfter.Format(time.RFC1123), f.WebReportLink)
+	logger.With(
+		"modified_after", f.ModifiedAfter.Format(time.RFC1123),
+		"web_report_link_type", f.WebReportLink,
+	).Info("exporting")
 
 	// Process Inspections
 	err = f.processNewInspections(ctx, apiClient, exporter)
@@ -214,11 +219,12 @@ func (f *InspectionFeed) processNewInspections(ctx context.Context, apiClient *a
 			}
 		}
 
-		lg.Info(GetLogString(f.Name(), &LogStringConfig{
-			RemainingRecords: resp.Metadata.RemainingRecords,
-			HTTPDuration:     apiClient.Duration,
-			ExporterDuration: exporter.GetDuration(),
-		}))
+		lg.With(
+			"estimated_remaining", resp.Metadata.RemainingRecords,
+			"duration_ms", apiClient.Duration.Milliseconds(),
+			"export_duration_ms", exporter.GetDuration().Milliseconds(),
+		).Info("export batch complete")
+
 		return nil
 	}
 

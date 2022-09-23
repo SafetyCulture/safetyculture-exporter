@@ -63,7 +63,9 @@ func (e *SQLExporter) InitFeed(feed Feed, opts *InitFeedOptions) error {
 	}
 
 	if opts.Truncate {
-		e.Logger.Infof("%s: truncating", feed.Name())
+		e.Logger.With(
+			"feed", feed.Name(),
+		).Info("truncating")
 		result := e.DB.Session(&gorm.Session{AllowGlobalUpdate: true}).Unscoped().Delete(model)
 		if result.Error != nil {
 			return errors.Wrap(result.Error, "Unable to truncate table")
