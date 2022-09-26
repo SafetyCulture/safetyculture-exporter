@@ -33,6 +33,7 @@ type Issue struct {
 	LocationName    string     `json:"location_name" csv:"location_name"`
 	CategoryID      string     `json:"category_id" csv:"category_id"`
 	CategoryLabel   string     `json:"category_label" csv:"category_label"`
+	ModifiedAt      time.Time  `json:"modified_at" csv:"modified_at"`
 }
 
 // IssueFeed is a representation of the issues feed
