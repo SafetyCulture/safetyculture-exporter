@@ -57,10 +57,12 @@ func (f *SiteMemberFeed) CreateSchema(exporter Exporter) error {
 
 // Export exports the feed to the supplied exporter
 func (f *SiteMemberFeed) Export(ctx context.Context, apiClient *api.Client, exporter Exporter, orgID string) error {
-	logger := util.GetLogger()
-	feedName := f.Name()
+	logger := util.GetLogger().With(
+		"feed", f.Name(),
+		"org_id", orgID,
+	)
 
-	logger.Infof("%s: exporting for org_id: %s", feedName, orgID)
+	logger.Info("exporting")
 
 	exporter.InitFeed(f, &InitFeedOptions{
 		// Truncate files if upserts aren't supported.
@@ -91,7 +93,11 @@ func (f *SiteMemberFeed) Export(ctx context.Context, apiClient *api.Client, expo
 			}
 		}
 
-		logger.Infof("%s: %d remaining. Last call was %dms", feedName, resp.Metadata.RemainingRecords, apiClient.Duration.Milliseconds())
+		logger.With(
+			"estimated_remaining", resp.Metadata.RemainingRecords,
+			"duration_ms", apiClient.Duration.Milliseconds(),
+			"export_duration_ms", exporter.GetDuration().Milliseconds(),
+		).Info("export batch complete")
 		return nil
 	})
 	util.Check(err, "Failed to export feed")

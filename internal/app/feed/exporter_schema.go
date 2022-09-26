@@ -35,7 +35,7 @@ func isPrimaryKey(pk int) string {
 
 // WriteSchema writes schema of a feed to output in tabular format
 func (e *SchemaExporter) WriteSchema(feed Feed) error {
-	e.Logger.Infof("Schema for %s:", feed.Name())
+	e.Logger.With("feed", feed.Name()).Info("writing schema")
 
 	schema := &[]*schema{}
 
