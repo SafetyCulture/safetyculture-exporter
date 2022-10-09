@@ -20,9 +20,9 @@ require (
 	gopkg.in/h2non/gock.v1 v1.1.2
 	gorm.io/driver/mysql v1.4.1
 	gorm.io/driver/postgres v1.4.1
-	gorm.io/driver/sqlite v1.3.6
+	gorm.io/driver/sqlite v1.4.2
 	gorm.io/driver/sqlserver v1.3.2
-	gorm.io/gorm v1.23.10
+	gorm.io/gorm v1.24.0
 )
 
 require (
@@ -51,7 +51,7 @@ require (
 	github.com/kr/text v0.2.0 // indirect
 	github.com/magiconair/properties v1.8.6 // indirect
 	github.com/mattn/go-runewidth v0.0.13 // indirect
-	github.com/mattn/go-sqlite3 v1.14.12 // indirect
+	github.com/mattn/go-sqlite3 v1.14.15 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/pelletier/go-toml v1.9.5 // indirect
 	github.com/pelletier/go-toml/v2 v2.0.5 // indirect
