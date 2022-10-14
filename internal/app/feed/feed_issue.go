@@ -3,6 +3,7 @@ package feed
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"time"
 
 	"github.com/SafetyCulture/iauditor-exporter/internal/app/api"
@@ -128,6 +129,6 @@ func (f *IssueFeed) Export(ctx context.Context, apiClient *api.Client, exporter 
 	}
 
 	err := apiClient.DrainFeed(ctx, request, feedFn)
-	util.Check(err, "Failed to export feed")
+	util.Check(err, fmt.Sprintf("Failed to export feed %q", f.Name()))
 	return exporter.FinaliseExport(f, &[]*Issue{})
 }
