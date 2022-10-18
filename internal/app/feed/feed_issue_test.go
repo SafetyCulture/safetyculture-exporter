@@ -2,11 +2,12 @@ package feed_test
 
 import (
 	"context"
+	"testing"
+	"time"
+
 	"github.com/SafetyCulture/iauditor-exporter/internal/app/api"
 	"github.com/SafetyCulture/iauditor-exporter/internal/app/feed"
 	"github.com/stretchr/testify/assert"
-	"testing"
-	"time"
 )
 
 func TestIssueFeed_Export_ShouldExportRows(t *testing.T) {
@@ -80,4 +81,6 @@ func testAllValues(t *testing.T, issue *feed.Issue) {
 	assert.Equal(t, "592ec130-90e0-4c0e-a1c0-1f37f12f5fb5", issue.CategoryID)
 	assert.Equal(t, "Tow Trucks", issue.CategoryLabel)
 	assert.Equal(t, time.Date(2020, time.April, 14, 2, 36, 53, 304000000, time.UTC), issue.ModifiedAt)
+	completedAt := time.Date(2020, time.April, 14, 2, 36, 53, 304000000, time.UTC)
+	assert.Equal(t, &completedAt, issue.CompletedAt)
 }

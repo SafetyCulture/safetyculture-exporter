@@ -22,7 +22,8 @@
       "location_name": "88bc5efa-2420-483d-bad1-27b35922c488",
       "category_id": "592ec130-90e0-4c0e-a1c0-1f37f12f5fb5",
       "category_label": "Tow Trucks",
-      "modified_at": "2020-04-14T02:36:53.304Z"
+      "modified_at": "2020-04-14T02:36:53.304Z",
+      "completed_at": "2020-04-14T02:36:53.304Z"
     },
     {
       "id": "52a88aeb-5ec6-4876-8c6c-85a642e4bddc",

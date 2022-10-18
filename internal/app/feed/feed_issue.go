@@ -34,6 +34,7 @@ type Issue struct {
 	CategoryID      string     `json:"category_id" csv:"category_id"`
 	CategoryLabel   string     `json:"category_label" csv:"category_label"`
 	ModifiedAt      time.Time  `json:"modified_at" csv:"modified_at"`
+	CompletedAt     *time.Time `json:"completed_at" csv:"completed_at"`
 }
 
 // IssueFeed is a representation of the issues feed
