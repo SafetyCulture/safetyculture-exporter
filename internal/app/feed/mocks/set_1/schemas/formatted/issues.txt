@@ -19,4 +19,5 @@
 | category_id       | TEXT     |             |
 | category_label    | TEXT     |             |
 | modified_at       | datetime |             |
+| completed_at      | datetime |             |
 +-------------------+----------+-------------+
