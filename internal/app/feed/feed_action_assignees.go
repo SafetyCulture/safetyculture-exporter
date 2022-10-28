@@ -140,6 +140,6 @@ func (f *ActionAssigneeFeed) Export(ctx context.Context, apiClient *api.Client, 
 		return nil
 	})
 
-	util.CheckFeedError(err, fmt.Sprintf("Failed to export feed %q", f.Name()))
+	util.CheckFeedError(logger, err, fmt.Sprintf("Failed to export feed %q", f.Name()))
 	return exporter.FinaliseExport(f, &[]*ActionAssignee{})
 }

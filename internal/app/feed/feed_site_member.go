@@ -104,6 +104,6 @@ func (f *SiteMemberFeed) Export(ctx context.Context, apiClient *api.Client, expo
 		InitialURL: "/feed/site_members",
 	}, feedFn)
 
-	util.CheckFeedError(err, fmt.Sprintf("Failed to export feed %q", f.Name()))
+	util.CheckFeedError(logger, err, fmt.Sprintf("Failed to export feed %q", f.Name()))
 	return exporter.FinaliseExport(f, &[]*SiteMember{})
 }

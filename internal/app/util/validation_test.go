@@ -3,9 +3,14 @@
 package util_test
 
 import (
+	"net/http"
 	"testing"
 
 	"github.com/SafetyCulture/iauditor-exporter/internal/app/util"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zaptest/observer"
 )
 
 func TestCheck(t *testing.T) {
@@ -26,4 +31,27 @@ func TestCheck(t *testing.T) {
 			util.Check(tt.err, tt.msg)
 		})
 	}
+}
+
+func TestCheckFeedError_ShouldReturnIfNoError(t *testing.T) {
+	observedZapCore, observedLogs := observer.New(zap.ErrorLevel)
+	observedLogger := zap.New(observedZapCore)
+
+	util.CheckFeedError(observedLogger.Sugar(), nil, "some message")
+
+	assert.Empty(t, observedLogs)
+}
+
+func TestCheckFeedError_ShouldCapture403(t *testing.T) {
+	observedZapCore, observedLogs := observer.New(zap.ErrorLevel)
+	observedLogger := zap.New(observedZapCore)
+
+	util.CheckFeedError(observedLogger.Sugar(), util.HTTPError{
+		StatusCode: http.StatusForbidden,
+		Resource:   "/test",
+		Message:    "test",
+	}, "some message")
+
+	require.NotEmpty(t, observedLogs)
+	assert.Equal(t, `some message: {"status_code":403,"resource":"/test","message":"test"}`, observedLogs.All()[0].Message)
 }

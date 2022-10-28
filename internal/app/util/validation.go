@@ -21,21 +21,17 @@ func Check(err error, msg string) {
 }
 
 // CheckFeedError - checks the Feed for errors, except for 403's
-func CheckFeedError(err error, msg string) {
+func CheckFeedError(logger *zap.SugaredLogger, err error, msg string) {
 	if err == nil {
 		return
-	}
-
-	if lgr == nil {
-		lgr = GetLogger()
 	}
 
 	switch e := err.(type) {
 	case HTTPError:
 		if e.StatusCode == http.StatusForbidden {
-			lgr.Error(errors.Wrapf(err, msg))
+			logger.Error(errors.Wrapf(err, msg))
 			return
 		}
 	}
-	lgr.Fatal(errors.Wrapf(err, msg))
+	logger.Fatal(errors.Wrapf(err, msg))
 }
