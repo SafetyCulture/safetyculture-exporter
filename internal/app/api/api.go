@@ -317,7 +317,7 @@ func (a *Client) GetFeed(ctx context.Context, request *GetFeedRequest) (*GetFeed
 	}
 
 	if httpRes != nil && (httpRes.StatusCode < 200 || httpRes.StatusCode > 299) {
-		return nil, util.HttpError{
+		return nil, util.HTTPError{
 			StatusCode: httpRes.StatusCode,
 			Resource:   request.InitialURL,
 			Message:    string(errMsg),

@@ -31,7 +31,7 @@ func CheckFeedError(err error, msg string) {
 	}
 
 	switch e := err.(type) {
-	case HttpError:
+	case HTTPError:
 		if e.StatusCode == http.StatusForbidden {
 			lgr.Error(errors.Wrapf(err, msg))
 			return
