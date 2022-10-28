@@ -2,11 +2,12 @@ package feed_test
 
 import (
 	"context"
-	"gopkg.in/h2non/gock.v1"
 	"net/http"
 	"path"
 	"testing"
 	"time"
+
+	"gopkg.in/h2non/gock.v1"
 
 	"github.com/SafetyCulture/iauditor-exporter/internal/app/feed"
 	"github.com/stretchr/testify/assert"

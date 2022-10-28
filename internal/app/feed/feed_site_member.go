@@ -67,13 +67,11 @@ func (f *SiteMemberFeed) Export(ctx context.Context, apiClient *api.Client, expo
 
 	exporter.InitFeed(f, &InitFeedOptions{
 		// Truncate files if upserts aren't supported.
-		// This ensure that the export does not contain duplicate rows
+		// This ensures that the export does not contain duplicate rows
 		Truncate: !exporter.SupportsUpsert(),
 	})
 
-	err := apiClient.DrainFeed(ctx, &api.GetFeedRequest{
-		InitialURL: "/feed/site_members",
-	}, func(resp *api.GetFeedResponse) error {
+	feedFn := func(resp *api.GetFeedResponse) error {
 		rows := []*SiteMember{}
 
 		err := json.Unmarshal(resp.Data, &rows)
@@ -100,8 +98,12 @@ func (f *SiteMemberFeed) Export(ctx context.Context, apiClient *api.Client, expo
 			"export_duration_ms", exporter.GetDuration().Milliseconds(),
 		).Info("export batch complete")
 		return nil
-	})
-	util.Check(err, fmt.Sprintf("Failed to export feed %q", f.Name()))
+	}
 
+	err := apiClient.DrainFeed(ctx, &api.GetFeedRequest{
+		InitialURL: "/feed/site_members",
+	}, feedFn)
+
+	util.CheckFeedError(err, fmt.Sprintf("Failed to export feed %q", f.Name()))
 	return exporter.FinaliseExport(f, &[]*SiteMember{})
 }

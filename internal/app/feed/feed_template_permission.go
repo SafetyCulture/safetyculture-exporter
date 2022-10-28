@@ -115,7 +115,7 @@ func (f *TemplatePermissionFeed) Export(ctx context.Context, apiClient *api.Clie
 
 		return nil
 	})
-	util.Check(err, fmt.Sprintf("Failed to export feed %q", f.Name()))
 
+	util.CheckFeedError(err, fmt.Sprintf("Failed to export feed %q", f.Name()))
 	return exporter.FinaliseExport(f, &[]*TemplatePermission{})
 }
