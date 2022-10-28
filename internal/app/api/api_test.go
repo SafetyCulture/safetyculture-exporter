@@ -6,13 +6,14 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/stretchr/testify/require"
 	"net/http"
 	"net/url"
 	"path"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/require"
 
 	"github.com/SafetyCulture/iauditor-exporter/internal/app/api"
 	"github.com/stretchr/testify/assert"
@@ -243,7 +244,7 @@ func TestClient_DrainFeed_WhenApiReturns403Error(t *testing.T) {
 	}, func(data *api.GetFeedResponse) error {
 		return nil
 	})
-	assert.EqualValues(t, `{"statusCode":403,"error":"Forbidden","message":"The caller does not have permission to execute the specified operation"}`, err.Error())
+	assert.EqualValues(t, `{"status_code":403,"resource":"/feed/inspections","message":"{\"statusCode\":403,\"error\":\"Forbidden\",\"message\":\"The caller does not have permission to execute the specified operation\"}"}`, err.Error())
 }
 
 func TestAPIClientDrainFeed_should_return_api_errors(t *testing.T) {
