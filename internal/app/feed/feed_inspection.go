@@ -182,7 +182,7 @@ func (f *InspectionFeed) Export(ctx context.Context, apiClient *api.Client, expo
 
 	// Process Inspections
 	err = f.processNewInspections(ctx, apiClient, exporter)
-	util.Check(err, "Failed to export feed")
+	util.CheckFeedError(logger, err, fmt.Sprintf("Failed to export feed %q", f.Name()))
 
 	// Process Deleted Inspections
 	err = f.processDeletedInspections(ctx, apiClient, exporter)

@@ -3,6 +3,7 @@ package feed
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"time"
 
 	"github.com/SafetyCulture/iauditor-exporter/internal/app/api"
@@ -110,7 +111,7 @@ func (f *GroupUserFeed) Export(ctx context.Context, apiClient *api.Client, expor
 		).Info("export batch complete")
 		return nil
 	})
-	util.Check(err, "Failed to export feed")
 
+	util.CheckFeedError(logger, err, fmt.Sprintf("Failed to export feed %q", f.Name()))
 	return exporter.FinaliseExport(f, &[]*GroupUser{})
 }

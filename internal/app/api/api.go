@@ -198,7 +198,7 @@ func (a *Client) do(doer HTTPDoer) (*http.Response, error) {
 					return resp, nil
 
 				case status == http.StatusForbidden:
-					a.logger.Debugw("no access to this resource", "url", url, "status", status)
+					a.logger.Errorw("no access to this resource", "url", url, "status", status)
 					return resp, nil
 
 				default:
@@ -305,17 +305,23 @@ func (a *Client) GetFeed(ctx context.Context, request *GetFeedRequest) (*GetFeed
 	req, _ := sl.Request()
 	req = req.WithContext(ctx)
 
-	_, err := a.do(&slingHTTPDoer{
+	httpRes, err := a.do(&slingHTTPDoer{
 		sl:       sl,
 		req:      req,
 		successV: &result,
 		failureV: &errMsg,
 	})
+
 	if err != nil {
 		return nil, errors.Wrap(err, "Failed request to API")
 	}
-	if len(errMsg) != 0 {
-		return nil, fmt.Errorf(string(errMsg))
+
+	if httpRes != nil && (httpRes.StatusCode < 200 || httpRes.StatusCode > 299) {
+		return nil, util.HTTPError{
+			StatusCode: httpRes.StatusCode,
+			Resource:   request.InitialURL,
+			Message:    string(errMsg),
+		}
 	}
 
 	return result, nil
