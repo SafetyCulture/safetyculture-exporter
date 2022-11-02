@@ -6,7 +6,7 @@ SafetyCulture Exporter is a command-line tool (CLI tool) that’s available to a
 
 For instructions on downloading and running the SafetyCulture Exporter, as well as interpreting the data output, please check out our [SafetyCulture Exporter documentation](https://developer.safetyculture.com/docs/safetyculture-exporter).
 
-* [SafetyCulture Exporter Doc](https://developer.safetyculture.com/docs/safetyculture-exporter)
+* [SafetyCulture Exporter documentation](https://developer.safetyculture.com/docs/safetyculture-exporter)
 * [Run the SafetyCulture Exporter](https://developer.safetyculture.com/docs/safetyculture-exporter-run)
   * [Download](https://developer.safetyculture.com/docs/safetyculture-exporter-run#download)
   * [Configuration](https://developer.safetyculture.com/docs/safetyculture-exporter-run#configure)
