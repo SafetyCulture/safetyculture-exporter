@@ -4,7 +4,7 @@
 
 SafetyCulture Exporter is a command-line tool (CLI tool) that’s available to all our Premium and Enterprise customers. You can use the SafetyCulture Exporter to export your data, such as inspections, templates, schedules, and actions, to multiple formats that can be used for business intelligence tools or record keeping.
 
-For instructions on downloading and running the SafetyCulture Exporter, as well as interpreting the data output, please check out our [SafetyCulture Exporter Doc](https://developer.safetyculture.com/docs/safetyculture-exporter).
+For instructions on downloading and running the SafetyCulture Exporter, as well as interpreting the data output, please check out our [SafetyCulture Exporter documentation](https://developer.safetyculture.com/docs/safetyculture-exporter).
 
 * [SafetyCulture Exporter Doc](https://developer.safetyculture.com/docs/safetyculture-exporter)
 * [Run the SafetyCulture Exporter](https://developer.safetyculture.com/docs/safetyculture-exporter-run)
