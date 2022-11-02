@@ -6,10 +6,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/SafetyCulture/iauditor-exporter/internal/app/api"
-	"github.com/SafetyCulture/iauditor-exporter/internal/app/config"
-	"github.com/SafetyCulture/iauditor-exporter/internal/app/exporter"
-	"github.com/SafetyCulture/iauditor-exporter/internal/app/util"
+	"github.com/SafetyCulture/safetyculture-exporter/internal/app/api"
+	"github.com/SafetyCulture/safetyculture-exporter/internal/app/config"
+	"github.com/SafetyCulture/safetyculture-exporter/internal/app/exporter"
+	"github.com/SafetyCulture/safetyculture-exporter/internal/app/util"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
 )

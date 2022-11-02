@@ -6,7 +6,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/SafetyCulture/iauditor-exporter/internal/app/util"
+	"github.com/SafetyCulture/safetyculture-exporter/internal/app/util"
 )
 
 func TestGetRandomRequestIDFromContext(t *testing.T) {
