@@ -4,24 +4,31 @@
 
 SafetyCulture Exporter is a command-line tool (CLI tool) that’s available to all our Premium and Enterprise customers. You can use the SafetyCulture Exporter to export your SafetyCulture data, such as inspections, templates, schedules, and actions to multiple formats that can be used for business intelligence tools or record keeping.
 
-For instructions on downloading and running the SafetyCulture Exporter, as well as interpreting the data output, please check out our [SafetyCulture Exporter wiki](https://github.com/SafetyCulture/safetyculture-exporter/wiki).
+For instructions on downloading and running the SafetyCulture Exporter, as well as interpreting the data output, please check out our [SafetyCulture Exporter Doc](https://developer.safetyculture.com/docs/safetyculture-exporter).
 
-* [SafetyCulture Exporter wiki](https://github.com/SafetyCulture/safetyculture-exporter/wiki/Home)
-* [Run the SafetyCulture Exporter](https://github.com/SafetyCulture/safetyculture-exporter/wiki/Run-the-SafetyCulture-Exporter)
-  * [Download](https://github.com/SafetyCulture/safetyculture-exporter/wiki/Download-the-SafetyCulture-Exporter)
-  * [Configuration](https://github.com/SafetyCulture/safetyculture-exporter/wiki/Configure-the-SafetyCulture-Exporter)
-  * [Database support](https://github.com/SafetyCulture/safetyculture-exporter/wiki/Database-support)
-  * [Export data](https://github.com/SafetyCulture/safetyculture-exporter/wiki/Export-data)
-  * [Errors](https://github.com/SafetyCulture/safetyculture-exporter/wiki/Errors)
-* [Understand the data](https://github.com/SafetyCulture/safetyculture-exporter/wiki/Understand-the-data)
-  * [CSV or SQL?](https://github.com/SafetyCulture/safetyculture-exporter/wiki/CSV-or-SQL%3F)
-  * [Data columns](https://github.com/SafetyCulture/safetyculture-exporter/wiki/Data-columns)
-    * [Inspections](https://github.com/SafetyCulture/safetyculture-exporter/wiki/Inspections-data-sets)
-    * [Templates](https://github.com/SafetyCulture/safetyculture-exporter/wiki/Templates-data-sets)
-    * [Organization](https://github.com/SafetyCulture/safetyculture-exporter/wiki/Organization-data-sets)
-    * [Schedules](https://github.com/SafetyCulture/safetyculture-exporter/wiki/Schedules-data-sets)
-    * [Actions](https://github.com/SafetyCulture/safetyculture-exporter/wiki/Actions-data-sets)
-    * [Issues](https://github.com/SafetyCulture/safetyculture-exporter/wiki/Issues-data-sets)
+* [SafetyCulture Exporter Doc](https://developer.safetyculture.com/docs/safetyculture-exporter)
+* [Run the SafetyCulture Exporter](https://developer.safetyculture.com/docs/safetyculture-exporter-run)
+  * [Download](https://developer.safetyculture.com/docs/safetyculture-exporter-run#download)
+  * [Configuration](https://developer.safetyculture.com/docs/safetyculture-exporter-run#configure)
+  * [Database support](https://developer.safetyculture.com/docs/safetyculture-exporter-database-support)
+  * [Docker support](https://developer.safetyculture.com/docs/iauditor-exporter-docker-support)
+  * [Errors](https://developer.safetyculture.com/docs/safetyculture-exporter-errors)
+* [Understand the data](https://developer.safetyculture.com/docs/safetyculture-exporter-data)
+  * [CSV or SQL?](https://developer.safetyculture.com/docs/safetyculture-exporter-csv-or-sql)
+  * [Inspections](https://developer.safetyculture.com/docs/safetyculture-exporter-data#inspections)
+  * [Inspection Items](https://developer.safetyculture.com/docs/iauditor-exporter-data#inspection-items)
+  * [Templates](https://developer.safetyculture.com/docs/iauditor-exporter-data#templates)
+  * [Sites](https://developer.safetyculture.com/docs/iauditor-exporter-data#sites)
+  * [Users](https://developer.safetyculture.com/docs/iauditor-exporter-data#users)
+  * [Groups](https://developer.safetyculture.com/docs/iauditor-exporter-data#groups)
+  * [Group Users](https://developer.safetyculture.com/docs/iauditor-exporter-data#group-users)
+  * [Activity Log Events](https://developer.safetyculture.com/docs/iauditor-exporter-data#activity-log-events)
+  * [Schedules](https://developer.safetyculture.com/docs/iauditor-exporter-data#schedules)
+  * [Schedule Assignees](https://developer.safetyculture.com/docs/iauditor-exporter-data#schedule-assignees)
+  * [Schedule Occurrences](https://developer.safetyculture.com/docs/iauditor-exporter-data#schedule-occurrences)
+  * [Actions](https://developer.safetyculture.com/docs/iauditor-exporter-data#actions)
+  * [Actions Assignees](https://developer.safetyculture.com/docs/iauditor-exporter-data#action-assignees)
+  * [Issues](https://developer.safetyculture.com/docs/iauditor-exporter-data#issues)
 
 > The [Python version of the SafetyCulture Exporter](https://github.com/SafetyCulture/safetyculture-exporter/tree/v2) is no longer being maintained. We recommend downloading this latest version for faster exporting and additional data sets.
 
