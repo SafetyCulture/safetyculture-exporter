@@ -2,7 +2,7 @@
 
 [![Maintainability](https://api.codeclimate.com/v1/badges/39eecd9ef3573ecca044/maintainability)](https://codeclimate.com/github/SafetyCulture/safetyculture-exporter/maintainability) [![Test Coverage](https://api.codeclimate.com/v1/badges/39eecd9ef3573ecca044/test_coverage)](https://codeclimate.com/github/SafetyCulture/safetyculture-exporter/test_coverage)
 
-SafetyCulture Exporter is a command-line tool (CLI tool) that’s available to all our Premium and Enterprise customers. You can use the SafetyCulture Exporter to export your SafetyCulture data, such as inspections, templates, schedules, and actions to multiple formats that can be used for business intelligence tools or record keeping.
+SafetyCulture Exporter is a command-line tool (CLI tool) that’s available to all our Premium and Enterprise customers. You can use the SafetyCulture Exporter to export your data, such as inspections, templates, schedules, and actions, to multiple formats that can be used for business intelligence tools or record keeping.
 
 For instructions on downloading and running the SafetyCulture Exporter, as well as interpreting the data output, please check out our [SafetyCulture Exporter Doc](https://developer.safetyculture.com/docs/safetyculture-exporter).
 
