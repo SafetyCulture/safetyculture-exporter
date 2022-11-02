@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/SafetyCulture/iauditor-exporter/internal/app/feed"
+	"github.com/SafetyCulture/safetyculture-exporter/internal/app/feed"
 	"github.com/stretchr/testify/assert"
 )
 

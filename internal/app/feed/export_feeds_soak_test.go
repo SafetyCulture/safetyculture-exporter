@@ -1,3 +1,4 @@
+//go:build soak
 // +build soak
 
 package feed_test
@@ -7,8 +8,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/SafetyCulture/iauditor-exporter/internal/app/api"
-	"github.com/SafetyCulture/iauditor-exporter/internal/app/feed"
+	"github.com/SafetyCulture/safetyculture-exporter/internal/app/api"
+	"github.com/SafetyCulture/safetyculture-exporter/internal/app/feed"
 
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"

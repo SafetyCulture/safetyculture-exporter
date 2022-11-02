@@ -5,7 +5,7 @@ import (
 	"io"
 	"testing"
 
-	"github.com/SafetyCulture/iauditor-exporter/cmd/iauditor-exporter/cmd"
+	"github.com/SafetyCulture/safetyculture-exporter/cmd/safetyculture-exporter/cmd"
 )
 
 func TestCommandConfigure_should_not_throw_error(t *testing.T) {

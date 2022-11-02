@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/SafetyCulture/iauditor-exporter/internal/app/util"
+	"github.com/SafetyCulture/safetyculture-exporter/internal/app/util"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -34,7 +34,7 @@ func Cmd() *cobra.Command {
 				fmt.Println("Config file updated successfully \U0001f389")
 			}
 
-			fmt.Println("\nVisit \"https://github.com/SafetyCulture/iauditor-exporter#configure\" to learn more about configuration options.")
+			fmt.Println("\nVisit \"https://github.com/SafetyCulture/safetyculture-exporter#configure\" to learn more about configuration options.")
 
 			util.Check(os.Chmod(viper.ConfigFileUsed(), 0666), "while updating file permissions")
 		},

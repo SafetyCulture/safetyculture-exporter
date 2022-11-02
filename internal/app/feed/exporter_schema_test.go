@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/SafetyCulture/iauditor-exporter/internal/app/feed"
+	"github.com/SafetyCulture/safetyculture-exporter/internal/app/feed"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 )

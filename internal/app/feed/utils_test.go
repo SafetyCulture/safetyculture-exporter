@@ -11,7 +11,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/SafetyCulture/iauditor-exporter/internal/app/feed"
+	"github.com/SafetyCulture/safetyculture-exporter/internal/app/feed"
 	"github.com/gofrs/uuid"
 	"github.com/stretchr/testify/assert"
 )
@@ -96,7 +96,7 @@ func getTestingSQLExporter() (*feed.SQLExporter, error) {
 		return nil, err
 	}
 
-	connectionString = strings.Replace(connectionString, "iauditor_exporter_db", dbName, 1)
+	connectionString = strings.Replace(connectionString, "safetyculture_exporter_db", dbName, 1)
 	connectionString = strings.Replace(connectionString, "master", dbName, 1)
 
 	return feed.NewSQLExporter(dialect, connectionString, true, "")

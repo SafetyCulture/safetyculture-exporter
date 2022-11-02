@@ -8,8 +8,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/SafetyCulture/iauditor-exporter/internal/app/api"
-	"github.com/SafetyCulture/iauditor-exporter/internal/app/util"
+	"github.com/SafetyCulture/safetyculture-exporter/internal/app/api"
+	"github.com/SafetyCulture/safetyculture-exporter/internal/app/util"
 )
 
 const maxGoRoutines = 10

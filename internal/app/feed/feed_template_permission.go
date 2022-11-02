@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/SafetyCulture/iauditor-exporter/internal/app/api"
-	"github.com/SafetyCulture/iauditor-exporter/internal/app/util"
+	"github.com/SafetyCulture/safetyculture-exporter/internal/app/api"
+	"github.com/SafetyCulture/safetyculture-exporter/internal/app/util"
 )
 
 // TemplatePermission represents a row from the template_permissions feed
