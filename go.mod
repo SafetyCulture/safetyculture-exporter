@@ -1,8 +1,9 @@
-module github.com/SafetyCulture/iauditor-exporter
+module github.com/SafetyCulture/safetyculture-exporter
 
 go 1.18
 
 require (
+	github.com/SafetyCulture/safetyculture-exporter v0.0.0-20221031231527-f33defc48751
 	github.com/bmizerany/assert v0.0.0-20160611221934-b7ed37b82869
 	github.com/dghubble/sling v1.4.0
 	github.com/gocarina/gocsv v0.0.0-20220310154401-d4df709ca055
