@@ -45,11 +45,15 @@ type Exporter interface {
 }
 
 // DeduplicateList a list of T type and maintains the latest value
-func DeduplicateList[T any](pkFun func(row *T) string, rows []*T) []*T {
+func DeduplicateList[T any](pkFun func(element *T) string, elements []*T) []*T {
 	var dMap = map[string]*T{}
 	var filteredVals []*T
 
-	for _, row := range rows {
+	if elements == nil || len(elements) == 0 {
+		return filteredVals
+	}
+
+	for _, row := range elements {
 		mapPk := pkFun(row)
 		dMap[mapPk] = row
 	}
