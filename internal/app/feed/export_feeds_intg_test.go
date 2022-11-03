@@ -262,7 +262,7 @@ func TestIntegrationDbExportFeeds_should_update_action_assignees_on_second_run(t
 	filesEqualish(t, "mocks/set_2/outputs/action_assignees.csv", filepath.Join(exporter.ExportPath, "action_assignees.csv"))
 }
 
-func TestGroupUserFeed_Export_should_update_on_pk_conflict(t *testing.T) {
+func TestGroupUserFeed_Export_should_filter_duplicates(t *testing.T) {
 	sqlExporter, err := getTestingSQLExporter()
 	require.Nil(t, err)
 	require.NotNil(t, sqlExporter)
@@ -297,12 +297,7 @@ func TestGroupUserFeed_Export_should_update_on_pk_conflict(t *testing.T) {
 	err = feed.ExportFeeds(viperConfig, apiClient, exporter)
 	assert.Nil(t, err)
 
-	gock.New("http://localhost:9999").
-		Get("/feed/group_users").
-		Times(1).
-		Reply(200).
-		File("mocks/set_5/feed_group_users_2.json")
-
-	err = feed.ExportFeeds(viperConfig, apiClient, exporter)
+	lines, err := countFileLines(filepath.Join(exporter.ExportPath, "group_users.csv"))
 	assert.Nil(t, err)
+	assert.Equal(t, 5, lines)
 }
