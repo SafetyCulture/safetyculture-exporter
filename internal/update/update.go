@@ -20,7 +20,7 @@ type ReleaseInfo struct {
 func Check(currentVersion string) *ReleaseInfo {
 	ctx := context.Background()
 	g := github.NewClient(&http.Client{})
-	res, _, err := g.Repositories.GetLatestRelease(ctx, "SafetyCulture", "iauditor-exporter")
+	res, _, err := g.Repositories.GetLatestRelease(ctx, "SafetyCulture", "safetyculture-exporter")
 	if err != nil {
 		return nil
 	}

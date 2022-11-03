@@ -4,7 +4,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/SafetyCulture/iauditor-exporter/internal/app/exporter"
+	"github.com/SafetyCulture/safetyculture-exporter/internal/app/exporter"
 )
 
 // getTemporaryJSONExporter creates a JSONExporter that writes to a temp folder

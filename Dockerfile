@@ -2,5 +2,5 @@
 FROM alpine
 VOLUME /export
 VOLUME /config
-ENTRYPOINT ["./iauditor-exporter"]
-COPY iauditor-exporter /
+ENTRYPOINT ["./safetyculture-exporter"]
+COPY safetyculture-exporter /

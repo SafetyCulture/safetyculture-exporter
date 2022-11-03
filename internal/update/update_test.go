@@ -1,7 +1,7 @@
 package update_test
 
 import (
-	"github.com/SafetyCulture/iauditor-exporter/internal/update"
+	"github.com/SafetyCulture/safetyculture-exporter/internal/update"
 	"testing"
 )
 

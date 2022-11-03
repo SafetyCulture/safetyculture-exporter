@@ -7,8 +7,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/SafetyCulture/iauditor-exporter/internal/app/api"
-	"github.com/SafetyCulture/iauditor-exporter/internal/app/util"
+	"github.com/SafetyCulture/safetyculture-exporter/internal/app/api"
+	"github.com/SafetyCulture/safetyculture-exporter/internal/app/util"
 )
 
 // Inspection represents a row from the inspections feed

@@ -11,7 +11,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/SafetyCulture/iauditor-exporter/internal/app/api"
+	"github.com/SafetyCulture/safetyculture-exporter/internal/app/api"
 	"github.com/pkg/errors"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"

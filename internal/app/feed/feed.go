@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/SafetyCulture/iauditor-exporter/internal/app/api"
+	"github.com/SafetyCulture/safetyculture-exporter/internal/app/api"
 )
 
 // Feed is an interface to a data feed. It provides methods to export the data to an exporter

@@ -16,8 +16,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/SafetyCulture/iauditor-exporter/internal/app/util"
-	"github.com/SafetyCulture/iauditor-exporter/internal/app/version"
+	"github.com/SafetyCulture/safetyculture-exporter/internal/app/util"
+	"github.com/SafetyCulture/safetyculture-exporter/internal/app/version"
 	"github.com/dghubble/sling"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
@@ -32,7 +32,7 @@ var (
 
 const activityHistoryLogURL = "/accounts/history/v1/activity_log/list"
 
-// Client is used to with iAuditor API's.
+// Client is used to with SafetyCulture API's.
 type Client struct {
 	logger        *zap.SugaredLogger
 	accessToken   string
@@ -227,7 +227,7 @@ func (a *Client) do(doer HTTPDoer) (*http.Response, error) {
 	return nil, fmt.Errorf("%s giving up after %d attempt(s)", url, a.RetryMax+1)
 }
 
-// GetMedia fetches the media object from iAuditor.
+// GetMedia fetches the media object from SafetyCulture.
 func (a *Client) GetMedia(ctx context.Context, request *GetMediaRequest) (*GetMediaResponse, error) {
 	baseURL := strings.TrimPrefix(request.URL, a.baseURL)
 
@@ -239,7 +239,7 @@ func (a *Client) GetMedia(ctx context.Context, request *GetMediaRequest) (*GetMe
 
 	sl := a.sling.New().Get(baseURL).
 		Set(string(Authorization), fmt.Sprintf("Bearer %s", a.accessToken)).
-		Set(string(IntegrationID), "iauditor-exporter").
+		Set(string(IntegrationID), "safetyculture-exporter").
 		Set(string(IntegrationVersion), version.GetVersion()).
 		Set(string(XRequestID), util.RequestIDFromContext(ctx))
 
@@ -294,7 +294,7 @@ func (a *Client) GetFeed(ctx context.Context, request *GetFeedRequest) (*GetFeed
 	sl := a.sling.New().
 		Get(initialURL).
 		Set(string(Authorization), "Bearer "+a.accessToken).
-		Set(string(IntegrationID), "iauditor-exporter").
+		Set(string(IntegrationID), "safetyculture-exporter").
 		Set(string(IntegrationVersion), version.GetVersion()).
 		Set(string(XRequestID), util.RequestIDFromContext(ctx))
 
@@ -355,7 +355,7 @@ func (a *Client) ListOrganisationActivityLog(ctx context.Context, request *GetAc
 	sl := a.sling.New().
 		Post(activityHistoryLogURL).
 		Set(string(Authorization), "Bearer "+a.accessToken).
-		Set(string(IntegrationID), "iauditor-exporter").
+		Set(string(IntegrationID), "safetyculture-exporter").
 		Set(string(IntegrationVersion), version.GetVersion()).
 		Set(string(XRequestID), util.RequestIDFromContext(ctx)).
 		BodyJSON(request)
@@ -400,7 +400,7 @@ func (a *Client) DrainAccountActivityHistoryLog(ctx context.Context, req *GetAcc
 	return nil
 }
 
-// ListInspections retrieves the list of inspections from iAuditor
+// ListInspections retrieves the list of inspections from SafetyCulture
 func (a *Client) ListInspections(ctx context.Context, params *ListInspectionsParams) (*ListInspectionsResponse, error) {
 	var (
 		result *ListInspectionsResponse
@@ -409,7 +409,7 @@ func (a *Client) ListInspections(ctx context.Context, params *ListInspectionsPar
 
 	sl := a.sling.New().Get("/audits/search").
 		Set(string(Authorization), fmt.Sprintf("Bearer %s", a.accessToken)).
-		Set(string(IntegrationID), "iauditor-exporter").
+		Set(string(IntegrationID), "safetyculture-exporter").
 		Set(string(IntegrationVersion), version.GetVersion()).
 		Set(string(XRequestID), util.RequestIDFromContext(ctx))
 
@@ -439,7 +439,7 @@ func (a *Client) GetInspection(ctx context.Context, id string) (*json.RawMessage
 
 	sl := a.sling.New().Get(fmt.Sprintf("/audits/%s", id)).
 		Set(string(Authorization), fmt.Sprintf("Bearer %s", a.accessToken)).
-		Set(string(IntegrationID), "iauditor-exporter").
+		Set(string(IntegrationID), "safetyculture-exporter").
 		Set(string(IntegrationVersion), version.GetVersion()).
 		Set(string(XRequestID), util.RequestIDFromContext(ctx))
 
@@ -510,7 +510,7 @@ func (a *Client) InitiateInspectionReportExport(ctx context.Context, auditID str
 
 	sl := a.sling.New().Post(url).
 		Set(string(Authorization), "Bearer "+a.accessToken).
-		Set(string(IntegrationID), "iauditor-exporter").
+		Set(string(IntegrationID), "safetyculture-exporter").
 		Set(string(IntegrationVersion), version.GetVersion()).
 		Set(string(XRequestID), util.RequestIDFromContext(ctx)).
 		BodyJSON(body)
@@ -542,7 +542,7 @@ func (a *Client) CheckInspectionReportExportCompletion(ctx context.Context, audi
 
 	sl := a.sling.New().Get(url).
 		Set(string(Authorization), "Bearer "+a.accessToken).
-		Set(string(IntegrationID), "iauditor-exporter").
+		Set(string(IntegrationID), "safetyculture-exporter").
 		Set(string(IntegrationVersion), version.GetVersion()).
 		Set(string(XRequestID), util.RequestIDFromContext(ctx))
 
@@ -568,7 +568,7 @@ func (a *Client) DownloadInspectionReportFile(ctx context.Context, url string) (
 
 	sl := a.sling.New().Get(url).
 		Set(string(Authorization), "Bearer "+a.accessToken).
-		Set(string(IntegrationID), "iauditor-exporter").
+		Set(string(IntegrationID), "safetyculture-exporter").
 		Set(string(IntegrationVersion), version.GetVersion()).
 		Set(string(XRequestID), util.RequestIDFromContext(ctx))
 
@@ -595,7 +595,7 @@ func (a *Client) WhoAmI(ctx context.Context) (*WhoAmIResponse, error) {
 
 	sl := a.sling.New().Get("accounts/user/v1/user:WhoAmI").
 		Set(string(Authorization), fmt.Sprintf("Bearer %s", a.accessToken)).
-		Set(string(IntegrationID), "iauditor-exporter").
+		Set(string(IntegrationID), "safetyculture-exporter").
 		Set(string(IntegrationVersion), version.GetVersion()).
 		Set(string(XRequestID), util.RequestIDFromContext(ctx))
 

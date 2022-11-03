@@ -1,7 +1,7 @@
 # yamllint disable rule:line-length
 ---
 # Make sure to check the documentation at http://goreleaser.com
-project_name: iauditor-exporter
+project_name: safetyculture-exporter
 before:
   hooks:
     - go mod download
@@ -11,7 +11,7 @@ env:
   - GOPROXY=https://proxy.golang.org
 builds:
   - id: darwin-amd64
-    main: ./cmd/iauditor-exporter/main.go
+    main: ./cmd/safetyculture-exporter/main.go
     goos:
       - darwin
     goarch:
@@ -23,9 +23,9 @@ builds:
       - -tags=netgo  # Force using the go network stack
       - -mod=readonly
     ldflags:
-      - -s -w -X github.com/SafetyCulture/iauditor-exporter/internal/app/version.version={{.Version}}
+      - -s -w -X github.com/SafetyCulture/safetyculture-exporter/internal/app/version.version={{.Version}}
   - id: darwin-arm64
-    main: ./cmd/iauditor-exporter/main.go
+    main: ./cmd/safetyculture-exporter/main.go
     goos:
       - darwin
     goarch:
@@ -37,9 +37,9 @@ builds:
       - -tags=netgo  # Force using the go network stack
       - -mod=readonly
     ldflags:
-      - -s -w -X github.com/SafetyCulture/iauditor-exporter/internal/app/version.version={{.Version}}
+      - -s -w -X github.com/SafetyCulture/safetyculture-exporter/internal/app/version.version={{.Version}}
   - id: linux-amd64
-    main: ./cmd/iauditor-exporter/main.go
+    main: ./cmd/safetyculture-exporter/main.go
     goos:
       - linux
     goarch:
@@ -52,10 +52,10 @@ builds:
       - -trimpath
       - -mod=readonly
     ldflags:
-      - -s -w -X github.com/SafetyCulture/iauditor-exporter/internal/app/version.version={{.Version}}
+      - -s -w -X github.com/SafetyCulture/safetyculture-exporter/internal/app/version.version={{.Version}}
       - -extldflags "-lc -lrt -lpthread --static"
   - id: windows-amd64
-    main: ./cmd/iauditor-exporter/main.go
+    main: ./cmd/safetyculture-exporter/main.go
     goos:
       - windows
     goarch:
@@ -68,16 +68,16 @@ builds:
       - -mod=readonly
       - -buildmode=exe
     ldflags:
-      - -s -w -X github.com/SafetyCulture/iauditor-exporter/internal/app/version.version={{.Version}}
+      - -s -w -X github.com/SafetyCulture/safetyculture-exporter/internal/app/version.version={{.Version}}
 dockers:
   - image_templates:
-      - "ghcr.io/safetyculture/iauditor-exporter:{{ .Tag }}"
-      - "ghcr.io/safetyculture/iauditor-exporter:latest"
+      - "ghcr.io/safetyculture/safetyculture-exporter:{{ .Tag }}"
+      - "ghcr.io/safetyculture/safetyculture-exporter:latest"
     goos: linux
     goarch: amd64
     goarm: ''
 archives:
-  - id: iauditor-exporter
+  - id: safetyculture-exporter
     builds:
       - darwin-amd64
       - darwin-arm64

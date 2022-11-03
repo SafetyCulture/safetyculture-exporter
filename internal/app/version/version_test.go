@@ -1,7 +1,7 @@
 package version_test
 
 import (
-	"github.com/SafetyCulture/iauditor-exporter/internal/app/version"
+	"github.com/SafetyCulture/safetyculture-exporter/internal/app/version"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )

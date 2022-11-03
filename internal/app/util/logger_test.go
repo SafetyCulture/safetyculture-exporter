@@ -3,7 +3,7 @@ package util_test
 import (
 	"testing"
 
-	"github.com/SafetyCulture/iauditor-exporter/internal/app/util"
+	"github.com/SafetyCulture/safetyculture-exporter/internal/app/util"
 	"github.com/stretchr/testify/assert"
 )
 

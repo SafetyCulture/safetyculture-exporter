@@ -6,11 +6,11 @@ import (
 	"net/url"
 	"os"
 
-	"github.com/SafetyCulture/iauditor-exporter/internal/app/api"
-	"github.com/SafetyCulture/iauditor-exporter/internal/app/exporter"
-	"github.com/SafetyCulture/iauditor-exporter/internal/app/feed"
-	"github.com/SafetyCulture/iauditor-exporter/internal/app/inspections"
-	"github.com/SafetyCulture/iauditor-exporter/internal/app/util"
+	"github.com/SafetyCulture/safetyculture-exporter/internal/app/api"
+	"github.com/SafetyCulture/safetyculture-exporter/internal/app/exporter"
+	"github.com/SafetyCulture/safetyculture-exporter/internal/app/feed"
+	"github.com/SafetyCulture/safetyculture-exporter/internal/app/inspections"
+	"github.com/SafetyCulture/safetyculture-exporter/internal/app/util"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -19,12 +19,12 @@ import (
 func SQLCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   "sql",
-		Short: "Export iAuditor data to SQL database",
+		Short: "Export SafetyCulture data to SQL database",
 		Example: `// Limit inspections and schedules to these templates
-iauditor-exporter sql --template-ids template_F492E54D87F2419E9398F7BDCA0FA5D9,template_d54e06808d2f11e2893e83a731dba0ca
+safetyculture-exporter sql --template-ids template_F492E54D87F2419E9398F7BDCA0FA5D9,template_d54e06808d2f11e2893e83a731dba0ca
 
 // Customise export location
-iauditor-exporter sql --export-path /path/to/export/to`,
+safetyculture-exporter sql --export-path /path/to/export/to`,
 		RunE: runSQL,
 	}
 }
@@ -33,12 +33,12 @@ iauditor-exporter sql --export-path /path/to/export/to`,
 func CSVCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   "csv",
-		Short: "Export iAuditor data to CSV files",
+		Short: "Export SafetyCulture data to CSV files",
 		Example: `// Limit inspections and schedules to these templates
-iauditor-exporter csv --template-ids template_F492E54D87F2419E9398F7BDCA0FA5D9,template_d54e06808d2f11e2893e83a731dba0ca
+safetyculture-exporter csv --template-ids template_F492E54D87F2419E9398F7BDCA0FA5D9,template_d54e06808d2f11e2893e83a731dba0ca
 
 // Customise export location
-iauditor-exporter csv --export-path /path/to/export/to`,
+safetyculture-exporter csv --export-path /path/to/export/to`,
 		RunE: runCSV,
 	}
 }
@@ -47,12 +47,12 @@ iauditor-exporter csv --export-path /path/to/export/to`,
 func InspectionJSONCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   "inspection-json",
-		Short: "Export iAuditor inspections to json files",
+		Short: "Export SafetyCulture inspections to json files",
 		Example: `// Limit inspections to these templates
-iauditor-exporter inspection-json --template-ids template_F492E54D87F2419E9398F7BDCA0FA5D9,template_d54e06808d2f11e2893e83a731dba0ca
+safetyculture-exporter inspection-json --template-ids template_F492E54D87F2419E9398F7BDCA0FA5D9,template_d54e06808d2f11e2893e83a731dba0ca
 
 // Customise export location
-iauditor-exporter inspection-json --export-path /path/to/export/to`,
+safetyculture-exporter inspection-json --export-path /path/to/export/to`,
 		RunE: runInspectionJSON,
 	}
 }
@@ -61,8 +61,8 @@ iauditor-exporter inspection-json --export-path /path/to/export/to`,
 func PrintSchemaCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:     "schema",
-		Short:   "Print iAuditor table schemas",
-		Example: `iauditor-exporter schema`,
+		Short:   "Print SafetyCulture table schemas",
+		Example: `safetyculture-exporter schema`,
 		RunE:    printSchema,
 	}
 }
@@ -73,9 +73,9 @@ func ReportCmd() *cobra.Command {
 		Use:   "report",
 		Short: "Export inspection report",
 		Example: `// Export PDF and Word inspection reports
-		iauditor-exporter report --export-path /path/to/export/to --format PDF,WORD
+		safetyculture-exporter report --export-path /path/to/export/to --format PDF,WORD
 		// Export PDF inspection reports with a custom report layout
-		iauditor-exporter report --export-path /path/to/export/to --format PDF --preference-id abc`,
+		safetyculture-exporter report --export-path /path/to/export/to --format PDF --preference-id abc`,
 		RunE: runInspectionReports,
 	}
 }

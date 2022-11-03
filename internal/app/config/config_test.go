@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/SafetyCulture/iauditor-exporter/internal/app/config"
+	"github.com/SafetyCulture/safetyculture-exporter/internal/app/config"
 	"github.com/bmizerany/assert"
 	"github.com/spf13/viper"
 )

@@ -5,11 +5,11 @@ import (
 	"os"
 	"strings"
 
-	"github.com/SafetyCulture/iauditor-exporter/cmd/iauditor-exporter/cmd/configure"
-	"github.com/SafetyCulture/iauditor-exporter/cmd/iauditor-exporter/cmd/export"
-	"github.com/SafetyCulture/iauditor-exporter/internal/app/util"
-	"github.com/SafetyCulture/iauditor-exporter/internal/app/version"
-	"github.com/SafetyCulture/iauditor-exporter/internal/update"
+	"github.com/SafetyCulture/safetyculture-exporter/cmd/safetyculture-exporter/cmd/configure"
+	"github.com/SafetyCulture/safetyculture-exporter/cmd/safetyculture-exporter/cmd/export"
+	"github.com/SafetyCulture/safetyculture-exporter/internal/app/util"
+	"github.com/SafetyCulture/safetyculture-exporter/internal/app/version"
+	"github.com/SafetyCulture/safetyculture-exporter/internal/update"
 	"github.com/gookit/color"
 	"github.com/spf13/cobra"
 	"github.com/spf13/cobra/doc"
@@ -25,9 +25,9 @@ var connectionFlags, dbFlags, csvFlags, exportFlags, mediaFlags, inspectionFlags
 // RootCmd represents the base command when called without any subcommands.
 var RootCmd = &cobra.Command{
 	Version: version.GetVersion(),
-	Use:     "iauditor-exporter",
-	Short:   "A CLI tool for extracting your iAuditor data",
-	Long:    "A CLI tool for extracting your iAuditor data",
+	Use:     "safetyculture-exporter",
+	Short:   "A CLI tool for extracting your SafetyCulture data",
+	Long:    "A CLI tool for extracting your SafetyCulture data",
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -48,7 +48,7 @@ func Execute() {
 		yellow := color.FgYellow.Render
 		cyan := color.FgCyan.Render
 		fmt.Fprintf(os.Stderr, "\n\n%s %s → %s\n%s\n\n",
-			yellow("A new version of iauditor-exporter is available"),
+			yellow("A new version of safetyculture-exporter is available"),
 			cyan(version.GetVersion()),
 			cyan(newRelease.Version),
 			yellow(newRelease.ChangelogURL),
@@ -66,7 +66,7 @@ func init() {
 	// will be global for your application.
 	cobra.OnInitialize(initConfig)
 
-	RootCmd.PersistentFlags().StringVar(&cfgFile, "config-path", "./iauditor-exporter.yaml", "config file")
+	RootCmd.PersistentFlags().StringVar(&cfgFile, "config-path", "./safetyculture-exporter.yaml", "config file")
 
 	configFlags()
 	bindFlags()
@@ -195,7 +195,7 @@ func initConfig() {
 		// Use config file from the flag.
 		viper.SetConfigFile(cfgFile)
 	} else {
-		viper.SetConfigFile("iauditor-exporter.yaml")
+		viper.SetConfigFile("safetyculture-exporter.yaml")
 	}
 
 	viper.SetEnvPrefix("IAUD")

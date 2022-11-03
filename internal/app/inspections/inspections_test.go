@@ -7,9 +7,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/SafetyCulture/iauditor-exporter/internal/app/api"
-	exportermock "github.com/SafetyCulture/iauditor-exporter/internal/app/exporter/mocks"
-	"github.com/SafetyCulture/iauditor-exporter/internal/app/inspections"
+	"github.com/SafetyCulture/safetyculture-exporter/internal/app/api"
+	exportermock "github.com/SafetyCulture/safetyculture-exporter/internal/app/exporter/mocks"
+	"github.com/SafetyCulture/safetyculture-exporter/internal/app/inspections"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
