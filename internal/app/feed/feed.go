@@ -43,3 +43,19 @@ type Exporter interface {
 	SupportsUpsert() bool
 	ParameterLimit() int
 }
+
+// DeduplicateList a list of T type and maintains the latest value
+func DeduplicateList[T any](pkFun func(row *T) string, rows []*T) []*T {
+	var dMap = map[string]*T{}
+	var filteredVals []*T
+
+	for _, row := range rows {
+		mapPk := pkFun(row)
+		dMap[mapPk] = row
+	}
+
+	for _, row := range dMap {
+		filteredVals = append(filteredVals, row)
+	}
+	return filteredVals
+}

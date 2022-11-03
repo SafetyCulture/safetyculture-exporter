@@ -107,7 +107,8 @@ func (e *SQLExporter) WriteRows(feed Feed, rows interface{}) error {
 	}
 
 	start := time.Now()
-	insert := e.DB.Table(feed.Name()).
+	insert := e.DB.
+		Table(feed.Name()).
 		Clauses(clause.OnConflict{
 			Columns:   columns,
 			DoUpdates: clause.AssignmentColumns(feed.Columns()),

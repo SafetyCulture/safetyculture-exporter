@@ -84,22 +84,27 @@ func (f *GroupUserFeed) Export(ctx context.Context, apiClient *api.Client, expor
 		InitialURL: "/feed/group_users",
 		Params:     api.GetFeedParams{},
 	}, func(resp *api.GetFeedResponse) error {
-		rows := []*GroupUser{}
+		var rows []*GroupUser
 
 		err := json.Unmarshal(resp.Data, &rows)
 		util.Check(err, "Failed to unmarshal group-users data to struct")
 
-		if len(rows) != 0 {
+		// deduplicate rows (hotfix) because the feed Api GetUserGroups returns duplicates and this creates PK violations issues
+		deDupedRows := DeduplicateList(func(row *GroupUser) string {
+			return fmt.Sprintf("pk__%s_%s", row.UserID, row.GroupID)
+		}, rows)
+
+		if len(deDupedRows) != 0 {
 			// Calculate the size of the batch we can insert into the DB at once. Column count + buffer to account for primary keys
 			batchSize := exporter.ParameterLimit() / (len(f.Columns()) + 4)
 
-			for i := 0; i < len(rows); i += batchSize {
+			for i := 0; i < len(deDupedRows); i += batchSize {
 				j := i + batchSize
-				if j > len(rows) {
-					j = len(rows)
+				if j > len(deDupedRows) {
+					j = len(deDupedRows)
 				}
 
-				err = exporter.WriteRows(f, rows[i:j])
+				err = exporter.WriteRows(f, deDupedRows[i:j])
 				util.Check(err, "Failed to write data to exporter")
 			}
 		}
