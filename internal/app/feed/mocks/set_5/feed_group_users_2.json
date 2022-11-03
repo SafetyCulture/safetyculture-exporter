@@ -1,0 +1,13 @@
+{
+  "metadata": {
+    "next_page": null,
+    "remaining_records": 0
+  },
+  "data": [
+    {
+      "user_id": "user_1",
+      "group_id": "role_group3",
+      "organisation_id": "role_123_update"
+    }
+  ]
+}
