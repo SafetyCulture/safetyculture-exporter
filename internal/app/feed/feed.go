@@ -49,7 +49,7 @@ func DeduplicateList[T any](pkFun func(element *T) string, elements []*T) []*T {
 	var dMap = map[string]*T{}
 	var filteredVals []*T
 
-	if elements == nil || len(elements) == 0 {
+	if len(elements) == 0 {
 		return filteredVals
 	}
 
