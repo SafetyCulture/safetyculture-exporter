@@ -8,6 +8,7 @@ import (
 
 	"github.com/SafetyCulture/safetyculture-exporter/internal/app/feed"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestSQLExporterSupportsUpsert_should_return_true(t *testing.T) {
@@ -140,6 +141,38 @@ func TestSQLExporterWriteRows_should_write_rows(t *testing.T) {
 	assert.Equal(t, 2, len(rows))
 	assert.Equal(t, "user_1", rows[0].ID)
 	assert.Equal(t, "user_2", rows[1].ID)
+}
+
+func TestSQLExporter_WriteRows_should_upsert_when_pk_conflict(t *testing.T) {
+	exporter, err := getInmemorySQLExporter("")
+	require.Nil(t, err)
+	require.NotNil(t, exporter)
+
+	groupUserFeed := feed.GroupUserFeed{}
+	feedOptions := feed.InitFeedOptions{
+		Truncate: false,
+	}
+
+	err = exporter.InitFeed(&groupUserFeed, &feedOptions)
+	require.Nil(t, err)
+
+	feedData := []feed.GroupUser{
+		{UserID: "UID_1", GroupID: "GID_1", OrganisationID: "OID_1"},
+		{UserID: "UID_2", GroupID: "GID_1", OrganisationID: "OID_1"},
+		{UserID: "UID_3", GroupID: "GID_1", OrganisationID: "OID_1"},
+		{UserID: "UID_4", GroupID: "GID_2", OrganisationID: "OID_1"},
+		{UserID: "UID_1", GroupID: "GID_1", OrganisationID: "OID_1b"}, // should upsert there
+	}
+	err = exporter.WriteRows(&groupUserFeed, feedData)
+	require.Nil(t, err)
+
+	var dbData []feed.GroupUser
+	sqlRes := exporter.DB.Table("group_users").Scan(&dbData)
+	assert.Nil(t, sqlRes.Error)
+	assert.EqualValues(t, 4, len(dbData))
+	assert.EqualValues(t, "UID_1", dbData[0].UserID)
+	assert.EqualValues(t, "GID_1", dbData[0].GroupID)
+	assert.EqualValues(t, "OID_1b", dbData[0].OrganisationID)
 }
 
 func TestSQLExporterWriteRows_should_update_rows(t *testing.T) {

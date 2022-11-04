@@ -11,6 +11,7 @@ import (
 
 	"github.com/SafetyCulture/safetyculture-exporter/internal/app/api"
 	"github.com/SafetyCulture/safetyculture-exporter/internal/app/feed"
+	"github.com/stretchr/testify/require"
 	"gopkg.in/h2non/gock.v1"
 
 	"github.com/spf13/viper"
@@ -259,4 +260,44 @@ func TestIntegrationDbExportFeeds_should_update_action_assignees_on_second_run(t
 	err = feed.ExportFeeds(viperConfig, apiClient, exporter)
 	assert.Nil(t, err)
 	filesEqualish(t, "mocks/set_2/outputs/action_assignees.csv", filepath.Join(exporter.ExportPath, "action_assignees.csv"))
+}
+
+func TestGroupUserFeed_Export_should_filter_duplicates(t *testing.T) {
+	sqlExporter, err := getTestingSQLExporter()
+	require.Nil(t, err)
+	require.NotNil(t, sqlExporter)
+
+	exporter, err := getTemporaryCSVExporterWithRealSQLExporter(sqlExporter)
+	assert.Nil(t, err)
+
+	viperConfig := viper.New()
+	viperConfig.Set("export.incremental", true)
+	viperConfig.Set("export.tables", []string{"group_users"})
+
+	apiClient := api.GetTestClient()
+	gock.InterceptClient(apiClient.HTTPClient())
+	gock.New("http://localhost:9999").
+		Get("/accounts/user/v1/user:WhoAmI").
+		Times(2).
+		Reply(200).
+		BodyString(`
+		{
+			"user_id": "user_123",
+			"organisation_id": "role_123",
+			"firstname": "Test",
+			"lastname": "Test"
+		  }
+		`)
+	gock.New("http://localhost:9999").
+		Get("/feed/group_users").
+		Times(1).
+		Reply(200).
+		File("mocks/set_5/feed_group_users_1.json")
+
+	err = feed.ExportFeeds(viperConfig, apiClient, exporter)
+	assert.Nil(t, err)
+
+	lines, err := countFileLines(filepath.Join(exporter.ExportPath, "group_users.csv"))
+	assert.Nil(t, err)
+	assert.Equal(t, 5, lines)
 }

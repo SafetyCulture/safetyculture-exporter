@@ -101,13 +101,14 @@ func (e *SQLExporter) DeleteRowsIfExist(feed Feed, query string, args ...interfa
 
 // WriteRows writes out the rows to the DB
 func (e *SQLExporter) WriteRows(feed Feed, rows interface{}) error {
-	columns := []clause.Column{}
+	var columns []clause.Column
 	for _, column := range feed.PrimaryKey() {
 		columns = append(columns, clause.Column{Name: column})
 	}
 
 	start := time.Now()
-	insert := e.DB.Table(feed.Name()).
+	insert := e.DB.
+		Table(feed.Name()).
 		Clauses(clause.OnConflict{
 			Columns:   columns,
 			DoUpdates: clause.AssignmentColumns(feed.Columns()),
