@@ -23,15 +23,20 @@ func TestDeduplicateList_when_not_empty(t *testing.T) {
 		{"ID4", "Alfonso"},
 	}
 
-	dedupedList := feed.DeduplicateList(
+	dedupedList := feed.DeduplicateList[student](
 		func(s *student) string { return s.id },
 		originalList)
 
 	require.Len(t, dedupedList, 4)
-	assert.EqualValues(t, "José", dedupedList[0].name)
-	assert.EqualValues(t, "Merry", dedupedList[1].name)
-	assert.EqualValues(t, "Konstantin", dedupedList[2].name)
-	assert.EqualValues(t, "Alfonso", dedupedList[3].name)
+
+	values := map[string]string{}
+	for _, val := range dedupedList {
+		values[val.id] = val.name
+	}
+	assert.EqualValues(t, "José", values["ID1"])
+	assert.EqualValues(t, "Merry", values["ID2"])
+	assert.EqualValues(t, "Konstantin", values["ID3"])
+	assert.EqualValues(t, "Alfonso", values["ID4"])
 }
 
 func TestDeduplicateList_when_nil(t *testing.T) {
