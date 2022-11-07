@@ -96,7 +96,7 @@ func getAPIClient() *api.Client {
 
 	return api.NewClient(
 		viper.GetString("api.url"),
-		viper.GetString("access_token"),
+		fmt.Sprintf("Bearer %s", viper.GetString("access_token")),
 		apiOpts...,
 	)
 }

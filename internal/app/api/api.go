@@ -34,12 +34,12 @@ const activityHistoryLogURL = "/accounts/history/v1/activity_log/list"
 
 // Client is used to with SafetyCulture API's.
 type Client struct {
-	logger        *zap.SugaredLogger
-	accessToken   string
-	baseURL       string
-	sling         *sling.Sling
-	httpClient    *http.Client
-	httpTransport *http.Transport
+	logger              *zap.SugaredLogger
+	authorizationHeader string
+	baseURL             string
+	sling               *sling.Sling
+	httpClient          *http.Client
+	httpTransport       *http.Transport
 
 	Duration      time.Duration
 	CheckForRetry CheckForRetry
@@ -53,7 +53,7 @@ type Client struct {
 type Opt func(*Client)
 
 // NewClient creates a new instance of the Client
-func NewClient(addr string, accessToken string, opts ...Opt) *Client {
+func NewClient(addr string, authorizationHeader string, opts ...Opt) *Client {
 	httpTransport := &http.Transport{
 		DialContext: (&net.Dialer{
 			Timeout:   30 * time.Second,
@@ -73,18 +73,18 @@ func NewClient(addr string, accessToken string, opts ...Opt) *Client {
 	}
 
 	a := &Client{
-		logger:        util.GetLogger(),
-		httpClient:    httpClient,
-		baseURL:       addr,
-		httpTransport: httpTransport,
-		sling:         sling.New().Client(httpClient).Base(addr),
-		accessToken:   accessToken,
-		Duration:      0,
-		CheckForRetry: DefaultRetryPolicy,
-		Backoff:       DefaultBackoff,
-		RetryMax:      defaultRetryMax,
-		RetryWaitMin:  defaultRetryWaitMin,
-		RetryWaitMax:  defaultRetryWaitMax,
+		logger:              util.GetLogger(),
+		httpClient:          httpClient,
+		baseURL:             addr,
+		httpTransport:       httpTransport,
+		sling:               sling.New().Client(httpClient).Base(addr),
+		authorizationHeader: authorizationHeader,
+		Duration:            0,
+		CheckForRetry:       DefaultRetryPolicy,
+		Backoff:             DefaultBackoff,
+		RetryMax:            defaultRetryMax,
+		RetryWaitMin:        defaultRetryWaitMin,
+		RetryWaitMax:        defaultRetryWaitMax,
 	}
 
 	for _, opt := range opts {
@@ -238,7 +238,7 @@ func (a *Client) GetMedia(ctx context.Context, request *GetMediaRequest) (*GetMe
 	mediaID := mediaIDURL[len(mediaIDURL)-1]
 
 	sl := a.sling.New().Get(baseURL).
-		Set(string(Authorization), fmt.Sprintf("Bearer %s", a.accessToken)).
+		Set(string(Authorization), a.authorizationHeader).
 		Set(string(IntegrationID), "safetyculture-exporter").
 		Set(string(IntegrationVersion), version.GetVersion()).
 		Set(string(XRequestID), util.RequestIDFromContext(ctx))
@@ -293,7 +293,7 @@ func (a *Client) GetFeed(ctx context.Context, request *GetFeedRequest) (*GetFeed
 
 	sl := a.sling.New().
 		Get(initialURL).
-		Set(string(Authorization), "Bearer "+a.accessToken).
+		Set(string(Authorization), a.authorizationHeader).
 		Set(string(IntegrationID), "safetyculture-exporter").
 		Set(string(IntegrationVersion), version.GetVersion()).
 		Set(string(XRequestID), util.RequestIDFromContext(ctx))
@@ -354,7 +354,7 @@ func (a *Client) DrainFeed(ctx context.Context, request *GetFeedRequest, feedFn 
 func (a *Client) ListOrganisationActivityLog(ctx context.Context, request *GetAccountsActivityLogRequestParams) (*GetAccountsActivityLogResponse, error) {
 	sl := a.sling.New().
 		Post(activityHistoryLogURL).
-		Set(string(Authorization), "Bearer "+a.accessToken).
+		Set(string(Authorization), a.authorizationHeader).
 		Set(string(IntegrationID), "safetyculture-exporter").
 		Set(string(IntegrationVersion), version.GetVersion()).
 		Set(string(XRequestID), util.RequestIDFromContext(ctx)).
@@ -408,7 +408,7 @@ func (a *Client) ListInspections(ctx context.Context, params *ListInspectionsPar
 	)
 
 	sl := a.sling.New().Get("/audits/search").
-		Set(string(Authorization), fmt.Sprintf("Bearer %s", a.accessToken)).
+		Set(string(Authorization), a.authorizationHeader).
 		Set(string(IntegrationID), "safetyculture-exporter").
 		Set(string(IntegrationVersion), version.GetVersion()).
 		Set(string(XRequestID), util.RequestIDFromContext(ctx))
@@ -438,7 +438,7 @@ func (a *Client) GetInspection(ctx context.Context, id string) (*json.RawMessage
 	)
 
 	sl := a.sling.New().Get(fmt.Sprintf("/audits/%s", id)).
-		Set(string(Authorization), fmt.Sprintf("Bearer %s", a.accessToken)).
+		Set(string(Authorization), a.authorizationHeader).
 		Set(string(IntegrationID), "safetyculture-exporter").
 		Set(string(IntegrationVersion), version.GetVersion()).
 		Set(string(XRequestID), util.RequestIDFromContext(ctx))
@@ -509,7 +509,7 @@ func (a *Client) InitiateInspectionReportExport(ctx context.Context, auditID str
 	}
 
 	sl := a.sling.New().Post(url).
-		Set(string(Authorization), "Bearer "+a.accessToken).
+		Set(string(Authorization), a.authorizationHeader).
 		Set(string(IntegrationID), "safetyculture-exporter").
 		Set(string(IntegrationVersion), version.GetVersion()).
 		Set(string(XRequestID), util.RequestIDFromContext(ctx)).
@@ -541,7 +541,7 @@ func (a *Client) CheckInspectionReportExportCompletion(ctx context.Context, audi
 	url := fmt.Sprintf("audits/%s/report/%s", auditID, messageID)
 
 	sl := a.sling.New().Get(url).
-		Set(string(Authorization), "Bearer "+a.accessToken).
+		Set(string(Authorization), a.authorizationHeader).
 		Set(string(IntegrationID), "safetyculture-exporter").
 		Set(string(IntegrationVersion), version.GetVersion()).
 		Set(string(XRequestID), util.RequestIDFromContext(ctx))
@@ -567,7 +567,7 @@ func (a *Client) DownloadInspectionReportFile(ctx context.Context, url string) (
 	var res *http.Response
 
 	sl := a.sling.New().Get(url).
-		Set(string(Authorization), "Bearer "+a.accessToken).
+		Set(string(Authorization), a.authorizationHeader).
 		Set(string(IntegrationID), "safetyculture-exporter").
 		Set(string(IntegrationVersion), version.GetVersion()).
 		Set(string(XRequestID), util.RequestIDFromContext(ctx))
@@ -594,7 +594,7 @@ func (a *Client) WhoAmI(ctx context.Context) (*WhoAmIResponse, error) {
 	)
 
 	sl := a.sling.New().Get("accounts/user/v1/user:WhoAmI").
-		Set(string(Authorization), fmt.Sprintf("Bearer %s", a.accessToken)).
+		Set(string(Authorization), a.authorizationHeader).
 		Set(string(IntegrationID), "safetyculture-exporter").
 		Set(string(IntegrationVersion), version.GetVersion()).
 		Set(string(XRequestID), util.RequestIDFromContext(ctx))
