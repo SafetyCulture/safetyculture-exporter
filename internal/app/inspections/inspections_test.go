@@ -2,10 +2,11 @@ package inspections_test
 
 import (
 	"context"
-	"github.com/stretchr/testify/require"
 	"net/http"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/require"
 
 	"github.com/SafetyCulture/safetyculture-exporter/internal/app/api"
 	exportermock "github.com/SafetyCulture/safetyculture-exporter/internal/app/exporter/mocks"
@@ -57,7 +58,7 @@ func TestInspectionsExport(t *testing.T) {
 		exporterMock,
 	)
 	err := inspectionClient.Export(context.Background())
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 }
 
 func TestInspectionsExport_WhenSkipID(t *testing.T) {
@@ -77,7 +78,7 @@ func TestInspectionsExport_WhenSkipID(t *testing.T) {
 	)
 	inspectionClient.(*inspections.Client).SkipIDs = []string{"audit_d7e2f55b95094bd48fac601850e1db63"}
 	err := inspectionClient.Export(context.Background())
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 }
 
 func TestInspectionsExport_WhenModifiedAtIsNotNil(t *testing.T) {
@@ -96,7 +97,7 @@ func TestInspectionsExport_WhenModifiedAtIsNotNil(t *testing.T) {
 		exporterMock,
 	)
 	err := inspectionClient.Export(context.Background())
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 }
 
 func TestNewInspectionClient(t *testing.T) {

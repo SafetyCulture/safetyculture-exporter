@@ -13,7 +13,7 @@ import (
 
 func TestActionAssigneeFeedExport_should_export_rows_to_sql_db(t *testing.T) {
 	exporter, err := getInmemorySQLExporter("")
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	apiClient := api.GetTestClient()
 	initMockFeedsSet1(apiClient.HTTPClient())
@@ -24,7 +24,7 @@ func TestActionAssigneeFeedExport_should_export_rows_to_sql_db(t *testing.T) {
 	}
 
 	err = actionAssigneeFeed.Export(context.Background(), apiClient, exporter, "")
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	rows := []feed.ActionAssignee{}
 	resp := exporter.DB.Table("action_assignees").Scan(&rows)

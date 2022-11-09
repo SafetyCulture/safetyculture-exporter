@@ -12,7 +12,7 @@ import (
 
 func TestIssueFeed_Export_ShouldExportRows(t *testing.T) {
 	exporter, err := getInmemorySQLExporter("")
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	apiClient := api.GetTestClient()
 	defer resetMocks(apiClient.HTTPClient())
@@ -23,7 +23,7 @@ func TestIssueFeed_Export_ShouldExportRows(t *testing.T) {
 	}
 
 	err = actionsFeed.Export(context.Background(), apiClient, exporter, "")
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	var rows []feed.Issue
 	resp := exporter.DB.Table("issues").Scan(&rows)

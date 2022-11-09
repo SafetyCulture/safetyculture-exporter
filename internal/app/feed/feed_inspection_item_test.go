@@ -15,7 +15,7 @@ import (
 
 func TestInspectionItemFeedExport_should_export_rows_to_sql_db(t *testing.T) {
 	exporter, err := getInmemorySQLExporter("")
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	apiClient := api.GetTestClient()
 	initMockFeedsSet1(apiClient.HTTPClient())
@@ -30,7 +30,7 @@ func TestInspectionItemFeedExport_should_export_rows_to_sql_db(t *testing.T) {
 	}
 
 	err = inspectionItemFeed.Export(context.Background(), apiClient, exporter, "")
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	rows := []feed.InspectionItem{}
 	resp := exporter.DB.Table("inspection_items").Scan(&rows)
@@ -41,10 +41,10 @@ func TestInspectionItemFeedExport_should_export_rows_to_sql_db(t *testing.T) {
 
 func TestInspectionItemFeedExportWithMedia(t *testing.T) {
 	dir, err := os.MkdirTemp("", "export")
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	exporter, err := getInmemorySQLExporter(dir)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	result := `{id:"test-id"}`
 	req := gock.New("http://localhost:9999").
@@ -68,5 +68,5 @@ func TestInspectionItemFeedExportWithMedia(t *testing.T) {
 	}
 
 	err = inspectionItemFeed.Export(context.Background(), apiClient, exporter, "")
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 }
