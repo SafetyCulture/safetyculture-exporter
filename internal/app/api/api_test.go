@@ -182,7 +182,7 @@ func TestAPIClientDrainFeed_should_return_for_as_long_next_page_set(t *testing.T
 
 		rows := []map[string]string{}
 		err := json.Unmarshal(data.Data, &rows)
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 
 		for _, row := range rows {
 			auditIDs = append(auditIDs, row["id"])
@@ -190,7 +190,7 @@ func TestAPIClientDrainFeed_should_return_for_as_long_next_page_set(t *testing.T
 
 		return nil
 	})
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	assert.Equal(t, 2, calls)
 	assert.Equal(t, []string{
@@ -399,7 +399,7 @@ func TestAPIClientDrainInspections_should_return_for_as_long_next_page_set(t *te
 			}
 			return nil
 		})
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	assert.Equal(t, []string{
 		"audit_8E2B1F3CB9C94D8792957F9F99E2E4BD",
@@ -422,11 +422,11 @@ func TestAPIClientGetInspection(t *testing.T) {
 	gock.InterceptClient(apiClient.HTTPClient())
 
 	resp, err := apiClient.GetInspection(context.Background(), auditID)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	rows := map[string]string{}
 	err = json.Unmarshal(*resp, &rows)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	expected, ok := rows["audit_id"]
 	assert.Equal(t, true, ok)
@@ -550,7 +550,7 @@ func TestGetMediaWith403Error(t *testing.T) {
 			AuditID: "1234",
 		},
 	)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 }
 
 func TestGetMediaWith404Error(t *testing.T) {
@@ -571,7 +571,7 @@ func TestGetMediaWith404Error(t *testing.T) {
 			AuditID: "1234",
 		},
 	)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 }
 
 func TestGetMediaWith405Error(t *testing.T) {
@@ -614,7 +614,7 @@ func TestGetMediaWith204Error(t *testing.T) {
 			AuditID: "1234",
 		},
 	)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assert.Nil(t, resp)
 }
 
@@ -665,7 +665,7 @@ func TestGetMedia(t *testing.T) {
 			AuditID: "1234",
 		},
 	)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assert.Equal(t, resp, expected)
 }
 
@@ -688,7 +688,7 @@ func TestAPIClientInitiateInspectionReportExport_should_return_messageID(t *test
 
 	mId, err := apiClient.InitiateInspectionReportExport(context.Background(), "audit_123", "PDF", "p123")
 
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assert.Equal(t, "abc", mId)
 }
 
@@ -742,7 +742,7 @@ func TestAPIClientCheckInspectionReportExportCompletion_should_return_status(t *
 
 	res, err := apiClient.CheckInspectionReportExportCompletion(context.Background(), "audit_123", "abc")
 
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assert.Equal(t, res.Status, "SUCCESS")
 	assert.Equal(t, res.URL, "http://domain.com/report")
 }
@@ -793,7 +793,7 @@ func TestAPIClientDownloadInspectionReportFile_should_return_status(t *testing.T
 
 	res, err := apiClient.DownloadInspectionReportFile(context.Background(), "http://localhost:9999/report-exports/abc")
 
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	buf := new(bytes.Buffer)
 	buf.ReadFrom(res)

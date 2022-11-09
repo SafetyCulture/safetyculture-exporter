@@ -105,10 +105,10 @@ func getTestingSQLExporter() (*feed.SQLExporter, error) {
 // filesEqualish checks if files are equal enough (ignoring dates)
 func filesEqualish(t *testing.T, expectedPath, actualPath string) {
 	expectedFile, err := os.ReadFile(expectedPath)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	actualFile, err := os.ReadFile(actualPath)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	assert.Equal(t,
 		dateRegex.ReplaceAllLiteralString(strings.TrimSpace(string(expectedFile)), "--date--"),
@@ -118,7 +118,7 @@ func filesEqualish(t *testing.T, expectedPath, actualPath string) {
 
 func fileExists(t *testing.T, expectedPath string) {
 	_, err := os.Stat(expectedPath)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 }
 
 func getFileModTime(filePath string) (time.Time, error) {

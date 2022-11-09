@@ -13,21 +13,21 @@ import (
 
 func TestSQLExporterSupportsUpsert_should_return_true(t *testing.T) {
 	exporter, err := getInmemorySQLExporter("")
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	assert.True(t, exporter.SupportsUpsert())
 }
 
 func TestSQLExporterInitFeed_should_create_table_if_not_exists(t *testing.T) {
 	exporter, err := getInmemorySQLExporter("")
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	userFeed := &feed.UserFeed{}
 
 	err = exporter.InitFeed(userFeed, &feed.InitFeedOptions{
 		Truncate: false,
 	})
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	// This query will only work for SQLite
 	result := []struct {
@@ -43,14 +43,14 @@ func TestSQLExporterInitFeed_should_create_table_if_not_exists(t *testing.T) {
 
 func TestSQLExporterInitFeed_should_truncate_table_if_truncate_is_true(t *testing.T) {
 	exporter, err := getInmemorySQLExporter("")
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	userFeed := &feed.UserFeed{}
 
 	err = exporter.InitFeed(userFeed, &feed.InitFeedOptions{
 		Truncate: false,
 	})
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	users := []feed.User{
 		{
@@ -61,12 +61,12 @@ func TestSQLExporterInitFeed_should_truncate_table_if_truncate_is_true(t *testin
 	}
 
 	err = exporter.WriteRows(userFeed, users)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	err = exporter.InitFeed(userFeed, &feed.InitFeedOptions{
 		Truncate: true,
 	})
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	var rowCount int64
 	resp := exporter.DB.Table("users").Count(&rowCount)
@@ -76,14 +76,14 @@ func TestSQLExporterInitFeed_should_truncate_table_if_truncate_is_true(t *testin
 
 func TestSQLExporterInitFeed_should_not_truncate_table_if_truncate_is_false(t *testing.T) {
 	exporter, err := getInmemorySQLExporter("")
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	userFeed := &feed.UserFeed{}
 
 	err = exporter.InitFeed(userFeed, &feed.InitFeedOptions{
 		Truncate: false,
 	})
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	users := []feed.User{
 		{
@@ -94,12 +94,12 @@ func TestSQLExporterInitFeed_should_not_truncate_table_if_truncate_is_false(t *t
 	}
 
 	err = exporter.WriteRows(userFeed, users)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	err = exporter.InitFeed(userFeed, &feed.InitFeedOptions{
 		Truncate: false,
 	})
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	var rowCount int64
 	resp := exporter.DB.Table("users").Count(&rowCount)
@@ -109,14 +109,14 @@ func TestSQLExporterInitFeed_should_not_truncate_table_if_truncate_is_false(t *t
 
 func TestSQLExporterWriteRows_should_write_rows(t *testing.T) {
 	exporter, err := getInmemorySQLExporter("")
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	userFeed := &feed.UserFeed{}
 
 	err = exporter.InitFeed(userFeed, &feed.InitFeedOptions{
 		Truncate: false,
 	})
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	users := []feed.User{
 		{
@@ -132,7 +132,7 @@ func TestSQLExporterWriteRows_should_write_rows(t *testing.T) {
 	}
 
 	err = exporter.WriteRows(userFeed, users)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	rows := []feed.User{}
 	resp := exporter.DB.Table("users").Scan(&rows)
@@ -177,14 +177,14 @@ func TestSQLExporter_WriteRows_should_upsert_when_pk_conflict(t *testing.T) {
 
 func TestSQLExporterWriteRows_should_update_rows(t *testing.T) {
 	exporter, err := getInmemorySQLExporter("")
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	userFeed := &feed.UserFeed{}
 
 	err = exporter.InitFeed(userFeed, &feed.InitFeedOptions{
 		Truncate: true,
 	})
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	users := []feed.User{
 		{
@@ -195,7 +195,7 @@ func TestSQLExporterWriteRows_should_update_rows(t *testing.T) {
 	}
 
 	err = exporter.WriteRows(userFeed, users)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	users = []feed.User{
 		{
@@ -206,7 +206,7 @@ func TestSQLExporterWriteRows_should_update_rows(t *testing.T) {
 	}
 
 	err = exporter.WriteRows(userFeed, users)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	rows := []feed.User{}
 	resp := exporter.DB.Table("users").Scan(&rows)
@@ -220,14 +220,14 @@ func TestSQLExporterWriteRows_should_update_rows(t *testing.T) {
 
 func TestSQLExporterLastModifiedAt_should_return_latest_modified_at(t *testing.T) {
 	exporter, err := getInmemorySQLExporter("")
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	inspectionFeed := &feed.InspectionFeed{}
 
 	err = exporter.InitFeed(inspectionFeed, &feed.InitFeedOptions{
 		Truncate: false,
 	})
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	now := time.Now()
 	inspections := []feed.Inspection{
@@ -250,16 +250,16 @@ func TestSQLExporterLastModifiedAt_should_return_latest_modified_at(t *testing.T
 	}
 
 	err = exporter.WriteRows(inspectionFeed, inspections)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	// Check the timestamp for the audits that doesn't have organisation_id
 	lastModifiedAt, err := exporter.LastModifiedAt(inspectionFeed, time.Now().Add(time.Hour*-30000), "role_123")
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	// Times are slightly lossy, convery to ISO string
 	assert.Equal(t, now.Format(time.RFC3339), lastModifiedAt.Format(time.RFC3339))
 
 	lastModifiedAt, err = exporter.LastModifiedAt(inspectionFeed, time.Now().Add(time.Hour*-30000), "role_1234")
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	// Times are slightly lossy, convery to ISO string
 	assert.Equal(t, now.Format(time.RFC3339), lastModifiedAt.Format(time.RFC3339))
 
@@ -287,30 +287,30 @@ func TestSQLExporterLastModifiedAt_should_return_latest_modified_at(t *testing.T
 	}
 
 	err = exporter.WriteRows(inspectionFeed, inspections)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	// Check the timestamp for the audits that contains organisation_id
 	lastModifiedAt, err = exporter.LastModifiedAt(inspectionFeed, time.Now().Add(time.Hour*-30000), "role_123")
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	// Times are slightly lossy, convery to ISO string
 	assert.Equal(t, now.Format(time.RFC3339), lastModifiedAt.Format(time.RFC3339))
 
 	lastModifiedAt, err = exporter.LastModifiedAt(inspectionFeed, time.Now().Add(time.Hour*-30000), "role_1234")
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	// Times are slightly lossy, convery to ISO string
 	assert.Equal(t, now.Add(time.Hour*-2).Format(time.RFC3339), lastModifiedAt.Format(time.RFC3339))
 }
 
 func TestSQLExporterLastModifiedAt_should_return_modified_after_if_latest(t *testing.T) {
 	exporter, err := getInmemorySQLExporter("")
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	inspectionFeed := &feed.InspectionFeed{}
 
 	err = exporter.InitFeed(inspectionFeed, &feed.InitFeedOptions{
 		Truncate: false,
 	})
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	now := time.Now()
 	inspections := []feed.Inspection{
@@ -333,16 +333,16 @@ func TestSQLExporterLastModifiedAt_should_return_modified_after_if_latest(t *tes
 	}
 
 	err = exporter.WriteRows(inspectionFeed, inspections)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	// Check the timestamp for the audits that doesn't have organisation_id
 	lastModifiedAt, err := exporter.LastModifiedAt(inspectionFeed, now.Add(time.Hour), "role_123")
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	// Times are slightly lossy, converting to ISO string
 	assert.Equal(t, now.Add(time.Hour).Format(time.RFC3339), lastModifiedAt.Format(time.RFC3339))
 
 	lastModifiedAt, err = exporter.LastModifiedAt(inspectionFeed, now.Add(time.Hour), "role_124")
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	// Times are slightly lossy, converting to ISO string
 	assert.Equal(t, now.Add(time.Hour).Format(time.RFC3339), lastModifiedAt.Format(time.RFC3339))
 
@@ -370,23 +370,23 @@ func TestSQLExporterLastModifiedAt_should_return_modified_after_if_latest(t *tes
 	}
 
 	err = exporter.WriteRows(inspectionFeed, inspections)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	// Check the timestamp for the audits that contains organisation_id
 	lastModifiedAt, err = exporter.LastModifiedAt(inspectionFeed, now.Add(time.Hour), "role_123")
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	// Times are slightly lossy, converting to ISO string
 	assert.Equal(t, now.Add(time.Hour).Format(time.RFC3339), lastModifiedAt.Format(time.RFC3339))
 
 	lastModifiedAt, err = exporter.LastModifiedAt(inspectionFeed, now.Add(time.Hour), "role_124")
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	// Times are slightly lossy, converting to ISO string
 	assert.Equal(t, now.Add(time.Hour).Format(time.RFC3339), lastModifiedAt.Format(time.RFC3339))
 }
 
 func TestNewSQLExporter_should_create_exporter_for_sqlite(t *testing.T) {
 	sqlExporter, err := feed.NewSQLExporter("sqlite", "file::memory:", true, "")
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	assert.NotNil(t, sqlExporter)
 }
@@ -410,7 +410,7 @@ func TestSQLExporterWriteMedia(t *testing.T) {
 	}
 
 	sqlExporter, err := feed.NewSQLExporter("sqlite", "file::memory:", true, dir)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	sqlExporter.WriteMedia("1234", "12345", "image/jpeg", []byte("sample-string"))
 }
