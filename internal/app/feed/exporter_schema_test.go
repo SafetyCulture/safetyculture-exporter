@@ -15,7 +15,7 @@ import (
 func TestSchemaWriter_should_write_schema(t *testing.T) {
 	var buf bytes.Buffer
 	exporter, err := feed.NewSchemaExporter(&buf)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	viperConfig := viper.New()
 
@@ -42,12 +42,12 @@ func TestSchemaWriter_should_write_schema(t *testing.T) {
 func TestSchemaWriter_should_write_all_schemas(t *testing.T) {
 	var buf bytes.Buffer
 	exporter, err := feed.NewSchemaExporter(&buf)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	viperConfig := viper.New()
 
 	err = feed.WriteSchemas(viperConfig, exporter)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	assert.NotNil(t, buf.String())
 }

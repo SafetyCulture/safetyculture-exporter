@@ -12,7 +12,7 @@ import (
 
 func TestActionFeedExport_should_export_rows_to_sql_db(t *testing.T) {
 	exporter, err := getInmemorySQLExporter("")
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	apiClient := api.GetTestClient()
 	initMockFeedsSet1(apiClient.HTTPClient())
@@ -22,7 +22,7 @@ func TestActionFeedExport_should_export_rows_to_sql_db(t *testing.T) {
 	}
 
 	err = actionsFeed.Export(context.Background(), apiClient, exporter, "")
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	rows := []feed.Action{}
 	resp := exporter.DB.Table("actions").Scan(&rows)
@@ -34,7 +34,7 @@ func TestActionFeedExport_should_export_rows_to_sql_db(t *testing.T) {
 
 func TestActionFeed_Export_ShouldNotFailWhen403(t *testing.T) {
 	exporter, err := getInmemorySQLExporter("")
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	apiClient := api.GetTestClient()
 	gock.InterceptClient(apiClient.HTTPClient())
@@ -46,5 +46,5 @@ func TestActionFeed_Export_ShouldNotFailWhen403(t *testing.T) {
 		Limit: 100,
 	}
 	err = actionsFeed.Export(context.Background(), apiClient, exporter, "")
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 }

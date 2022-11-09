@@ -17,7 +17,7 @@ import (
 
 func TestIntegrationDbSoakExportFeeds_should_successfully_export_with_significant_data(t *testing.T) {
 	exporter, err := getTestingSQLExporter()
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	exporter.AutoMigrate = true
 
 	fmt.Println(err, exporter)
@@ -27,5 +27,5 @@ func TestIntegrationDbSoakExportFeeds_should_successfully_export_with_significan
 	apiClient := api.NewClient(os.Getenv("TEST_API_HOST"), os.Getenv("TEST_ACCESS_TOKEN"))
 
 	err = feed.ExportFeeds(viperConfig, apiClient, exporter)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 }

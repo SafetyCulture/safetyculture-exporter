@@ -1,3 +1,4 @@
+//go:build sql
 // +build sql
 
 package feed_test
@@ -12,14 +13,14 @@ import (
 
 func TestIntegrationDbSQLExporterLastModifiedAt_should_return_latest_modified_at(t *testing.T) {
 	exporter, err := getTestingSQLExporter()
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	inspectionFeed := &feed.InspectionFeed{}
 
 	err = exporter.InitFeed(inspectionFeed, &feed.InitFeedOptions{
 		Truncate: false,
 	})
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	now := time.Now()
 	inspections := []feed.Inspection{
@@ -58,10 +59,10 @@ func TestIntegrationDbSQLExporterLastModifiedAt_should_return_latest_modified_at
 	}
 
 	err = exporter.WriteRows(inspectionFeed, inspections)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	lastModifiedAt, err := exporter.LastModifiedAt(inspectionFeed, time.Now().Add(time.Hour*-30000), "role_123")
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	// Times are slightly lossy, convery to ISO string
 	assert.Equal(t, now.Format(time.RFC3339), lastModifiedAt.Format(time.RFC3339))
 
@@ -105,17 +106,17 @@ func TestIntegrationDbSQLExporterLastModifiedAt_should_return_latest_modified_at
 	}
 
 	err = exporter.WriteRows(inspectionFeed, inspections)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	lastModifiedAt, err = exporter.LastModifiedAt(inspectionFeed, time.Now().Add(time.Hour*-30000), "role_1234")
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	// Times are slightly lossy, convery to ISO string
 	assert.Equal(t, now.Add(time.Hour*-2).Format(time.RFC3339), lastModifiedAt.Format(time.RFC3339))
 }
 
 func TestIntegrationDbSQLExporterInitFeed_integration_should_not_initialise_schemas_with_auto_migrate_disabled(t *testing.T) {
 	exporter, err := getTestingSQLExporter()
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	exporter.AutoMigrate = false
 
 	userFeed := &feed.UserFeed{}
@@ -123,7 +124,7 @@ func TestIntegrationDbSQLExporterInitFeed_integration_should_not_initialise_sche
 	err = exporter.InitFeed(userFeed, &feed.InitFeedOptions{
 		Truncate: false,
 	})
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	users := []feed.User{
 		{
@@ -139,14 +140,14 @@ func TestIntegrationDbSQLExporterInitFeed_integration_should_not_initialise_sche
 
 func TestIntegrationDbSQLExporterInitFeed_integration_should_initialise_schemas(t *testing.T) {
 	exporter, err := getTestingSQLExporter()
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	userFeed := &feed.UserFeed{}
 
 	err = exporter.InitFeed(userFeed, &feed.InitFeedOptions{
 		Truncate: false,
 	})
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	users := []feed.User{
 		{
@@ -157,5 +158,5 @@ func TestIntegrationDbSQLExporterInitFeed_integration_should_initialise_schemas(
 	}
 
 	err = exporter.WriteRows(userFeed, users)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 }

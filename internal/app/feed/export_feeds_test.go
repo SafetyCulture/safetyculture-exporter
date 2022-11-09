@@ -16,13 +16,13 @@ import (
 
 func TestCreateSchemas_should_create_all_schemas_to_file(t *testing.T) {
 	exporter, err := getTemporaryCSVExporter()
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	viperConfig := viper.New()
 	viperConfig.Set("export.site.include_deleted", true)
 
 	err = feed.CreateSchemas(viperConfig, exporter)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	filesEqualish(t, "mocks/set_1/schemas/inspections.csv", filepath.Join(exporter.ExportPath, "inspections.csv"))
 	filesEqualish(t, "mocks/set_1/schemas/inspection_items.csv", filepath.Join(exporter.ExportPath, "inspection_items.csv"))
@@ -45,7 +45,7 @@ func TestExportFeeds_should_export_all_feeds_to_file(t *testing.T) {
 	defer gock.Off()
 
 	exporter, err := getTemporaryCSVExporter()
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	viperConfig := viper.New()
 	viperConfig.Set("export.site.include_deleted", true)
@@ -66,7 +66,7 @@ func TestExportFeeds_should_export_all_feeds_to_file(t *testing.T) {
 		`)
 
 	err = feed.ExportFeeds(viperConfig, apiClient, exporter)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	filesEqualish(t, "mocks/set_1/outputs/inspections.csv", filepath.Join(exporter.ExportPath, "inspections.csv"))
 	filesEqualish(t, "mocks/set_1/outputs/inspection_items.csv", filepath.Join(exporter.ExportPath, "inspection_items.csv"))
@@ -119,7 +119,7 @@ func TestExportFeeds_should_perform_incremental_update_on_second_run(t *testing.
 		File(path.Join("mocks", "set_2", "inspections_deleted_single_page.json"))
 
 	exporter, err := getTemporaryCSVExporter()
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	viperConfig := viper.New()
 	viperConfig.Set("export.incremental", true)
@@ -129,12 +129,12 @@ func TestExportFeeds_should_perform_incremental_update_on_second_run(t *testing.
 	initMockFeedsSet1(apiClient.HTTPClient())
 
 	err = feed.ExportFeeds(viperConfig, apiClient, exporter)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	initMockFeedsSet2(apiClient.HTTPClient())
 
 	err = feed.ExportFeeds(viperConfig, apiClient, exporter)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	filesEqualish(t, "mocks/set_2/outputs/inspections.csv", filepath.Join(exporter.ExportPath, "inspections.csv"))
 	filesEqualish(t, "mocks/set_2/outputs/inspection_items.csv", filepath.Join(exporter.ExportPath, "inspection_items.csv"))
@@ -186,7 +186,7 @@ func TestExportFeeds_should_handle_lots_of_rows_ok(t *testing.T) {
 	defer gock.Off()
 
 	exporter, err := getTemporaryCSVExporter()
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	viperConfig := viper.New()
 	viperConfig.Set("export.incremental", true)
@@ -213,13 +213,13 @@ func TestExportFeeds_should_handle_lots_of_rows_ok(t *testing.T) {
 		`)
 
 	err = feed.ExportFeeds(viperConfig, apiClient, exporter)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	inspectionsLines, err := countFileLines(filepath.Join(exporter.ExportPath, "inspections.csv"))
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assert.Equal(t, 97, inspectionsLines)
 
 	inspectionItemsLines, err := countFileLines(filepath.Join(exporter.ExportPath, "inspection_items.csv"))
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assert.Equal(t, 230, inspectionItemsLines)
 }

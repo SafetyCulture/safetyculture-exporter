@@ -25,9 +25,9 @@ import (
 
 func TestIntegrationDbCreateSchema_should_create_all_schemas(t *testing.T) {
 	sqlExporter, err := getTestingSQLExporter()
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	exporter, err := getTemporaryCSVExporterWithRealSQLExporter(sqlExporter)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	viperConfig := viper.New()
 
@@ -45,7 +45,7 @@ func TestIntegrationDbCreateSchema_should_create_all_schemas(t *testing.T) {
 		`)
 
 	err = feed.CreateSchemas(viperConfig, exporter)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	filesEqualish(t, "mocks/set_1/schemas/inspections.csv", filepath.Join(exporter.ExportPath, "inspections.csv"))
 	filesEqualish(t, "mocks/set_1/schemas/inspection_items.csv", filepath.Join(exporter.ExportPath, "inspection_items.csv"))
@@ -68,9 +68,9 @@ func TestIntegrationDbCreateSchema_should_create_all_schemas(t *testing.T) {
 
 func TestIntegrationDbExportFeeds_should_export_all_feeds_to_file(t *testing.T) {
 	sqlExporter, err := getTestingSQLExporter()
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	exporter, err := getTemporaryCSVExporterWithRealSQLExporter(sqlExporter)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	viperConfig := viper.New()
 
@@ -91,7 +91,7 @@ func TestIntegrationDbExportFeeds_should_export_all_feeds_to_file(t *testing.T) 
 		`)
 
 	err = feed.ExportFeeds(viperConfig, apiClient, exporter)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	filesEqualish(t, "mocks/set_1/outputs/inspections.csv", filepath.Join(exporter.ExportPath, "inspections.csv"))
 	filesEqualish(t, "mocks/set_1/outputs/inspection_items.csv", filepath.Join(exporter.ExportPath, "inspection_items.csv"))
@@ -116,9 +116,9 @@ func TestIntegrationDbExportFeeds_should_export_all_feeds_to_file(t *testing.T) 
 // and that other tables are incrementally updated
 func TestIntegrationDbExportFeeds_should_perform_incremental_update_on_second_run(t *testing.T) {
 	sqlExporter, err := getTestingSQLExporter()
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	exporter, err := getTemporaryCSVExporterWithRealSQLExporter(sqlExporter)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	viperConfig := viper.New()
 	viperConfig.Set("export.incremental", true)
@@ -145,12 +145,12 @@ func TestIntegrationDbExportFeeds_should_perform_incremental_update_on_second_ru
 		File(path.Join("mocks", "set_2", "inspections_deleted_single_page.json"))
 
 	err = feed.ExportFeeds(viperConfig, apiClient, exporter)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	initMockFeedsSet2(apiClient.HTTPClient())
 
 	err = feed.ExportFeeds(viperConfig, apiClient, exporter)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	filesEqualish(t, "mocks/set_2/outputs/inspections.csv", filepath.Join(exporter.ExportPath, "inspections.csv"))
 	filesEqualish(t, "mocks/set_2/outputs/inspection_items.csv", filepath.Join(exporter.ExportPath, "inspection_items.csv"))
@@ -173,9 +173,9 @@ func TestIntegrationDbExportFeeds_should_perform_incremental_update_on_second_ru
 
 func TestIntegrationDbExportFeeds_should_handle_lots_of_rows_ok(t *testing.T) {
 	sqlExporter, err := getTestingSQLExporter()
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	exporter, err := getTemporaryCSVExporterWithRealSQLExporter(sqlExporter)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	viperConfig := viper.New()
 	viperConfig.Set("export.incremental", true)
@@ -203,22 +203,22 @@ func TestIntegrationDbExportFeeds_should_handle_lots_of_rows_ok(t *testing.T) {
 		`)
 
 	err = feed.ExportFeeds(viperConfig, apiClient, exporter)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	inspectionsLines, err := countFileLines(filepath.Join(exporter.ExportPath, "inspections.csv"))
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assert.Equal(t, 97, inspectionsLines)
 
 	inspectionItemsLines, err := countFileLines(filepath.Join(exporter.ExportPath, "inspection_items.csv"))
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assert.Equal(t, 230, inspectionItemsLines)
 }
 
 func TestIntegrationDbExportFeeds_should_update_action_assignees_on_second_run(t *testing.T) {
 	sqlExporter, err := getTestingSQLExporter()
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	exporter, err := getTemporaryCSVExporterWithRealSQLExporter(sqlExporter)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	viperConfig := viper.New()
 	viperConfig.Set("export.incremental", true)
@@ -251,14 +251,14 @@ func TestIntegrationDbExportFeeds_should_update_action_assignees_on_second_run(t
 		File(path.Join("mocks", "set_1", "inspections_deleted_single_page.json"))
 
 	err = feed.ExportFeeds(viperConfig, apiClient, exporter)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	filesEqualish(t, "mocks/set_1/outputs/action_assignees.csv", filepath.Join(exporter.ExportPath, "action_assignees.csv"))
 
 	initMockFeedsSet2(apiClient.HTTPClient())
 
 	err = feed.ExportFeeds(viperConfig, apiClient, exporter)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	filesEqualish(t, "mocks/set_2/outputs/action_assignees.csv", filepath.Join(exporter.ExportPath, "action_assignees.csv"))
 }
 
@@ -268,7 +268,7 @@ func TestGroupUserFeed_Export_should_filter_duplicates(t *testing.T) {
 	require.NotNil(t, sqlExporter)
 
 	exporter, err := getTemporaryCSVExporterWithRealSQLExporter(sqlExporter)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	viperConfig := viper.New()
 	viperConfig.Set("export.incremental", true)
@@ -295,9 +295,9 @@ func TestGroupUserFeed_Export_should_filter_duplicates(t *testing.T) {
 		File("mocks/set_5/feed_group_users_1.json")
 
 	err = feed.ExportFeeds(viperConfig, apiClient, exporter)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	lines, err := countFileLines(filepath.Join(exporter.ExportPath, "group_users.csv"))
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assert.Equal(t, 5, lines)
 }
