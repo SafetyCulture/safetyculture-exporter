@@ -2,6 +2,7 @@ package feed
 
 import (
 	"context"
+	"errors"
 	"sync"
 
 	"github.com/SafetyCulture/safetyculture-exporter/internal/app/api"
@@ -19,9 +20,9 @@ func GetFeeds(v *viper.Viper) []Feed {
 	actionLimit := GetActionLimit(v)
 	issueLimit := GetIssueLimit(v)
 	inspectionConfig := config.GetInspectionConfig(v)
-	exportMedia := viper.GetBool("export.media")
-	sitesIncludeDeleted := viper.GetBool("export.site.include_deleted")
-	sitesIncludeFullHierarchy := viper.GetBool("export.site.include_full_hierarchy")
+	exportMedia := v.GetBool("export.media")
+	sitesIncludeDeleted := v.GetBool("export.site.include_deleted")
+	sitesIncludeFullHierarchy := v.GetBool("export.site.include_full_hierarchy")
 
 	return []Feed{
 		getInspectionFeed(inspectionConfig, templateIDs),
@@ -110,6 +111,11 @@ func getTemplateIDs(v *viper.Viper) []string {
 	return v.GetStringSlice("export.template_ids")
 }
 
+// GetSheqsyFeeds returns list of all available data feeds for sheqsy
+func GetSheqsyFeeds(v *viper.Viper) []Feed {
+	return []Feed{}
+}
+
 // CreateSchemas generates schemas for the data feeds without fetching any data
 func CreateSchemas(v *viper.Viper, exporter Exporter) error {
 	logger := util.GetLogger()
@@ -146,23 +152,39 @@ func ExportFeeds(v *viper.Viper, apiClient *api.Client, exporter Exporter) error
 	logger := util.GetLogger()
 	ctx := context.Background()
 
-	var wg sync.WaitGroup
 	tables := v.GetStringSlice("export.tables")
 	tablesMap := map[string]bool{}
 	for _, table := range tables {
 		tablesMap[table] = true
 	}
 
-	// TODO. Should validate auth before doing anything
-
-	resp, err := apiClient.WhoAmI(ctx)
-	util.Check(err, "failed to get details of the current user")
-
-	logger.Infof("Exporting data by user: %s %s", resp.Firstname, resp.Lastname)
-
+	var wg sync.WaitGroup
 	semaphore := make(chan int, maxConcurrentGoRoutines)
-	for _, feed := range GetFeeds(v) {
-		if tablesMap[feed.Name()] || len(tables) == 0 {
+
+	atLeastOneRun := false
+
+	// Run export for SafetyCulture data
+	if len(v.GetString("access_token")) != 0 {
+		atLeastOneRun = true
+		logger.Info("exporting SafetyCulture data")
+
+		feeds := []Feed{}
+		for _, feed := range GetFeeds(v) {
+			if tablesMap[feed.Name()] || len(tables) == 0 {
+				feeds = append(feeds, feed)
+			}
+		}
+
+		resp, err := apiClient.WhoAmI(ctx)
+		util.Check(err, "failed to get details of the current user")
+
+		logger.Infof("Exporting data by user: %s %s", resp.Firstname, resp.Lastname)
+
+		if len(feeds) == 0 {
+			return errors.New("no tables selected")
+		}
+
+		for _, feed := range feeds {
 			semaphore <- 1
 			wg.Add(1)
 
@@ -176,7 +198,49 @@ func ExportFeeds(v *viper.Viper, apiClient *api.Client, exporter Exporter) error
 		}
 	}
 
+	// if len(viper.GetString("sheqsy_username")) != 0 {
+	// 	atLeastOneRun = true
+	// 	logger.Info("exporting SHEQSY data")
+
+	// 	feeds := []Feed{}
+
+	// 	tables := v.GetStringSlice("export.tables")
+	// 	for _, table := range tables {
+	// 		for _, feed := range GetFeeds(v) {
+	// 			if feed.Name() == table || len(tables) == 0 {
+	// 				feeds = append(feeds, feed)
+	// 			}
+	// 		}
+	// 	}
+
+	// 	resp, err := apiClient.WhoAmI(ctx)
+	// 	util.Check(err, "failed to get details of the current user")
+
+	// 	logger.Infof("Exporting data by user: %s %s", resp.Firstname, resp.Lastname)
+
+	// 	if len(feeds) == 0 {
+	// 		logger.Fatal("no tables or API tokens provided")
+	// 	}
+
+	// 	for _, feed := range feeds {
+	// 		semaphore <- 1
+	// 		wg.Add(1)
+
+	// 		go func(f Feed) {
+	// 			logger.Infof(" ... queueing %s\n", f.Name())
+	// 			defer wg.Done()
+	// 			err := f.Export(ctx, apiClient, exporter, resp.OrganisationID)
+	// 			util.Check(err, "failed to export")
+	// 			<-semaphore
+	// 		}(feed)
+	// 	}
+	// }
+
 	wg.Wait()
+
+	if !atLeastOneRun {
+		return errors.New("no API tokens provided")
+	}
 
 	logger.Info("Export finished")
 

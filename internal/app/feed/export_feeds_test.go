@@ -20,6 +20,7 @@ func TestCreateSchemas_should_create_all_schemas_to_file(t *testing.T) {
 
 	viperConfig := viper.New()
 	viperConfig.Set("export.site.include_deleted", true)
+	viperConfig.Set("access_token", "token-123")
 
 	err = feed.CreateSchemas(viperConfig, exporter)
 	assert.NoError(t, err)
@@ -49,6 +50,7 @@ func TestExportFeeds_should_export_all_feeds_to_file(t *testing.T) {
 
 	viperConfig := viper.New()
 	viperConfig.Set("export.site.include_deleted", true)
+	viperConfig.Set("access_token", "token-123")
 
 	apiClient := api.GetTestClient()
 	initMockFeedsSet1(apiClient.HTTPClient())
@@ -124,6 +126,7 @@ func TestExportFeeds_should_perform_incremental_update_on_second_run(t *testing.
 	viperConfig := viper.New()
 	viperConfig.Set("export.incremental", true)
 	viperConfig.Set("export.site.include_deleted", true)
+	viperConfig.Set("access_token", "token-123")
 
 	apiClient := api.GetTestClient()
 	initMockFeedsSet1(apiClient.HTTPClient())
@@ -190,6 +193,7 @@ func TestExportFeeds_should_handle_lots_of_rows_ok(t *testing.T) {
 
 	viperConfig := viper.New()
 	viperConfig.Set("export.incremental", true)
+	viperConfig.Set("access_token", "token-123")
 
 	apiClient := api.GetTestClient()
 	initMockFeedsSet3(apiClient.HTTPClient())

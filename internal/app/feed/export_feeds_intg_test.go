@@ -30,6 +30,7 @@ func TestIntegrationDbCreateSchema_should_create_all_schemas(t *testing.T) {
 	assert.NoError(t, err)
 
 	viperConfig := viper.New()
+	viperConfig.Set("access_token", "token-123")
 
 	gock.New("http://localhost:9999").
 		Get("/accounts/user/v1/user:WhoAmI").
@@ -73,6 +74,7 @@ func TestIntegrationDbExportFeeds_should_export_all_feeds_to_file(t *testing.T) 
 	assert.NoError(t, err)
 
 	viperConfig := viper.New()
+	viperConfig.Set("access_token", "token-123")
 
 	apiClient := api.GetTestClient()
 	initMockFeedsSet1(apiClient.HTTPClient())
@@ -122,6 +124,7 @@ func TestIntegrationDbExportFeeds_should_perform_incremental_update_on_second_ru
 
 	viperConfig := viper.New()
 	viperConfig.Set("export.incremental", true)
+	viperConfig.Set("access_token", "token-123")
 
 	apiClient := api.GetTestClient()
 	initMockFeedsSet1(apiClient.HTTPClient())
@@ -179,6 +182,7 @@ func TestIntegrationDbExportFeeds_should_handle_lots_of_rows_ok(t *testing.T) {
 
 	viperConfig := viper.New()
 	viperConfig.Set("export.incremental", true)
+	viperConfig.Set("access_token", "token-123")
 
 	apiClient := api.GetTestClient()
 	initMockFeedsSet3(apiClient.HTTPClient())
@@ -222,6 +226,7 @@ func TestIntegrationDbExportFeeds_should_update_action_assignees_on_second_run(t
 
 	viperConfig := viper.New()
 	viperConfig.Set("export.incremental", true)
+	viperConfig.Set("access_token", "token-123")
 
 	gock.New("http://localhost:9999").
 		Get("/accounts/user/v1/user:WhoAmI").
@@ -273,6 +278,7 @@ func TestGroupUserFeed_Export_should_filter_duplicates(t *testing.T) {
 	viperConfig := viper.New()
 	viperConfig.Set("export.incremental", true)
 	viperConfig.Set("export.tables", []string{"group_users"})
+	viperConfig.Set("access_token", "token-123")
 
 	apiClient := api.GetTestClient()
 	gock.InterceptClient(apiClient.HTTPClient())
