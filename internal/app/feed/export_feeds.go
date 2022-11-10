@@ -113,7 +113,10 @@ func getTemplateIDs(v *viper.Viper) []string {
 
 // GetSheqsyFeeds returns list of all available data feeds for sheqsy
 func GetSheqsyFeeds(v *viper.Viper) []Feed {
-	return []Feed{}
+	return []Feed{
+		&SheqsyEmployeeFeed{},
+		&SheqsyActivityFeed{},
+	}
 }
 
 // CreateSchemas generates schemas for the data feeds without fetching any data
@@ -148,7 +151,7 @@ func WriteSchemas(v *viper.Viper, exporter *SchemaExporter) error {
 }
 
 // ExportFeeds fetches all the feeds data from server and stores them in the format provided
-func ExportFeeds(v *viper.Viper, apiClient *api.Client, exporter Exporter) error {
+func ExportFeeds(v *viper.Viper, apiClient *api.Client, sheqsyApiClient *api.Client, exporter Exporter) error {
 	logger := util.GetLogger()
 	ctx := context.Background()
 
@@ -198,43 +201,40 @@ func ExportFeeds(v *viper.Viper, apiClient *api.Client, exporter Exporter) error
 		}
 	}
 
-	// if len(viper.GetString("sheqsy_username")) != 0 {
-	// 	atLeastOneRun = true
-	// 	logger.Info("exporting SHEQSY data")
+	// Run export for SHEQSY data
+	if len(v.GetString("sheqsy_username")) != 0 {
+		atLeastOneRun = true
+		logger.Info("exporting SHEQSY data")
 
-	// 	feeds := []Feed{}
+		feeds := []Feed{}
+		for _, feed := range GetSheqsyFeeds(v) {
+			if tablesMap[feed.Name()] || len(tables) == 0 {
+				feeds = append(feeds, feed)
+			}
+		}
 
-	// 	tables := v.GetStringSlice("export.tables")
-	// 	for _, table := range tables {
-	// 		for _, feed := range GetFeeds(v) {
-	// 			if feed.Name() == table || len(tables) == 0 {
-	// 				feeds = append(feeds, feed)
-	// 			}
-	// 		}
-	// 	}
+		resp, err := sheqsyApiClient.GetSheqsyCompany(ctx, v.GetString("sheqsy_company_id"))
+		util.Check(err, "failed to get details of the current user")
 
-	// 	resp, err := apiClient.WhoAmI(ctx)
-	// 	util.Check(err, "failed to get details of the current user")
+		logger.Infof("Exporting data for SHEQSY company: %s %s", resp.Name, resp.CompanyUID)
 
-	// 	logger.Infof("Exporting data by user: %s %s", resp.Firstname, resp.Lastname)
+		if len(feeds) == 0 {
+			return errors.New("no tables selected")
+		}
 
-	// 	if len(feeds) == 0 {
-	// 		logger.Fatal("no tables or API tokens provided")
-	// 	}
+		for _, feed := range feeds {
+			semaphore <- 1
+			wg.Add(1)
 
-	// 	for _, feed := range feeds {
-	// 		semaphore <- 1
-	// 		wg.Add(1)
-
-	// 		go func(f Feed) {
-	// 			logger.Infof(" ... queueing %s\n", f.Name())
-	// 			defer wg.Done()
-	// 			err := f.Export(ctx, apiClient, exporter, resp.OrganisationID)
-	// 			util.Check(err, "failed to export")
-	// 			<-semaphore
-	// 		}(feed)
-	// 	}
-	// }
+			go func(f Feed) {
+				logger.Infof(" ... queueing %s\n", f.Name())
+				defer wg.Done()
+				err := f.Export(ctx, sheqsyApiClient, exporter, resp.CompanyUID)
+				util.Check(err, "failed to export")
+				<-semaphore
+			}(feed)
+		}
+	}
 
 	wg.Wait()
 

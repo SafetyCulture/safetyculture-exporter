@@ -459,6 +459,35 @@ func (a *Client) GetInspection(ctx context.Context, id string) (*json.RawMessage
 	return result, nil
 }
 
+// Get makes a get request
+func (a *Client) Get(ctx context.Context, url string) (*json.RawMessage, error) {
+	var (
+		result *json.RawMessage
+		errMsg json.RawMessage
+	)
+
+	sl := a.sling.New().Get(url).
+		Set(string(Authorization), a.authorizationHeader).
+		Set(string(IntegrationID), "safetyculture-exporter").
+		Set(string(IntegrationVersion), version.GetVersion()).
+		Set(string(XRequestID), util.RequestIDFromContext(ctx))
+
+	req, _ := sl.Request()
+	req = req.WithContext(ctx)
+
+	_, err := a.do(&slingHTTPDoer{
+		sl:       sl,
+		req:      req,
+		successV: &result,
+		failureV: &errMsg,
+	})
+	if err != nil {
+		return nil, errors.Wrap(err, "Failed request to API")
+	}
+
+	return result, nil
+}
+
 // DrainInspections fetches the inspections in batches and triggers the callback
 // for each batch.
 func (a *Client) DrainInspections(

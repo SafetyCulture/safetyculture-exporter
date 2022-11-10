@@ -67,7 +67,7 @@ func TestExportFeeds_should_export_all_feeds_to_file(t *testing.T) {
 		  }
 		`)
 
-	err = feed.ExportFeeds(viperConfig, apiClient, exporter)
+	err = feed.ExportFeeds(viperConfig, apiClient, apiClient, exporter)
 	assert.NoError(t, err)
 
 	filesEqualish(t, "mocks/set_1/outputs/inspections.csv", filepath.Join(exporter.ExportPath, "inspections.csv"))
@@ -131,12 +131,12 @@ func TestExportFeeds_should_perform_incremental_update_on_second_run(t *testing.
 	apiClient := api.GetTestClient()
 	initMockFeedsSet1(apiClient.HTTPClient())
 
-	err = feed.ExportFeeds(viperConfig, apiClient, exporter)
+	err = feed.ExportFeeds(viperConfig, apiClient, apiClient, exporter)
 	assert.NoError(t, err)
 
 	initMockFeedsSet2(apiClient.HTTPClient())
 
-	err = feed.ExportFeeds(viperConfig, apiClient, exporter)
+	err = feed.ExportFeeds(viperConfig, apiClient, apiClient, exporter)
 	assert.NoError(t, err)
 
 	filesEqualish(t, "mocks/set_2/outputs/inspections.csv", filepath.Join(exporter.ExportPath, "inspections.csv"))
@@ -216,7 +216,7 @@ func TestExportFeeds_should_handle_lots_of_rows_ok(t *testing.T) {
 		  }
 		`)
 
-	err = feed.ExportFeeds(viperConfig, apiClient, exporter)
+	err = feed.ExportFeeds(viperConfig, apiClient, apiClient, exporter)
 	assert.NoError(t, err)
 
 	inspectionsLines, err := countFileLines(filepath.Join(exporter.ExportPath, "inspections.csv"))
