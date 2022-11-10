@@ -36,7 +36,7 @@ type SheqsyActivity struct {
 	Version                 int       `json:"version" csv:"version" gorm:"column:version"`
 	TimeEnrouteSec          int       `json:"timeEnrouteSec" csv:"time_enroute_sec" gorm:"column:time_enroute_sec"`
 	DistanceTravelledMeters int       `json:"distanceTravelledMeters" csv:"distance_travelled_meters" gorm:"column:distance_travelled_meters"`
-	ShiftID                 *string   `json:"shiftId" csv:"shift_id" gorm:"column:shift_id"`
+	ShiftID                 *int      `json:"shiftId" csv:"shift_id" gorm:"column:shift_id"`
 	Departments             string    `json:"departments" csv:"departments" gorm:"type:string;column:departments"`
 	ExportedAt              time.Time `json:"exported_at" csv:"exported_at" gorm:"autoUpdateTime"`
 }

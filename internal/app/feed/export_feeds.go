@@ -116,6 +116,7 @@ func GetSheqsyFeeds(v *viper.Viper) []Feed {
 	return []Feed{
 		&SheqsyEmployeeFeed{},
 		&SheqsyActivityFeed{},
+		&SheqsyShiftFeed{},
 	}
 }
 
