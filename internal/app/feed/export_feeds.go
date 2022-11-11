@@ -125,7 +125,7 @@ func CreateSchemas(v *viper.Viper, exporter Exporter) error {
 	logger := util.GetLogger()
 	logger.Info("Creating schemas started")
 
-	for _, feed := range GetFeeds(v) {
+	for _, feed := range append(GetFeeds(v), GetSheqsyFeeds(v)...) {
 		err := feed.CreateSchema(exporter)
 		util.Check(err, "failed to create schema")
 	}
@@ -139,7 +139,7 @@ func WriteSchemas(v *viper.Viper, exporter *SchemaExporter) error {
 	logger := util.GetLogger()
 	logger.Info("Writing schemas started")
 
-	for _, feed := range GetFeeds(v) {
+	for _, feed := range append(GetFeeds(v), GetSheqsyFeeds(v)...) {
 		err := exporter.CreateSchema(feed, feed.RowsModel())
 		util.Check(err, "failed to create schema")
 
