@@ -1,0 +1,2 @@
+employee_uid,employee_id,external_id,first_name,last_name,email,accepted_activities_count,pending_activities_count,is_in_panic,exported_at
+93a1184a-2299-46cc-a192-f7920acd5adf,14590,,tests+dwight.schrute@safetyculture.io,Dwight,Schrute,0,0,false,--date--

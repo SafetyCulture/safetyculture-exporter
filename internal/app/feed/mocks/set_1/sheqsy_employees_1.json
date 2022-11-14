@@ -1,0 +1,15 @@
+[
+	{
+		"employeeId": 14590,
+		"employeeUId": "93a1184a-2299-46cc-a192-f7920acd5adf",
+		"externalId": null,
+		"firstName": "tests+dwight.schrute@safetyculture.io",
+		"lastName": "Dwight",
+		"email": "Schrute",
+		"acceptedActivitiesCount": 0,
+		"pendingActivitiesCount": 0,
+		"currentActivity": null,
+		"lastKnownLocation": null,
+		"isInPanic": false
+	}
+]

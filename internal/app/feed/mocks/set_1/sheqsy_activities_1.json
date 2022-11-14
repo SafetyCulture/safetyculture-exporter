@@ -1,0 +1,36 @@
+{
+	"data": [
+		{
+			"activityId": 301270,
+			"activityUId": "f70c916c-397b-45f8-aad1-01fdd81573df",
+			"externalId": null,
+			"email": "tests+dwight.schrute@safetyculture.io",
+			"phoneNumber": "+61",
+			"activityName": "Quick Panic",
+			"startDateTimeUTC": "2022-07-29T04:02:59.96",
+			"startDateTimeLocal": "2022-07-29T14:02:59.96",
+			"finishDateTimeUTC": "2022-07-29T04:03:13.613",
+			"finishDateTimeLocal": "2022-07-29T14:03:13.613",
+			"activityType": "Quick Panic",
+			"employeeName": "Dwight",
+			"employeeSurname": "Schrute",
+			"startLatitude": -33.884679,
+			"startLongitude": 151.211731,
+			"startAddress": "74-84 Foveaux St, Surry Hills NSW 2010, Australia",
+			"finishLatitude": -33.884672,
+			"finishLongitude": 151.211734,
+			"finishAddress": "74-84 Foveaux St, Surry Hills NSW 2010, Australia",
+			"timeSpentSec": 14,
+			"version": 29848207,
+			"timeEnrouteSec": 0,
+			"distanceTravelledMeters": 0,
+			"shiftId": null,
+			"departments": [
+				"New Business"
+			]
+		}
+	],
+	"lastVersion": 36384957,
+	"hasMoreItems": true,
+	"itemsLeft": 1
+}
