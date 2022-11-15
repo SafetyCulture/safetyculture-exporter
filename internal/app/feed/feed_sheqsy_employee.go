@@ -4,10 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/SafetyCulture/safetyculture-exporter/internal/app/api"
 	"github.com/SafetyCulture/safetyculture-exporter/internal/app/util"
+	"github.com/tidwall/gjson"
+	"github.com/tidwall/sjson"
 )
 
 // SheqsyEmployee represents a user in sheqsy
@@ -21,6 +24,9 @@ type SheqsyEmployee struct {
 	AcceptedActivitiesCount int       `json:"acceptedActivitiesCount" csv:"accepted_activities_count" gorm:"column:accepted_activities_count"`
 	PendingActivitiesCount  int       `json:"pendingActivitiesCount" csv:"pending_activities_count" gorm:"column:pending_activities_count"`
 	IsInPanic               bool      `json:"isInPanic" csv:"is_in_panic" gorm:"column:is_in_panic"`
+	Status                  string    `json:"status" csv:"status" gorm:"column:status"`
+	LastActivityDateTimeUTC string    `json:"lastActivityDateTimeUTC" csv:"last_activity_date_time_utc" gorm:"column:last_activity_date_time_utc"`
+	Departments             string    `json:"departments" csv:"departments" gorm:"column:departments"`
 	ExportedAt              time.Time `json:"exported_at" csv:"exported_at" gorm:"autoUpdateTime"`
 }
 
@@ -58,6 +64,8 @@ func (f *SheqsyEmployeeFeed) Columns() []string {
 		"accepted_activities_count",
 		"pending_activities_count",
 		"is_in_panic",
+		"status",
+		"last_activity_date_time_utc",
 		"exported_at",
 	}
 }
@@ -90,7 +98,37 @@ func (f *SheqsyEmployeeFeed) Export(ctx context.Context, apiClient *api.Client, 
 	resp, err := apiClient.Get(ctx, fmt.Sprintf("/SheqsyIntegrationApi/api/v3/companies/%s/employees", companyID))
 	util.Check(err, "failed fetch data")
 
-	err = json.Unmarshal(*resp, &rows)
+	var respBytes []byte
+	respBytes = *resp
+
+	gjson.ParseBytes(respBytes).ForEach(func(key, value gjson.Result) bool {
+		// These timestamps aren't parsable as RFC 3339 strings, so we have to munge them to that format
+		lastSeen := value.Get("lastActivityDateTimeUTC").String()
+		if len(lastSeen) != 0 {
+			respBytes, err = sjson.SetBytes(
+				respBytes,
+				fmt.Sprintf("%d.lastActivityDateTimeUTC", key.Int()),
+				lastSeen+"Z",
+			)
+			util.Check(err, "failed to update lastActivityDateTimeUTC")
+		}
+
+		departments := []string{}
+		value.Get("departments.#.name").ForEach(func(key, value gjson.Result) bool {
+			departments = append(departments, value.String())
+			return true
+		})
+		util.Check(err, "failed to set departments")
+		respBytes, err = sjson.SetBytes(
+			respBytes,
+			fmt.Sprintf("%d.departments", key.Int()),
+			strings.Join(departments, ","),
+		)
+		util.Check(err, "failed to set departments")
+		return true
+	})
+
+	err = json.Unmarshal(respBytes, &rows)
 	util.Check(err, "failed to parse API response")
 
 	if len(rows) != 0 {
