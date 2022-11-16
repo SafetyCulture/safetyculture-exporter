@@ -2,6 +2,7 @@ package export
 
 import (
 	"context"
+	"encoding/base64"
 	"fmt"
 	"net/url"
 	"os"
@@ -96,7 +97,38 @@ func getAPIClient() *api.Client {
 
 	return api.NewClient(
 		viper.GetString("api.url"),
-		viper.GetString("access_token"),
+		fmt.Sprintf("Bearer %s", viper.GetString("access_token")),
+		apiOpts...,
+	)
+}
+
+func getSheqsyAPIClient() *api.Client {
+	apiOpts := []api.Opt{}
+	if viper.GetBool("api.tls_skip_verify") {
+		apiOpts = append(apiOpts, api.OptSetInsecureTLS(true))
+	}
+	if viper.GetString("api.tls_cert") != "" {
+		apiOpts = append(apiOpts, api.OptAddTLSCert(viper.GetString("api.tls_cert")))
+	}
+	if viper.GetString("api.proxy_url") != "" {
+		proxyURL, err := url.Parse(viper.GetString("api.proxy_url"))
+		util.Check(err, "Unable to parse proxy URL")
+		apiOpts = append(apiOpts, api.OptSetProxy(proxyURL))
+	}
+
+	token := base64.StdEncoding.EncodeToString(
+		[]byte(
+			fmt.Sprintf(
+				"%s:%s",
+				viper.GetString("sheqsy_username"),
+				viper.GetString("sheqsy_password"),
+			),
+		),
+	)
+
+	return api.NewClient(
+		viper.GetString("api.sheqsy_url"),
+		fmt.Sprintf("Basic %s", token),
 		apiOpts...,
 	)
 }
@@ -119,9 +151,12 @@ func runSQL(cmd *cobra.Command, args []string) error {
 		return feed.CreateSchemas(viper.GetViper(), exporter)
 	}
 
-	apiClient := getAPIClient()
-
-	return feed.ExportFeeds(viper.GetViper(), apiClient, exporter)
+	return feed.ExportFeeds(
+		viper.GetViper(),
+		getAPIClient(),
+		getSheqsyAPIClient(),
+		exporter,
+	)
 }
 
 func runInspectionJSON(cmd *cobra.Command, args []string) error {
@@ -163,9 +198,12 @@ func runCSV(cmd *cobra.Command, args []string) error {
 		return feed.CreateSchemas(viper.GetViper(), exporter)
 	}
 
-	apiClient := getAPIClient()
-
-	return feed.ExportFeeds(viper.GetViper(), apiClient, exporter)
+	return feed.ExportFeeds(
+		viper.GetViper(),
+		getAPIClient(),
+		getSheqsyAPIClient(),
+		exporter,
+	)
 }
 
 func printSchema(cmd *cobra.Command, args []string) error {

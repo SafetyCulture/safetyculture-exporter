@@ -1,0 +1,9 @@
++----------------+----------+-------------+
+|      NAME      |   TYPE   | PRIMARY KEY |
++----------------+----------+-------------+
+| employee_uid   | TEXT     | true        |
+| department_uid | TEXT     | true        |
+| employee_id    | INTEGER  |             |
+| department_id  | INTEGER  |             |
+| exported_at    | datetime |             |
++----------------+----------+-------------+

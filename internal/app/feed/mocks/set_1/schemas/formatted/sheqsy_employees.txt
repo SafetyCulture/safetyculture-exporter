@@ -1,0 +1,17 @@
++-----------------------------+----------+-------------+
+|            NAME             |   TYPE   | PRIMARY KEY |
++-----------------------------+----------+-------------+
+| employee_uid                | TEXT     | true        |
+| employee_id                 | INTEGER  |             |
+| external_id                 | TEXT     |             |
+| first_name                  | TEXT     |             |
+| last_name                   | TEXT     |             |
+| email                       | TEXT     |             |
+| accepted_activities_count   | INTEGER  |             |
+| pending_activities_count    | INTEGER  |             |
+| is_in_panic                 | numeric  |             |
+| status                      | TEXT     |             |
+| last_activity_date_time_utc | TEXT     |             |
+| departments                 | TEXT     |             |
+| exported_at                 | datetime |             |
++-----------------------------+----------+-------------+

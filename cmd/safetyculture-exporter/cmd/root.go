@@ -90,6 +90,10 @@ func configFlags() {
 	// TODO - Can we validate these tokens and throw error if they are wrong?
 	connectionFlags.StringP("access-token", "t", "", "API Access Token")
 	connectionFlags.String("api-url", "https://api.safetyculture.io", "API URL")
+	connectionFlags.StringP("sheqsy-username", "", "", "SHEQSY API Username")
+	connectionFlags.StringP("sheqsy-password", "", "", "SHEQSY API Password")
+	connectionFlags.StringP("sheqsy-company-id", "", "", "SHEQSY Company ID")
+	connectionFlags.String("sheqsy-api-url", "https://app.sheqsy.com", "API URL")
 	connectionFlags.Bool("tls-skip-verify", false, "Skip verification of API TLS certificates")
 	connectionFlags.String("tls-cert", "", "Custom root CA certificate to use when making API requests")
 	connectionFlags.String("proxy-url", "", "Proxy URL for making API requests through")
@@ -143,8 +147,12 @@ func configFlags() {
 
 func bindFlags() {
 	util.Check(viper.BindPFlag("access_token", connectionFlags.Lookup("access-token")), "while binding flag")
+	util.Check(viper.BindPFlag("sheqsy_username", connectionFlags.Lookup("sheqsy-username")), "while binding flag")
+	util.Check(viper.BindPFlag("sheqsy_password", connectionFlags.Lookup("sheqsy-password")), "while binding flag")
+	util.Check(viper.BindPFlag("sheqsy_company_id", connectionFlags.Lookup("sheqsy-company-id")), "while binding flag")
 
 	util.Check(viper.BindPFlag("api.url", connectionFlags.Lookup("api-url")), "while binding flag")
+	util.Check(viper.BindPFlag("api.sheqsy_url", connectionFlags.Lookup("sheqsy-api-url")), "while binding flag")
 	util.Check(viper.BindPFlag("api.tls_skip_verify", connectionFlags.Lookup("tls-skip-verify")), "while binding flag")
 	util.Check(viper.BindPFlag("api.tls_cert", connectionFlags.Lookup("tls-cert")), "while binding flag")
 	util.Check(viper.BindPFlag("api.proxy_url", connectionFlags.Lookup("proxy-url")), "while binding flag")

@@ -1,0 +1,28 @@
++---------------------------+----------+-------------+
+|           NAME            |   TYPE   | PRIMARY KEY |
++---------------------------+----------+-------------+
+| activity_uid              | TEXT     | true        |
+| activity_id               | INTEGER  |             |
+| external_id               | TEXT     |             |
+| email                     | TEXT     |             |
+| phone_number              | TEXT     |             |
+| activity_name             | TEXT     |             |
+| start_date_time_utc       | datetime |             |
+| finish_date_time_utc      | datetime |             |
+| activity_type             | TEXT     |             |
+| employee_name             | TEXT     |             |
+| employee_surname          | TEXT     |             |
+| start_latitude            | REAL     |             |
+| start_longitude           | REAL     |             |
+| start_address             | TEXT     |             |
+| finish_latitude           | REAL     |             |
+| finish_longitude          | REAL     |             |
+| finish_address            | TEXT     |             |
+| time_spent_sec            | INTEGER  |             |
+| version                   | INTEGER  |             |
+| time_enroute_sec          | INTEGER  |             |
+| distance_travelled_meters | INTEGER  |             |
+| shift_id                  | INTEGER  |             |
+| departments               | TEXT     |             |
+| exported_at               | datetime |             |
++---------------------------+----------+-------------+

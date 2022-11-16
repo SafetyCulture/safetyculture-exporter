@@ -1,0 +1,25 @@
+{
+	"data": [
+		{
+			"shiftId": 200000,
+			"employeeName": "Abraham",
+			"employeeSurname": "Lincoln",
+			"email": "tests+abraham.lincoln@safetyculture.io",
+			"phoneNumber": "+1555555555",
+			"startDateTimeUTC": "2022-03-21T22:55:26.277",
+			"startDateTimeLocal": "2022-03-21T18:55:26.277",
+			"finishDateTimeUTC": "2022-03-21T23:10:34.883",
+			"finishDateTimeLocal": "2022-03-21T19:10:34.883",
+			"lastReportedAddress": "1600 Pennsylvania Avenue NW, Washington, DC 20500, USA",
+			"lastReportedLatitude": 1,
+			"lastReportedLongitude": -1,
+			"version": 22079864,
+			"departments": [
+				"DC"
+			]
+		}
+	],
+	"lastVersion": 37381147,
+	"hasMoreItems": false,
+	"itemsLeft": 1
+}

@@ -1,0 +1,66 @@
+[
+	{
+		"departmentId": 2656,
+		"departmentUId": "28f1657f-9cf2-4d99-92a3-f39c1d0d88e4",
+		"name": "Expansion",
+		"externalName": null,
+		"number": null,
+		"manager": null
+	},
+	{
+		"departmentId": 2657,
+		"departmentUId": "4d8543a3-9270-4c41-a31a-541f033630fb",
+		"name": "Key Accounts",
+		"externalName": null,
+		"number": null,
+		"manager": null
+	},
+	{
+		"departmentId": 2658,
+		"departmentUId": "983845e4-d2fe-4cc1-8eb2-6f4be762462f",
+		"name": "New Business",
+		"externalName": null,
+		"number": null,
+		"manager": null
+	},
+	{
+		"departmentId": 2659,
+		"departmentUId": "98456f6a-e931-4f1f-9a74-62c4b708c4b2",
+		"name": "Customer",
+		"externalName": null,
+		"number": null,
+		"manager": null
+	},
+	{
+		"departmentId": 2660,
+		"departmentUId": "7c1568eb-bf35-432b-96cc-108ae88030f7",
+		"name": "Rev Ops",
+		"externalName": null,
+		"number": null,
+		"manager": null
+	},
+	{
+		"departmentId": 2661,
+		"departmentUId": "501da634-8f5e-4e04-9021-b3244582aa07",
+		"name": "Engagement",
+		"externalName": null,
+		"number": null,
+		"manager": "Joe Schmoe"
+	},
+	{
+		"departmentId": 2761,
+		"departmentUId": "cddbd877-f2f7-4a47-b06d-f9b99c2e6272",
+		"name": "Product",
+		"externalName": null,
+		"number": null,
+		"manager": null
+	},
+	{
+		"departmentId": 2779,
+		"departmentUId": "c4c7b7a6-0ae9-4956-8563-e059ccaa75c1",
+		"name": "Finance & Operations",
+		"externalName": null,
+		"number": null,
+		"manager": null
+	}
+]

@@ -1,0 +1,51 @@
+[
+	{
+		"employeeId": 14590,
+		"employeeUId": "93a1184a-2299-46cc-a192-f7920acd5adf",
+		"externalId": null,
+		"firstName": "tests+dwight.schrute@safetyculture.io",
+		"lastName": "Dwight",
+		"email": "Schrute",
+		"acceptedActivitiesCount": 0,
+		"pendingActivitiesCount": 0,
+		"currentActivity": null,
+		"lastKnownLocation": null,
+		"lastActivityDateTimeUTC": "2022-08-18T05:56:44.67",
+		"status": "Logged in",
+		"isInPanic": false,
+		"departments": [
+			{
+				"departmentId": 2656,
+				"departmentUId": "28f1657f-9cf2-4d99-92a3-f39c1d0d88e4",
+				"name": "Expansion",
+				"externalName": null,
+				"number": null,
+				"manager": null
+			},
+			{
+				"departmentId": 2657,
+				"departmentUId": "28f1657e-9cf2-4d99-92a3-f39c1d0d88e4",
+				"name": "New Business",
+				"externalName": null,
+				"number": null,
+				"manager": null
+			}
+		]
+	},
+	{
+		"employeeId": 14591,
+		"employeeUId": "93a1184d-2299-46cc-a192-f7920acd5adf",
+		"externalId": null,
+		"firstName": "tests+dwight.schrute1@safetyculture.io",
+		"lastName": "Dwight",
+		"email": "Schrute1",
+		"acceptedActivitiesCount": 0,
+		"pendingActivitiesCount": 0,
+		"currentActivity": null,
+		"lastKnownLocation": null,
+		"lastActivityDateTimeUTC": null,
+		"status": "Logged in",
+		"isInPanic": false,
+		"departments": null
+	}
+]

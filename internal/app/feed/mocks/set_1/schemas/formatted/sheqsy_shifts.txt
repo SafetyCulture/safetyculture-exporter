@@ -1,0 +1,16 @@
++-------------------------+----------+-------------+
+|          NAME           |   TYPE   | PRIMARY KEY |
++-------------------------+----------+-------------+
+| shift_id                | INTEGER  | true        |
+| employee_name           | TEXT     |             |
+| employee_surname        | TEXT     |             |
+| email                   | TEXT     |             |
+| phone_number            | TEXT     |             |
+| start_date_time_utc     | datetime |             |
+| finish_date_time_utc    | datetime |             |
+| last_reported_address   | TEXT     |             |
+| last_reported_latitude  | REAL     |             |
+| last_reported_longitude | REAL     |             |
+| version                 | INTEGER  |             |
+| departments             | TEXT     |             |
++-------------------------+----------+-------------+

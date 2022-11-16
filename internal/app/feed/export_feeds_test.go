@@ -20,6 +20,7 @@ func TestCreateSchemas_should_create_all_schemas_to_file(t *testing.T) {
 
 	viperConfig := viper.New()
 	viperConfig.Set("export.site.include_deleted", true)
+	viperConfig.Set("access_token", "token-123")
 
 	err = feed.CreateSchemas(viperConfig, exporter)
 	assert.NoError(t, err)
@@ -49,6 +50,9 @@ func TestExportFeeds_should_export_all_feeds_to_file(t *testing.T) {
 
 	viperConfig := viper.New()
 	viperConfig.Set("export.site.include_deleted", true)
+	viperConfig.Set("access_token", "token-123")
+	viperConfig.Set("sheqsy_username", "token-123")
+	viperConfig.Set("sheqsy_company_id", "ada3042f-16a4-4249-915d-dc088adef92a")
 
 	apiClient := api.GetTestClient()
 	initMockFeedsSet1(apiClient.HTTPClient())
@@ -65,7 +69,28 @@ func TestExportFeeds_should_export_all_feeds_to_file(t *testing.T) {
 		  }
 		`)
 
-	err = feed.ExportFeeds(viperConfig, apiClient, exporter)
+	gock.New("http://localhost:9999").
+		Get("/SheqsyIntegrationApi/api/v3/companies/ada3042f-16a4-4249-915d-dc088adef92a").
+		Reply(200).
+		BodyString(`{
+			"companyId": 4834,
+			"companyName": "SafetyCulture",
+			"name": null,
+			"companyUId": "ada3042f-16a4-4249-915d-dc088adef92a",
+			"externalId": null,
+			"billingContactUId": null,
+			"integratedSystems": 0,
+			"taskTypes": [],
+			"companyPlan": null,
+			"createdDateTimeLocal": "0001-01-01T00:00:00",
+			"employees": null,
+			"users": null,
+			"departments": null,
+			"status": null,
+			"ssoSettings": null
+		}`)
+
+	err = feed.ExportFeeds(viperConfig, apiClient, apiClient, exporter)
 	assert.NoError(t, err)
 
 	filesEqualish(t, "mocks/set_1/outputs/inspections.csv", filepath.Join(exporter.ExportPath, "inspections.csv"))
@@ -86,6 +111,12 @@ func TestExportFeeds_should_export_all_feeds_to_file(t *testing.T) {
 
 	filesEqualish(t, "mocks/set_1/outputs/actions.csv", filepath.Join(exporter.ExportPath, "actions.csv"))
 	filesEqualish(t, "mocks/set_1/outputs/action_assignees.csv", filepath.Join(exporter.ExportPath, "action_assignees.csv"))
+
+	filesEqualish(t, "mocks/set_1/outputs/sheqsy_employees.csv", filepath.Join(exporter.ExportPath, "sheqsy_employees.csv"))
+	filesEqualish(t, "mocks/set_1/outputs/sheqsy_department_employees.csv", filepath.Join(exporter.ExportPath, "sheqsy_department_employees.csv"))
+	filesEqualish(t, "mocks/set_1/outputs/sheqsy_shifts.csv", filepath.Join(exporter.ExportPath, "sheqsy_shifts.csv"))
+	filesEqualish(t, "mocks/set_1/outputs/sheqsy_activities.csv", filepath.Join(exporter.ExportPath, "sheqsy_activities.csv"))
+	filesEqualish(t, "mocks/set_1/outputs/sheqsy_departments.csv", filepath.Join(exporter.ExportPath, "sheqsy_departments.csv"))
 }
 
 // Expectation of this test is that group_users and schedule_assignees are truncated and refreshed
@@ -124,16 +155,17 @@ func TestExportFeeds_should_perform_incremental_update_on_second_run(t *testing.
 	viperConfig := viper.New()
 	viperConfig.Set("export.incremental", true)
 	viperConfig.Set("export.site.include_deleted", true)
+	viperConfig.Set("access_token", "token-123")
 
 	apiClient := api.GetTestClient()
 	initMockFeedsSet1(apiClient.HTTPClient())
 
-	err = feed.ExportFeeds(viperConfig, apiClient, exporter)
+	err = feed.ExportFeeds(viperConfig, apiClient, apiClient, exporter)
 	assert.NoError(t, err)
 
 	initMockFeedsSet2(apiClient.HTTPClient())
 
-	err = feed.ExportFeeds(viperConfig, apiClient, exporter)
+	err = feed.ExportFeeds(viperConfig, apiClient, apiClient, exporter)
 	assert.NoError(t, err)
 
 	filesEqualish(t, "mocks/set_2/outputs/inspections.csv", filepath.Join(exporter.ExportPath, "inspections.csv"))
@@ -190,6 +222,7 @@ func TestExportFeeds_should_handle_lots_of_rows_ok(t *testing.T) {
 
 	viperConfig := viper.New()
 	viperConfig.Set("export.incremental", true)
+	viperConfig.Set("access_token", "token-123")
 
 	apiClient := api.GetTestClient()
 	initMockFeedsSet3(apiClient.HTTPClient())
@@ -212,7 +245,7 @@ func TestExportFeeds_should_handle_lots_of_rows_ok(t *testing.T) {
 		  }
 		`)
 
-	err = feed.ExportFeeds(viperConfig, apiClient, exporter)
+	err = feed.ExportFeeds(viperConfig, apiClient, apiClient, exporter)
 	assert.NoError(t, err)
 
 	inspectionsLines, err := countFileLines(filepath.Join(exporter.ExportPath, "inspections.csv"))

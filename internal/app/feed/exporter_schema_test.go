@@ -37,6 +37,11 @@ func TestSchemaWriter_should_write_schema(t *testing.T) {
 		fmt.Printf("TESTING FEED: %s\n", f.Name())
 		testSchema(f)
 	}
+
+	for _, f := range feed.GetSheqsyFeeds(viperConfig) {
+		fmt.Printf("TESTING FEED: %s\n", f.Name())
+		testSchema(f)
+	}
 }
 
 func TestSchemaWriter_should_write_all_schemas(t *testing.T) {
