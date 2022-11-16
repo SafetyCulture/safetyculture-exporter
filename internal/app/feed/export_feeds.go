@@ -115,6 +115,7 @@ func getTemplateIDs(v *viper.Viper) []string {
 func GetSheqsyFeeds(v *viper.Viper) []Feed {
 	return []Feed{
 		&SheqsyEmployeeFeed{},
+		&SheqsyDepartmentFeed{},
 		&SheqsyActivityFeed{},
 		&SheqsyShiftFeed{},
 	}

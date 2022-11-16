@@ -107,6 +107,11 @@ func initMockFeedsSet1(httpClient *http.Client) {
 		File("mocks/set_1/sheqsy_employees_1.json")
 
 	gock.New("http://localhost:9999").
+		Get("/SheqsyIntegrationApi/api/v3/companies/ada3042f-16a4-4249-915d-dc088adef92a/departments").
+		Reply(200).
+		File("mocks/set_1/sheqsy_departments_1.json")
+
+	gock.New("http://localhost:9999").
 		Get("/SheqsyIntegrationApi/api/v3/companies/ada3042f-16a4-4249-915d-dc088adef92a/shifts/history").
 		Reply(200).
 		File("mocks/set_1/sheqsy_shifts_1.json")
