@@ -63,7 +63,7 @@ func (f *SheqsyDepartmentFeed) Order() string {
 
 // CreateSchema creates the schema of the feed for the supplied exporter
 func (f *SheqsyDepartmentFeed) CreateSchema(exporter Exporter) error {
-	return exporter.CreateSchema(f, &[]*User{})
+	return exporter.CreateSchema(f, &[]*SheqsyDepartmentFeed{})
 }
 
 // Export exports the feed to the supplied exporter

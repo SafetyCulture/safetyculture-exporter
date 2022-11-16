@@ -113,6 +113,7 @@ func TestExportFeeds_should_export_all_feeds_to_file(t *testing.T) {
 	filesEqualish(t, "mocks/set_1/outputs/action_assignees.csv", filepath.Join(exporter.ExportPath, "action_assignees.csv"))
 
 	filesEqualish(t, "mocks/set_1/outputs/sheqsy_employees.csv", filepath.Join(exporter.ExportPath, "sheqsy_employees.csv"))
+	filesEqualish(t, "mocks/set_1/outputs/sheqsy_department_employees.csv", filepath.Join(exporter.ExportPath, "sheqsy_department_employees.csv"))
 	filesEqualish(t, "mocks/set_1/outputs/sheqsy_shifts.csv", filepath.Join(exporter.ExportPath, "sheqsy_shifts.csv"))
 	filesEqualish(t, "mocks/set_1/outputs/sheqsy_activities.csv", filepath.Join(exporter.ExportPath, "sheqsy_activities.csv"))
 	filesEqualish(t, "mocks/set_1/outputs/sheqsy_departments.csv", filepath.Join(exporter.ExportPath, "sheqsy_departments.csv"))

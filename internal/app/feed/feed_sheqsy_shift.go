@@ -76,7 +76,7 @@ func (f *SheqsyShiftFeed) Order() string {
 
 // CreateSchema creates the schema of the feed for the supplied exporter
 func (f *SheqsyShiftFeed) CreateSchema(exporter Exporter) error {
-	return exporter.CreateSchema(f, &[]*User{})
+	return exporter.CreateSchema(f, &[]*SheqsyShift{})
 }
 
 // Export exports the feed to the supplied exporter

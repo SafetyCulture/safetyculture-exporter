@@ -102,6 +102,7 @@ func initMockFeedsSet1(httpClient *http.Client) {
 		File(path.Join("mocks", "set_1", "inspections_deleted_single_page.json"))
 
 	gock.New("http://localhost:9999").
+		Persist().
 		Get("/SheqsyIntegrationApi/api/v3/companies/ada3042f-16a4-4249-915d-dc088adef92a/employees").
 		Reply(200).
 		File("mocks/set_1/sheqsy_employees_1.json")
