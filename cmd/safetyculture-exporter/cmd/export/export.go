@@ -57,7 +57,7 @@ func HostedDBCmd() *cobra.Command {
 		Hidden:  true,
 		Use:     "hosted-db",
 		Short:   "Export SafetyCulture data to hosted database",
-		Example: `DO NOT USE, THIS IS A BETA FEATURE AND MY RESULT IN A CORRUPTED DATA EXPORT`,
+		Example: `DO NOT USE, THIS IS AN ALPHA FEATURE AND MY RESULT IN A CORRUPTED DATA EXPORT`,
 		RunE:    runHostedDB,
 	}
 }
@@ -225,7 +225,7 @@ func runCSV(cmd *cobra.Command, args []string) error {
 }
 
 func runHostedDB(cmd *cobra.Command, args []string) error {
-	if os.Getenv("SC_EXPORTER_BETA_FEATURES") != "true" {
+	if os.Getenv("SC_EXPORTER_ALPHA_FEATURES") != "true" {
 		return errors.New("invalid command hosted-db")
 	}
 
