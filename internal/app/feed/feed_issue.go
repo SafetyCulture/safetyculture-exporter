@@ -86,7 +86,12 @@ func (f *IssueFeed) CreateSchema(exporter Exporter) error {
 
 // Export exports the feed to the supplied exporter
 func (f *IssueFeed) Export(ctx context.Context, apiClient *api.Client, exporter Exporter, orgID string) error {
-	logger := util.GetLogger()
+	logger := util.GetLogger().With(
+		"feed", f.Name(),
+		"org_id", orgID,
+	)
+
+	logger.Info("exporting")
 
 	_ = exporter.InitFeed(f, &InitFeedOptions{
 		// Delete data if incremental refresh is disabled so there is no duplicates

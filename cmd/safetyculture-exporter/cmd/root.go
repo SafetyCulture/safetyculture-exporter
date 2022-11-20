@@ -74,6 +74,7 @@ func init() {
 	// Add sub-commands
 	addCmd(export.SQLCmd(), connectionFlags, exportFlags, dbFlags, inspectionFlags, actionFlags, templatesFlag, tablesFlag, schemasFlag, mediaFlags, sitesFlags)
 	addCmd(export.CSVCmd(), connectionFlags, exportFlags, csvFlags, inspectionFlags, actionFlags, templatesFlag, tablesFlag, schemasFlag, mediaFlags, sitesFlags)
+	addCmd(export.HostedDBCmd(), connectionFlags, exportFlags, csvFlags, inspectionFlags, actionFlags, templatesFlag, tablesFlag, schemasFlag, mediaFlags, sitesFlags)
 	addCmd(export.InspectionJSONCmd(), exportFlags, connectionFlags, inspectionFlags, actionFlags, templatesFlag)
 	addCmd(export.ReportCmd(), connectionFlags, exportFlags, inspectionFlags, actionFlags, templatesFlag, reportFlags)
 	addCmd(export.PrintSchemaCmd())

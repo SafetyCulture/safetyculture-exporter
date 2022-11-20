@@ -12,7 +12,7 @@ import (
 
 // SheqsyDepartment represents a user in sheqsy
 type SheqsyDepartment struct {
-	DepartmentUID string    `json:"departmentUId" csv:"department_uid" gorm:"primarykey;column:department_uid;size:32"`
+	DepartmentUID string    `json:"departmentUId" csv:"department_uid" gorm:"primarykey;column:department_uid;size:36"`
 	DepartmentID  int       `json:"departmentId" csv:"department_id" gorm:"column:department_id"`
 	Name          string    `json:"name" csv:"name" gorm:"column:name"`
 	ExternalName  string    `json:"external_name" csv:"external_name" gorm:"column:external_name"`

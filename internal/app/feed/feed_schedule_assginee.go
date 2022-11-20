@@ -70,10 +70,12 @@ func (f *ScheduleAssigneeFeed) CreateSchema(exporter Exporter) error {
 
 // Export exports the feed to the supplied exporter
 func (f *ScheduleAssigneeFeed) Export(ctx context.Context, apiClient *api.Client, exporter Exporter, orgID string) error {
-	logger := util.GetLogger()
-	feedName := f.Name()
+	logger := util.GetLogger().With(
+		"feed", f.Name(),
+		"org_id", orgID,
+	)
 
-	logger.Infof("%s: exporting for org_id: %s", feedName, orgID)
+	logger.Info("exporting")
 
 	exporter.InitFeed(f, &InitFeedOptions{
 		// Always truncate. This data must be refreshed in order to be accurate
