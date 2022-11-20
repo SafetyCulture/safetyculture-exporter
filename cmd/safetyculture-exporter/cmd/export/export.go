@@ -301,9 +301,11 @@ func runHostedDB(cmd *cobra.Command, args []string) error {
 			logger.Fatal("error exporting data", err)
 		}
 
-		logger.Info("export finished, checking for updates in 15mins")
+		delay := time.Hour
 
-		time.Sleep(time.Hour * 1)
+		logger.Infof("export finished, checking for updates in %s (%s)", delay.String(), time.Now().Add(delay).Local().Format(time.RFC822))
+
+		time.Sleep(delay)
 	}
 }
 
