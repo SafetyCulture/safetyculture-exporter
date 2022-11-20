@@ -3,6 +3,7 @@ package export
 import (
 	"context"
 	"encoding/base64"
+	"errors"
 	"fmt"
 	"net/url"
 	"os"
@@ -53,14 +54,11 @@ safetyculture-exporter csv --export-path /path/to/export/to`,
 // HostedDBCmd is used to export data in csv format
 func HostedDBCmd() *cobra.Command {
 	return &cobra.Command{
-		Use:   "hosted-db",
-		Short: "Export SasfetyCulture data to hosted database",
-		Example: `// Limit inspections and schedules to these templates
-safetyculture-exporter csv --template-ids template_F492E54D87F2419E9398F7BDCA0FA5D9,template_d54e06808d2f11e2893e83a731dba0ca
-
-// Customise export location
-safetyculture-exporter csv --export-path /path/to/export/to`,
-		RunE: runHostedDB,
+		Hidden:  true,
+		Use:     "hosted-db",
+		Short:   "Export SafetyCulture data to hosted database",
+		Example: `DO NOT USE, THIS IS A BETA FEATURE AND MY RESULT IN A CORRUPTED DATA EXPORT`,
+		RunE:    runHostedDB,
 	}
 }
 
@@ -227,6 +225,10 @@ func runCSV(cmd *cobra.Command, args []string) error {
 }
 
 func runHostedDB(cmd *cobra.Command, args []string) error {
+	if os.Getenv("SC_EXPORTER_BETA_FEATURES") != "true" {
+		return errors.New("invalid command hosted-db")
+	}
+
 	logger := util.GetLogger()
 
 	exportPath := viper.GetString("export.path")
@@ -236,9 +238,9 @@ func runHostedDB(cmd *cobra.Command, args []string) error {
 		RuntimePath(path.Join(exportPath, "pg/runtime")).
 		DataPath(path.Join(exportPath, "pg/data")).
 		BinariesPath(path.Join(exportPath, "pg/bin")).
-		Username("iauditor_exporter").
-		Password("iauditor_exporter").
-		Database("iauditor_exporter").
+		Username("safetyculture_exporter").
+		Password("safetyculture_exporter").
+		Database("safetyculture_exporter").
 		Port(35432).
 		StartTimeout(45 * time.Second),
 	)
@@ -266,7 +268,7 @@ func runHostedDB(cmd *cobra.Command, args []string) error {
 		util.Check(err, fmt.Sprintf("Failed to create directory %s", exportMediaPath))
 	}
 
-	exporter, err := feed.NewSQLExporter("postgres", "postgres://iauditor_exporter:iauditor_exporter@localhost:35432/iauditor_exporter", true, exportMediaPath)
+	exporter, err := feed.NewSQLExporter("postgres", "postgres://safetyculture_exporter:safetyculture_exporter@localhost:35432/safetyculture_exporter", true, exportMediaPath)
 	util.Check(err, "unable to create exporter")
 
 	if viper.GetBool("export.schema_only") {
