@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/SafetyCulture/safetyculture-exporter/internal/app/api"
+	"github.com/SafetyCulture/safetyculture-exporter/internal/app/config"
 )
 
 // Feed is an interface to a data feed. It provides methods to export the data to an exporter
@@ -42,6 +43,30 @@ type Exporter interface {
 
 	SupportsUpsert() bool
 	ParameterLimit() int
+}
+
+// SafetyCultureExporter defines the basic action in regard to the exporter
+type SafetyCultureExporter interface {
+	CreateSchemas(exporter Exporter) error
+}
+
+type ExporterApp struct {
+	cfg *config.ExportConfig
+}
+
+func NewExporterApp(cfg *config.ExportConfig) *ExporterApp {
+	return &ExporterApp{cfg: cfg}
+}
+
+// CreateSchemas creates schema for each feed
+func (e *ExporterApp) CreateSchemas(exporter Exporter) error {
+	var lastErr error = nil
+	feeds := e.GetFeeds()
+	for _, feed := range feeds {
+		lastErr = feed.CreateSchema(exporter)
+	}
+
+	return lastErr
 }
 
 // DeduplicateList a list of T type and maintains the latest value

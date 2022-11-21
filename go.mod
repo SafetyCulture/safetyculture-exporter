@@ -10,7 +10,6 @@ require (
 	github.com/google/go-github v17.0.0+incompatible
 	github.com/gookit/color v1.5.2
 	github.com/hashicorp/go-version v1.6.0
-	github.com/lib/pq v1.10.2
 	github.com/olekukonko/tablewriter v0.0.5
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/cobra v1.6.1

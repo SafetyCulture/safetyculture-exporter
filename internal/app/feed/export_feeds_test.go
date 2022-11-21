@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/SafetyCulture/safetyculture-exporter/cmd/safetyculture-exporter/cmd/export"
 	"github.com/SafetyCulture/safetyculture-exporter/internal/app/api"
 	"github.com/SafetyCulture/safetyculture-exporter/internal/app/feed"
 	"gopkg.in/h2non/gock.v1"
@@ -22,7 +23,9 @@ func TestCreateSchemas_should_create_all_schemas_to_file(t *testing.T) {
 	viperConfig.Set("export.site.include_deleted", true)
 	viperConfig.Set("access_token", "token-123")
 
-	err = feed.CreateSchemas(viperConfig, exporter)
+	exporterAppCfg := export.MapViperConfigToExportConfig(viper.GetViper())
+	exporterApp := feed.NewExporterApp(exporterAppCfg)
+	err = exporterApp.CreateSchemas(exporter)
 	assert.NoError(t, err)
 
 	filesEqualish(t, "mocks/set_1/schemas/inspections.csv", filepath.Join(exporter.ExportPath, "inspections.csv"))

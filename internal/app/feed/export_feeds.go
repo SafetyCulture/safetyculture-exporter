@@ -13,7 +13,74 @@ import (
 
 const maxConcurrentGoRoutines = 10
 
-// GetFeeds returns list of all available data feeds
+func (e *ExporterApp) GetFeeds() []Feed {
+	return []Feed{
+		&InspectionFeed{
+			SkipIDs:       e.cfg.InspectionConfig.SkipIDs,
+			ModifiedAfter: e.cfg.ModifiedAfter,
+			TemplateIDs:   e.cfg.FilterByTemplateIDs,
+			Archived:      e.cfg.InspectionConfig.Archived,
+			Completed:     e.cfg.InspectionConfig.Completed,
+			Incremental:   e.cfg.Incremental,
+			Limit:         e.cfg.InspectionConfig.BatchLimit,
+			WebReportLink: e.cfg.InspectionConfig.WebReportLink,
+		},
+		&InspectionItemFeed{
+			SkipIDs:         e.cfg.InspectionConfig.SkipIDs,
+			ModifiedAfter:   e.cfg.ModifiedAfter,
+			TemplateIDs:     e.cfg.FilterByTemplateIDs,
+			Archived:        e.cfg.InspectionConfig.Archived,
+			Completed:       e.cfg.InspectionConfig.Completed,
+			IncludeInactive: e.cfg.InspectionConfig.IncludeInactiveItems,
+			Incremental:     e.cfg.Incremental,
+			Limit:           e.cfg.InspectionConfig.BatchLimit,
+			ExportMedia:     e.cfg.MediaConfig.Export,
+		},
+		&TemplateFeed{
+			Incremental: e.cfg.Incremental,
+		},
+		&TemplatePermissionFeed{
+			Incremental: e.cfg.Incremental,
+		},
+		&SiteFeed{
+			IncludeDeleted:       e.cfg.SiteConfig.IncludeDeleted,
+			IncludeFullHierarchy: e.cfg.SiteConfig.IncludeFullHierarchy,
+		},
+		&SiteMemberFeed{},
+		&UserFeed{},
+		&GroupFeed{},
+		&GroupUserFeed{},
+		&ScheduleFeed{
+			TemplateIDs: e.cfg.FilterByTemplateIDs,
+		},
+		&ScheduleAssigneeFeed{
+			TemplateIDs: e.cfg.FilterByTemplateIDs,
+		},
+		&ScheduleOccurrenceFeed{
+			TemplateIDs: e.cfg.FilterByTemplateIDs,
+		},
+		&ActionFeed{
+			ModifiedAfter: e.cfg.ModifiedAfter,
+			Incremental:   e.cfg.Incremental,
+			Limit:         e.cfg.ActionConfig.BatchLimit,
+		},
+		&ActionAssigneeFeed{
+			ModifiedAfter: e.cfg.ModifiedAfter,
+			Incremental:   e.cfg.Incremental,
+		},
+		&IssueFeed{
+			Incremental: false, //this was disabled on request. Issues API doesn't support modified After filters
+			Limit:       e.cfg.ActionConfig.BatchLimit,
+		},
+		&SheqsyEmployeeFeed{},
+		&SheqsyDepartmentEmployeeFeed{},
+		&SheqsyDepartmentFeed{},
+		&SheqsyActivityFeed{},
+		&SheqsyShiftFeed{},
+	}
+}
+
+// GetFeeds LEGACY returns list of all available data feeds
 func GetFeeds(v *viper.Viper) []Feed {
 	inspectionIncludeInactiveItems := v.GetBool("export.inspection.included_inactive_items")
 	templateIDs := getTemplateIDs(v)
@@ -112,7 +179,7 @@ func getTemplateIDs(v *viper.Viper) []string {
 }
 
 // GetSheqsyFeeds returns list of all available data feeds for sheqsy
-func GetSheqsyFeeds(v *viper.Viper) []Feed {
+func GetSheqsyFeeds() []Feed {
 	return []Feed{
 		&SheqsyEmployeeFeed{},
 		&SheqsyDepartmentEmployeeFeed{},
@@ -122,26 +189,12 @@ func GetSheqsyFeeds(v *viper.Viper) []Feed {
 	}
 }
 
-// CreateSchemas generates schemas for the data feeds without fetching any data
-func CreateSchemas(v *viper.Viper, exporter Exporter) error {
-	logger := util.GetLogger()
-	logger.Info("Creating schemas started")
-
-	for _, feed := range append(GetFeeds(v), GetSheqsyFeeds(v)...) {
-		err := feed.CreateSchema(exporter)
-		util.Check(err, "failed to create schema")
-	}
-
-	logger.Info("Creating schemas finished")
-	return nil
-}
-
 // WriteSchemas is used to print the schema of each feed to console output
 func WriteSchemas(v *viper.Viper, exporter *SchemaExporter) error {
 	logger := util.GetLogger()
 	logger.Info("Writing schemas started")
 
-	for _, feed := range append(GetFeeds(v), GetSheqsyFeeds(v)...) {
+	for _, feed := range append(GetFeeds(v), GetSheqsyFeeds()...) {
 		err := exporter.CreateSchema(feed, feed.RowsModel())
 		util.Check(err, "failed to create schema")
 
@@ -210,7 +263,7 @@ func ExportFeeds(v *viper.Viper, apiClient *api.Client, sheqsyApiClient *api.Cli
 		logger.Info("exporting SHEQSY data")
 
 		feeds := []Feed{}
-		for _, feed := range GetSheqsyFeeds(v) {
+		for _, feed := range GetSheqsyFeeds() {
 			if tablesMap[feed.Name()] || len(tables) == 0 {
 				feeds = append(feeds, feed)
 			}

@@ -8,6 +8,7 @@ import (
 	"os"
 
 	"github.com/SafetyCulture/safetyculture-exporter/internal/app/api"
+	"github.com/SafetyCulture/safetyculture-exporter/internal/app/config"
 	"github.com/SafetyCulture/safetyculture-exporter/internal/app/exporter"
 	"github.com/SafetyCulture/safetyculture-exporter/internal/app/feed"
 	"github.com/SafetyCulture/safetyculture-exporter/internal/app/inspections"
@@ -133,6 +134,47 @@ func getSheqsyAPIClient() *api.Client {
 	)
 }
 
+// MapViperConfigToExportConfig maps Viper config to ExportConfig structure
+// doesn't map 100% every field. Just the ones I found needed.
+func MapViperConfigToExportConfig(v *viper.Viper) *config.ExportConfig {
+
+	// caps action batch limit to 100
+	actionLimit := v.GetInt("export.action.limit")
+	if actionLimit > 100 {
+		actionLimit = 100
+	}
+
+	// caps issue batch limit to 100
+	issueLimit := v.GetInt("export.issue.limit")
+	if issueLimit > 100 {
+		issueLimit = 100
+	}
+
+	return &config.ExportConfig{
+		Incremental:         v.GetBool("export.incremental"),
+		ModifiedAfter:       v.GetTime("export.modified_after"),
+		FilterByTemplateIDs: v.GetStringSlice("export.template_ids"),
+		InspectionConfig: &config.ExportInspectionConfig{
+			IncludeInactiveItems: v.GetBool("export.inspection.included_inactive_items"),
+			Archived:             v.GetString("export.inspection.archived"),
+			Completed:            v.GetString("export.inspection.completed"),
+			SkipIDs:              v.GetStringSlice("export.inspection.skip_ids"),
+			BatchLimit:           v.GetInt("export.inspection.limit"),
+			WebReportLink:        v.GetString("export.inspection.web_report_link"),
+		},
+		SiteConfig: &config.ExportSiteConfig{
+			IncludeDeleted:       v.GetBool("export.site.include_deleted"),
+			IncludeFullHierarchy: v.GetBool("export.site.include_full_hierarchy"),
+		},
+		MediaConfig: &config.ExportMediaConfig{
+			Export: v.GetBool("export.media"),
+		},
+		ActionConfig: &config.ExportActionConfig{
+			BatchLimit: actionLimit,
+		},
+	}
+}
+
 func runSQL(cmd *cobra.Command, args []string) error {
 
 	var exportMediaPath string
@@ -147,8 +189,10 @@ func runSQL(cmd *cobra.Command, args []string) error {
 	exporter, err := feed.NewSQLExporter(viper.GetString("db.dialect"), viper.GetString("db.connection_string"), true, exportMediaPath)
 	util.Check(err, "unable to create exporter")
 
+	exporterAppCfg := MapViperConfigToExportConfig(viper.GetViper())
+	exporterApp := feed.NewExporterApp(exporterAppCfg)
 	if viper.GetBool("export.schema_only") {
-		return feed.CreateSchemas(viper.GetViper(), exporter)
+		return exporterApp.CreateSchemas(exporter)
 	}
 
 	return feed.ExportFeeds(
@@ -194,8 +238,10 @@ func runCSV(cmd *cobra.Command, args []string) error {
 	exporter, err := feed.NewCSVExporter(exportPath, exportMediaPath, maxRowsPerFile)
 	util.Check(err, "unable to create exporter")
 
+	exporterAppCfg := MapViperConfigToExportConfig(viper.GetViper())
+	exporterApp := feed.NewExporterApp(exporterAppCfg)
 	if viper.GetBool("export.schema_only") {
-		return feed.CreateSchemas(viper.GetViper(), exporter)
+		return exporterApp.CreateSchemas(exporter)
 	}
 
 	return feed.ExportFeeds(
