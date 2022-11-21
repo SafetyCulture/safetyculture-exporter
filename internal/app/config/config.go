@@ -44,6 +44,11 @@ type ExportActionConfig struct {
 	BatchLimit int // The limit for the number of actions that gets processed per batch
 }
 
+// ExportIssueConfig is a representation of the export.issue section from yaml configuration
+type ExportIssueConfig struct {
+	BatchLimit int // The limit for the number of issues that gets processed per batch
+}
+
 // ExportConfig is a representation of the export section from YAML configuration
 type ExportConfig struct {
 	Incremental        bool      // The flag to remember or not remember where the last export run
@@ -51,6 +56,7 @@ type ExportConfig struct {
 	FilterByTemplateID []string  // The template IDs to filter by for inspections and schedules export
 	FilterByTableName  []string  // The CSV and/or SQL tables to export. Empty means all tables will be exported
 	ActionConfig       *ExportActionConfig
+	IssueConfig        *ExportIssueConfig
 	InspectionConfig   *ExportInspectionConfig
 	SiteConfig         *ExportSiteConfig
 	MediaConfig        *ExportMediaConfig

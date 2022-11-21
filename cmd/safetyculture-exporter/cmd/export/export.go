@@ -181,6 +181,9 @@ func MapViperConfigToConfigurationOptions(v *viper.Viper) *config.ConfigurationO
 			ActionConfig: &config.ExportActionConfig{
 				BatchLimit: actionLimit,
 			},
+			IssueConfig: &config.ExportIssueConfig{
+				BatchLimit: issueLimit,
+			},
 		},
 	}
 }
