@@ -44,15 +44,35 @@ type ExportActionConfig struct {
 	BatchLimit int // The limit for the number of actions that gets processed per batch
 }
 
-// ExportConfig is a representation of the export section from yaml configuration
+// ExportConfig is a representation of the export section from YAML configuration
 type ExportConfig struct {
-	Incremental         bool      // The flag to remember or not remember where the last export run
-	ModifiedAfter       time.Time // The timestamp in Coordinated Universal Time (UTC) to start inspections and actions exports
-	FilterByTemplateIDs []string  // The template IDs to filter by for inspections and schedules export
-	ActionConfig        *ExportActionConfig
-	InspectionConfig    *ExportInspectionConfig
-	SiteConfig          *ExportSiteConfig
-	MediaConfig         *ExportMediaConfig
+	Incremental        bool      // The flag to remember or not remember where the last export run
+	ModifiedAfter      time.Time // The timestamp in Coordinated Universal Time (UTC) to start inspections and actions exports
+	FilterByTemplateID []string  // The template IDs to filter by for inspections and schedules export
+	FilterByTableName  []string  // The CSV and/or SQL tables to export. Empty means all tables will be exported
+	ActionConfig       *ExportActionConfig
+	InspectionConfig   *ExportInspectionConfig
+	SiteConfig         *ExportSiteConfig
+	MediaConfig        *ExportMediaConfig
+}
+
+// ApiConfig is a representation of the api fields from YAML configuration for SafetyCulture
+type ApiConfig struct {
+	AccessToken string //the API Token. Maps to access_token
+}
+
+// SheqsyApiConfig is a representation of the api fields from YAML configuration for Sheqsy
+type SheqsyApiConfig struct {
+	UserName  string // maps to sheqsy_username
+	CompanyID string // maps to sheqsy_company_id
+}
+
+// ConfigurationOptions is an approximate representation of the YAML configuration
+// NOTE: while refactoring, it is a partial representation. We will add fields when needed
+type ConfigurationOptions struct {
+	ApiConfig       *ApiConfig
+	SheqsyApiConfig *SheqsyApiConfig
+	ExportConfig    *ExportConfig
 }
 
 // GetInspectionConfig returns configurations that have been set for fetching inspections

@@ -46,7 +46,7 @@ func TestIntegrationDbCreateSchema_should_create_all_schemas(t *testing.T) {
 		`)
 
 	exporterAppCfg := export.MapViperConfigToExportConfig(viper.GetViper())
-	exporterApp := feed.NewExporterApp(exporterAppCfg)
+	exporterApp := feed.NewExporterApp(nil, nil, exporterAppCfg)
 	err = exporterApp.CreateSchemas(exporter)
 	assert.NoError(t, err)
 

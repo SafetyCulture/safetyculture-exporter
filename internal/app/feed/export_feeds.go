@@ -13,70 +13,66 @@ import (
 
 const maxConcurrentGoRoutines = 10
 
+// GetFeeds returns list of available SafetyCulture feeds
 func (e *ExporterApp) GetFeeds() []Feed {
 	return []Feed{
 		&InspectionFeed{
-			SkipIDs:       e.cfg.InspectionConfig.SkipIDs,
-			ModifiedAfter: e.cfg.ModifiedAfter,
-			TemplateIDs:   e.cfg.FilterByTemplateIDs,
-			Archived:      e.cfg.InspectionConfig.Archived,
-			Completed:     e.cfg.InspectionConfig.Completed,
-			Incremental:   e.cfg.Incremental,
-			Limit:         e.cfg.InspectionConfig.BatchLimit,
-			WebReportLink: e.cfg.InspectionConfig.WebReportLink,
+			SkipIDs:       e.exportConfig.InspectionConfig.SkipIDs,
+			ModifiedAfter: e.exportConfig.ModifiedAfter,
+			TemplateIDs:   e.exportConfig.FilterByTemplateID,
+			Archived:      e.exportConfig.InspectionConfig.Archived,
+			Completed:     e.exportConfig.InspectionConfig.Completed,
+			Incremental:   e.exportConfig.Incremental,
+			Limit:         e.exportConfig.InspectionConfig.BatchLimit,
+			WebReportLink: e.exportConfig.InspectionConfig.WebReportLink,
 		},
 		&InspectionItemFeed{
-			SkipIDs:         e.cfg.InspectionConfig.SkipIDs,
-			ModifiedAfter:   e.cfg.ModifiedAfter,
-			TemplateIDs:     e.cfg.FilterByTemplateIDs,
-			Archived:        e.cfg.InspectionConfig.Archived,
-			Completed:       e.cfg.InspectionConfig.Completed,
-			IncludeInactive: e.cfg.InspectionConfig.IncludeInactiveItems,
-			Incremental:     e.cfg.Incremental,
-			Limit:           e.cfg.InspectionConfig.BatchLimit,
-			ExportMedia:     e.cfg.MediaConfig.Export,
+			SkipIDs:         e.exportConfig.InspectionConfig.SkipIDs,
+			ModifiedAfter:   e.exportConfig.ModifiedAfter,
+			TemplateIDs:     e.exportConfig.FilterByTemplateID,
+			Archived:        e.exportConfig.InspectionConfig.Archived,
+			Completed:       e.exportConfig.InspectionConfig.Completed,
+			IncludeInactive: e.exportConfig.InspectionConfig.IncludeInactiveItems,
+			Incremental:     e.exportConfig.Incremental,
+			Limit:           e.exportConfig.InspectionConfig.BatchLimit,
+			ExportMedia:     e.exportConfig.MediaConfig.Export,
 		},
 		&TemplateFeed{
-			Incremental: e.cfg.Incremental,
+			Incremental: e.exportConfig.Incremental,
 		},
 		&TemplatePermissionFeed{
-			Incremental: e.cfg.Incremental,
+			Incremental: e.exportConfig.Incremental,
 		},
 		&SiteFeed{
-			IncludeDeleted:       e.cfg.SiteConfig.IncludeDeleted,
-			IncludeFullHierarchy: e.cfg.SiteConfig.IncludeFullHierarchy,
+			IncludeDeleted:       e.exportConfig.SiteConfig.IncludeDeleted,
+			IncludeFullHierarchy: e.exportConfig.SiteConfig.IncludeFullHierarchy,
 		},
 		&SiteMemberFeed{},
 		&UserFeed{},
 		&GroupFeed{},
 		&GroupUserFeed{},
 		&ScheduleFeed{
-			TemplateIDs: e.cfg.FilterByTemplateIDs,
+			TemplateIDs: e.exportConfig.FilterByTemplateID,
 		},
 		&ScheduleAssigneeFeed{
-			TemplateIDs: e.cfg.FilterByTemplateIDs,
+			TemplateIDs: e.exportConfig.FilterByTemplateID,
 		},
 		&ScheduleOccurrenceFeed{
-			TemplateIDs: e.cfg.FilterByTemplateIDs,
+			TemplateIDs: e.exportConfig.FilterByTemplateID,
 		},
 		&ActionFeed{
-			ModifiedAfter: e.cfg.ModifiedAfter,
-			Incremental:   e.cfg.Incremental,
-			Limit:         e.cfg.ActionConfig.BatchLimit,
+			ModifiedAfter: e.exportConfig.ModifiedAfter,
+			Incremental:   e.exportConfig.Incremental,
+			Limit:         e.exportConfig.ActionConfig.BatchLimit,
 		},
 		&ActionAssigneeFeed{
-			ModifiedAfter: e.cfg.ModifiedAfter,
-			Incremental:   e.cfg.Incremental,
+			ModifiedAfter: e.exportConfig.ModifiedAfter,
+			Incremental:   e.exportConfig.Incremental,
 		},
 		&IssueFeed{
 			Incremental: false, //this was disabled on request. Issues API doesn't support modified After filters
-			Limit:       e.cfg.ActionConfig.BatchLimit,
+			Limit:       e.exportConfig.ActionConfig.BatchLimit,
 		},
-		&SheqsyEmployeeFeed{},
-		&SheqsyDepartmentEmployeeFeed{},
-		&SheqsyDepartmentFeed{},
-		&SheqsyActivityFeed{},
-		&SheqsyShiftFeed{},
 	}
 }
 
@@ -189,6 +185,17 @@ func GetSheqsyFeeds() []Feed {
 	}
 }
 
+// CreateSchemas generates schemas for the data feeds without fetching any data
+func (e *ExporterApp) CreateSchemas(exporter Exporter) error {
+	var lastErr error = nil
+	feeds := e.GetFeeds()
+	for _, feed := range feeds {
+		lastErr = feed.CreateSchema(exporter)
+	}
+
+	return lastErr
+}
+
 // WriteSchemas is used to print the schema of each feed to console output
 func WriteSchemas(v *viper.Viper, exporter *SchemaExporter) error {
 	logger := util.GetLogger()
@@ -207,11 +214,11 @@ func WriteSchemas(v *viper.Viper, exporter *SchemaExporter) error {
 }
 
 // ExportFeeds fetches all the feeds data from server and stores them in the format provided
-func ExportFeeds(v *viper.Viper, apiClient *api.Client, sheqsyApiClient *api.Client, exporter Exporter) error {
+func (e *ExporterApp) ExportFeeds(exporter Exporter) error {
 	logger := util.GetLogger()
 	ctx := context.Background()
 
-	tables := v.GetStringSlice("export.tables")
+	tables := e.exportConfig.FilterByTableName
 	tablesMap := map[string]bool{}
 	for _, table := range tables {
 		tablesMap[table] = true
@@ -223,18 +230,18 @@ func ExportFeeds(v *viper.Viper, apiClient *api.Client, sheqsyApiClient *api.Cli
 	atLeastOneRun := false
 
 	// Run export for SafetyCulture data
-	if len(v.GetString("access_token")) != 0 {
+	if len(e.apiConfig.AccessToken) != 0 {
 		atLeastOneRun = true
 		logger.Info("exporting SafetyCulture data")
 
-		feeds := []Feed{}
-		for _, feed := range GetFeeds(v) {
+		var feeds []Feed
+		for _, feed := range e.GetFeeds() {
 			if tablesMap[feed.Name()] || len(tables) == 0 {
 				feeds = append(feeds, feed)
 			}
 		}
 
-		resp, err := apiClient.WhoAmI(ctx)
+		resp, err := e.apiClient.WhoAmI(ctx)
 		util.Check(err, "failed to get details of the current user")
 
 		logger.Infof("Exporting data by user: %s %s", resp.Firstname, resp.Lastname)
@@ -250,7 +257,7 @@ func ExportFeeds(v *viper.Viper, apiClient *api.Client, sheqsyApiClient *api.Cli
 			go func(f Feed) {
 				logger.Infof(" ... queueing %s\n", f.Name())
 				defer wg.Done()
-				err := f.Export(ctx, apiClient, exporter, resp.OrganisationID)
+				err := f.Export(ctx, e.apiClient, exporter, resp.OrganisationID)
 				util.Check(err, "failed to export")
 				<-semaphore
 			}(feed)
@@ -258,18 +265,18 @@ func ExportFeeds(v *viper.Viper, apiClient *api.Client, sheqsyApiClient *api.Cli
 	}
 
 	// Run export for SHEQSY data
-	if len(v.GetString("sheqsy_username")) != 0 {
+	if len(e.sheqsyApiConfig.UserName) != 0 {
 		atLeastOneRun = true
 		logger.Info("exporting SHEQSY data")
 
-		feeds := []Feed{}
+		var feeds []Feed
 		for _, feed := range GetSheqsyFeeds() {
 			if tablesMap[feed.Name()] || len(tables) == 0 {
 				feeds = append(feeds, feed)
 			}
 		}
 
-		resp, err := sheqsyApiClient.GetSheqsyCompany(ctx, v.GetString("sheqsy_company_id"))
+		resp, err := e.sheqsyApiClient.GetSheqsyCompany(ctx, e.sheqsyApiConfig.CompanyID)
 		util.Check(err, "failed to get details of the current user")
 
 		logger.Infof("Exporting data for SHEQSY company: %s %s", resp.Name, resp.CompanyUID)
@@ -285,7 +292,7 @@ func ExportFeeds(v *viper.Viper, apiClient *api.Client, sheqsyApiClient *api.Cli
 			go func(f Feed) {
 				logger.Infof(" ... queueing %s\n", f.Name())
 				defer wg.Done()
-				err := f.Export(ctx, sheqsyApiClient, exporter, resp.CompanyUID)
+				err := f.Export(ctx, e.sheqsyApiClient, exporter, resp.CompanyUID)
 				util.Check(err, "failed to export")
 				<-semaphore
 			}(feed)

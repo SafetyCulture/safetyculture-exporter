@@ -23,8 +23,8 @@ func TestCreateSchemas_should_create_all_schemas_to_file(t *testing.T) {
 	viperConfig.Set("export.site.include_deleted", true)
 	viperConfig.Set("access_token", "token-123")
 
-	exporterAppCfg := export.MapViperConfigToExportConfig(viper.GetViper())
-	exporterApp := feed.NewExporterApp(exporterAppCfg)
+	exporterAppCfg := export.MapViperConfigToConfigurationOptions(viperConfig)
+	exporterApp := feed.NewExporterApp(nil, nil, exporterAppCfg)
 	err = exporterApp.CreateSchemas(exporter)
 	assert.NoError(t, err)
 
@@ -93,7 +93,9 @@ func TestExportFeeds_should_export_all_feeds_to_file(t *testing.T) {
 			"ssoSettings": null
 		}`)
 
-	err = feed.ExportFeeds(viperConfig, apiClient, apiClient, exporter)
+	exporterAppCfg := export.MapViperConfigToConfigurationOptions(viperConfig)
+	exporterApp := feed.NewExporterApp(apiClient, apiClient, exporterAppCfg)
+	err = exporterApp.ExportFeeds(exporter)
 	assert.NoError(t, err)
 
 	filesEqualish(t, "mocks/set_1/outputs/inspections.csv", filepath.Join(exporter.ExportPath, "inspections.csv"))
@@ -160,15 +162,17 @@ func TestExportFeeds_should_perform_incremental_update_on_second_run(t *testing.
 	viperConfig.Set("export.site.include_deleted", true)
 	viperConfig.Set("access_token", "token-123")
 
+	exporterAppCfg := export.MapViperConfigToConfigurationOptions(viperConfig)
+
 	apiClient := api.GetTestClient()
 	initMockFeedsSet1(apiClient.HTTPClient())
-
-	err = feed.ExportFeeds(viperConfig, apiClient, apiClient, exporter)
+	exporterApp := feed.NewExporterApp(apiClient, nil, exporterAppCfg)
+	err = exporterApp.ExportFeeds(exporter)
 	assert.NoError(t, err)
 
 	initMockFeedsSet2(apiClient.HTTPClient())
-
-	err = feed.ExportFeeds(viperConfig, apiClient, apiClient, exporter)
+	exporterApp = feed.NewExporterApp(apiClient, nil, exporterAppCfg)
+	err = exporterApp.ExportFeeds(exporter)
 	assert.NoError(t, err)
 
 	filesEqualish(t, "mocks/set_2/outputs/inspections.csv", filepath.Join(exporter.ExportPath, "inspections.csv"))
@@ -248,7 +252,9 @@ func TestExportFeeds_should_handle_lots_of_rows_ok(t *testing.T) {
 		  }
 		`)
 
-	err = feed.ExportFeeds(viperConfig, apiClient, apiClient, exporter)
+	exporterAppCfg := export.MapViperConfigToConfigurationOptions(viperConfig)
+	exporterApp := feed.NewExporterApp(apiClient, apiClient, exporterAppCfg)
+	err = exporterApp.ExportFeeds(exporter)
 	assert.NoError(t, err)
 
 	inspectionsLines, err := countFileLines(filepath.Join(exporter.ExportPath, "inspections.csv"))

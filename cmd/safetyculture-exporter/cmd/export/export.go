@@ -134,9 +134,9 @@ func getSheqsyAPIClient() *api.Client {
 	)
 }
 
-// MapViperConfigToExportConfig maps Viper config to ExportConfig structure
+// MapViperConfigToConfigurationOptions maps Viper config to ConfigurationOptions structure
 // doesn't map 100% every field. Just the ones I found needed.
-func MapViperConfigToExportConfig(v *viper.Viper) *config.ExportConfig {
+func MapViperConfigToConfigurationOptions(v *viper.Viper) *config.ConfigurationOptions {
 
 	// caps action batch limit to 100
 	actionLimit := v.GetInt("export.action.limit")
@@ -150,27 +150,37 @@ func MapViperConfigToExportConfig(v *viper.Viper) *config.ExportConfig {
 		issueLimit = 100
 	}
 
-	return &config.ExportConfig{
-		Incremental:         v.GetBool("export.incremental"),
-		ModifiedAfter:       v.GetTime("export.modified_after"),
-		FilterByTemplateIDs: v.GetStringSlice("export.template_ids"),
-		InspectionConfig: &config.ExportInspectionConfig{
-			IncludeInactiveItems: v.GetBool("export.inspection.included_inactive_items"),
-			Archived:             v.GetString("export.inspection.archived"),
-			Completed:            v.GetString("export.inspection.completed"),
-			SkipIDs:              v.GetStringSlice("export.inspection.skip_ids"),
-			BatchLimit:           v.GetInt("export.inspection.limit"),
-			WebReportLink:        v.GetString("export.inspection.web_report_link"),
+	return &config.ConfigurationOptions{
+		ApiConfig: &config.ApiConfig{
+			AccessToken: v.GetString("access_token"),
 		},
-		SiteConfig: &config.ExportSiteConfig{
-			IncludeDeleted:       v.GetBool("export.site.include_deleted"),
-			IncludeFullHierarchy: v.GetBool("export.site.include_full_hierarchy"),
+		SheqsyApiConfig: &config.SheqsyApiConfig{
+			UserName:  v.GetString("sheqsy_username"),
+			CompanyID: v.GetString("sheqsy_company_id"),
 		},
-		MediaConfig: &config.ExportMediaConfig{
-			Export: v.GetBool("export.media"),
-		},
-		ActionConfig: &config.ExportActionConfig{
-			BatchLimit: actionLimit,
+		ExportConfig: &config.ExportConfig{
+			Incremental:        v.GetBool("export.incremental"),
+			ModifiedAfter:      v.GetTime("export.modified_after"),
+			FilterByTemplateID: v.GetStringSlice("export.template_ids"),
+			FilterByTableName:  v.GetStringSlice("export.tables"),
+			InspectionConfig: &config.ExportInspectionConfig{
+				IncludeInactiveItems: v.GetBool("export.inspection.included_inactive_items"),
+				Archived:             v.GetString("export.inspection.archived"),
+				Completed:            v.GetString("export.inspection.completed"),
+				SkipIDs:              v.GetStringSlice("export.inspection.skip_ids"),
+				BatchLimit:           v.GetInt("export.inspection.limit"),
+				WebReportLink:        v.GetString("export.inspection.web_report_link"),
+			},
+			SiteConfig: &config.ExportSiteConfig{
+				IncludeDeleted:       v.GetBool("export.site.include_deleted"),
+				IncludeFullHierarchy: v.GetBool("export.site.include_full_hierarchy"),
+			},
+			MediaConfig: &config.ExportMediaConfig{
+				Export: v.GetBool("export.media"),
+			},
+			ActionConfig: &config.ExportActionConfig{
+				BatchLimit: actionLimit,
+			},
 		},
 	}
 }
@@ -189,18 +199,13 @@ func runSQL(cmd *cobra.Command, args []string) error {
 	exporter, err := feed.NewSQLExporter(viper.GetString("db.dialect"), viper.GetString("db.connection_string"), true, exportMediaPath)
 	util.Check(err, "unable to create exporter")
 
-	exporterAppCfg := MapViperConfigToExportConfig(viper.GetViper())
-	exporterApp := feed.NewExporterApp(exporterAppCfg)
+	exporterAppCfg := MapViperConfigToConfigurationOptions(viper.GetViper())
+	exporterApp := feed.NewExporterApp(getAPIClient(), getSheqsyAPIClient(), exporterAppCfg)
 	if viper.GetBool("export.schema_only") {
 		return exporterApp.CreateSchemas(exporter)
 	}
 
-	return feed.ExportFeeds(
-		viper.GetViper(),
-		getAPIClient(),
-		getSheqsyAPIClient(),
-		exporter,
-	)
+	return exporterApp.ExportFeeds(exporter)
 }
 
 func runInspectionJSON(cmd *cobra.Command, args []string) error {
@@ -238,18 +243,17 @@ func runCSV(cmd *cobra.Command, args []string) error {
 	exporter, err := feed.NewCSVExporter(exportPath, exportMediaPath, maxRowsPerFile)
 	util.Check(err, "unable to create exporter")
 
-	exporterAppCfg := MapViperConfigToExportConfig(viper.GetViper())
-	exporterApp := feed.NewExporterApp(exporterAppCfg)
+	exporterAppCfg := MapViperConfigToConfigurationOptions(viper.GetViper())
+	exporterApp := feed.NewExporterApp(getAPIClient(), getSheqsyAPIClient(), exporterAppCfg)
 	if viper.GetBool("export.schema_only") {
 		return exporterApp.CreateSchemas(exporter)
 	}
 
-	return feed.ExportFeeds(
-		viper.GetViper(),
-		getAPIClient(),
-		getSheqsyAPIClient(),
-		exporter,
-	)
+	if len(viper.GetViper().GetString("access_token")) != 0 {
+		return exporterApp.ExportFeeds(exporter)
+	}
+
+	return nil
 }
 
 func printSchema(cmd *cobra.Command, args []string) error {
