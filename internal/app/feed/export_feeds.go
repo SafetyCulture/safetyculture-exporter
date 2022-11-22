@@ -120,23 +120,6 @@ func GetSheqsyFeeds() []Feed {
 	}
 }
 
-// WriteSchemas is used to print the schema of each feed to console output
-func WriteSchemas(v *viper.Viper, exporter *SchemaExporter) error {
-	logger := util.GetLogger()
-	logger.Info("Writing schemas started")
-
-	for _, feed := range append(GetFeeds(v), GetSheqsyFeeds()...) {
-		err := exporter.CreateSchema(feed, feed.RowsModel())
-		util.Check(err, "failed to create schema")
-
-		err = exporter.WriteSchema(feed)
-		util.Check(err, "failed to write schema")
-	}
-
-	logger.Info("Writing schemas finished")
-	return nil
-}
-
 // ExportInspectionReports download all the reports for inspections and stores them on disk
 func ExportInspectionReports(v *viper.Viper, apiClient *api.Client, exporter *ReportExporter) error {
 	logger := util.GetLogger()

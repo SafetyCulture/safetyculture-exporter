@@ -258,10 +258,12 @@ func runCSV(cmd *cobra.Command, args []string) error {
 }
 
 func printSchema(cmd *cobra.Command, args []string) error {
+	exporterAppCfg := MapViperConfigToConfigurationOptions(viper.GetViper())
+	exporterApp := feed.NewExporterApp(getAPIClient(), getSheqsyAPIClient(), exporterAppCfg)
+
 	exporter, err := feed.NewSchemaExporter(os.Stdout)
 	util.Check(err, "unable to create exporter")
-
-	return feed.WriteSchemas(viper.GetViper(), exporter)
+	return exporterApp.PrintSchemas(exporter)
 }
 
 func runInspectionReports(cmd *cobra.Command, args []string) error {

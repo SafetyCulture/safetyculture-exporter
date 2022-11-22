@@ -16,6 +16,8 @@ type SafetyCultureFeedExporter interface {
 	CreateSchemas(exporter Exporter) error
 	// ExportFeeds will export SafetyCulture feeds and Sheqsy feeds
 	ExportFeeds(exporter Exporter) error
+	// PrintSchemas is used to print the schema of each feed to console output
+	PrintSchemas(exporter Exporter) error
 }
 
 type ExporterFeedClient struct {
@@ -195,6 +197,18 @@ func (e *ExporterFeedClient) GetFeeds() []Feed {
 			Limit:       e.exportConfig.ActionConfig.BatchLimit,
 		},
 	}
+}
+
+// PrintSchemas is used to print the schema of each feed to console output
+func (e *ExporterFeedClient) PrintSchemas(exporter *SchemaExporter) error {
+	for _, feed := range append(e.GetFeeds(), GetSheqsyFeeds()...) {
+		err := exporter.CreateSchema(feed, feed.RowsModel())
+		util.Check(err, "failed to create schema")
+
+		err = exporter.WriteSchema(feed)
+		util.Check(err, "failed to write schema")
+	}
+	return nil
 }
 
 func NewExporterApp(scApiClient *api.Client, sheqsyApiClient *api.Client, cfg *config.ConfigurationOptions) *ExporterFeedClient {

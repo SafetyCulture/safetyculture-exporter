@@ -7,6 +7,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/SafetyCulture/safetyculture-exporter/cmd/safetyculture-exporter/cmd/export"
 	"github.com/SafetyCulture/safetyculture-exporter/internal/app/feed"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
@@ -33,7 +34,10 @@ func TestSchemaWriter_should_write_schema(t *testing.T) {
 		buf.Reset()
 	}
 
-	for _, f := range feed.GetFeeds(viperConfig) {
+	exporterAppCfg := export.MapViperConfigToConfigurationOptions(viperConfig)
+	exporterApp := feed.NewExporterApp(nil, nil, exporterAppCfg)
+
+	for _, f := range exporterApp.GetFeeds() {
 		fmt.Printf("TESTING FEED: %s\n", f.Name())
 		testSchema(f)
 	}
@@ -50,8 +54,10 @@ func TestSchemaWriter_should_write_all_schemas(t *testing.T) {
 	assert.NoError(t, err)
 
 	viperConfig := viper.New()
+	exporterAppCfg := export.MapViperConfigToConfigurationOptions(viperConfig)
+	exporterApp := feed.NewExporterApp(nil, nil, exporterAppCfg)
 
-	err = feed.WriteSchemas(viperConfig, exporter)
+	err = exporterApp.PrintSchemas(exporter)
 	assert.NoError(t, err)
 
 	assert.NotNil(t, buf.String())
