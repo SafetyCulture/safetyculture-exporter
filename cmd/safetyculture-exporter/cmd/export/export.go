@@ -217,11 +217,9 @@ func runInspectionJSON(cmd *cobra.Command, args []string) error {
 	err := os.MkdirAll(exportPath, os.ModePerm)
 	util.Check(err, fmt.Sprintf("Failed to create directory %s", exportPath))
 
-	inspectionsClient := inspections.NewInspectionClient(
-		viper.GetViper(),
-		getAPIClient(),
-		exporter.NewJSONExporter(exportPath),
-	)
+	exporterAppCfg := MapViperConfigToConfigurationOptions(viper.GetViper())
+	exporter := exporter.NewJSONExporter(exportPath)
+	inspectionsClient := inspections.NewInspectionClient(exporterAppCfg, getAPIClient(), exporter)
 
 	return inspectionsClient.Export(context.Background())
 }

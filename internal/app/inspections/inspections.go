@@ -10,7 +10,6 @@ import (
 	"github.com/SafetyCulture/safetyculture-exporter/internal/app/config"
 	"github.com/SafetyCulture/safetyculture-exporter/internal/app/exporter"
 	"github.com/SafetyCulture/safetyculture-exporter/internal/app/util"
-	"github.com/spf13/viper"
 	"go.uber.org/zap"
 )
 
@@ -36,19 +35,16 @@ type InspectionClient interface {
 }
 
 // NewInspectionClient returns a new instance of InspectionClient
-func NewInspectionClient(v *viper.Viper, apiClient *api.Client, exporter exporter.Exporter) InspectionClient {
-	inspectionConfig := config.GetInspectionConfig(v)
-	templateIDs := v.GetStringSlice("export.template_ids")
-
+func NewInspectionClient(cfg *config.ConfigurationOptions, apiClient *api.Client, exporter exporter.Exporter) InspectionClient {
 	return &Client{
 		apiClient:     apiClient,
 		exporter:      exporter,
-		SkipIDs:       inspectionConfig.SkipIDs,
-		ModifiedAfter: inspectionConfig.ModifiedAfter,
-		TemplateIDs:   templateIDs,
-		Archived:      inspectionConfig.Archived,
-		Completed:     inspectionConfig.Completed,
-		Incremental:   inspectionConfig.Incremental,
+		SkipIDs:       cfg.ExportConfig.InspectionConfig.SkipIDs,
+		ModifiedAfter: cfg.ExportConfig.ModifiedAfter,
+		TemplateIDs:   cfg.ExportConfig.FilterByTemplateID,
+		Archived:      cfg.ExportConfig.InspectionConfig.Archived,
+		Completed:     cfg.ExportConfig.InspectionConfig.Completed,
+		Incremental:   cfg.ExportConfig.Incremental,
 		SugaredLogger: util.GetLogger(),
 	}
 }
