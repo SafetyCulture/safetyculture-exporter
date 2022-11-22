@@ -10,6 +10,11 @@ import (
 	"github.com/SafetyCulture/safetyculture-exporter/internal/app/util"
 )
 
+/**
+NOTE: these functions were migrated from various feed methods and adapted not to use viper
+They are called directly by the CMD from export cmd.package
+*/
+
 // SafetyCultureFeedExporter defines the basic action in regard to the exporter
 type SafetyCultureFeedExporter interface {
 	// CreateSchemas will generate the schema for SafetyCulture feeds, without downloading data
