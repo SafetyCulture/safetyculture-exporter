@@ -14,7 +14,6 @@ import (
 	"github.com/stretchr/testify/require"
 	"gopkg.in/h2non/gock.v1"
 
-	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -29,9 +28,6 @@ func TestIntegrationDbCreateSchema_should_create_all_schemas(t *testing.T) {
 	exporter, err := getTemporaryCSVExporterWithRealSQLExporter(sqlExporter)
 	assert.NoError(t, err)
 
-	viperConfig := viper.New()
-	viperConfig.Set("access_token", "token-123")
-
 	gock.New("http://localhost:9999").
 		Get("/accounts/user/v1/user:WhoAmI").
 		Times(2).
@@ -45,7 +41,9 @@ func TestIntegrationDbCreateSchema_should_create_all_schemas(t *testing.T) {
 		  }
 		`)
 
-	exporterAppCfg := export.MapViperConfigToExportConfig(viper.GetViper())
+	exporterAppCfg := createEmptyConfigurationOptions()
+	exporterAppCfg.ApiConfig.AccessToken = "token-123"
+
 	exporterApp := feed.NewExporterApp(nil, nil, exporterAppCfg)
 	err = exporterApp.ExportSchemas(exporter)
 	assert.NoError(t, err)
@@ -75,9 +73,6 @@ func TestIntegrationDbExportFeeds_should_export_all_feeds_to_file(t *testing.T) 
 	exporter, err := getTemporaryCSVExporterWithRealSQLExporter(sqlExporter)
 	assert.NoError(t, err)
 
-	viperConfig := viper.New()
-	viperConfig.Set("access_token", "token-123")
-
 	apiClient := api.GetTestClient()
 	initMockFeedsSet1(apiClient.HTTPClient())
 
@@ -94,7 +89,11 @@ func TestIntegrationDbExportFeeds_should_export_all_feeds_to_file(t *testing.T) 
 		  }
 		`)
 
-	err = feed.ExportFeeds(viperConfig, apiClient, apiClient, exporter)
+	exporterAppCfg := createEmptyConfigurationOptions()
+	exporterAppCfg.ApiConfig.AccessToken = "token-123"
+
+	exporterApp := feed.NewExporterApp(apiClient, apiClient, exporterAppCfg)
+	err = exporterApp.ExportFeeds(exporter)
 	assert.NoError(t, err)
 
 	filesEqualish(t, "mocks/set_1/outputs/inspections.csv", filepath.Join(exporter.ExportPath, "inspections.csv"))
@@ -124,10 +123,6 @@ func TestIntegrationDbExportFeeds_should_perform_incremental_update_on_second_ru
 	exporter, err := getTemporaryCSVExporterWithRealSQLExporter(sqlExporter)
 	assert.NoError(t, err)
 
-	viperConfig := viper.New()
-	viperConfig.Set("export.incremental", true)
-	viperConfig.Set("access_token", "token-123")
-
 	apiClient := api.GetTestClient()
 	initMockFeedsSet1(apiClient.HTTPClient())
 
@@ -149,12 +144,18 @@ func TestIntegrationDbExportFeeds_should_perform_incremental_update_on_second_ru
 		Reply(http.StatusOK).
 		File(path.Join("mocks", "set_2", "inspections_deleted_single_page.json"))
 
-	err = feed.ExportFeeds(viperConfig, apiClient, apiClient, exporter)
+	exporterAppCfg := createEmptyConfigurationOptions()
+	exporterAppCfg.ApiConfig.AccessToken = "token-123"
+	exporterAppCfg.ExportConfig.Incremental = true
+
+	exporterApp := feed.NewExporterApp(apiClient, apiClient, exporterAppCfg)
+	err = exporterApp.ExportFeeds(exporter)
 	assert.NoError(t, err)
 
 	initMockFeedsSet2(apiClient.HTTPClient())
 
-	err = feed.ExportFeeds(viperConfig, apiClient, apiClient, exporter)
+	exporterApp = feed.NewExporterApp(apiClient, apiClient, exporterAppCfg)
+	err = exporterApp.ExportFeeds(exporter)
 	assert.NoError(t, err)
 
 	filesEqualish(t, "mocks/set_2/outputs/inspections.csv", filepath.Join(exporter.ExportPath, "inspections.csv"))
@@ -182,10 +183,6 @@ func TestIntegrationDbExportFeeds_should_handle_lots_of_rows_ok(t *testing.T) {
 	exporter, err := getTemporaryCSVExporterWithRealSQLExporter(sqlExporter)
 	assert.NoError(t, err)
 
-	viperConfig := viper.New()
-	viperConfig.Set("export.incremental", true)
-	viperConfig.Set("access_token", "token-123")
-
 	apiClient := api.GetTestClient()
 	initMockFeedsSet3(apiClient.HTTPClient())
 
@@ -208,7 +205,12 @@ func TestIntegrationDbExportFeeds_should_handle_lots_of_rows_ok(t *testing.T) {
 		  }
 		`)
 
-	err = feed.ExportFeeds(viperConfig, apiClient, apiClient, exporter)
+	exporterAppCfg := createEmptyConfigurationOptions()
+	exporterAppCfg.ApiConfig.AccessToken = "token-123"
+	exporterAppCfg.ExportConfig.Incremental = true
+
+	exporterApp := feed.NewExporterApp(apiClient, apiClient, exporterAppCfg)
+	err = exporterApp.ExportFeeds(exporter)
 	assert.NoError(t, err)
 
 	inspectionsLines, err := countFileLines(filepath.Join(exporter.ExportPath, "inspections.csv"))
@@ -225,10 +227,6 @@ func TestIntegrationDbExportFeeds_should_update_action_assignees_on_second_run(t
 	assert.NoError(t, err)
 	exporter, err := getTemporaryCSVExporterWithRealSQLExporter(sqlExporter)
 	assert.NoError(t, err)
-
-	viperConfig := viper.New()
-	viperConfig.Set("export.incremental", true)
-	viperConfig.Set("access_token", "token-123")
 
 	gock.New("http://localhost:9999").
 		Get("/accounts/user/v1/user:WhoAmI").
@@ -257,14 +255,20 @@ func TestIntegrationDbExportFeeds_should_update_action_assignees_on_second_run(t
 		Reply(http.StatusOK).
 		File(path.Join("mocks", "set_1", "inspections_deleted_single_page.json"))
 
-	err = feed.ExportFeeds(viperConfig, apiClient, apiClient, exporter)
+	exporterAppCfg := createEmptyConfigurationOptions()
+	exporterAppCfg.ApiConfig.AccessToken = "token-123"
+	exporterAppCfg.ExportConfig.Incremental = true
+
+	exporterApp := feed.NewExporterApp(apiClient, apiClient, exporterAppCfg)
+	err = exporterApp.ExportFeeds(exporter)
 	assert.NoError(t, err)
 
 	filesEqualish(t, "mocks/set_1/outputs/action_assignees.csv", filepath.Join(exporter.ExportPath, "action_assignees.csv"))
 
 	initMockFeedsSet2(apiClient.HTTPClient())
 
-	err = feed.ExportFeeds(viperConfig, apiClient, apiClient, exporter)
+	exporterApp = feed.NewExporterApp(apiClient, apiClient, exporterAppCfg)
+	err = exporterApp.ExportFeeds(exporter)
 	assert.NoError(t, err)
 	filesEqualish(t, "mocks/set_2/outputs/action_assignees.csv", filepath.Join(exporter.ExportPath, "action_assignees.csv"))
 }
@@ -276,11 +280,6 @@ func TestGroupUserFeed_Export_should_filter_duplicates(t *testing.T) {
 
 	exporter, err := getTemporaryCSVExporterWithRealSQLExporter(sqlExporter)
 	assert.NoError(t, err)
-
-	viperConfig := viper.New()
-	viperConfig.Set("export.incremental", true)
-	viperConfig.Set("export.tables", []string{"group_users"})
-	viperConfig.Set("access_token", "token-123")
 
 	apiClient := api.GetTestClient()
 	gock.InterceptClient(apiClient.HTTPClient())
@@ -302,7 +301,13 @@ func TestGroupUserFeed_Export_should_filter_duplicates(t *testing.T) {
 		Reply(200).
 		File("mocks/set_5/feed_group_users_1.json")
 
-	err = feed.ExportFeeds(viperConfig, apiClient, apiClient, exporter)
+	exporterAppCfg := createEmptyConfigurationOptions()
+	exporterAppCfg.ApiConfig.AccessToken = "token-123"
+	exporterAppCfg.ExportConfig.Incremental = true
+	exporterAppCfg.ExportConfig.FilterByTableName = []string{"group_users"}
+
+	exporterApp := feed.NewExporterApp(apiClient, apiClient, exporterAppCfg)
+	err = exporterApp.ExportFeeds(exporter)
 	assert.NoError(t, err)
 
 	lines, err := countFileLines(filepath.Join(exporter.ExportPath, "group_users.csv"))

@@ -6,24 +6,20 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/SafetyCulture/safetyculture-exporter/cmd/safetyculture-exporter/cmd/export"
 	"github.com/SafetyCulture/safetyculture-exporter/internal/app/api"
 	"github.com/SafetyCulture/safetyculture-exporter/internal/app/feed"
-	"gopkg.in/h2non/gock.v1"
-
-	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
+	"gopkg.in/h2non/gock.v1"
 )
 
 func TestCreateSchemas_should_create_all_schemas_to_file(t *testing.T) {
 	exporter, err := getTemporaryCSVExporter()
 	assert.NoError(t, err)
 
-	viperConfig := viper.New()
-	viperConfig.Set("export.site.include_deleted", true)
-	viperConfig.Set("access_token", "token-123")
+	exporterAppCfg := createEmptyConfigurationOptions()
+	exporterAppCfg.ApiConfig.AccessToken = "token-123"
+	exporterAppCfg.ExportConfig.SiteConfig.IncludeDeleted = true
 
-	exporterAppCfg := export.MapViperConfigToConfigurationOptions(viperConfig)
 	exporterApp := feed.NewExporterApp(nil, nil, exporterAppCfg)
 	err = exporterApp.ExportSchemas(exporter)
 	assert.NoError(t, err)
@@ -50,12 +46,6 @@ func TestExportFeeds_should_export_all_feeds_to_file(t *testing.T) {
 
 	exporter, err := getTemporaryCSVExporter()
 	assert.NoError(t, err)
-
-	viperConfig := viper.New()
-	viperConfig.Set("export.site.include_deleted", true)
-	viperConfig.Set("access_token", "token-123")
-	viperConfig.Set("sheqsy_username", "token-123")
-	viperConfig.Set("sheqsy_company_id", "ada3042f-16a4-4249-915d-dc088adef92a")
 
 	apiClient := api.GetTestClient()
 	initMockFeedsSet1(apiClient.HTTPClient())
@@ -93,7 +83,12 @@ func TestExportFeeds_should_export_all_feeds_to_file(t *testing.T) {
 			"ssoSettings": null
 		}`)
 
-	exporterAppCfg := export.MapViperConfigToConfigurationOptions(viperConfig)
+	exporterAppCfg := createEmptyConfigurationOptions()
+	exporterAppCfg.ApiConfig.AccessToken = "token-123"
+	exporterAppCfg.ExportConfig.SiteConfig.IncludeDeleted = true
+	exporterAppCfg.SheqsyApiConfig.UserName = "token-123"
+	exporterAppCfg.SheqsyApiConfig.CompanyID = "ada3042f-16a4-4249-915d-dc088adef92a"
+
 	exporterApp := feed.NewExporterApp(apiClient, apiClient, exporterAppCfg)
 	err = exporterApp.ExportFeeds(exporter)
 	assert.NoError(t, err)
@@ -157,12 +152,9 @@ func TestExportFeeds_should_perform_incremental_update_on_second_run(t *testing.
 	exporter, err := getTemporaryCSVExporter()
 	assert.NoError(t, err)
 
-	viperConfig := viper.New()
-	viperConfig.Set("export.incremental", true)
-	viperConfig.Set("export.site.include_deleted", true)
-	viperConfig.Set("access_token", "token-123")
-
-	exporterAppCfg := export.MapViperConfigToConfigurationOptions(viperConfig)
+	exporterAppCfg := createEmptyConfigurationOptions()
+	exporterAppCfg.ApiConfig.AccessToken = "token-123"
+	exporterAppCfg.ExportConfig.SiteConfig.IncludeDeleted = true
 
 	apiClient := api.GetTestClient()
 	initMockFeedsSet1(apiClient.HTTPClient())
@@ -201,10 +193,6 @@ func TestExportFeeds_should_handle_lots_of_rows_ok(t *testing.T) {
 	exporter, err := getTemporaryCSVExporter()
 	assert.NoError(t, err)
 
-	viperConfig := viper.New()
-	viperConfig.Set("export.incremental", true)
-	viperConfig.Set("access_token", "token-123")
-
 	apiClient := api.GetTestClient()
 	initMockFeedsSet3(apiClient.HTTPClient())
 
@@ -226,7 +214,10 @@ func TestExportFeeds_should_handle_lots_of_rows_ok(t *testing.T) {
 		  }
 		`)
 
-	exporterAppCfg := export.MapViperConfigToConfigurationOptions(viperConfig)
+	exporterAppCfg := createEmptyConfigurationOptions()
+	exporterAppCfg.ApiConfig.AccessToken = "token-123"
+	exporterAppCfg.ExportConfig.SiteConfig.IncludeDeleted = true
+
 	exporterApp := feed.NewExporterApp(apiClient, apiClient, exporterAppCfg)
 	err = exporterApp.ExportFeeds(exporter)
 	assert.NoError(t, err)
