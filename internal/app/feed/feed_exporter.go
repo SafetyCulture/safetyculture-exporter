@@ -37,7 +37,7 @@ type ExporterFeedClient struct {
 	sheqsyApiConfig *config.SheqsyApiConfig
 }
 
-// CreateSchemas generates schemas for the data feeds without fetching any data
+// ExportSchemas generates schemas for the data feeds without fetching any data
 func (e *ExporterFeedClient) ExportSchemas(exporter Exporter) error {
 	var lastErr error = nil
 	feeds := e.GetFeeds()
