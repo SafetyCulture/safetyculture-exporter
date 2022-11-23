@@ -24,9 +24,9 @@ import (
 
 func TestIntegrationDbCreateSchema_should_create_all_schemas(t *testing.T) {
 	sqlExporter, err := getTestingSQLExporter()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	exporter, err := getTemporaryCSVExporterWithRealSQLExporter(sqlExporter)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	gock.New("http://localhost:9999").
 		Get("/accounts/user/v1/user:WhoAmI").
@@ -69,9 +69,9 @@ func TestIntegrationDbCreateSchema_should_create_all_schemas(t *testing.T) {
 
 func TestIntegrationDbExportFeeds_should_export_all_feeds_to_file(t *testing.T) {
 	sqlExporter, err := getTestingSQLExporter()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	exporter, err := getTemporaryCSVExporterWithRealSQLExporter(sqlExporter)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	apiClient := api.GetTestClient()
 	initMockFeedsSet1(apiClient.HTTPClient())
@@ -119,9 +119,9 @@ func TestIntegrationDbExportFeeds_should_export_all_feeds_to_file(t *testing.T) 
 // and that other tables are incrementally updated
 func TestIntegrationDbExportFeeds_should_perform_incremental_update_on_second_run(t *testing.T) {
 	sqlExporter, err := getTestingSQLExporter()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	exporter, err := getTemporaryCSVExporterWithRealSQLExporter(sqlExporter)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	apiClient := api.GetTestClient()
 	initMockFeedsSet1(apiClient.HTTPClient())
@@ -179,9 +179,9 @@ func TestIntegrationDbExportFeeds_should_perform_incremental_update_on_second_ru
 
 func TestIntegrationDbExportFeeds_should_handle_lots_of_rows_ok(t *testing.T) {
 	sqlExporter, err := getTestingSQLExporter()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	exporter, err := getTemporaryCSVExporterWithRealSQLExporter(sqlExporter)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	apiClient := api.GetTestClient()
 	initMockFeedsSet3(apiClient.HTTPClient())
@@ -224,9 +224,9 @@ func TestIntegrationDbExportFeeds_should_handle_lots_of_rows_ok(t *testing.T) {
 
 func TestIntegrationDbExportFeeds_should_update_action_assignees_on_second_run(t *testing.T) {
 	sqlExporter, err := getTestingSQLExporter()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	exporter, err := getTemporaryCSVExporterWithRealSQLExporter(sqlExporter)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	gock.New("http://localhost:9999").
 		Get("/accounts/user/v1/user:WhoAmI").
