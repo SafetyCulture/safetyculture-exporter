@@ -42,7 +42,7 @@ func TestSchemaWriter_should_write_schema(t *testing.T) {
 		testSchema(f)
 	}
 
-	for _, f := range feed.GetSheqsyFeeds() {
+	for _, f := range exporterApp.GetSheqsyFeeds() {
 		fmt.Printf("TESTING FEED: %s\n", f.Name())
 		testSchema(f)
 	}

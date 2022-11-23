@@ -13,7 +13,6 @@ import (
 
 	"github.com/SafetyCulture/safetyculture-exporter/internal/app/api"
 	"github.com/pkg/errors"
-	"github.com/spf13/viper"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -28,6 +27,7 @@ type ReportExporter struct {
 	Filename     string
 	Format       []string
 	Mu           sync.Mutex
+	retryTimeout int
 }
 
 type reportExportFormat struct {
@@ -56,7 +56,7 @@ func (e *ReportExporter) SaveReports(ctx context.Context, apiClient *api.Client,
 
 	format, err := e.getFormats()
 	if err != nil {
-		return fmt.Errorf("No valid export format specified")
+		return fmt.Errorf("no valid export format specified")
 	}
 
 	report := &reportExport{}
@@ -225,10 +225,8 @@ func (e *ReportExporter) exportInspection(ctx context.Context, apiClient *api.Cl
 	tries := 0
 
 	for {
-
-		retryTimeout := viper.GetInt("report.retry_timeout")
 		// wait for stipulated time before checking for report completion
-		time.Sleep(GetWaitTime(retryTimeout) * time.Second)
+		time.Sleep(GetWaitTime(e.retryTimeout) * time.Second)
 
 		rec, cErr := apiClient.CheckInspectionReportExportCompletion(ctx, inspection.ID, messageID)
 		if cErr != nil {
@@ -367,7 +365,7 @@ func getFilePath(exportPath string, inspection *Inspection, format string, filen
 }
 
 // NewReportExporter returns a new instance of ReportExporter
-func NewReportExporter(exportPath string, format []string, preferenceID string, filename string) (*ReportExporter, error) {
+func NewReportExporter(exportPath string, format []string, preferenceID string, filename string, retryTimeout int) (*ReportExporter, error) {
 	sqlExporter, err := NewSQLExporter("sqlite", filepath.Join(exportPath, "reports.db"), true, "")
 	if err != nil {
 		return nil, err
@@ -380,5 +378,6 @@ func NewReportExporter(exportPath string, format []string, preferenceID string, 
 		Format:       format,
 		PreferenceID: preferenceID,
 		Filename:     filename,
+		retryTimeout: retryTimeout,
 	}, nil
 }

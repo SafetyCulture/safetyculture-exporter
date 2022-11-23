@@ -50,7 +50,7 @@ func getTemporaryReportExporter(format []string, preferenceID string, filename s
 		log.Fatal(err)
 	}
 
-	return feed.NewReportExporter(dir, format, preferenceID, filename)
+	return feed.NewReportExporter(dir, format, preferenceID, filename, 10)
 }
 
 // getTemporaryCSVExporterWithRealSQLExporter creates a CSV exporter that writes a temporary folder

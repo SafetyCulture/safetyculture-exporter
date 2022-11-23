@@ -205,10 +205,12 @@ func runSQL(cmd *cobra.Command, args []string) error {
 	exporterAppCfg := MapViperConfigToConfigurationOptions(viper.GetViper())
 	exporterApp := feed.NewExporterApp(getAPIClient(), getSheqsyAPIClient(), exporterAppCfg)
 	if viper.GetBool("export.schema_only") {
-		return exporterApp.CreateSchemas(exporter)
+		return exporterApp.ExportSchemas(exporter)
 	}
 
-	return exporterApp.ExportFeeds(exporter)
+	err = exporterApp.ExportFeeds(exporter)
+	util.Check(err, "error while exporting feeds")
+	return nil
 }
 
 func runInspectionJSON(cmd *cobra.Command, args []string) error {
@@ -221,7 +223,9 @@ func runInspectionJSON(cmd *cobra.Command, args []string) error {
 	exporter := exporter.NewJSONExporter(exportPath)
 	inspectionsClient := inspections.NewInspectionClient(exporterAppCfg, getAPIClient(), exporter)
 
-	return inspectionsClient.Export(context.Background())
+	err = inspectionsClient.Export(context.Background())
+	util.Check(err, "error while exporting JSON")
+	return nil
 }
 
 func runCSV(cmd *cobra.Command, args []string) error {
@@ -247,11 +251,12 @@ func runCSV(cmd *cobra.Command, args []string) error {
 	exporterAppCfg := MapViperConfigToConfigurationOptions(viper.GetViper())
 	exporterApp := feed.NewExporterApp(getAPIClient(), getSheqsyAPIClient(), exporterAppCfg)
 	if viper.GetBool("export.schema_only") {
-		return exporterApp.CreateSchemas(exporter)
+		return exporterApp.ExportSchemas(exporter)
 	}
 
 	if len(viper.GetViper().GetString("access_token")) != 0 {
-		return exporterApp.ExportFeeds(exporter)
+		err = exporterApp.ExportFeeds(exporter)
+		util.Check(err, "error while exporting feeds")
 	}
 
 	return nil
@@ -263,7 +268,10 @@ func printSchema(cmd *cobra.Command, args []string) error {
 
 	exporter, err := feed.NewSchemaExporter(os.Stdout)
 	util.Check(err, "unable to create exporter")
-	return exporterApp.PrintSchemas(exporter)
+	err = exporterApp.PrintSchemas(exporter)
+	util.Check(err, "error while printing schema")
+
+	return nil
 }
 
 func runInspectionReports(cmd *cobra.Command, args []string) error {
@@ -276,12 +284,12 @@ func runInspectionReports(cmd *cobra.Command, args []string) error {
 	preferenceID := viper.GetString("report.preference_id")
 	filenameConvention := viper.GetString("report.filename_convention")
 
-	exporter, err := feed.NewReportExporter(exportPath, format, preferenceID, filenameConvention)
+	exporter, err := feed.NewReportExporter(exportPath, format, preferenceID, filenameConvention, viper.GetInt("report.retry_timeout"))
 	util.Check(err, "unable to create exporter")
 
-	apiClient := getAPIClient()
-
-	err = feed.ExportInspectionReports(viper.GetViper(), apiClient, exporter)
+	exporterAppCfg := MapViperConfigToConfigurationOptions(viper.GetViper())
+	exporterApp := feed.NewExporterApp(getAPIClient(), getSheqsyAPIClient(), exporterAppCfg)
+	err = exporterApp.ExportInspectionReports(exporter)
 	util.Check(err, "failed to generate reports")
 
 	return nil

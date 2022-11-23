@@ -25,7 +25,7 @@ func TestCreateSchemas_should_create_all_schemas_to_file(t *testing.T) {
 
 	exporterAppCfg := export.MapViperConfigToConfigurationOptions(viperConfig)
 	exporterApp := feed.NewExporterApp(nil, nil, exporterAppCfg)
-	err = exporterApp.CreateSchemas(exporter)
+	err = exporterApp.ExportSchemas(exporter)
 	assert.NoError(t, err)
 
 	filesEqualish(t, "mocks/set_1/schemas/inspections.csv", filepath.Join(exporter.ExportPath, "inspections.csv"))

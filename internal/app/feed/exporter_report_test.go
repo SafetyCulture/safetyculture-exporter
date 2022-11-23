@@ -9,6 +9,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/SafetyCulture/safetyculture-exporter/cmd/safetyculture-exporter/cmd/export"
 	"github.com/SafetyCulture/safetyculture-exporter/internal/app/api"
 	"github.com/SafetyCulture/safetyculture-exporter/internal/app/feed"
 	"github.com/spf13/viper"
@@ -69,7 +70,9 @@ func TestExportReports_should_export_all_reports(t *testing.T) {
 		Reply(200).
 		Body(bytes.NewBuffer([]byte(`file content`)))
 
-	err = feed.ExportInspectionReports(viperConfig, apiClient, exporter)
+	exporterAppCfg := export.MapViperConfigToConfigurationOptions(viperConfig)
+	exporterApp := feed.NewExporterApp(apiClient, nil, exporterAppCfg)
+	err = exporterApp.ExportInspectionReports(exporter)
 	assert.NoError(t, err)
 
 	fileExists(t, filepath.Join(exporter.ExportPath, "My-Audit.pdf"))
@@ -123,7 +126,9 @@ func TestExportReports_should_export_all_reports_with_ID_filename(t *testing.T) 
 		Reply(200).
 		Body(bytes.NewBuffer([]byte(`file content`)))
 
-	err = feed.ExportInspectionReports(viperConfig, apiClient, exporter)
+	exporterAppCfg := export.MapViperConfigToConfigurationOptions(viperConfig)
+	exporterApp := feed.NewExporterApp(apiClient, nil, exporterAppCfg)
+	err = exporterApp.ExportInspectionReports(exporter)
 	assert.NoError(t, err)
 
 	fileExists(t, filepath.Join(exporter.ExportPath, "audit_47ac0dce16f94d73b5178372368af162.pdf"))
@@ -186,7 +191,9 @@ func TestExportReports_should_not_run_if_all_exported(t *testing.T) {
 		Reply(200).
 		Body(bytes.NewBuffer([]byte(`file content`)))
 
-	err = feed.ExportInspectionReports(viperConfig, apiClient, exporter)
+	exporterAppCfg := export.MapViperConfigToConfigurationOptions(viperConfig)
+	exporterApp := feed.NewExporterApp(apiClient, nil, exporterAppCfg)
+	err = exporterApp.ExportInspectionReports(exporter)
 	assert.NoError(t, err)
 
 	file1ModTime1, _ := getFileModTime(filepath.Join(exporter.ExportPath, "My-Audit.pdf"))
@@ -195,7 +202,8 @@ func TestExportReports_should_not_run_if_all_exported(t *testing.T) {
 
 	// run the export process again
 	initMockFeedsSet1(apiClient.HTTPClient())
-	err = feed.ExportInspectionReports(viperConfig, apiClient, exporter)
+	exporterApp = feed.NewExporterApp(apiClient, nil, exporterAppCfg)
+	err = exporterApp.ExportInspectionReports(exporter)
 	assert.NoError(t, err)
 
 	file1ModTime2, _ := getFileModTime(filepath.Join(exporter.ExportPath, "My-Audit.pdf"))
@@ -260,7 +268,9 @@ func TestExportReports_should_take_care_of_invalid_file_names(t *testing.T) {
 		Reply(http.StatusOK).
 		BodyString(`{"activites": []}`)
 
-	err = feed.ExportInspectionReports(viperConfig, apiClient, exporter)
+	exporterAppCfg := export.MapViperConfigToConfigurationOptions(viperConfig)
+	exporterApp := feed.NewExporterApp(apiClient, nil, exporterAppCfg)
+	err = exporterApp.ExportInspectionReports(exporter)
 	assert.NoError(t, err)
 
 	fileExists(t, filepath.Join(exporter.ExportPath, "My-Audit-1.pdf"))
@@ -309,7 +319,9 @@ func TestExportReports_should_fail_after_retries(t *testing.T) {
 		Reply(200).
 		JSON(getReportExportCompletionMessage("IN_PROGRESS"))
 
-	err = feed.ExportInspectionReports(viperConfig, apiClient, exporter)
+	exporterAppCfg := export.MapViperConfigToConfigurationOptions(viperConfig)
+	exporterApp := feed.NewExporterApp(apiClient, nil, exporterAppCfg)
+	err = exporterApp.ExportInspectionReports(exporter)
 	assert.NotNil(t, err)
 	assert.Contains(t, err.Error(), "Failed to generate 3 PDF reports and 0 WORD reports")
 }
@@ -349,7 +361,9 @@ func TestExportReports_should_fail_if_report_status_fails(t *testing.T) {
 		Reply(200).
 		JSON(getReportExportCompletionMessage("FAILED"))
 
-	err = feed.ExportInspectionReports(viperConfig, apiClient, exporter)
+	exporterAppCfg := export.MapViperConfigToConfigurationOptions(viperConfig)
+	exporterApp := feed.NewExporterApp(apiClient, nil, exporterAppCfg)
+	err = exporterApp.ExportInspectionReports(exporter)
 	assert.NotNil(t, err)
 	assert.Contains(t, err.Error(), "Failed to generate 0 PDF reports and 3 WORD reports")
 }
@@ -382,7 +396,9 @@ func TestExportReports_should_fail_if_init_report_reply_is_not_success(t *testin
 		Reply(500).
 		JSON(`{"error": "something went wrong"}`)
 
-	err = feed.ExportInspectionReports(viperConfig, apiClient, exporter)
+	exporterAppCfg := export.MapViperConfigToConfigurationOptions(viperConfig)
+	exporterApp := feed.NewExporterApp(apiClient, nil, exporterAppCfg)
+	err = exporterApp.ExportInspectionReports(exporter)
 	assert.NotNil(t, err)
 	assert.Contains(t, err.Error(), "Failed to generate 0 PDF reports and 3 WORD reports")
 }
@@ -422,7 +438,9 @@ func TestExportReports_should_fail_if_report_completion_reply_is_not_success(t *
 		Reply(500).
 		JSON(`{"error": "something went wrong"}`)
 
-	err = feed.ExportInspectionReports(viperConfig, apiClient, exporter)
+	exporterAppCfg := export.MapViperConfigToConfigurationOptions(viperConfig)
+	exporterApp := feed.NewExporterApp(apiClient, nil, exporterAppCfg)
+	err = exporterApp.ExportInspectionReports(exporter)
 	assert.NotNil(t, err)
 	assert.Contains(t, err.Error(), "Failed to generate 0 PDF reports and 3 WORD reports")
 }
@@ -468,7 +486,9 @@ func TestExportReports_should_fail_if_download_report_reply_is_not_success(t *te
 		Reply(500).
 		JSON(`{"error": "something went wrong"}`)
 
-	err = feed.ExportInspectionReports(viperConfig, apiClient, exporter)
+	exporterAppCfg := export.MapViperConfigToConfigurationOptions(viperConfig)
+	exporterApp := feed.NewExporterApp(apiClient, nil, exporterAppCfg)
+	err = exporterApp.ExportInspectionReports(exporter)
 	assert.NotNil(t, err)
 	assert.Contains(t, err.Error(), "Failed to generate 3 PDF reports and 0 WORD reports")
 }
@@ -494,8 +514,10 @@ func TestExportReports_should_return_error_for_unsupported_format(t *testing.T) 
 		  }
 		`)
 
-	err = feed.ExportInspectionReports(viperConfig, apiClient, exporter)
-	assert.EqualError(t, err, "No valid export format specified")
+	exporterAppCfg := export.MapViperConfigToConfigurationOptions(viperConfig)
+	exporterApp := feed.NewExporterApp(apiClient, nil, exporterAppCfg)
+	err = exporterApp.ExportInspectionReports(exporter)
+	assert.EqualError(t, err, "no valid export format specified")
 }
 
 func Test_GetWaitTime(t *testing.T) {

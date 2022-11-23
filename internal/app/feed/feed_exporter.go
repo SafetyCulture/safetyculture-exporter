@@ -10,19 +10,23 @@ import (
 	"github.com/SafetyCulture/safetyculture-exporter/internal/app/util"
 )
 
-/**
+/*
+*
 NOTE: these functions were migrated from various feed methods and adapted not to use viper
 They are called directly by the CMD from export cmd.package
 */
+const maxConcurrentGoRoutines = 10
 
 // SafetyCultureFeedExporter defines the basic action in regard to the exporter
 type SafetyCultureFeedExporter interface {
-	// CreateSchemas will generate the schema for SafetyCulture feeds, without downloading data
-	CreateSchemas(exporter Exporter) error
+	// ExportSchemas will generate the schema for SafetyCulture feeds, without downloading data
+	ExportSchemas(exporter Exporter) error
 	// ExportFeeds will export SafetyCulture feeds and Sheqsy feeds
 	ExportFeeds(exporter Exporter) error
 	// PrintSchemas is used to print the schema of each feed to console output
-	PrintSchemas(exporter Exporter) error
+	PrintSchemas(exporter *SchemaExporter) error
+	// ExportInspectionReports download all the reports for inspections and stores them on disk
+	ExportInspectionReports(exporter *ReportExporter) error
 }
 
 type ExporterFeedClient struct {
@@ -34,7 +38,7 @@ type ExporterFeedClient struct {
 }
 
 // CreateSchemas generates schemas for the data feeds without fetching any data
-func (e *ExporterFeedClient) CreateSchemas(exporter Exporter) error {
+func (e *ExporterFeedClient) ExportSchemas(exporter Exporter) error {
 	var lastErr error = nil
 	feeds := e.GetFeeds()
 	for _, feed := range feeds {
@@ -101,7 +105,7 @@ func (e *ExporterFeedClient) ExportFeeds(exporter Exporter) error {
 		logger.Info("exporting SHEQSY data")
 
 		var feeds []Feed
-		for _, feed := range GetSheqsyFeeds() {
+		for _, feed := range e.GetSheqsyFeeds() {
 			if tablesMap[feed.Name()] || len(tables) == 0 {
 				feeds = append(feeds, feed)
 			}
@@ -144,16 +148,7 @@ func (e *ExporterFeedClient) ExportFeeds(exporter Exporter) error {
 // GetFeeds returns list of available SafetyCulture feeds
 func (e *ExporterFeedClient) GetFeeds() []Feed {
 	return []Feed{
-		&InspectionFeed{
-			SkipIDs:       e.exportConfig.InspectionConfig.SkipIDs,
-			ModifiedAfter: e.exportConfig.ModifiedAfter,
-			TemplateIDs:   e.exportConfig.FilterByTemplateID,
-			Archived:      e.exportConfig.InspectionConfig.Archived,
-			Completed:     e.exportConfig.InspectionConfig.Completed,
-			Incremental:   e.exportConfig.Incremental,
-			Limit:         e.exportConfig.InspectionConfig.BatchLimit,
-			WebReportLink: e.exportConfig.InspectionConfig.WebReportLink,
-		},
+		e.getInspectionFeed(),
 		&InspectionItemFeed{
 			SkipIDs:         e.exportConfig.InspectionConfig.SkipIDs,
 			ModifiedAfter:   e.exportConfig.ModifiedAfter,
@@ -204,9 +199,33 @@ func (e *ExporterFeedClient) GetFeeds() []Feed {
 	}
 }
 
+func (e *ExporterFeedClient) getInspectionFeed() *InspectionFeed {
+	return &InspectionFeed{
+		SkipIDs:       e.exportConfig.InspectionConfig.SkipIDs,
+		ModifiedAfter: e.exportConfig.ModifiedAfter,
+		TemplateIDs:   e.exportConfig.FilterByTemplateID,
+		Archived:      e.exportConfig.InspectionConfig.Archived,
+		Completed:     e.exportConfig.InspectionConfig.Completed,
+		Incremental:   e.exportConfig.Incremental,
+		Limit:         e.exportConfig.InspectionConfig.BatchLimit,
+		WebReportLink: e.exportConfig.InspectionConfig.WebReportLink,
+	}
+}
+
+// GetSheqsyFeeds returns list of all available data feeds for sheqsy
+func (e *ExporterFeedClient) GetSheqsyFeeds() []Feed {
+	return []Feed{
+		&SheqsyEmployeeFeed{},
+		&SheqsyDepartmentEmployeeFeed{},
+		&SheqsyDepartmentFeed{},
+		&SheqsyActivityFeed{},
+		&SheqsyShiftFeed{},
+	}
+}
+
 // PrintSchemas is used to print the schema of each feed to console output
 func (e *ExporterFeedClient) PrintSchemas(exporter *SchemaExporter) error {
-	for _, feed := range append(e.GetFeeds(), GetSheqsyFeeds()...) {
+	for _, feed := range append(e.GetFeeds(), e.GetSheqsyFeeds()...) {
 		err := exporter.CreateSchema(feed, feed.RowsModel())
 		util.Check(err, "failed to create schema")
 
@@ -214,6 +233,27 @@ func (e *ExporterFeedClient) PrintSchemas(exporter *SchemaExporter) error {
 		util.Check(err, "failed to write schema")
 	}
 	return nil
+}
+
+func (e *ExporterFeedClient) ExportInspectionReports(exporter *ReportExporter) error {
+	logger := util.GetLogger()
+	ctx := context.Background()
+
+	resp, err := e.apiClient.WhoAmI(ctx)
+	util.Check(err, "failed to get details of the current user")
+
+	logger.Infof("Exporting inspection reports by user: %s %s", resp.Firstname, resp.Lastname)
+
+	feed := e.getInspectionFeed()
+	err = feed.Export(ctx, e.apiClient, exporter, resp.OrganisationID)
+	util.Check(err, "failed to export inspection feed")
+
+	err = exporter.SaveReports(ctx, e.apiClient, feed)
+	if err != nil {
+		logger.Info("Export finished")
+	}
+
+	return err
 }
 
 func NewExporterApp(scApiClient *api.Client, sheqsyApiClient *api.Client, cfg *config.ConfigurationOptions) *ExporterFeedClient {
