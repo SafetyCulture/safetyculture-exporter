@@ -221,8 +221,8 @@ func runInspectionJSON(cmd *cobra.Command, args []string) error {
 
 func runCSV(cmd *cobra.Command, args []string) error {
 	e := NewSafetyCultureExporter(viper.GetViper())
-	err := e.RunInspectionJSON()
-	util.Check(err, "error while exporting JSON")
+	err := e.RunCSV()
+	util.Check(err, "error while exporting CSV")
 	return nil
 }
 
