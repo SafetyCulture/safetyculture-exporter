@@ -93,7 +93,7 @@ func (f *SheqsyEmployeeFeed) Export(ctx context.Context, apiClient *api.Client, 
 		Truncate: !exporter.SupportsUpsert(),
 	})
 
-	rows := []*SheqsyEmployee{}
+	var rows []*SheqsyEmployee
 
 	resp, err := apiClient.Get(ctx, fmt.Sprintf("/SheqsyIntegrationApi/api/v3/companies/%s/employees", companyID))
 	util.Check(err, "failed fetch data")
@@ -113,7 +113,7 @@ func (f *SheqsyEmployeeFeed) Export(ctx context.Context, apiClient *api.Client, 
 			util.Check(err, "failed to update lastActivityDateTimeUTC")
 		}
 
-		departments := []string{}
+		var departments []string
 		value.Get("departments.#.name").ForEach(func(key, value gjson.Result) bool {
 			departments = append(departments, value.String())
 			return true

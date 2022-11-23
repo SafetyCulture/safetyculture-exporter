@@ -24,7 +24,7 @@ func TestActionFeedExport_should_export_rows_to_sql_db(t *testing.T) {
 	err = actionsFeed.Export(context.Background(), apiClient, exporter, "")
 	assert.NoError(t, err)
 
-	rows := []feed.Action{}
+	var rows []feed.Action
 	resp := exporter.DB.Table("actions").Scan(&rows)
 	assert.Nil(t, resp.Error)
 

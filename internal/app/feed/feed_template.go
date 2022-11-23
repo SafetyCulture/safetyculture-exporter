@@ -105,7 +105,7 @@ func (f *TemplateFeed) Export(ctx context.Context, apiClient *api.Client, export
 			ModifiedAfter: f.ModifiedAfter,
 		},
 	}, func(resp *api.GetFeedResponse) error {
-		rows := []*Template{}
+		var rows []*Template
 
 		err := json.Unmarshal(resp.Data, &rows)
 		util.Check(err, "Failed to unmarshal templates data to struct")

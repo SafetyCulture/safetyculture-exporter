@@ -1,8 +1,9 @@
 package api
 
 import (
-	"github.com/dghubble/sling"
 	"net/http"
+
+	"github.com/dghubble/sling"
 )
 
 // Header is used to represent name of a header

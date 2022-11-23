@@ -37,7 +37,7 @@ func TestInspectionFeedExport_should_export_rows_to_sql_db(t *testing.T) {
 	err = inspectionsFeed.Export(context.Background(), apiClient, exporter, "")
 	assert.NoError(t, err)
 
-	rows := []feed.Inspection{}
+	var rows []feed.Inspection
 	resp := exporter.DB.Table("inspections").Scan(&rows)
 	assert.Nil(t, resp.Error)
 

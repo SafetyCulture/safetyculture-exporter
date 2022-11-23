@@ -83,12 +83,12 @@ func (f *SheqsyDepartmentEmployeeFeed) Export(ctx context.Context, apiClient *ap
 		Truncate: !exporter.SupportsUpsert(),
 	})
 
-	rows := []*SheqsyDepartmentEmployee{}
+	var rows []*SheqsyDepartmentEmployee
 
 	resp, err := apiClient.Get(ctx, fmt.Sprintf("/SheqsyIntegrationApi/api/v3/companies/%s/employees", companyID))
 	util.Check(err, "failed fetch data")
 
-	rawData := []sheqsyEmployeeRaw{}
+	var rawData []sheqsyEmployeeRaw
 	err = json.Unmarshal(*resp, &rawData)
 	util.Check(err, "failed parse data")
 

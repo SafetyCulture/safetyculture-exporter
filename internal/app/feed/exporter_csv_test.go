@@ -136,7 +136,7 @@ func TestCSVExporterWriteRows_should_write_rows(t *testing.T) {
 	err = exporter.WriteRows(userFeed, users)
 	assert.NoError(t, err)
 
-	rows := []feed.User{}
+	var rows []feed.User
 	resp := exporter.DB.Table("users").Scan(&rows)
 	assert.Nil(t, resp.Error)
 
@@ -178,7 +178,7 @@ func TestCSVExporterWriteRows_should_update_rows(t *testing.T) {
 	err = exporter.WriteRows(userFeed, users)
 	assert.NoError(t, err)
 
-	rows := []feed.User{}
+	var rows []feed.User
 	resp := exporter.DB.Table("users").Scan(&rows)
 	assert.Nil(t, resp.Error)
 

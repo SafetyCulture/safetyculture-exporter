@@ -121,7 +121,7 @@ func (f *ActionFeed) Export(ctx context.Context, apiClient *api.Client, exporter
 			Limit:         f.Limit,
 		},
 	}, func(resp *api.GetFeedResponse) error {
-		rows := []*Action{}
+		var rows []*Action
 
 		err := json.Unmarshal(resp.Data, &rows)
 		util.Check(err, "Failed to unmarshal actions data to struct")
