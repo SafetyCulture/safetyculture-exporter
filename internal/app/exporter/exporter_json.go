@@ -24,7 +24,7 @@ type JSONExporter struct {
 }
 
 // NewJSONExporter creates new instance of JSONExporter
-func NewJSONExporter(exportPath string) Exporter {
+func NewJSONExporter(exportPath string) SafetyCultureJSONExporter {
 	return &JSONExporter{
 		exportPath: exportPath,
 	}

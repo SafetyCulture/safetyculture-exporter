@@ -20,7 +20,7 @@ type Client struct {
 	*zap.SugaredLogger
 
 	apiClient     *api.Client
-	exporter      exporter.Exporter
+	exporter      exporter.SafetyCultureJSONExporter
 	SkipIDs       []string
 	ModifiedAfter time.Time
 	TemplateIDs   []string
@@ -35,7 +35,7 @@ type InspectionClient interface {
 }
 
 // NewInspectionClient returns a new instance of InspectionClient
-func NewInspectionClient(cfg *config.ConfigurationOptions, apiClient *api.Client, exporter exporter.Exporter) InspectionClient {
+func NewInspectionClient(cfg *config.ConfigurationOptions, apiClient *api.Client, exporter exporter.SafetyCultureJSONExporter) InspectionClient {
 	return &Client{
 		apiClient:     apiClient,
 		exporter:      exporter,

@@ -8,7 +8,7 @@ import (
 )
 
 // getTemporaryJSONExporter creates a JSONExporter that writes to a temp folder
-func getTemporaryJSONExporter() exporter.Exporter {
+func getTemporaryJSONExporter() exporter.SafetyCultureJSONExporter {
 	dir, err := os.MkdirTemp("", "export")
 	if err != nil {
 		log.Fatal(err)
