@@ -27,6 +27,7 @@ require (
 )
 
 require (
+	github.com/lib/pq v1.10.7 // indirect
 	github.com/tidwall/match v1.1.1 // indirect
 	github.com/tidwall/pretty v1.2.1 // indirect
 )
