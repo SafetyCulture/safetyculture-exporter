@@ -9,10 +9,11 @@ import (
 	"github.com/SafetyCulture/safetyculture-exporter/internal/app/api"
 	"github.com/SafetyCulture/safetyculture-exporter/internal/app/feed"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"gopkg.in/h2non/gock.v1"
 )
 
-func TestCreateSchemas_should_create_all_schemas_to_file(t *testing.T) {
+func TestExporterFeedClient_ExportFeeds_should_create_all_schemas_to_file(t *testing.T) {
 	exporter, err := getTemporaryCSVExporter()
 	assert.NoError(t, err)
 
@@ -41,7 +42,7 @@ func TestCreateSchemas_should_create_all_schemas_to_file(t *testing.T) {
 	filesEqualish(t, "mocks/set_1/schemas/schedule_occurrences.csv", filepath.Join(exporter.ExportPath, "schedule_occurrences.csv"))
 }
 
-func TestExportFeeds_should_export_all_feeds_to_file(t *testing.T) {
+func TestExporterFeedClient_ExportFeeds_should_export_all_feeds_to_file(t *testing.T) {
 	defer gock.Off()
 
 	exporter, err := getTemporaryCSVExporter()
@@ -119,9 +120,70 @@ func TestExportFeeds_should_export_all_feeds_to_file(t *testing.T) {
 	filesEqualish(t, "mocks/set_1/outputs/sheqsy_departments.csv", filepath.Join(exporter.ExportPath, "sheqsy_departments.csv"))
 }
 
+func TestExporterFeedClient_ExportFeeds_should_err_when_not_auth(t *testing.T) {
+	defer gock.Off()
+
+	exporter, err := getTemporaryCSVExporter()
+	require.NoError(t, err)
+
+	apiClient := api.GetTestClient()
+	gock.InterceptClient(apiClient.HTTPClient())
+
+	gock.New("http://localhost:9999").
+		Get("/accounts/user/v1/user:WhoAmI").
+		Reply(401).
+		BodyString(`
+		{
+			"statusCode": 401,
+			"error": "Unauthorized",
+			"message": "Bad token or token expired"
+		}
+		`)
+
+	exporterAppCfg := createEmptyConfigurationOptions()
+	exporterAppCfg.ApiConfig.AccessToken = "token-123"
+	exporterApp := feed.NewExporterApp(apiClient, nil, exporterAppCfg)
+	err = exporterApp.ExportFeeds(exporter)
+	assert.EqualError(t, err, "failed to get details of the current user: Failed request to API: request error status: 401")
+}
+
+func TestExporterFeedClient_ExportFeeds_should_err_when_cannot_unmarshal(t *testing.T) {
+	defer gock.Off()
+
+	exporter, err := getTemporaryCSVExporter()
+	require.NoError(t, err)
+
+	apiClient := api.GetTestClient()
+	gock.InterceptClient(apiClient.HTTPClient())
+
+	gock.New("http://localhost:9999").
+		Get("/accounts/user/v1/user:WhoAmI").
+		Reply(200).
+		BodyString(`
+		{
+			"user_id": "user_123",
+			"organisation_id": "role_123",
+			"firstname": "Test",
+			"lastname": "Test"
+		  }
+		`)
+
+	gock.New("http://localhost:9999").
+		Get("/feed/users").
+		Reply(200).
+		File("mocks/misc/feed_users_bad_format.json")
+
+	exporterAppCfg := createEmptyConfigurationOptions()
+	exporterAppCfg.ApiConfig.AccessToken = "token-123"
+	exporterAppCfg.ExportConfig.FilterByTableName = []string{"users"}
+	exporterApp := feed.NewExporterApp(apiClient, apiClient, exporterAppCfg)
+	err = exporterApp.ExportFeeds(exporter)
+	assert.EqualError(t, err, `failed to export: failed to export feed "users": failed to unmarshal users data to struct: unexpected end of JSON input`)
+}
+
 // Expectation of this test is that group_users and schedule_assignees are truncated and refreshed
 // and that other tables are incrementally updated
-func TestExportFeeds_should_perform_incremental_update_on_second_run(t *testing.T) {
+func TestExporterFeedClient_ExportFeeds_should_perform_incremental_update_on_second_run(t *testing.T) {
 	defer gock.Off()
 
 	gock.New("http://localhost:9999").
@@ -187,7 +249,7 @@ func TestExportFeeds_should_perform_incremental_update_on_second_run(t *testing.
 	filesEqualish(t, "mocks/set_2/outputs/action_assignees.csv", filepath.Join(exporter.ExportPath, "action_assignees.csv"))
 }
 
-func TestExportFeeds_should_handle_lots_of_rows_ok(t *testing.T) {
+func TestExporterFeedClient_ExportFeeds_should_handle_lots_of_rows_ok(t *testing.T) {
 	defer gock.Off()
 
 	exporter, err := getTemporaryCSVExporter()

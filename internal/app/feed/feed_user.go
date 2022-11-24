@@ -70,25 +70,21 @@ func (f *UserFeed) CreateSchema(exporter Exporter) error {
 
 // Export exports the feed to the supplied exporter
 func (f *UserFeed) Export(ctx context.Context, apiClient *api.Client, exporter Exporter, orgID string) error {
-	logger := util.GetLogger().With(
-		"feed", f.Name(),
-		"org_id", orgID,
-	)
+	logger := util.GetLogger().With("feed", f.Name(), "org_id", orgID)
 
 	exporter.InitFeed(f, &InitFeedOptions{
 		// Truncate files if upserts aren't supported.
-		// This ensure that the export does not contain duplicate rows
+		// This ensures that the export does not contain duplicate rows
 		Truncate: !exporter.SupportsUpsert(),
 	})
 
-	err := apiClient.DrainFeed(ctx, &api.GetFeedRequest{
-		InitialURL: "/feed/users",
-		Params:     api.GetFeedParams{},
-	}, func(resp *api.GetFeedResponse) error {
+	drainFn := func(resp *api.GetFeedResponse) error {
 		var rows []*User
 
 		err := json.Unmarshal(resp.Data, &rows)
-		util.Check(err, "Failed to unmarshal users data to struct")
+		if err != nil {
+			return fmt.Errorf("failed to unmarshal users data to struct: %w", err)
+		}
 
 		if len(rows) != 0 {
 			// Calculate the size of the batch we can insert into the DB at once. Column count + buffer to account for primary keys
@@ -111,8 +107,12 @@ func (f *UserFeed) Export(ctx context.Context, apiClient *api.Client, exporter E
 			"export_duration_ms", exporter.GetDuration().Milliseconds(),
 		).Info("export batch complete")
 		return nil
-	})
+	}
 
-	util.CheckFeedError(logger, err, fmt.Sprintf("Failed to export feed %q", f.Name()))
+	req := &api.GetFeedRequest{InitialURL: "/feed/users", Params: api.GetFeedParams{}}
+	err := apiClient.DrainFeed(ctx, req, drainFn)
+	if err != nil {
+		return fmt.Errorf("failed to export feed %q: %w", f.Name(), err)
+	}
 	return exporter.FinaliseExport(f, &[]*User{})
 }

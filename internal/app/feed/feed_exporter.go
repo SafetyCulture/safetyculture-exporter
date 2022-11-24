@@ -3,7 +3,7 @@ package feed
 import (
 	"context"
 	"errors"
-	"sync"
+	"fmt"
 
 	"github.com/SafetyCulture/safetyculture-exporter/internal/app/api"
 	"github.com/SafetyCulture/safetyculture-exporter/internal/app/config"
@@ -59,8 +59,8 @@ func (e *ExporterFeedClient) ExportFeeds(exporter Exporter) error {
 		tablesMap[table] = true
 	}
 
-	var wg sync.WaitGroup
-	semaphore := make(chan int, maxConcurrentGoRoutines)
+	doneCh := make(chan int, maxConcurrentGoRoutines)
+	errCh := make(chan error)
 
 	atLeastOneRun := false
 
@@ -77,7 +77,9 @@ func (e *ExporterFeedClient) ExportFeeds(exporter Exporter) error {
 		}
 
 		resp, err := e.apiClient.WhoAmI(ctx)
-		util.Check(err, "failed to get details of the current user")
+		if err != nil {
+			return fmt.Errorf("failed to get details of the current user: %w", err)
+		}
 
 		logger.Infof("Exporting data by user: %s %s", resp.Firstname, resp.Lastname)
 
@@ -86,15 +88,17 @@ func (e *ExporterFeedClient) ExportFeeds(exporter Exporter) error {
 		}
 
 		for _, feed := range feeds {
-			semaphore <- 1
-			wg.Add(1)
+			doneCh <- 1
 
 			go func(f Feed) {
 				logger.Infof(" ... queueing %s\n", f.Name())
-				defer wg.Done()
 				err := f.Export(ctx, e.apiClient, exporter, resp.OrganisationID)
-				util.Check(err, "failed to export")
-				<-semaphore
+				if err != nil {
+					logger.Errorf(">>> STOPPING GO ROUTINE %s", f.Name())
+					errCh <- fmt.Errorf("failed to export: %w", err)
+					return
+				}
+				<-doneCh
 			}(feed)
 		}
 	}
@@ -121,23 +125,26 @@ func (e *ExporterFeedClient) ExportFeeds(exporter Exporter) error {
 		}
 
 		for _, feed := range feeds {
-			semaphore <- 1
-			wg.Add(1)
+			doneCh <- 1
 
 			go func(f Feed) {
 				logger.Infof(" ... queueing %s\n", f.Name())
-				defer wg.Done()
 				err := f.Export(ctx, e.sheqsyApiClient, exporter, resp.CompanyUID)
 				util.Check(err, "failed to export")
-				<-semaphore
+				<-doneCh
 			}(feed)
 		}
 	}
 
-	wg.Wait()
-
 	if !atLeastOneRun {
 		return errors.New("no API tokens provided")
+	}
+
+	select {
+	case <-doneCh:
+		fmt.Println("success:")
+	case e := <-errCh:
+		fmt.Println("failure:", e)
 	}
 
 	logger.Info("Export finished")
