@@ -85,7 +85,7 @@ func (f *UserFeed) Export(ctx context.Context, apiClient *api.Client, exporter E
 		InitialURL: "/feed/users",
 		Params:     api.GetFeedParams{},
 	}, func(resp *api.GetFeedResponse) error {
-		rows := []*User{}
+		var rows []*User
 
 		err := json.Unmarshal(resp.Data, &rows)
 		util.Check(err, "Failed to unmarshal users data to struct")

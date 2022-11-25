@@ -170,7 +170,7 @@ func (f *InspectionItemFeed) writeRows(ctx context.Context, exporter Exporter, r
 
 		// Some audits in production have the same item ID multiple times
 		// We can't insert them simultaneously. This means we are dropping data, which sucks.
-		rowsToInsert := []*InspectionItem{}
+		var rowsToInsert []*InspectionItem
 		idSeen := map[string]bool{}
 		for _, row := range rows[i:j] {
 			skip := skipIDs[row.AuditID]
@@ -251,7 +251,7 @@ func (f *InspectionItemFeed) Export(ctx context.Context, apiClient *api.Client, 
 			Limit:           f.Limit,
 		},
 	}, func(resp *api.GetFeedResponse) error {
-		rows := []*InspectionItem{}
+		var rows []*InspectionItem
 
 		err := json.Unmarshal(resp.Data, &rows)
 		util.Check(err, "Failed to unmarshal inspection-items data to struct")

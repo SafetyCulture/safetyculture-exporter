@@ -111,7 +111,7 @@ func (f *ScheduleFeed) Export(ctx context.Context, apiClient *api.Client, export
 			TemplateIDs: f.TemplateIDs,
 		},
 	}, func(resp *api.GetFeedResponse) error {
-		rows := []*Schedule{}
+		var rows []*Schedule
 
 		err := json.Unmarshal(resp.Data, &rows)
 		util.Check(err, "Failed to unmarshal schedules data to struct")

@@ -72,7 +72,7 @@ func (f *SiteMemberFeed) Export(ctx context.Context, apiClient *api.Client, expo
 	})
 
 	feedFn := func(resp *api.GetFeedResponse) error {
-		rows := []*SiteMember{}
+		var rows []*SiteMember
 
 		err := json.Unmarshal(resp.Data, &rows)
 		util.Check(err, "Failed to unmarshal sites data to struct")

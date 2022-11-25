@@ -101,7 +101,7 @@ func (f *ScheduleOccurrenceFeed) Export(ctx context.Context, apiClient *api.Clie
 			TemplateIDs: f.TemplateIDs,
 		},
 	}, func(resp *api.GetFeedResponse) error {
-		rows := []*ScheduleOccurrence{}
+		var rows []*ScheduleOccurrence
 
 		err := json.Unmarshal(resp.Data, &rows)
 		util.Check(err, "Failed to unmarshal schedule-occurrences data to struct")

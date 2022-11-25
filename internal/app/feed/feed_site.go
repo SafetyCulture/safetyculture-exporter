@@ -96,7 +96,7 @@ func (f *SiteFeed) Export(ctx context.Context, apiClient *api.Client, exporter E
 			ShowOnlyLeafNodes: &showOnlyLeafNodes,
 		},
 	}, func(resp *api.GetFeedResponse) error {
-		rows := []*Site{}
+		var rows []*Site
 
 		err := json.Unmarshal(resp.Data, &rows)
 		util.Check(err, "Failed to unmarshal sites data to struct")

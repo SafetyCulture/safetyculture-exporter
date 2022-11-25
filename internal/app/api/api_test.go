@@ -174,13 +174,13 @@ func TestAPIClientDrainFeed_should_return_for_as_long_next_page_set(t *testing.T
 	gock.InterceptClient(apiClient.HTTPClient())
 
 	calls := 0
-	auditIDs := []string{}
+	var auditIDs []string
 	err := apiClient.DrainFeed(context.Background(), &api.GetFeedRequest{
 		InitialURL: "/feed/inspections",
 	}, func(data *api.GetFeedResponse) error {
 		calls += 1
 
-		rows := []map[string]string{}
+		var rows []map[string]string
 		err := json.Unmarshal(data.Data, &rows)
 		assert.NoError(t, err)
 
@@ -389,7 +389,7 @@ func TestAPIClientDrainInspections_should_return_for_as_long_next_page_set(t *te
 	apiClient := api.GetTestClient()
 	gock.InterceptClient(apiClient.HTTPClient())
 
-	auditIDs := []string{}
+	var auditIDs []string
 	err := apiClient.DrainInspections(
 		context.Background(),
 		&api.ListInspectionsParams{},

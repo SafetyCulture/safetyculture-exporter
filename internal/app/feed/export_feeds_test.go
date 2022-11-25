@@ -8,21 +8,20 @@ import (
 
 	"github.com/SafetyCulture/safetyculture-exporter/internal/app/api"
 	"github.com/SafetyCulture/safetyculture-exporter/internal/app/feed"
-	"gopkg.in/h2non/gock.v1"
-
-	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
+	"gopkg.in/h2non/gock.v1"
 )
 
 func TestCreateSchemas_should_create_all_schemas_to_file(t *testing.T) {
 	exporter, err := getTemporaryCSVExporter()
 	assert.NoError(t, err)
 
-	viperConfig := viper.New()
-	viperConfig.Set("export.site.include_deleted", true)
-	viperConfig.Set("access_token", "token-123")
+	exporterAppCfg := createEmptyConfigurationOptions()
+	exporterAppCfg.ApiConfig.AccessToken = "token-123"
+	exporterAppCfg.ExportConfig.SiteConfig.IncludeDeleted = true
 
-	err = feed.CreateSchemas(viperConfig, exporter)
+	exporterApp := feed.NewExporterApp(nil, nil, exporterAppCfg)
+	err = exporterApp.ExportSchemas(exporter)
 	assert.NoError(t, err)
 
 	filesEqualish(t, "mocks/set_1/schemas/inspections.csv", filepath.Join(exporter.ExportPath, "inspections.csv"))
@@ -47,12 +46,6 @@ func TestExportFeeds_should_export_all_feeds_to_file(t *testing.T) {
 
 	exporter, err := getTemporaryCSVExporter()
 	assert.NoError(t, err)
-
-	viperConfig := viper.New()
-	viperConfig.Set("export.site.include_deleted", true)
-	viperConfig.Set("access_token", "token-123")
-	viperConfig.Set("sheqsy_username", "token-123")
-	viperConfig.Set("sheqsy_company_id", "ada3042f-16a4-4249-915d-dc088adef92a")
 
 	apiClient := api.GetTestClient()
 	initMockFeedsSet1(apiClient.HTTPClient())
@@ -90,7 +83,14 @@ func TestExportFeeds_should_export_all_feeds_to_file(t *testing.T) {
 			"ssoSettings": null
 		}`)
 
-	err = feed.ExportFeeds(viperConfig, apiClient, apiClient, exporter)
+	exporterAppCfg := createEmptyConfigurationOptions()
+	exporterAppCfg.ApiConfig.AccessToken = "token-123"
+	exporterAppCfg.ExportConfig.SiteConfig.IncludeDeleted = true
+	exporterAppCfg.SheqsyApiConfig.UserName = "token-123"
+	exporterAppCfg.SheqsyApiConfig.CompanyID = "ada3042f-16a4-4249-915d-dc088adef92a"
+
+	exporterApp := feed.NewExporterApp(apiClient, apiClient, exporterAppCfg)
+	err = exporterApp.ExportFeeds(exporter)
 	assert.NoError(t, err)
 
 	filesEqualish(t, "mocks/set_1/outputs/inspections.csv", filepath.Join(exporter.ExportPath, "inspections.csv"))
@@ -152,20 +152,19 @@ func TestExportFeeds_should_perform_incremental_update_on_second_run(t *testing.
 	exporter, err := getTemporaryCSVExporter()
 	assert.NoError(t, err)
 
-	viperConfig := viper.New()
-	viperConfig.Set("export.incremental", true)
-	viperConfig.Set("export.site.include_deleted", true)
-	viperConfig.Set("access_token", "token-123")
+	exporterAppCfg := createEmptyConfigurationOptions()
+	exporterAppCfg.ApiConfig.AccessToken = "token-123"
+	exporterAppCfg.ExportConfig.SiteConfig.IncludeDeleted = true
 
 	apiClient := api.GetTestClient()
 	initMockFeedsSet1(apiClient.HTTPClient())
-
-	err = feed.ExportFeeds(viperConfig, apiClient, apiClient, exporter)
+	exporterApp := feed.NewExporterApp(apiClient, nil, exporterAppCfg)
+	err = exporterApp.ExportFeeds(exporter)
 	assert.NoError(t, err)
 
 	initMockFeedsSet2(apiClient.HTTPClient())
-
-	err = feed.ExportFeeds(viperConfig, apiClient, apiClient, exporter)
+	exporterApp = feed.NewExporterApp(apiClient, nil, exporterAppCfg)
+	err = exporterApp.ExportFeeds(exporter)
 	assert.NoError(t, err)
 
 	filesEqualish(t, "mocks/set_2/outputs/inspections.csv", filepath.Join(exporter.ExportPath, "inspections.csv"))
@@ -188,41 +187,11 @@ func TestExportFeeds_should_perform_incremental_update_on_second_run(t *testing.
 	filesEqualish(t, "mocks/set_2/outputs/action_assignees.csv", filepath.Join(exporter.ExportPath, "action_assignees.csv"))
 }
 
-func TestGetActionLimit(t *testing.T) {
-	viperConfig := viper.New()
-
-	viperConfig.Set("export.action.limit", 200)
-	assert.Equal(t, 100, feed.GetActionLimit(viperConfig))
-
-	viperConfig.Set("export.action.limit", 20)
-	assert.Equal(t, 20, feed.GetActionLimit(viperConfig))
-
-	viperConfig.Set("export.action.limit", 100)
-	assert.Equal(t, 100, feed.GetActionLimit(viperConfig))
-}
-
-func TestGetIssueLimit(t *testing.T) {
-	viperConfig := viper.New()
-
-	viperConfig.Set("export.issue.limit", 200)
-	assert.Equal(t, 100, feed.GetIssueLimit(viperConfig))
-
-	viperConfig.Set("export.issue.limit", 20)
-	assert.Equal(t, 20, feed.GetIssueLimit(viperConfig))
-
-	viperConfig.Set("export.issue.limit", 100)
-	assert.Equal(t, 100, feed.GetIssueLimit(viperConfig))
-}
-
 func TestExportFeeds_should_handle_lots_of_rows_ok(t *testing.T) {
 	defer gock.Off()
 
 	exporter, err := getTemporaryCSVExporter()
 	assert.NoError(t, err)
-
-	viperConfig := viper.New()
-	viperConfig.Set("export.incremental", true)
-	viperConfig.Set("access_token", "token-123")
 
 	apiClient := api.GetTestClient()
 	initMockFeedsSet3(apiClient.HTTPClient())
@@ -245,7 +214,12 @@ func TestExportFeeds_should_handle_lots_of_rows_ok(t *testing.T) {
 		  }
 		`)
 
-	err = feed.ExportFeeds(viperConfig, apiClient, apiClient, exporter)
+	exporterAppCfg := createEmptyConfigurationOptions()
+	exporterAppCfg.ApiConfig.AccessToken = "token-123"
+	exporterAppCfg.ExportConfig.SiteConfig.IncludeDeleted = true
+
+	exporterApp := feed.NewExporterApp(apiClient, apiClient, exporterAppCfg)
+	err = exporterApp.ExportFeeds(exporter)
 	assert.NoError(t, err)
 
 	inspectionsLines, err := countFileLines(filepath.Join(exporter.ExportPath, "inspections.csv"))

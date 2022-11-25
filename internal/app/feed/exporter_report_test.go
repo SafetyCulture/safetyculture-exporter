@@ -11,7 +11,6 @@ import (
 
 	"github.com/SafetyCulture/safetyculture-exporter/internal/app/api"
 	"github.com/SafetyCulture/safetyculture-exporter/internal/app/feed"
-	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/h2non/gock.v1"
 )
@@ -33,8 +32,6 @@ func TestExportReports_should_export_all_reports(t *testing.T) {
 	exporter, err := getTemporaryReportExporter([]string{"PDF", "WORD"}, "", "INSPECTION_TITLE")
 	assert.NoError(t, err)
 
-	viperConfig := viper.New()
-
 	apiClient := api.GetTestClient()
 	defer resetMocks(apiClient.HTTPClient())
 	initMockFeedsSet1(apiClient.HTTPClient())
@@ -69,7 +66,9 @@ func TestExportReports_should_export_all_reports(t *testing.T) {
 		Reply(200).
 		Body(bytes.NewBuffer([]byte(`file content`)))
 
-	err = feed.ExportInspectionReports(viperConfig, apiClient, exporter)
+	exporterAppCfg := createEmptyConfigurationOptions()
+	exporterApp := feed.NewExporterApp(apiClient, nil, exporterAppCfg)
+	err = exporterApp.ExportInspectionReports(exporter)
 	assert.NoError(t, err)
 
 	fileExists(t, filepath.Join(exporter.ExportPath, "My-Audit.pdf"))
@@ -87,8 +86,6 @@ func TestExportReports_should_export_all_reports_with_ID_filename(t *testing.T) 
 	exporter, err := getTemporaryReportExporter([]string{"PDF", "WORD"}, "", "INSPECTION_ID")
 	assert.NoError(t, err)
 
-	viperConfig := viper.New()
-
 	apiClient := api.GetTestClient()
 	defer resetMocks(apiClient.HTTPClient())
 	initMockFeedsSet1(apiClient.HTTPClient())
@@ -123,7 +120,9 @@ func TestExportReports_should_export_all_reports_with_ID_filename(t *testing.T) 
 		Reply(200).
 		Body(bytes.NewBuffer([]byte(`file content`)))
 
-	err = feed.ExportInspectionReports(viperConfig, apiClient, exporter)
+	exporterAppCfg := createEmptyConfigurationOptions()
+	exporterApp := feed.NewExporterApp(apiClient, nil, exporterAppCfg)
+	err = exporterApp.ExportInspectionReports(exporter)
 	assert.NoError(t, err)
 
 	fileExists(t, filepath.Join(exporter.ExportPath, "audit_47ac0dce16f94d73b5178372368af162.pdf"))
@@ -140,9 +139,6 @@ func TestExportReports_should_not_run_if_all_exported(t *testing.T) {
 
 	exporter, err := getTemporaryReportExporter([]string{"PDF"}, "", "INSPECTION_TITLE")
 	assert.NoError(t, err)
-
-	viperConfig := viper.New()
-	viperConfig.Set("export.incremental", true)
 
 	apiClient := api.GetTestClient()
 	defer resetMocks(apiClient.HTTPClient())
@@ -186,7 +182,11 @@ func TestExportReports_should_not_run_if_all_exported(t *testing.T) {
 		Reply(200).
 		Body(bytes.NewBuffer([]byte(`file content`)))
 
-	err = feed.ExportInspectionReports(viperConfig, apiClient, exporter)
+	exporterAppCfg := createEmptyConfigurationOptions()
+	exporterAppCfg.ExportConfig.Incremental = true
+
+	exporterApp := feed.NewExporterApp(apiClient, nil, exporterAppCfg)
+	err = exporterApp.ExportInspectionReports(exporter)
 	assert.NoError(t, err)
 
 	file1ModTime1, _ := getFileModTime(filepath.Join(exporter.ExportPath, "My-Audit.pdf"))
@@ -195,7 +195,8 @@ func TestExportReports_should_not_run_if_all_exported(t *testing.T) {
 
 	// run the export process again
 	initMockFeedsSet1(apiClient.HTTPClient())
-	err = feed.ExportInspectionReports(viperConfig, apiClient, exporter)
+	exporterApp = feed.NewExporterApp(apiClient, nil, exporterAppCfg)
+	err = exporterApp.ExportInspectionReports(exporter)
 	assert.NoError(t, err)
 
 	file1ModTime2, _ := getFileModTime(filepath.Join(exporter.ExportPath, "My-Audit.pdf"))
@@ -210,9 +211,6 @@ func TestExportReports_should_not_run_if_all_exported(t *testing.T) {
 func TestExportReports_should_take_care_of_invalid_file_names(t *testing.T) {
 	exporter, err := getTemporaryReportExporter([]string{"PDF"}, "", "INSPECTION_TITLE")
 	assert.NoError(t, err)
-
-	viperConfig := viper.New()
-	viperConfig.Set("export.incremental", true)
 
 	apiClient := api.GetTestClient()
 	defer resetMocks(apiClient.HTTPClient())
@@ -260,7 +258,11 @@ func TestExportReports_should_take_care_of_invalid_file_names(t *testing.T) {
 		Reply(http.StatusOK).
 		BodyString(`{"activites": []}`)
 
-	err = feed.ExportInspectionReports(viperConfig, apiClient, exporter)
+	exporterAppCfg := createEmptyConfigurationOptions()
+	exporterAppCfg.ExportConfig.Incremental = true
+
+	exporterApp := feed.NewExporterApp(apiClient, nil, exporterAppCfg)
+	err = exporterApp.ExportInspectionReports(exporter)
 	assert.NoError(t, err)
 
 	fileExists(t, filepath.Join(exporter.ExportPath, "My-Audit-1.pdf"))
@@ -277,8 +279,6 @@ func TestExportReports_should_take_care_of_invalid_file_names(t *testing.T) {
 func TestExportReports_should_fail_after_retries(t *testing.T) {
 	exporter, err := getTemporaryReportExporter([]string{"PDF"}, "", "INSPECTION_TITLE")
 	assert.NoError(t, err)
-
-	viperConfig := viper.New()
 
 	apiClient := api.GetTestClient()
 	defer resetMocks(apiClient.HTTPClient())
@@ -309,7 +309,9 @@ func TestExportReports_should_fail_after_retries(t *testing.T) {
 		Reply(200).
 		JSON(getReportExportCompletionMessage("IN_PROGRESS"))
 
-	err = feed.ExportInspectionReports(viperConfig, apiClient, exporter)
+	exporterAppCfg := createEmptyConfigurationOptions()
+	exporterApp := feed.NewExporterApp(apiClient, nil, exporterAppCfg)
+	err = exporterApp.ExportInspectionReports(exporter)
 	assert.NotNil(t, err)
 	assert.Contains(t, err.Error(), "Failed to generate 3 PDF reports and 0 WORD reports")
 }
@@ -317,8 +319,6 @@ func TestExportReports_should_fail_after_retries(t *testing.T) {
 func TestExportReports_should_fail_if_report_status_fails(t *testing.T) {
 	exporter, err := getTemporaryReportExporter([]string{"WORD"}, "", "INSPECTION_TITLE")
 	assert.NoError(t, err)
-
-	viperConfig := viper.New()
 
 	apiClient := api.GetTestClient()
 	defer resetMocks(apiClient.HTTPClient())
@@ -349,7 +349,9 @@ func TestExportReports_should_fail_if_report_status_fails(t *testing.T) {
 		Reply(200).
 		JSON(getReportExportCompletionMessage("FAILED"))
 
-	err = feed.ExportInspectionReports(viperConfig, apiClient, exporter)
+	exporterAppCfg := createEmptyConfigurationOptions()
+	exporterApp := feed.NewExporterApp(apiClient, nil, exporterAppCfg)
+	err = exporterApp.ExportInspectionReports(exporter)
 	assert.NotNil(t, err)
 	assert.Contains(t, err.Error(), "Failed to generate 0 PDF reports and 3 WORD reports")
 }
@@ -357,8 +359,6 @@ func TestExportReports_should_fail_if_report_status_fails(t *testing.T) {
 func TestExportReports_should_fail_if_init_report_reply_is_not_success(t *testing.T) {
 	exporter, err := getTemporaryReportExporter([]string{"WORD"}, "", "INSPECTION_TITLE")
 	assert.NoError(t, err)
-
-	viperConfig := viper.New()
 
 	apiClient := api.GetTestClient()
 	defer resetMocks(apiClient.HTTPClient())
@@ -382,7 +382,9 @@ func TestExportReports_should_fail_if_init_report_reply_is_not_success(t *testin
 		Reply(500).
 		JSON(`{"error": "something went wrong"}`)
 
-	err = feed.ExportInspectionReports(viperConfig, apiClient, exporter)
+	exporterAppCfg := createEmptyConfigurationOptions()
+	exporterApp := feed.NewExporterApp(apiClient, nil, exporterAppCfg)
+	err = exporterApp.ExportInspectionReports(exporter)
 	assert.NotNil(t, err)
 	assert.Contains(t, err.Error(), "Failed to generate 0 PDF reports and 3 WORD reports")
 }
@@ -390,8 +392,6 @@ func TestExportReports_should_fail_if_init_report_reply_is_not_success(t *testin
 func TestExportReports_should_fail_if_report_completion_reply_is_not_success(t *testing.T) {
 	exporter, err := getTemporaryReportExporter([]string{"WORD"}, "", "INSPECTION_TITLE")
 	assert.NoError(t, err)
-
-	viperConfig := viper.New()
 
 	apiClient := api.GetTestClient()
 	defer resetMocks(apiClient.HTTPClient())
@@ -422,7 +422,9 @@ func TestExportReports_should_fail_if_report_completion_reply_is_not_success(t *
 		Reply(500).
 		JSON(`{"error": "something went wrong"}`)
 
-	err = feed.ExportInspectionReports(viperConfig, apiClient, exporter)
+	exporterAppCfg := createEmptyConfigurationOptions()
+	exporterApp := feed.NewExporterApp(apiClient, nil, exporterAppCfg)
+	err = exporterApp.ExportInspectionReports(exporter)
 	assert.NotNil(t, err)
 	assert.Contains(t, err.Error(), "Failed to generate 0 PDF reports and 3 WORD reports")
 }
@@ -430,8 +432,6 @@ func TestExportReports_should_fail_if_report_completion_reply_is_not_success(t *
 func TestExportReports_should_fail_if_download_report_reply_is_not_success(t *testing.T) {
 	exporter, err := getTemporaryReportExporter([]string{"PDF"}, "", "INSPECTION_TITLE")
 	assert.NoError(t, err)
-
-	viperConfig := viper.New()
 
 	apiClient := api.GetTestClient()
 	defer resetMocks(apiClient.HTTPClient())
@@ -468,7 +468,9 @@ func TestExportReports_should_fail_if_download_report_reply_is_not_success(t *te
 		Reply(500).
 		JSON(`{"error": "something went wrong"}`)
 
-	err = feed.ExportInspectionReports(viperConfig, apiClient, exporter)
+	exporterAppCfg := createEmptyConfigurationOptions()
+	exporterApp := feed.NewExporterApp(apiClient, nil, exporterAppCfg)
+	err = exporterApp.ExportInspectionReports(exporter)
 	assert.NotNil(t, err)
 	assert.Contains(t, err.Error(), "Failed to generate 3 PDF reports and 0 WORD reports")
 }
@@ -476,8 +478,6 @@ func TestExportReports_should_fail_if_download_report_reply_is_not_success(t *te
 func TestExportReports_should_return_error_for_unsupported_format(t *testing.T) {
 	exporter, err := getTemporaryReportExporter([]string{"PNG"}, "", "INSPECTION_TITLE")
 	assert.NoError(t, err)
-
-	viperConfig := viper.New()
 
 	apiClient := api.GetTestClient()
 	initMockFeedsSet1(apiClient.HTTPClient())
@@ -494,8 +494,10 @@ func TestExportReports_should_return_error_for_unsupported_format(t *testing.T) 
 		  }
 		`)
 
-	err = feed.ExportInspectionReports(viperConfig, apiClient, exporter)
-	assert.EqualError(t, err, "No valid export format specified")
+	exporterAppCfg := createEmptyConfigurationOptions()
+	exporterApp := feed.NewExporterApp(apiClient, nil, exporterAppCfg)
+	err = exporterApp.ExportInspectionReports(exporter)
+	assert.EqualError(t, err, "no valid export format specified")
 }
 
 func Test_GetWaitTime(t *testing.T) {

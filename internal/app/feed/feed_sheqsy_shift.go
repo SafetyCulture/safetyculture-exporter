@@ -125,7 +125,7 @@ func (f *SheqsyShiftFeed) Export(ctx context.Context, apiClient *api.Client, exp
 			util.Check(err, "failed to fix timestamp")
 
 			// Departments needs to be a flat string
-			departments := []string{}
+			var departments []string
 			value.Get("departments").ForEach(func(key, value gjson.Result) bool {
 				departments = append(departments, value.String())
 				return true

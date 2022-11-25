@@ -122,7 +122,7 @@ func (f *ActionAssigneeFeed) Export(ctx context.Context, apiClient *api.Client, 
 			ModifiedAfter: f.ModifiedAfter,
 		},
 	}, func(resp *api.GetFeedResponse) error {
-		rows := []*ActionAssignee{}
+		var rows []*ActionAssignee
 
 		err := json.Unmarshal(resp.Data, &rows)
 		util.Check(err, "Failed to unmarshal action-assignees data to struct")
