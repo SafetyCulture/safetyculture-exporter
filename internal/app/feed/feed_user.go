@@ -81,8 +81,7 @@ func (f *UserFeed) Export(ctx context.Context, apiClient *api.Client, exporter E
 	drainFn := func(resp *api.GetFeedResponse) error {
 		var rows []*User
 
-		err := json.Unmarshal(resp.Data, &rows)
-		if err != nil {
+		if err := json.Unmarshal(resp.Data, &rows); err != nil {
 			return fmt.Errorf("map users data: %w", err)
 		}
 
@@ -96,8 +95,9 @@ func (f *UserFeed) Export(ctx context.Context, apiClient *api.Client, exporter E
 					j = len(rows)
 				}
 
-				err = exporter.WriteRows(f, rows[i:j])
-				util.Check(err, "Failed to write data to exporter")
+				if err := exporter.WriteRows(f, rows[i:j]); err != nil {
+					return fmt.Errorf("exporter: %w", err)
+				}
 			}
 		}
 

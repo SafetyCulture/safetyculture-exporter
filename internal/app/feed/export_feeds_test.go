@@ -1,6 +1,7 @@
 package feed_test
 
 import (
+	"fmt"
 	"net/http"
 	"path"
 	"path/filepath"
@@ -9,6 +10,7 @@ import (
 	"github.com/SafetyCulture/safetyculture-exporter/internal/app/api"
 	"github.com/SafetyCulture/safetyculture-exporter/internal/app/feed"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	"gopkg.in/h2non/gock.v1"
 )
@@ -195,6 +197,42 @@ func TestExporterFeedClient_ExportFeeds_should_err_when_cannot_unmarshal(t *test
 	exporterApp := feed.NewExporterApp(apiClient, apiClient, exporterAppCfg)
 	err = exporterApp.ExportFeeds(exporter)
 	assert.EqualError(t, err, `failed to export feed "users": map users data: unexpected end of JSON input`)
+}
+
+func TestExporterFeedClient_ExportFeeds_should_err_when_cannot_write_rows(t *testing.T) {
+	defer gock.Off()
+
+	apiClient := api.GetTestClient()
+	gock.InterceptClient(apiClient.HTTPClient())
+
+	gock.New("http://localhost:9999").
+		Get("/accounts/user/v1/user:WhoAmI").
+		Reply(200).
+		BodyString(`
+		{
+			"user_id": "user_123",
+			"organisation_id": "role_123",
+			"firstname": "Test",
+			"lastname": "Test"
+		  }
+		`)
+
+	gock.New("http://localhost:9999").
+		Get("/feed/users").
+		Reply(200).
+		File("mocks/set_1/feed_users_1.json")
+
+	exporterAppCfg := createEmptyConfigurationOptions()
+	exporterAppCfg.ApiConfig.AccessToken = "token-123"
+	exporterAppCfg.ExportConfig.FilterByTableName = []string{"users"}
+	exporterApp := feed.NewExporterApp(apiClient, apiClient, exporterAppCfg)
+
+	exporter := getMockedExporter()
+	exporter.On("InitFeed", mock.Anything, mock.Anything).Return(nil)
+	exporter.On("WriteRows", mock.Anything, mock.Anything).Return(fmt.Errorf("cannot write rows"))
+
+	err := exporterApp.ExportFeeds(exporter)
+	assert.EqualError(t, err, `failed to export feed "users": exporter: cannot write rows`)
 }
 
 // Expectation of this test is that group_users and schedule_assignees are truncated and refreshed
