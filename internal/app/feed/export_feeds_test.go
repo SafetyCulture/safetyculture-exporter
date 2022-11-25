@@ -169,16 +169,32 @@ func TestExporterFeedClient_ExportFeeds_should_err_when_cannot_unmarshal(t *test
 		`)
 
 	gock.New("http://localhost:9999").
+		Get("/feed/inspections").
+		Reply(200).
+		File("mocks/set_1/feed_inspections_1.json")
+
+	gock.New("http://localhost:9999").
+		Get("/feed/inspections/2").
+		Reply(200).
+		File("mocks/set_1/feed_inspections_2.json")
+
+	gock.New("http://localhost:9999").
 		Get("/feed/users").
 		Reply(200).
 		File("mocks/misc/feed_users_bad_format.json")
 
+	gock.New("http://localhost:9999").
+		Post("/accounts/history/v1/activity_log/list").
+		BodyString(`{"org_id":"","page_size":0,"page_token":"","filters":{"timeframe":{"from":"0001-01-01T00:00:00Z"},"event_types":["inspection.deleted"],"limit":0}}`).
+		Reply(http.StatusOK).
+		File(path.Join("mocks", "set_1", "inspections_deleted_single_page.json"))
+
 	exporterAppCfg := createEmptyConfigurationOptions()
 	exporterAppCfg.ApiConfig.AccessToken = "token-123"
-	exporterAppCfg.ExportConfig.FilterByTableName = []string{"users"}
+	exporterAppCfg.ExportConfig.FilterByTableName = []string{"inspections", "users"}
 	exporterApp := feed.NewExporterApp(apiClient, apiClient, exporterAppCfg)
 	err = exporterApp.ExportFeeds(exporter)
-	assert.EqualError(t, err, `failed to export: failed to export feed "users": failed to unmarshal users data to struct: unexpected end of JSON input`)
+	assert.EqualError(t, err, `failed to export feed "users": map users data: unexpected end of JSON input`)
 }
 
 // Expectation of this test is that group_users and schedule_assignees are truncated and refreshed

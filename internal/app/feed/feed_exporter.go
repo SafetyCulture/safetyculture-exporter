@@ -59,8 +59,10 @@ func (e *ExporterFeedClient) ExportFeeds(exporter Exporter) error {
 		tablesMap[table] = true
 	}
 
-	doneCh := make(chan int, maxConcurrentGoRoutines)
-	errCh := make(chan error)
+	semaphore := make(chan int, maxConcurrentGoRoutines)
+	var lastError error = nil
+	var errCh chan error
+	var doneCh chan string
 
 	atLeastOneRun := false
 
@@ -87,69 +89,79 @@ func (e *ExporterFeedClient) ExportFeeds(exporter Exporter) error {
 			return errors.New("no tables selected")
 		}
 
+		numberOfTasks := len(feeds)
+		errCh = make(chan error, numberOfTasks)
+		doneCh = make(chan string, numberOfTasks)
+
 		for _, feed := range feeds {
-			doneCh <- 1
+			semaphore <- 1
 
 			go func(f Feed) {
 				logger.Infof(" ... queueing %s\n", f.Name())
 				err := f.Export(ctx, e.apiClient, exporter, resp.OrganisationID)
 				if err != nil {
-					logger.Errorf(">>> STOPPING GO ROUTINE %s", f.Name())
-					errCh <- fmt.Errorf("failed to export: %w", err)
-					return
+					errCh <- err
+				} else {
+					doneCh <- f.Name()
 				}
-				<-doneCh
+				<-semaphore
 			}(feed)
+		}
+
+		var jobsProcessed = 0
+		for jobsProcessed != numberOfTasks {
+			select {
+			case exportError := <-errCh:
+				logger.Error(exportError)
+				lastError = exportError
+				jobsProcessed++
+			case name := <-doneCh:
+				logger.Infof("finished processing feed %s \n", name)
+				jobsProcessed++
+			}
 		}
 	}
 
 	// Run export for SHEQSY data
-	if len(e.sheqsyApiConfig.UserName) != 0 {
-		atLeastOneRun = true
-		logger.Info("exporting SHEQSY data")
-
-		var feeds []Feed
-		for _, feed := range e.GetSheqsyFeeds() {
-			if tablesMap[feed.Name()] || len(tables) == 0 {
-				feeds = append(feeds, feed)
-			}
-		}
-
-		resp, err := e.sheqsyApiClient.GetSheqsyCompany(ctx, e.sheqsyApiConfig.CompanyID)
-		util.Check(err, "failed to get details of the current user")
-
-		logger.Infof("Exporting data for SHEQSY company: %s %s", resp.Name, resp.CompanyUID)
-
-		if len(feeds) == 0 {
-			return errors.New("no tables selected")
-		}
-
-		for _, feed := range feeds {
-			doneCh <- 1
-
-			go func(f Feed) {
-				logger.Infof(" ... queueing %s\n", f.Name())
-				err := f.Export(ctx, e.sheqsyApiClient, exporter, resp.CompanyUID)
-				util.Check(err, "failed to export")
-				<-doneCh
-			}(feed)
-		}
-	}
+	//if len(e.sheqsyApiConfig.UserName) != 0 {
+	//	atLeastOneRun = true
+	//	logger.Info("exporting SHEQSY data")
+	//
+	//	var feeds []Feed
+	//	for _, feed := range e.GetSheqsyFeeds() {
+	//		if tablesMap[feed.Name()] || len(tables) == 0 {
+	//			feeds = append(feeds, feed)
+	//		}
+	//	}
+	//
+	//	resp, err := e.sheqsyApiClient.GetSheqsyCompany(ctx, e.sheqsyApiConfig.CompanyID)
+	//	util.Check(err, "failed to get details of the current user")
+	//
+	//	logger.Infof("Exporting data for SHEQSY company: %s %s", resp.Name, resp.CompanyUID)
+	//
+	//	if len(feeds) == 0 {
+	//		return errors.New("no tables selected")
+	//	}
+	//
+	//	for _, feed := range feeds {
+	//		semaphore <- 1
+	//
+	//		go func(f Feed) {
+	//			logger.Infof(" ... queueing %s\n", f.Name())
+	//			err := f.Export(ctx, e.sheqsyApiClient, exporter, resp.CompanyUID)
+	//			util.Check(err, "failed to export")
+	//			<-semaphore
+	//		}(feed)
+	//	}
+	//}
 
 	if !atLeastOneRun {
 		return errors.New("no API tokens provided")
 	}
 
-	select {
-	case <-doneCh:
-		fmt.Println("success:")
-	case e := <-errCh:
-		fmt.Println("failure:", e)
-	}
-
 	logger.Info("Export finished")
 
-	return nil
+	return lastError
 }
 
 // GetFeeds returns list of available SafetyCulture feeds

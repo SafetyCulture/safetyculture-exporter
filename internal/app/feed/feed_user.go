@@ -83,7 +83,7 @@ func (f *UserFeed) Export(ctx context.Context, apiClient *api.Client, exporter E
 
 		err := json.Unmarshal(resp.Data, &rows)
 		if err != nil {
-			return fmt.Errorf("failed to unmarshal users data to struct: %w", err)
+			return fmt.Errorf("map users data: %w", err)
 		}
 
 		if len(rows) != 0 {
