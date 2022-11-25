@@ -1,10 +1,11 @@
 package api
 
 import (
-	"github.com/stretchr/testify/assert"
 	"net/http"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestDefaultBackoff(t *testing.T) {

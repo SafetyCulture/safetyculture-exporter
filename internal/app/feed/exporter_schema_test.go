@@ -8,7 +8,6 @@ import (
 	"testing"
 
 	"github.com/SafetyCulture/safetyculture-exporter/internal/app/feed"
-	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -16,8 +15,6 @@ func TestSchemaWriter_should_write_schema(t *testing.T) {
 	var buf bytes.Buffer
 	exporter, err := feed.NewSchemaExporter(&buf)
 	assert.NoError(t, err)
-
-	viperConfig := viper.New()
 
 	testSchema := func(f feed.Feed) {
 		err := exporter.CreateSchema(f, f.RowsModel())
@@ -33,12 +30,15 @@ func TestSchemaWriter_should_write_schema(t *testing.T) {
 		buf.Reset()
 	}
 
-	for _, f := range feed.GetFeeds(viperConfig) {
+	exporterAppCfg := createEmptyConfigurationOptions()
+	exporterApp := feed.NewExporterApp(nil, nil, exporterAppCfg)
+
+	for _, f := range exporterApp.GetFeeds() {
 		fmt.Printf("TESTING FEED: %s\n", f.Name())
 		testSchema(f)
 	}
 
-	for _, f := range feed.GetSheqsyFeeds(viperConfig) {
+	for _, f := range exporterApp.GetSheqsyFeeds() {
 		fmt.Printf("TESTING FEED: %s\n", f.Name())
 		testSchema(f)
 	}
@@ -49,9 +49,10 @@ func TestSchemaWriter_should_write_all_schemas(t *testing.T) {
 	exporter, err := feed.NewSchemaExporter(&buf)
 	assert.NoError(t, err)
 
-	viperConfig := viper.New()
+	exporterAppCfg := createEmptyConfigurationOptions()
+	exporterApp := feed.NewExporterApp(nil, nil, exporterAppCfg)
 
-	err = feed.WriteSchemas(viperConfig, exporter)
+	err = exporterApp.PrintSchemas(exporter)
 	assert.NoError(t, err)
 
 	assert.NotNil(t, buf.String())

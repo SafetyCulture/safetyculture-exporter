@@ -6,12 +6,12 @@ import (
 	"testing"
 	"time"
 
+	"github.com/SafetyCulture/safetyculture-exporter/internal/app/config"
 	"github.com/stretchr/testify/require"
 
 	"github.com/SafetyCulture/safetyculture-exporter/internal/app/api"
 	exportermock "github.com/SafetyCulture/safetyculture-exporter/internal/app/exporter/mocks"
 	"github.com/SafetyCulture/safetyculture-exporter/internal/app/inspections"
-	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"gopkg.in/h2non/gock.v1"
@@ -43,7 +43,6 @@ func initMockInspections(httpClient *http.Client) {
 
 func TestInspectionsExport(t *testing.T) {
 
-	viperConfig := viper.New()
 	apiClient := api.GetTestClient()
 	initMockInspections(apiClient.HTTPClient())
 
@@ -52,17 +51,17 @@ func TestInspectionsExport(t *testing.T) {
 	exporterMock.On("SetLastModifiedAt", mock.Anything)
 	exporterMock.On("GetLastModifiedAt", mock.Anything).Return(nil)
 
-	inspectionClient := inspections.NewInspectionClient(
-		viperConfig,
-		apiClient,
-		exporterMock,
-	)
+	exporterAppCfg := &config.ConfigurationOptions{
+		ExportConfig: &config.ExportConfig{
+			InspectionConfig: &config.ExportInspectionConfig{},
+		},
+	}
+	inspectionClient := inspections.NewInspectionClient(exporterAppCfg, apiClient, exporterMock)
 	err := inspectionClient.Export(context.Background())
 	assert.NoError(t, err)
 }
 
 func TestInspectionsExport_WhenSkipID(t *testing.T) {
-	viperConfig := viper.New()
 	apiClient := api.GetTestClient()
 	initMockInspections(apiClient.HTTPClient())
 
@@ -71,18 +70,18 @@ func TestInspectionsExport_WhenSkipID(t *testing.T) {
 	exporterMock.On("SetLastModifiedAt", mock.Anything)
 	exporterMock.On("GetLastModifiedAt", mock.Anything).Return(nil)
 
-	inspectionClient := inspections.NewInspectionClient(
-		viperConfig,
-		apiClient,
-		exporterMock,
-	)
+	exporterAppCfg := &config.ConfigurationOptions{
+		ExportConfig: &config.ExportConfig{
+			InspectionConfig: &config.ExportInspectionConfig{},
+		},
+	}
+	inspectionClient := inspections.NewInspectionClient(exporterAppCfg, apiClient, exporterMock)
 	inspectionClient.(*inspections.Client).SkipIDs = []string{"audit_d7e2f55b95094bd48fac601850e1db63"}
 	err := inspectionClient.Export(context.Background())
 	assert.NoError(t, err)
 }
 
 func TestInspectionsExport_WhenModifiedAtIsNotNil(t *testing.T) {
-	viperConfig := viper.New()
 	apiClient := api.GetTestClient()
 	initMockInspections(apiClient.HTTPClient())
 
@@ -91,20 +90,23 @@ func TestInspectionsExport_WhenModifiedAtIsNotNil(t *testing.T) {
 	exporterMock.On("SetLastModifiedAt", mock.Anything)
 	exporterMock.On("GetLastModifiedAt", mock.Anything).Return(&time.Time{})
 
-	inspectionClient := inspections.NewInspectionClient(
-		viperConfig,
-		apiClient,
-		exporterMock,
-	)
+	exporterAppCfg := &config.ConfigurationOptions{
+		ExportConfig: &config.ExportConfig{
+			InspectionConfig: &config.ExportInspectionConfig{},
+		},
+	}
+	inspectionClient := inspections.NewInspectionClient(exporterAppCfg, apiClient, exporterMock)
 	err := inspectionClient.Export(context.Background())
 	assert.NoError(t, err)
 }
 
 func TestNewInspectionClient(t *testing.T) {
-	v := viper.GetViper()
-	require.NotNil(t, v)
-
-	res := inspections.NewInspectionClient(v, nil, nil)
+	exporterAppCfg := &config.ConfigurationOptions{
+		ExportConfig: &config.ExportConfig{
+			InspectionConfig: &config.ExportInspectionConfig{},
+		},
+	}
+	res := inspections.NewInspectionClient(exporterAppCfg, nil, nil)
 	require.NotNil(t, res)
 
 	client, ok := res.(*inspections.Client)

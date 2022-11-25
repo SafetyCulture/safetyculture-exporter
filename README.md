@@ -48,6 +48,10 @@ SQL Database integration tests can be run by starting the SQL DBs `docker-compos
 
 Note: these tests will be automatically when pushing or opening a pull request against the repository.
 
+To run dockers with local volume:
+create folder structure ~/docker-volume/mssql then execute:
+`docker-compose -f docker-compose-local-volume.yml up sqlserver`
+
 ### Releasing
 
 To release a new version you need just need to push a new tag to GitHub and [goreleaser](https://goreleaser.com) will do most of the work.

@@ -79,7 +79,7 @@ func (f *SheqsyDepartmentFeed) Export(ctx context.Context, apiClient *api.Client
 		Truncate: !exporter.SupportsUpsert(),
 	})
 
-	rows := []*SheqsyDepartment{}
+	var rows []*SheqsyDepartment
 
 	resp, err := apiClient.Get(ctx, fmt.Sprintf("/SheqsyIntegrationApi/api/v3/companies/%s/departments", companyID))
 	util.Check(err, "failed fetch data")

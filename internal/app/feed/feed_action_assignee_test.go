@@ -26,7 +26,7 @@ func TestActionAssigneeFeedExport_should_export_rows_to_sql_db(t *testing.T) {
 	err = actionAssigneeFeed.Export(context.Background(), apiClient, exporter, "")
 	assert.NoError(t, err)
 
-	rows := []feed.ActionAssignee{}
+	var rows []feed.ActionAssignee
 	resp := exporter.DB.Table("action_assignees").Scan(&rows)
 	assert.Nil(t, resp.Error)
 

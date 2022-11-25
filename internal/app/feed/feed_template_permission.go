@@ -87,7 +87,7 @@ func (f *TemplatePermissionFeed) Export(ctx context.Context, apiClient *api.Clie
 			ModifiedAfter: f.ModifiedAfter,
 		},
 	}, func(resp *api.GetFeedResponse) error {
-		rows := []*TemplatePermission{}
+		var rows []*TemplatePermission
 
 		err := json.Unmarshal(resp.Data, &rows)
 		util.Check(err, "Failed to unmarshal templates-permissions data to struct")

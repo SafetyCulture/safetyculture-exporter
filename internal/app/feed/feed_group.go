@@ -79,7 +79,7 @@ func (f *GroupFeed) Export(ctx context.Context, apiClient *api.Client, exporter 
 		InitialURL: "/feed/groups",
 		Params:     api.GetFeedParams{},
 	}, func(resp *api.GetFeedResponse) error {
-		rows := []*Group{}
+		var rows []*Group
 
 		err := json.Unmarshal(resp.Data, &rows)
 		util.Check(err, "Failed to unmarshal groups data to struct")
