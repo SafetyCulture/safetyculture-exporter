@@ -3,7 +3,6 @@ module github.com/SafetyCulture/safetyculture-exporter
 go 1.18
 
 require (
-	github.com/bmizerany/assert v0.0.0-20160611221934-b7ed37b82869
 	github.com/dghubble/sling v1.4.0
 	github.com/gocarina/gocsv v0.0.0-20220310154401-d4df709ca055
 	github.com/gofrs/uuid v4.3.1+incompatible
@@ -54,8 +53,6 @@ require (
 	github.com/jackc/pgx/v4 v4.17.2 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
-	github.com/kr/pretty v0.3.0 // indirect
-	github.com/kr/text v0.2.0 // indirect
 	github.com/magiconair/properties v1.8.6 // indirect
 	github.com/mattn/go-runewidth v0.0.13 // indirect
 	github.com/mattn/go-sqlite3 v1.14.15 // indirect
