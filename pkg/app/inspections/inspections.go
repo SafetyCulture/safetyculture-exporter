@@ -6,10 +6,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/SafetyCulture/safetyculture-exporter/internal/app/api"
-	"github.com/SafetyCulture/safetyculture-exporter/internal/app/config"
-	"github.com/SafetyCulture/safetyculture-exporter/internal/app/exporter"
-	"github.com/SafetyCulture/safetyculture-exporter/internal/app/util"
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/app/api"
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/app/config"
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/app/exporter"
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/app/util"
 	"go.uber.org/zap"
 )
 

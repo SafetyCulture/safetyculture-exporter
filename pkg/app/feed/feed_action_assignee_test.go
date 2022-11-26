@@ -5,10 +5,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/SafetyCulture/safetyculture-exporter/internal/app/feed"
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/app/feed"
 	"github.com/stretchr/testify/assert"
 
-	"github.com/SafetyCulture/safetyculture-exporter/internal/app/api"
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/app/api"
 )
 
 func TestActionAssigneeFeedExport_should_export_rows_to_sql_db(t *testing.T) {

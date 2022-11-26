@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/SafetyCulture/safetyculture-exporter/internal/app/api"
-	"github.com/SafetyCulture/safetyculture-exporter/internal/app/util"
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/app/api"
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/app/util"
 )
 
 // Action represents a row from the actions feed

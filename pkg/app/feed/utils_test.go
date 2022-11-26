@@ -11,8 +11,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/SafetyCulture/safetyculture-exporter/internal/app/config"
-	"github.com/SafetyCulture/safetyculture-exporter/internal/app/feed"
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/app/config"
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/app/feed"
 	"github.com/gofrs/uuid"
 	"github.com/stretchr/testify/assert"
 )

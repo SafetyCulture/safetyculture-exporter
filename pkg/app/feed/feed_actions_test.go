@@ -4,8 +4,8 @@ import (
 	"context"
 	"testing"
 
-	"github.com/SafetyCulture/safetyculture-exporter/internal/app/api"
-	"github.com/SafetyCulture/safetyculture-exporter/internal/app/feed"
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/app/api"
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/app/feed"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/h2non/gock.v1"
 )

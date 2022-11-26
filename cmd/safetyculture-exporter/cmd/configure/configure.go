@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/SafetyCulture/safetyculture-exporter/internal/app/util"
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/app/util"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )

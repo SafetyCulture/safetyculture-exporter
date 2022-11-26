@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/SafetyCulture/safetyculture-exporter/internal/app/util"
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/app/util"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"

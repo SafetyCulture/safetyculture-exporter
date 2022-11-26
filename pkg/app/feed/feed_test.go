@@ -3,7 +3,7 @@ package feed_test
 import (
 	"testing"
 
-	"github.com/SafetyCulture/safetyculture-exporter/internal/app/feed"
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/app/feed"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/SafetyCulture/safetyculture-exporter/internal/app/util"
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/app/util"
 )
 
 const (

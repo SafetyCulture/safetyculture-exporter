@@ -7,8 +7,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/SafetyCulture/safetyculture-exporter/internal/app/api"
-	"github.com/SafetyCulture/safetyculture-exporter/internal/app/util"
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/app/api"
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/app/util"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
 )

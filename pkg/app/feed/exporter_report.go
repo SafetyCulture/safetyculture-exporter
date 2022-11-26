@@ -11,8 +11,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/SafetyCulture/safetyculture-exporter/internal/app/api"
-	"github.com/SafetyCulture/safetyculture-exporter/internal/app/config"
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/app/api"
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/app/config"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 	"gorm.io/gorm"

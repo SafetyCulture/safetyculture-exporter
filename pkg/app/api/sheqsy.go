@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/SafetyCulture/safetyculture-exporter/internal/app/util"
-	"github.com/SafetyCulture/safetyculture-exporter/internal/app/version"
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/app/util"
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/app/version"
 	"github.com/pkg/errors"
 )
 

@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/SafetyCulture/safetyculture-exporter/internal/app/util"
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/app/util"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 	"gorm.io/driver/mysql"

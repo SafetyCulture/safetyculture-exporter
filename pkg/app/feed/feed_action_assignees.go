@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/SafetyCulture/safetyculture-exporter/internal/app/api"
-	"github.com/SafetyCulture/safetyculture-exporter/internal/app/util"
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/app/api"
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/app/util"
 )
 
 // ActionAssignee represents a row from the action_assignees feed

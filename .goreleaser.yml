@@ -23,7 +23,7 @@ builds:
       - -tags=netgo  # Force using the go network stack
       - -mod=readonly
     ldflags:
-      - -s -w -X github.com/SafetyCulture/safetyculture-exporter/internal/app/version.version={{.Version}}
+      - -s -w -X github.com/SafetyCulture/safetyculture-exporter/pkg/app/version.version={{.Version}}
   - id: darwin-arm64
     main: ./cmd/safetyculture-exporter/main.go
     goos:
@@ -37,7 +37,7 @@ builds:
       - -tags=netgo  # Force using the go network stack
       - -mod=readonly
     ldflags:
-      - -s -w -X github.com/SafetyCulture/safetyculture-exporter/internal/app/version.version={{.Version}}
+      - -s -w -X github.com/SafetyCulture/safetyculture-exporter/pkg/app/version.version={{.Version}}
   - id: linux-amd64
     main: ./cmd/safetyculture-exporter/main.go
     goos:
@@ -52,7 +52,7 @@ builds:
       - -trimpath
       - -mod=readonly
     ldflags:
-      - -s -w -X github.com/SafetyCulture/safetyculture-exporter/internal/app/version.version={{.Version}}
+      - -s -w -X github.com/SafetyCulture/safetyculture-exporter/pkg/app/version.version={{.Version}}
       - -extldflags "-lc -lrt -lpthread --static"
   - id: windows-amd64
     main: ./cmd/safetyculture-exporter/main.go
@@ -68,7 +68,7 @@ builds:
       - -mod=readonly
       - -buildmode=exe
     ldflags:
-      - -s -w -X github.com/SafetyCulture/safetyculture-exporter/internal/app/version.version={{.Version}}
+      - -s -w -X github.com/SafetyCulture/safetyculture-exporter/pkg/app/version.version={{.Version}}
 dockers:
   - image_templates:
       - "ghcr.io/safetyculture/safetyculture-exporter:{{ .Tag }}"

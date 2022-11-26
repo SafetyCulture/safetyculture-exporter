@@ -7,7 +7,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/SafetyCulture/safetyculture-exporter/internal/app/version"
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/app/version"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
