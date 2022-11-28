@@ -98,7 +98,7 @@ func (f *ScheduleOccurrenceFeed) Export(ctx context.Context, apiClient *api.Clie
 		var rows []*ScheduleOccurrence
 
 		if err := json.Unmarshal(resp.Data, &rows); err != nil {
-			return fmt.Errorf("map users data: %w", err)
+			return fmt.Errorf("map data: %w", err)
 		}
 
 		if len(rows) != 0 {

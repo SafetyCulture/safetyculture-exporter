@@ -145,8 +145,7 @@ func (f *InspectionFeed) writeRows(exporter Exporter, rows []Inspection) error {
 			}
 		}
 
-		err := exporter.WriteRows(f, rowsToInsert)
-		if err != nil {
+		if err := exporter.WriteRows(f, rowsToInsert); err != nil {
 			return err
 		}
 	}
@@ -161,40 +160,34 @@ func (f *InspectionFeed) CreateSchema(exporter Exporter) error {
 
 // Export exports the feed to the supplied exporter
 func (f *InspectionFeed) Export(ctx context.Context, apiClient *api.Client, exporter Exporter, orgID string) error {
-	logger := util.GetLogger().With(
-		"feed", f.Name(),
-		"org_id", orgID,
-	)
-
-	exporter.InitFeed(f, &InitFeedOptions{
+	if err := exporter.InitFeed(f, &InitFeedOptions{
 		// Delete data if incremental refresh is disabled so there is no duplicates
 		Truncate: !f.Incremental,
-	})
+	}); err != nil {
+		return fmt.Errorf("init feed: %w", err)
+	}
 
 	var err error
 	f.ModifiedAfter, err = exporter.LastModifiedAt(f, f.ModifiedAfter, orgID)
-	util.Check(err, "unable to load modified after")
-
-	logger.With(
-		"modified_after", f.ModifiedAfter.Format(time.RFC1123),
-		"web_report_link_type", f.WebReportLink,
-	).Info("exporting")
+	if err != nil {
+		return fmt.Errorf("unable to load modified after: %w", err)
+	}
 
 	// Process Inspections
-	err = f.processNewInspections(ctx, apiClient, exporter)
-	util.CheckFeedError(logger, err, fmt.Sprintf("Failed to export feed %q", f.Name()))
+	if err := f.processNewInspections(ctx, apiClient, exporter, orgID); err != nil {
+		return fmt.Errorf("export: %w", err)
+	}
 
 	// Process Deleted Inspections
-	err = f.processDeletedInspections(ctx, apiClient, exporter)
-	if err != nil {
-		logger.Errorf("failed to process deleted inspections. %v", err.Error())
+	if err := f.processDeletedInspections(ctx, apiClient, exporter); err != nil {
+		return fmt.Errorf("process deleted inspections. %w", err)
 	}
 
 	return exporter.FinaliseExport(f, &[]*Inspection{})
 }
 
-func (f *InspectionFeed) processNewInspections(ctx context.Context, apiClient *api.Client, exporter Exporter) error {
-	lg := util.GetLogger()
+func (f *InspectionFeed) processNewInspections(ctx context.Context, apiClient *api.Client, exporter Exporter, orgID string) error {
+	logger := util.GetLogger().With("feed", f.Name(), "org_id", orgID)
 	req := api.GetFeedRequest{
 		InitialURL: "/feed/inspections",
 		Params: api.GetFeedParams{
@@ -209,17 +202,18 @@ func (f *InspectionFeed) processNewInspections(ctx context.Context, apiClient *a
 	feedFn := func(resp *api.GetFeedResponse) error {
 		var rows []Inspection
 
-		err := json.Unmarshal(resp.Data, &rows)
-		util.Check(err, "Failed to unmarshal inspections data to struct")
+		if err := json.Unmarshal(resp.Data, &rows); err != nil {
+			return fmt.Errorf("map data: %w", err)
+		}
 
 		if len(rows) != 0 {
-			err = f.writeRows(exporter, rows)
+			err := f.writeRows(exporter, rows)
 			if err != nil {
 				return err
 			}
 		}
 
-		lg.With(
+		logger.With(
 			"estimated_remaining", resp.Metadata.RemainingRecords,
 			"duration_ms", apiClient.Duration.Milliseconds(),
 			"export_duration_ms", exporter.GetDuration().Milliseconds(),

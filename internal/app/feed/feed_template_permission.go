@@ -82,7 +82,7 @@ func (f *TemplatePermissionFeed) Export(ctx context.Context, apiClient *api.Clie
 		var rows []*TemplatePermission
 
 		if err := json.Unmarshal(resp.Data, &rows); err != nil {
-			return fmt.Errorf("map users data: %w", err)
+			return fmt.Errorf("map data: %w", err)
 		}
 
 		if len(rows) != 0 {

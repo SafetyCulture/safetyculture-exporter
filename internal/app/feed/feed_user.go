@@ -84,7 +84,7 @@ func (f *UserFeed) Export(ctx context.Context, apiClient *api.Client, exporter E
 		var rows []*User
 
 		if err := json.Unmarshal(resp.Data, &rows); err != nil {
-			return fmt.Errorf("map users data: %w", err)
+			return fmt.Errorf("map data: %w", err)
 		}
 
 		if len(rows) != 0 {

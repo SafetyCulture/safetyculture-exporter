@@ -177,18 +177,23 @@ func (e *SQLExporter) FinaliseExport(Feed, interface{}) error {
 func (e *SQLExporter) WriteMedia(auditID, mediaID, contentType string, body []byte) error {
 
 	exportMediaDir := filepath.Join(e.ExportMediaPath, auditID)
-	err := os.MkdirAll(exportMediaDir, os.ModePerm)
-	util.Check(err, fmt.Sprintf("Failed to create directory %s", exportMediaDir))
+	if err := os.MkdirAll(exportMediaDir, os.ModePerm); err != nil {
+		return fmt.Errorf("create directory %s: %w", exportMediaDir, err)
+	}
 
 	ext := strings.Split(contentType, "/")
 	exportFilePath := filepath.Join(exportMediaDir, fmt.Sprintf("%s.%s", mediaID, ext[1]))
 
 	file, err := os.OpenFile(exportFilePath, os.O_RDWR|os.O_CREATE, 0666)
-	util.Check(err, fmt.Sprintf("Failed to open file: %v", exportFilePath))
+	if err != nil {
+		return fmt.Errorf("open file %v: %w", exportFilePath, err)
+	}
 	defer file.Close()
 
 	_, err = file.WriteAt(body, 0)
-	util.Check(err, "Failed to write media to a file")
+	if err != nil {
+		return fmt.Errorf("write media to file: %w", err)
+	}
 
 	return nil
 }

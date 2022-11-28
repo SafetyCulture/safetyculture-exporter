@@ -82,7 +82,7 @@ func (f *GroupUserFeed) Export(ctx context.Context, apiClient *api.Client, expor
 		var rows []*GroupUser
 
 		if err := json.Unmarshal(resp.Data, &rows); err != nil {
-			return fmt.Errorf("map users data: %w", err)
+			return fmt.Errorf("map data: %w", err)
 		}
 
 		// deduplicate rows (hotfix) because the feed Api GetUserGroups returns duplicates and this creates PK violations issues

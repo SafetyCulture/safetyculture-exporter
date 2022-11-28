@@ -245,11 +245,13 @@ func (e *ExporterFeedClient) GetSheqsyFeeds() []Feed {
 // PrintSchemas is used to print the schema of each feed to console output
 func (e *ExporterFeedClient) PrintSchemas(exporter *SchemaExporter) error {
 	for _, feed := range append(e.GetFeeds(), e.GetSheqsyFeeds()...) {
-		err := exporter.CreateSchema(feed, feed.RowsModel())
-		util.Check(err, "failed to create schema")
+		if err := exporter.CreateSchema(feed, feed.RowsModel()); err != nil {
+			return fmt.Errorf("create schema: %w", err)
+		}
 
-		err = exporter.WriteSchema(feed)
-		util.Check(err, "failed to write schema")
+		if err := exporter.WriteSchema(feed); err != nil {
+			return fmt.Errorf("write schema: %w", err)
+		}
 	}
 	return nil
 }
@@ -259,17 +261,20 @@ func (e *ExporterFeedClient) ExportInspectionReports(exporter *ReportExporter) e
 	ctx := context.Background()
 
 	resp, err := e.apiClient.WhoAmI(ctx)
-	util.Check(err, "failed to get details of the current user")
+	if err != nil {
+		return fmt.Errorf("get details of the current user: %w", err)
+	}
 
 	logger.Infof("Exporting inspection reports by user: %s %s", resp.Firstname, resp.Lastname)
 
 	feed := e.getInspectionFeed()
-	err = feed.Export(ctx, e.apiClient, exporter, resp.OrganisationID)
-	util.Check(err, "failed to export inspection feed")
+	if err := feed.Export(ctx, e.apiClient, exporter, resp.OrganisationID); err != nil {
+		return fmt.Errorf("export inspection feed: %w", err)
+	}
 
 	err = exporter.SaveReports(ctx, e.apiClient, feed)
 	if err != nil {
-		logger.Info("Export finished")
+		return fmt.Errorf("save reports: %w", err)
 	}
 
 	return err
