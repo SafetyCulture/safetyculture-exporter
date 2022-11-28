@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"sync"
 
 	"github.com/SafetyCulture/safetyculture-exporter/internal/app/api"
 	"github.com/SafetyCulture/safetyculture-exporter/internal/app/config"
@@ -35,6 +36,8 @@ type ExporterFeedClient struct {
 	apiConfig       *config.ApiConfig
 	sheqsyApiClient *api.Client
 	sheqsyApiConfig *config.SheqsyApiConfig
+	errMu           sync.Mutex
+	errs            []error
 }
 
 // ExportSchemas generates schemas for the data feeds without fetching any data
@@ -48,6 +51,13 @@ func (e *ExporterFeedClient) ExportSchemas(exporter Exporter) error {
 	return lastErr
 }
 
+// TEMPORARY
+func (e *ExporterFeedClient) addError(err error) {
+	e.errMu.Lock()
+	e.errs = append(e.errs, err)
+	e.errMu.Unlock()
+}
+
 // ExportFeeds fetches all the feeds data from server and stores them in the format provided
 func (e *ExporterFeedClient) ExportFeeds(exporter Exporter) error {
 	logger := util.GetLogger()
@@ -59,10 +69,8 @@ func (e *ExporterFeedClient) ExportFeeds(exporter Exporter) error {
 		tablesMap[table] = true
 	}
 
+	var wg sync.WaitGroup
 	semaphore := make(chan int, maxConcurrentGoRoutines)
-	var lastError error = nil
-	var errCh chan error
-	var doneCh chan string
 
 	atLeastOneRun := false
 
@@ -89,79 +97,71 @@ func (e *ExporterFeedClient) ExportFeeds(exporter Exporter) error {
 			return errors.New("no tables selected")
 		}
 
-		numberOfTasks := len(feeds)
-		errCh = make(chan error, numberOfTasks)
-		doneCh = make(chan string, numberOfTasks)
+		for _, feed := range feeds {
+			semaphore <- 1
+			wg.Add(1)
+
+			go func(f Feed) {
+				logger.Infof(" ... queueing %s\n", f.Name())
+				defer wg.Done()
+				err := f.Export(ctx, e.apiClient, exporter, resp.OrganisationID)
+				if err != nil {
+					e.addError(err)
+				}
+				<-semaphore
+			}(feed)
+		}
+
+	}
+
+	// Run export for SHEQSY data
+	if len(e.sheqsyApiConfig.UserName) != 0 {
+		atLeastOneRun = true
+		logger.Info("exporting SHEQSY data")
+
+		var feeds []Feed
+		for _, feed := range e.GetSheqsyFeeds() {
+			if tablesMap[feed.Name()] || len(tables) == 0 {
+				feeds = append(feeds, feed)
+			}
+		}
+
+		resp, err := e.sheqsyApiClient.GetSheqsyCompany(ctx, e.sheqsyApiConfig.CompanyID)
+		util.Check(err, "failed to get details of the current user")
+
+		logger.Infof("Exporting data for SHEQSY company: %s %s", resp.Name, resp.CompanyUID)
+
+		if len(feeds) == 0 {
+			return errors.New("no tables selected")
+		}
 
 		for _, feed := range feeds {
 			semaphore <- 1
 
 			go func(f Feed) {
 				logger.Infof(" ... queueing %s\n", f.Name())
-				err := f.Export(ctx, e.apiClient, exporter, resp.OrganisationID)
+				err := f.Export(ctx, e.sheqsyApiClient, exporter, resp.CompanyUID)
 				if err != nil {
-					errCh <- err
-				} else {
-					doneCh <- f.Name()
+					e.addError(err)
 				}
 				<-semaphore
 			}(feed)
 		}
-
-		var jobsProcessed = 0
-		for jobsProcessed != numberOfTasks {
-			select {
-			case exportError := <-errCh:
-				logger.Error(exportError)
-				lastError = exportError
-				jobsProcessed++
-			case name := <-doneCh:
-				logger.Infof("finished processing feed %s \n", name)
-				jobsProcessed++
-			}
-		}
 	}
 
-	// Run export for SHEQSY data
-	//if len(e.sheqsyApiConfig.UserName) != 0 {
-	//	atLeastOneRun = true
-	//	logger.Info("exporting SHEQSY data")
-	//
-	//	var feeds []Feed
-	//	for _, feed := range e.GetSheqsyFeeds() {
-	//		if tablesMap[feed.Name()] || len(tables) == 0 {
-	//			feeds = append(feeds, feed)
-	//		}
-	//	}
-	//
-	//	resp, err := e.sheqsyApiClient.GetSheqsyCompany(ctx, e.sheqsyApiConfig.CompanyID)
-	//	util.Check(err, "failed to get details of the current user")
-	//
-	//	logger.Infof("Exporting data for SHEQSY company: %s %s", resp.Name, resp.CompanyUID)
-	//
-	//	if len(feeds) == 0 {
-	//		return errors.New("no tables selected")
-	//	}
-	//
-	//	for _, feed := range feeds {
-	//		semaphore <- 1
-	//
-	//		go func(f Feed) {
-	//			logger.Infof(" ... queueing %s\n", f.Name())
-	//			err := f.Export(ctx, e.sheqsyApiClient, exporter, resp.CompanyUID)
-	//			util.Check(err, "failed to export")
-	//			<-semaphore
-	//		}(feed)
-	//	}
-	//}
+	wg.Wait()
 
 	if !atLeastOneRun {
 		return errors.New("no API tokens provided")
 	}
 
 	logger.Info("Export finished")
+	if len(e.errs) != 0 {
+		// this is temporary code until we finish a follow-up ticket that will use structured errors
+		return e.errs[0]
+	}
 
-	return lastError
+	return nil
 }
 
 // GetFeeds returns list of available SafetyCulture feeds
