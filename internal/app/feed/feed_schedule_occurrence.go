@@ -87,10 +87,12 @@ func (f *ScheduleOccurrenceFeed) Export(ctx context.Context, apiClient *api.Clie
 
 	logger.Info("exporting")
 
-	exporter.InitFeed(f, &InitFeedOptions{
+	if err := exporter.InitFeed(f, &InitFeedOptions{
 		// Always truncate. This data must be refreshed in order to be accurate
 		Truncate: false,
-	})
+	}); err != nil {
+		return fmt.Errorf("init feed: %w", err)
+	}
 
 	drainFn := func(resp *api.GetFeedResponse) error {
 		var rows []*ScheduleOccurrence

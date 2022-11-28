@@ -72,11 +72,13 @@ func (f *UserFeed) CreateSchema(exporter Exporter) error {
 func (f *UserFeed) Export(ctx context.Context, apiClient *api.Client, exporter Exporter, orgID string) error {
 	logger := util.GetLogger().With("feed", f.Name(), "org_id", orgID)
 
-	exporter.InitFeed(f, &InitFeedOptions{
+	if err := exporter.InitFeed(f, &InitFeedOptions{
 		// Truncate files if upserts aren't supported.
 		// This ensures that the export does not contain duplicate rows
 		Truncate: !exporter.SupportsUpsert(),
-	})
+	}); err != nil {
+		return fmt.Errorf("init feed: %w", err)
+	}
 
 	drainFn := func(resp *api.GetFeedResponse) error {
 		var rows []*User

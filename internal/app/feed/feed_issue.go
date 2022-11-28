@@ -10,11 +10,6 @@ import (
 	"github.com/SafetyCulture/safetyculture-exporter/internal/app/util"
 )
 
-const (
-	feedName = "issues"
-	feedURL  = "/feed/issues"
-)
-
 // Issue represents a row from the issues feed
 type Issue struct {
 	ID              string     `json:"id" csv:"id" gorm:"primarykey;column:id;size:36"`
@@ -46,7 +41,7 @@ type IssueFeed struct {
 
 // Name returns the name of the feed
 func (f *IssueFeed) Name() string {
-	return feedName
+	return "issues"
 }
 
 // Model returns the model of the feed row
@@ -86,24 +81,21 @@ func (f *IssueFeed) CreateSchema(exporter Exporter) error {
 
 // Export exports the feed to the supplied exporter
 func (f *IssueFeed) Export(ctx context.Context, apiClient *api.Client, exporter Exporter, orgID string) error {
-	logger := util.GetLogger()
+	logger := util.GetLogger().With("feed", f.Name(), "org_id", orgID)
 
-	_ = exporter.InitFeed(f, &InitFeedOptions{
+	if err := exporter.InitFeed(f, &InitFeedOptions{
 		// Delete data if incremental refresh is disabled so there is no duplicates
 		Truncate: !f.Incremental,
-	})
-
-	var request = &api.GetFeedRequest{
-		InitialURL: feedURL,
-		Params: api.GetFeedParams{
-			Limit: f.Limit,
-		},
+	}); err != nil {
+		return fmt.Errorf("init feed: %w", err)
 	}
 
-	var feedFn = func(resp *api.GetFeedResponse) error {
+	var drainFn = func(resp *api.GetFeedResponse) error {
 		var rows []*Issue
-		err := json.Unmarshal(resp.Data, &rows)
-		util.Check(err, "Failed to unmarshal actions data to struct")
+
+		if err := json.Unmarshal(resp.Data, &rows); err != nil {
+			return fmt.Errorf("map users data: %w", err)
+		}
 
 		if len(rows) != 0 {
 			// Calculate the size of the batch we can insert into the DB at once.
@@ -116,8 +108,9 @@ func (f *IssueFeed) Export(ctx context.Context, apiClient *api.Client, exporter 
 					j = len(rows)
 				}
 
-				err = exporter.WriteRows(f, rows[i:j])
-				util.Check(err, "Failed to write data to exporter")
+				if err := exporter.WriteRows(f, rows[i:j]); err != nil {
+					return fmt.Errorf("exporter: %w", err)
+				}
 			}
 		}
 
@@ -129,7 +122,15 @@ func (f *IssueFeed) Export(ctx context.Context, apiClient *api.Client, exporter 
 		return nil
 	}
 
-	err := apiClient.DrainFeed(ctx, request, feedFn)
-	util.CheckFeedError(logger, err, fmt.Sprintf("Failed to export feed %q", f.Name()))
+	var req = &api.GetFeedRequest{
+		InitialURL: "/feed/issues",
+		Params: api.GetFeedParams{
+			Limit: f.Limit,
+		},
+	}
+
+	if err := apiClient.DrainFeed(ctx, req, drainFn); err != nil {
+		return fmt.Errorf("failed to export feed %q: %w", f.Name(), err)
+	}
 	return exporter.FinaliseExport(f, &[]*Issue{})
 }

@@ -83,10 +83,12 @@ func (f *TemplateFeed) CreateSchema(exporter Exporter) error {
 func (f *TemplateFeed) Export(ctx context.Context, apiClient *api.Client, exporter Exporter, orgID string) error {
 	logger := util.GetLogger().With("feed", f.Name(), "org_id", orgID)
 
-	exporter.InitFeed(f, &InitFeedOptions{
+	if err := exporter.InitFeed(f, &InitFeedOptions{
 		// Delete data if incremental refresh is disabled so there is no duplicates
 		Truncate: !f.Incremental,
-	})
+	}); err != nil {
+		return fmt.Errorf("init feed: %w", err)
+	}
 
 	drainFn := func(resp *api.GetFeedResponse) error {
 		var rows []*Template

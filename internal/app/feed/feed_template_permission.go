@@ -71,10 +71,12 @@ func (f *TemplatePermissionFeed) CreateSchema(exporter Exporter) error {
 func (f *TemplatePermissionFeed) Export(ctx context.Context, apiClient *api.Client, exporter Exporter, orgID string) error {
 	logger := util.GetLogger().With("feed", f.Name(), "org_id", orgID)
 
-	exporter.InitFeed(f, &InitFeedOptions{
+	if err := exporter.InitFeed(f, &InitFeedOptions{
 		// Always truncate. This data must be refreshed in order to be accurate
 		Truncate: true,
-	})
+	}); err != nil {
+		return fmt.Errorf("init feed: %w", err)
+	}
 
 	drainFn := func(resp *api.GetFeedResponse) error {
 		var rows []*TemplatePermission
