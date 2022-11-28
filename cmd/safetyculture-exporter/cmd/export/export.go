@@ -282,7 +282,7 @@ func (s *SafetyCultureExporter) RunSQL() error {
 	if len(s.cfg.ApiConfig.AccessToken) != 0 {
 		err = exporterApp.ExportFeeds(exporter)
 		if err != nil {
-			return errors.Wrap(err, "error while exporting feeds")
+			return errors.Wrap(err, "exporting feeds")
 		}
 	}
 
@@ -317,7 +317,7 @@ func (s *SafetyCultureExporter) RunCSV() error {
 	if len(s.cfg.ApiConfig.AccessToken) != 0 {
 		err = exporterApp.ExportFeeds(exporter)
 		if err != nil {
-			return errors.Wrap(err, "error while exporting feeds")
+			return errors.Wrap(err, "exporting feeds")
 		}
 	}
 

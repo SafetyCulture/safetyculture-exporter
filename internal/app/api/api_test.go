@@ -104,7 +104,7 @@ func TestClient_DrainDeletedInspections_WhenApiReturnsError(t *testing.T) {
 	}
 	err = apiClient.DrainAccountActivityHistoryLog(context.TODO(), req, fn)
 	require.NotNil(t, err)
-	assert.EqualValues(t, "Failed request to API: http://localhost:9999/accounts/history/v1/activity_log/list giving up after 2 attempt(s)", err.Error())
+	assert.EqualValues(t, "api request: http://localhost:9999/accounts/history/v1/activity_log/list giving up after 2 attempt(s)", err.Error())
 }
 
 func TestClient_DrainDeletedInspections_WhenFeedFnReturnsError(t *testing.T) {
@@ -364,7 +364,7 @@ func TestClient_WhoAmI_WhenNotOK(t *testing.T) {
 	r, err := apiClient.WhoAmI(context.Background())
 	require.NotNil(t, err)
 	require.Nil(t, r)
-	assert.EqualValues(t, "Failed request to API: http://localhost:9999/accounts/user/v1/user:WhoAmI giving up after 2 attempt(s)", err.Error())
+	assert.EqualValues(t, "api request: http://localhost:9999/accounts/user/v1/user:WhoAmI giving up after 2 attempt(s)", err.Error())
 }
 
 func TestAPIClientDrainInspections_should_return_for_as_long_next_page_set(t *testing.T) {

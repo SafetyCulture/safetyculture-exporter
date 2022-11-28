@@ -146,7 +146,7 @@ func TestExporterFeedClient_ExportFeeds_should_err_when_not_auth(t *testing.T) {
 	exporterAppCfg.ApiConfig.AccessToken = "token-123"
 	exporterApp := feed.NewExporterApp(apiClient, nil, exporterAppCfg)
 	err = exporterApp.ExportFeeds(exporter)
-	assert.EqualError(t, err, "failed to get details of the current user: Failed request to API: request error status: 401")
+	assert.EqualError(t, err, "get details of the current user: api request: request error status: 401")
 }
 
 func TestExporterFeedClient_ExportFeeds_should_err_when_cannot_unmarshal(t *testing.T) {

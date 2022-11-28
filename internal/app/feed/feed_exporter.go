@@ -87,7 +87,7 @@ func (e *ExporterFeedClient) ExportFeeds(exporter Exporter) error {
 
 		resp, err := e.apiClient.WhoAmI(ctx)
 		if err != nil {
-			return fmt.Errorf("failed to get details of the current user: %w", err)
+			return fmt.Errorf("get details of the current user: %w", err)
 		}
 
 		logger.Infof("Exporting data by user: %s %s", resp.Firstname, resp.Lastname)

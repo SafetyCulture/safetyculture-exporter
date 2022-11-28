@@ -313,7 +313,7 @@ func (a *Client) GetFeed(ctx context.Context, request *GetFeedRequest) (*GetFeed
 	})
 
 	if err != nil {
-		return nil, errors.Wrap(err, "Failed request to API")
+		return nil, errors.Wrap(err, "api request")
 	}
 
 	if httpRes != nil && (httpRes.StatusCode < 200 || httpRes.StatusCode > 299) {
@@ -372,7 +372,7 @@ func (a *Client) ListOrganisationActivityLog(ctx context.Context, request *GetAc
 		failureV: &errMsg,
 	})
 	if err != nil {
-		return nil, errors.Wrap(err, "Failed request to API")
+		return nil, errors.Wrap(err, "api request")
 	}
 
 	return &res, nil
@@ -424,7 +424,7 @@ func (a *Client) ListInspections(ctx context.Context, params *ListInspectionsPar
 		failureV: &errMsg,
 	})
 	if err != nil {
-		return nil, errors.Wrap(err, "Failed request to API")
+		return nil, errors.Wrap(err, "api request")
 	}
 
 	return result, nil
@@ -453,7 +453,7 @@ func (a *Client) GetInspection(ctx context.Context, id string) (*json.RawMessage
 		failureV: &errMsg,
 	})
 	if err != nil {
-		return nil, errors.Wrap(err, "Failed request to API")
+		return nil, errors.Wrap(err, "api request")
 	}
 
 	return result, nil
@@ -482,7 +482,7 @@ func (a *Client) Get(ctx context.Context, url string) (*json.RawMessage, error) 
 		failureV: &errMsg,
 	})
 	if err != nil {
-		return nil, errors.Wrap(err, "Failed request to API")
+		return nil, errors.Wrap(err, "api request")
 	}
 
 	return result, nil
@@ -554,7 +554,7 @@ func (a *Client) InitiateInspectionReportExport(ctx context.Context, auditID str
 		failureV: &errMsg,
 	})
 	if err != nil {
-		return "", errors.Wrap(err, "Failed request to API")
+		return "", errors.Wrap(err, "api request")
 	}
 
 	return result.MessageID, nil
@@ -585,7 +585,7 @@ func (a *Client) CheckInspectionReportExportCompletion(ctx context.Context, audi
 		failureV: &errMsg,
 	})
 	if err != nil {
-		return nil, errors.Wrap(err, "Failed request to API")
+		return nil, errors.Wrap(err, "api request")
 	}
 
 	return result, nil
@@ -638,7 +638,7 @@ func (a *Client) WhoAmI(ctx context.Context) (*WhoAmIResponse, error) {
 		failureV: &errMsg,
 	})
 	if err != nil {
-		return nil, errors.Wrap(err, "Failed request to API")
+		return nil, errors.Wrap(err, "api request")
 	}
 
 	return result, nil
