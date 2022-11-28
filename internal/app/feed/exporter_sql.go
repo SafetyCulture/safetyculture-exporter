@@ -227,7 +227,7 @@ func NewSQLExporter(dialect, connectionString string, autoMigrate bool, exportMe
 	db, err := gorm.Open(dialector, &gormConfig)
 
 	if err != nil {
-		return nil, errors.Wrap(err, "Unable to connect to DB")
+		return nil, errors.Wrap(err, "connect to DB")
 	}
 
 	return &SQLExporter{

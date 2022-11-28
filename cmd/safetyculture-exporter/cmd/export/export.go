@@ -251,8 +251,8 @@ func (s *SafetyCultureExporter) RunInspectionJSON() error {
 		return errors.Wrapf(err, "Failed to create directory %s", exportPath)
 	}
 
-	exporter := exporter.NewJSONExporter(exportPath)
-	inspectionsClient := inspections.NewInspectionClient(s.cfg, getAPIClient(), exporter)
+	e := exporter.NewJSONExporter(exportPath)
+	inspectionsClient := inspections.NewInspectionClient(s.cfg, getAPIClient(), e)
 
 	err = inspectionsClient.Export(context.Background())
 	if err != nil {
@@ -269,18 +269,18 @@ func (s *SafetyCultureExporter) RunSQL() error {
 		}
 	}
 
-	exporter, err := feed.NewSQLExporter(s.cfg.DBConfig.Dialect, s.cfg.DBConfig.ConnectionString, true, s.cfg.ExportConfig.MediaConfig.Path)
+	e, err := feed.NewSQLExporter(s.cfg.DBConfig.Dialect, s.cfg.DBConfig.ConnectionString, true, s.cfg.ExportConfig.MediaConfig.Path)
 	if err != nil {
-		return errors.Wrap(err, "unable to create sql exporter")
+		return errors.Wrap(err, "create sql exporter")
 	}
 
 	exporterApp := feed.NewExporterApp(getAPIClient(), getSheqsyAPIClient(), s.cfg)
 	if s.cfg.ExportConfig.SchemaOnly {
-		return exporterApp.ExportSchemas(exporter)
+		return exporterApp.ExportSchemas(e)
 	}
 
 	if len(s.cfg.ApiConfig.AccessToken) != 0 {
-		err = exporterApp.ExportFeeds(exporter)
+		err = exporterApp.ExportFeeds(e)
 		if err != nil {
 			return errors.Wrap(err, "exporting feeds")
 		}
@@ -304,18 +304,18 @@ func (s *SafetyCultureExporter) RunCSV() error {
 		}
 	}
 
-	exporter, err := feed.NewCSVExporter(exportPath, s.cfg.ExportConfig.MediaConfig.Path, s.cfg.CSVConfig.MaxRowsPerFile)
+	e, err := feed.NewCSVExporter(exportPath, s.cfg.ExportConfig.MediaConfig.Path, s.cfg.CSVConfig.MaxRowsPerFile)
 	if err != nil {
 		return errors.Wrap(err, "unable to create csv exporter")
 	}
 
 	exporterApp := feed.NewExporterApp(getAPIClient(), getSheqsyAPIClient(), s.cfg)
 	if s.cfg.ExportConfig.SchemaOnly {
-		return exporterApp.ExportSchemas(exporter)
+		return exporterApp.ExportSchemas(e)
 	}
 
 	if len(s.cfg.ApiConfig.AccessToken) != 0 {
-		err = exporterApp.ExportFeeds(exporter)
+		err = exporterApp.ExportFeeds(e)
 		if err != nil {
 			return errors.Wrap(err, "exporting feeds")
 		}
@@ -330,28 +330,28 @@ func (s *SafetyCultureExporter) RunInspectionReports() error {
 		return errors.Wrapf(err, "Failed to create directory %s", s.cfg.ExportConfig.Path)
 	}
 
-	exporter, err := feed.NewReportExporter(s.cfg.ExportConfig.Path, s.cfg.ReportConfig)
+	e, err := feed.NewReportExporter(s.cfg.ExportConfig.Path, s.cfg.ReportConfig)
 	if err != nil {
 		return errors.Wrap(err, "unable to create report exporter")
 	}
 
 	exporterApp := feed.NewExporterApp(getAPIClient(), getSheqsyAPIClient(), s.cfg)
-	err = exporterApp.ExportInspectionReports(exporter)
+	err = exporterApp.ExportInspectionReports(e)
 	if err != nil {
-		return errors.Wrap(err, "failed to generate reports")
+		return errors.Wrap(err, "generate reports")
 	}
 
 	return nil
 }
 
 func (s *SafetyCultureExporter) RunPrintSchema() error {
-	exporter, err := feed.NewSchemaExporter(os.Stdout)
+	e, err := feed.NewSchemaExporter(os.Stdout)
 	if err != nil {
 		return errors.Wrap(err, "unable to create exporter")
 	}
 
 	exporterApp := feed.NewExporterApp(getAPIClient(), getSheqsyAPIClient(), s.cfg)
-	err = exporterApp.PrintSchemas(exporter)
+	err = exporterApp.PrintSchemas(e)
 	if err != nil {
 		return errors.Wrap(err, "error while printing schema")
 	}
