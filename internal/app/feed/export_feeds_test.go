@@ -196,7 +196,7 @@ func TestExporterFeedClient_ExportFeeds_should_err_when_cannot_unmarshal(t *test
 	exporterAppCfg.ExportConfig.FilterByTableName = []string{"inspections", "users"}
 	exporterApp := feed.NewExporterApp(apiClient, apiClient, exporterAppCfg)
 	err = exporterApp.ExportFeeds(exporter)
-	assert.EqualError(t, err, `failed to export feed "users": map data: unexpected end of JSON input`)
+	assert.EqualError(t, err, `feed "users": map data: unexpected end of JSON input`)
 }
 
 func TestExporterFeedClient_ExportFeeds_should_err_when_cannot_write_rows(t *testing.T) {
@@ -232,7 +232,7 @@ func TestExporterFeedClient_ExportFeeds_should_err_when_cannot_write_rows(t *tes
 	exporter.On("WriteRows", mock.Anything, mock.Anything).Return(fmt.Errorf("cannot write rows"))
 
 	err := exporterApp.ExportFeeds(exporter)
-	assert.EqualError(t, err, `failed to export feed "users": exporter: cannot write rows`)
+	assert.EqualError(t, err, `feed "users": exporter: cannot write rows`)
 }
 
 // Expectation of this test is that group_users and schedule_assignees are truncated and refreshed
