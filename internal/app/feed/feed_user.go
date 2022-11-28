@@ -110,8 +110,7 @@ func (f *UserFeed) Export(ctx context.Context, apiClient *api.Client, exporter E
 	}
 
 	req := &api.GetFeedRequest{InitialURL: "/feed/users", Params: api.GetFeedParams{}}
-	err := apiClient.DrainFeed(ctx, req, drainFn)
-	if err != nil {
+	if err := apiClient.DrainFeed(ctx, req, drainFn); err != nil {
 		return fmt.Errorf("failed to export feed %q: %w", f.Name(), err)
 	}
 	return exporter.FinaliseExport(f, &[]*User{})

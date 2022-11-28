@@ -70,26 +70,19 @@ func (f *ScheduleAssigneeFeed) CreateSchema(exporter Exporter) error {
 
 // Export exports the feed to the supplied exporter
 func (f *ScheduleAssigneeFeed) Export(ctx context.Context, apiClient *api.Client, exporter Exporter, orgID string) error {
-	logger := util.GetLogger()
-	feedName := f.Name()
-
-	logger.Infof("%s: exporting for org_id: %s", feedName, orgID)
+	logger := util.GetLogger().With("feed", f.Name(), "org_id", orgID)
 
 	exporter.InitFeed(f, &InitFeedOptions{
 		// Always truncate. This data must be refreshed in order to be accurate
 		Truncate: true,
 	})
 
-	err := apiClient.DrainFeed(ctx, &api.GetFeedRequest{
-		InitialURL: "/feed/schedule_assignees",
-		Params: api.GetFeedParams{
-			TemplateIDs: f.TemplateIDs,
-		},
-	}, func(resp *api.GetFeedResponse) error {
+	drainFn := func(resp *api.GetFeedResponse) error {
 		var rows []*ScheduleAssignee
 
-		err := json.Unmarshal(resp.Data, &rows)
-		util.Check(err, "Failed to unmarshal schedule-asignees data to struct")
+		if err := json.Unmarshal(resp.Data, &rows); err != nil {
+			return fmt.Errorf("map users data: %w", err)
+		}
 
 		if len(rows) != 0 {
 			// Calculate the size of the batch we can insert into the DB at once. Column count + buffer to account for primary keys
@@ -101,8 +94,9 @@ func (f *ScheduleAssigneeFeed) Export(ctx context.Context, apiClient *api.Client
 					j = len(rows)
 				}
 
-				err = exporter.WriteRows(f, rows[i:j])
-				util.Check(err, "Failed to write data to exporter")
+				if err := exporter.WriteRows(f, rows[i:j]); err != nil {
+					return fmt.Errorf("exporter: %w", err)
+				}
 			}
 		}
 
@@ -112,8 +106,17 @@ func (f *ScheduleAssigneeFeed) Export(ctx context.Context, apiClient *api.Client
 			"export_duration_ms", exporter.GetDuration().Milliseconds(),
 		).Info("export batch complete")
 		return nil
-	})
+	}
 
-	util.CheckFeedError(logger, err, fmt.Sprintf("Failed to export feed %q", f.Name()))
+	req := &api.GetFeedRequest{
+		InitialURL: "/feed/schedule_assignees",
+		Params: api.GetFeedParams{
+			TemplateIDs: f.TemplateIDs,
+		},
+	}
+
+	if err := apiClient.DrainFeed(ctx, req, drainFn); err != nil {
+		return fmt.Errorf("failed to export feed %q: %w", f.Name(), err)
+	}
 	return exporter.FinaliseExport(f, &[]*ScheduleAssignee{})
 }

@@ -135,8 +135,7 @@ func (f *TemplateFeed) Export(ctx context.Context, apiClient *api.Client, export
 			ModifiedAfter: f.ModifiedAfter,
 		},
 	}
-	err = apiClient.DrainFeed(ctx, req, drainFn)
-	if err != nil {
+	if err := apiClient.DrainFeed(ctx, req, drainFn); err != nil {
 		return fmt.Errorf("failed to export feed %q: %w", f.Name(), err)
 	}
 	return exporter.FinaliseExport(f, &[]*Template{})
