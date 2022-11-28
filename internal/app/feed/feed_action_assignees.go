@@ -144,7 +144,7 @@ func (f *ActionAssigneeFeed) Export(ctx context.Context, apiClient *api.Client, 
 	}
 
 	if err := apiClient.DrainFeed(ctx, req, drainFn); err != nil {
-		return fmt.Errorf("failed to export feed %q: %w", f.Name(), err)
+		return fmt.Errorf("action assignees feed %q: %w", f.Name(), err)
 	}
 	return exporter.FinaliseExport(f, &[]*ActionAssignee{})
 }

@@ -151,7 +151,7 @@ func (f *ActionFeed) Export(ctx context.Context, apiClient *api.Client, exporter
 	}
 
 	if err := apiClient.DrainFeed(ctx, req, drainFn); err != nil {
-		return fmt.Errorf("failed to export feed %q: %w", f.Name(), err)
+		return fmt.Errorf("actions feed %q: %w", f.Name(), err)
 	}
 	return exporter.FinaliseExport(f, &[]*Action{})
 }

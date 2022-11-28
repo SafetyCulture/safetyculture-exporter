@@ -105,6 +105,7 @@ func (e *ExporterFeedClient) ExportFeeds(exporter Exporter) error {
 				defer wg.Done()
 				err := f.Export(ctx, e.apiClient, exporter, resp.OrganisationID)
 				if err != nil {
+					logger.Errorf("exporting feeds: %v", err)
 					e.addError(err)
 				}
 				<-semaphore

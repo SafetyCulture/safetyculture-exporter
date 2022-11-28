@@ -120,7 +120,7 @@ func (f *GroupUserFeed) Export(ctx context.Context, apiClient *api.Client, expor
 	}
 
 	if err := apiClient.DrainFeed(ctx, req, drainFn); err != nil {
-		return fmt.Errorf("failed to export feed %q: %w", f.Name(), err)
+		return fmt.Errorf("feed %q: %w", f.Name(), err)
 	}
 	return exporter.FinaliseExport(f, &[]*GroupUser{})
 }
