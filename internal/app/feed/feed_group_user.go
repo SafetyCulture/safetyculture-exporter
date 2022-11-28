@@ -100,7 +100,7 @@ func (f *GroupUserFeed) Export(ctx context.Context, apiClient *api.Client, expor
 					j = len(deDupedRows)
 				}
 
-				if err := exporter.WriteRows(f, rows[i:j]); err != nil {
+				if err := exporter.WriteRows(f, deDupedRows[i:j]); err != nil {
 					return fmt.Errorf("exporter: %w", err)
 				}
 			}

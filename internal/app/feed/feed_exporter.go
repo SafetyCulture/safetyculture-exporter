@@ -126,7 +126,9 @@ func (e *ExporterFeedClient) ExportFeeds(exporter Exporter) error {
 		}
 
 		resp, err := e.sheqsyApiClient.GetSheqsyCompany(ctx, e.sheqsyApiConfig.CompanyID)
-		util.Check(err, "failed to get details of the current user")
+		if err != nil {
+			return fmt.Errorf("get details of the current user: %w", err)
+		}
 
 		logger.Infof("Exporting data for SHEQSY company: %s %s", resp.Name, resp.CompanyUID)
 
