@@ -51,7 +51,6 @@ func (e *ExporterFeedClient) ExportSchemas(exporter Exporter) error {
 	return lastErr
 }
 
-// TEMPORARY
 func (e *ExporterFeedClient) addError(err error) {
 	e.errMu.Lock()
 	e.errs = append(e.errs, err)
@@ -137,9 +136,11 @@ func (e *ExporterFeedClient) ExportFeeds(exporter Exporter) error {
 
 		for _, feed := range feeds {
 			semaphore <- 1
+			wg.Add(1)
 
 			go func(f Feed) {
 				logger.Infof(" ... queueing %s\n", f.Name())
+				defer wg.Done()
 				err := f.Export(ctx, e.sheqsyApiClient, exporter, resp.CompanyUID)
 				if err != nil {
 					e.addError(err)
