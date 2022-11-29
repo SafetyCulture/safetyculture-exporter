@@ -13,6 +13,7 @@ import (
 
 	"github.com/SafetyCulture/safetyculture-exporter/internal/app/config"
 	"github.com/SafetyCulture/safetyculture-exporter/internal/app/feed"
+	"github.com/SafetyCulture/safetyculture-exporter/internal/app/feed/mocks"
 	"github.com/gofrs/uuid"
 	"github.com/stretchr/testify/assert"
 )
@@ -32,6 +33,13 @@ func getTemporaryCSVExporter() (*feed.CSVExporter, error) {
 	}
 
 	return feed.NewCSVExporter(dir, "", 100000)
+}
+
+func getMockedExporter() *mocks.Exporter {
+	exporter := &mocks.Exporter{}
+	exporter.On("SupportsUpsert").Return(true)
+	exporter.On("ParameterLimit").Return(0)
+	return exporter
 }
 
 // getTemporaryCSVExporterWithMaxRowsLimit creates a CSVExporter that writes to a temp folder with row limit

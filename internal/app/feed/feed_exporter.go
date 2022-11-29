@@ -3,6 +3,7 @@ package feed
 import (
 	"context"
 	"errors"
+	"fmt"
 	"sync"
 
 	"github.com/SafetyCulture/safetyculture-exporter/internal/app/api"
@@ -35,6 +36,8 @@ type ExporterFeedClient struct {
 	apiConfig       *config.ApiConfig
 	sheqsyApiClient *api.Client
 	sheqsyApiConfig *config.SheqsyApiConfig
+	errMu           sync.Mutex
+	errs            []error
 }
 
 // ExportSchemas generates schemas for the data feeds without fetching any data
@@ -46,6 +49,12 @@ func (e *ExporterFeedClient) ExportSchemas(exporter Exporter) error {
 	}
 
 	return lastErr
+}
+
+func (e *ExporterFeedClient) addError(err error) {
+	e.errMu.Lock()
+	e.errs = append(e.errs, err)
+	e.errMu.Unlock()
 }
 
 // ExportFeeds fetches all the feeds data from server and stores them in the format provided
@@ -77,7 +86,9 @@ func (e *ExporterFeedClient) ExportFeeds(exporter Exporter) error {
 		}
 
 		resp, err := e.apiClient.WhoAmI(ctx)
-		util.Check(err, "failed to get details of the current user")
+		if err != nil {
+			return fmt.Errorf("get details of the current user: %w", err)
+		}
 
 		logger.Infof("Exporting data by user: %s %s", resp.Firstname, resp.Lastname)
 
@@ -93,10 +104,14 @@ func (e *ExporterFeedClient) ExportFeeds(exporter Exporter) error {
 				logger.Infof(" ... queueing %s\n", f.Name())
 				defer wg.Done()
 				err := f.Export(ctx, e.apiClient, exporter, resp.OrganisationID)
-				util.Check(err, "failed to export")
+				if err != nil {
+					logger.Errorf("exporting feeds: %v", err)
+					e.addError(err)
+				}
 				<-semaphore
 			}(feed)
 		}
+
 	}
 
 	// Run export for SHEQSY data
@@ -112,7 +127,9 @@ func (e *ExporterFeedClient) ExportFeeds(exporter Exporter) error {
 		}
 
 		resp, err := e.sheqsyApiClient.GetSheqsyCompany(ctx, e.sheqsyApiConfig.CompanyID)
-		util.Check(err, "failed to get details of the current user")
+		if err != nil {
+			return fmt.Errorf("get details of the current user: %w", err)
+		}
 
 		logger.Infof("Exporting data for SHEQSY company: %s %s", resp.Name, resp.CompanyUID)
 
@@ -128,7 +145,9 @@ func (e *ExporterFeedClient) ExportFeeds(exporter Exporter) error {
 				logger.Infof(" ... queueing %s\n", f.Name())
 				defer wg.Done()
 				err := f.Export(ctx, e.sheqsyApiClient, exporter, resp.CompanyUID)
-				util.Check(err, "failed to export")
+				if err != nil {
+					e.addError(err)
+				}
 				<-semaphore
 			}(feed)
 		}
@@ -141,6 +160,10 @@ func (e *ExporterFeedClient) ExportFeeds(exporter Exporter) error {
 	}
 
 	logger.Info("Export finished")
+	if len(e.errs) != 0 {
+		// this is temporary code until we finish a follow-up ticket that will use structured errors
+		return e.errs[0]
+	}
 
 	return nil
 }
@@ -226,11 +249,13 @@ func (e *ExporterFeedClient) GetSheqsyFeeds() []Feed {
 // PrintSchemas is used to print the schema of each feed to console output
 func (e *ExporterFeedClient) PrintSchemas(exporter *SchemaExporter) error {
 	for _, feed := range append(e.GetFeeds(), e.GetSheqsyFeeds()...) {
-		err := exporter.CreateSchema(feed, feed.RowsModel())
-		util.Check(err, "failed to create schema")
+		if err := exporter.CreateSchema(feed, feed.RowsModel()); err != nil {
+			return fmt.Errorf("create schema: %w", err)
+		}
 
-		err = exporter.WriteSchema(feed)
-		util.Check(err, "failed to write schema")
+		if err := exporter.WriteSchema(feed); err != nil {
+			return fmt.Errorf("write schema: %w", err)
+		}
 	}
 	return nil
 }
@@ -240,17 +265,20 @@ func (e *ExporterFeedClient) ExportInspectionReports(exporter *ReportExporter) e
 	ctx := context.Background()
 
 	resp, err := e.apiClient.WhoAmI(ctx)
-	util.Check(err, "failed to get details of the current user")
+	if err != nil {
+		return fmt.Errorf("get details of the current user: %w", err)
+	}
 
 	logger.Infof("Exporting inspection reports by user: %s %s", resp.Firstname, resp.Lastname)
 
 	feed := e.getInspectionFeed()
-	err = feed.Export(ctx, e.apiClient, exporter, resp.OrganisationID)
-	util.Check(err, "failed to export inspection feed")
+	if err := feed.Export(ctx, e.apiClient, exporter, resp.OrganisationID); err != nil {
+		return fmt.Errorf("export inspection feed: %w", err)
+	}
 
 	err = exporter.SaveReports(ctx, e.apiClient, feed)
 	if err != nil {
-		logger.Info("Export finished")
+		return fmt.Errorf("save reports: %w", err)
 	}
 
 	return err

@@ -63,31 +63,27 @@ func (f *GroupUserFeed) CreateSchema(exporter Exporter) error {
 
 // Export exports the feed to the supplied exporter
 func (f *GroupUserFeed) Export(ctx context.Context, apiClient *api.Client, exporter Exporter, orgID string) error {
-	logger := util.GetLogger().With(
-		"feed", f.Name(),
-		"org_id", orgID,
-	)
+	logger := util.GetLogger().With("feed", f.Name(), "org_id", orgID)
 
-	logger.Info("exporting")
-
-	exporter.InitFeed(f, &InitFeedOptions{
+	if err := exporter.InitFeed(f, &InitFeedOptions{
 		// Truncate files if upserts aren't supported.
-		// This ensure that the export does not contain duplicate rows
+		// This ensures that the export does not contain duplicate rows
 		Truncate: false,
-	})
+	}); err != nil {
+		return fmt.Errorf("init feed: %w", err)
+	}
 
 	// Delete the actions if already exist
-	err := exporter.DeleteRowsIfExist(f, "organisation_id = ?", orgID)
-	util.Check(err, "Failed to delete rows in exporter")
+	if err := exporter.DeleteRowsIfExist(f, "organisation_id = ?", orgID); err != nil {
+		return fmt.Errorf("delete row: %w", err)
+	}
 
-	err = apiClient.DrainFeed(ctx, &api.GetFeedRequest{
-		InitialURL: "/feed/group_users",
-		Params:     api.GetFeedParams{},
-	}, func(resp *api.GetFeedResponse) error {
+	drainFn := func(resp *api.GetFeedResponse) error {
 		var rows []*GroupUser
 
-		err := json.Unmarshal(resp.Data, &rows)
-		util.Check(err, "Failed to unmarshal group-users data to struct")
+		if err := json.Unmarshal(resp.Data, &rows); err != nil {
+			return fmt.Errorf("map data: %w", err)
+		}
 
 		// deduplicate rows (hotfix) because the feed Api GetUserGroups returns duplicates and this creates PK violations issues
 		deDupedRows := DeduplicateList(func(row *GroupUser) string {
@@ -104,8 +100,9 @@ func (f *GroupUserFeed) Export(ctx context.Context, apiClient *api.Client, expor
 					j = len(deDupedRows)
 				}
 
-				err = exporter.WriteRows(f, deDupedRows[i:j])
-				util.Check(err, "Failed to write data to exporter")
+				if err := exporter.WriteRows(f, deDupedRows[i:j]); err != nil {
+					return fmt.Errorf("exporter: %w", err)
+				}
 			}
 		}
 
@@ -115,8 +112,15 @@ func (f *GroupUserFeed) Export(ctx context.Context, apiClient *api.Client, expor
 			"export_duration_ms", exporter.GetDuration().Milliseconds(),
 		).Info("export batch complete")
 		return nil
-	})
+	}
 
-	util.CheckFeedError(logger, err, fmt.Sprintf("Failed to export feed %q", f.Name()))
+	req := &api.GetFeedRequest{
+		InitialURL: "/feed/group_users",
+		Params:     api.GetFeedParams{},
+	}
+
+	if err := apiClient.DrainFeed(ctx, req, drainFn); err != nil {
+		return fmt.Errorf("feed %q: %w", f.Name(), err)
+	}
 	return exporter.FinaliseExport(f, &[]*GroupUser{})
 }

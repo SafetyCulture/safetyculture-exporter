@@ -82,21 +82,22 @@ func (f *SheqsyEmployeeFeed) CreateSchema(exporter Exporter) error {
 
 // Export exports the feed to the supplied exporter
 func (f *SheqsyEmployeeFeed) Export(ctx context.Context, apiClient *api.Client, exporter Exporter, companyID string) error {
-	logger := util.GetLogger().With(
-		"feed", f.Name(),
-		"org_id", companyID,
-	)
+	logger := util.GetLogger().With("feed", f.Name(), "org_id", companyID)
 
-	exporter.InitFeed(f, &InitFeedOptions{
+	if err := exporter.InitFeed(f, &InitFeedOptions{
 		// Truncate files if upserts aren't supported.
-		// This ensure that the export does not contain duplicate rows
+		// This ensures that the export does not contain duplicate rows
 		Truncate: !exporter.SupportsUpsert(),
-	})
+	}); err != nil {
+		return fmt.Errorf("init feed: %w", err)
+	}
 
 	var rows []*SheqsyEmployee
 
 	resp, err := apiClient.Get(ctx, fmt.Sprintf("/SheqsyIntegrationApi/api/v3/companies/%s/employees", companyID))
-	util.Check(err, "failed fetch data")
+	if err != nil {
+		return fmt.Errorf("fetch data: %w", err)
+	}
 
 	var respBytes []byte
 	respBytes = *resp
@@ -110,7 +111,10 @@ func (f *SheqsyEmployeeFeed) Export(ctx context.Context, apiClient *api.Client, 
 				fmt.Sprintf("%d.lastActivityDateTimeUTC", key.Int()),
 				lastSeen+"Z",
 			)
-			util.Check(err, "failed to update lastActivityDateTimeUTC")
+			if err != nil {
+				logger.Errorf("failed to update lastActivityDateTimeUTC: %v", err)
+				return false
+			}
 		}
 
 		var departments []string
@@ -118,18 +122,21 @@ func (f *SheqsyEmployeeFeed) Export(ctx context.Context, apiClient *api.Client, 
 			departments = append(departments, value.String())
 			return true
 		})
-		util.Check(err, "failed to set departments")
 		respBytes, err = sjson.SetBytes(
 			respBytes,
 			fmt.Sprintf("%d.departments", key.Int()),
 			strings.Join(departments, ","),
 		)
-		util.Check(err, "failed to set departments")
+		if err != nil {
+			logger.Errorf("failed to set departments: %v", err)
+			return false
+		}
 		return true
 	})
 
-	err = json.Unmarshal(respBytes, &rows)
-	util.Check(err, "failed to parse API response")
+	if err := json.Unmarshal(respBytes, &rows); err != nil {
+		return fmt.Errorf("map data: %w", err)
+	}
 
 	if len(rows) != 0 {
 		// Calculate the size of the batch we can insert into the DB at once. Column count + buffer to account for primary keys
@@ -141,8 +148,9 @@ func (f *SheqsyEmployeeFeed) Export(ctx context.Context, apiClient *api.Client, 
 				j = len(rows)
 			}
 
-			err = exporter.WriteRows(f, rows[i:j])
-			util.Check(err, "Failed to write data to exporter")
+			if err := exporter.WriteRows(f, rows[i:j]); err != nil {
+				return fmt.Errorf("exporter: %w", err)
+			}
 		}
 	}
 

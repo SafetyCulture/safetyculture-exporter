@@ -122,7 +122,7 @@ func (client *Client) Export(ctx context.Context) error {
 		params,
 		callback,
 	)
-	util.Check(err, "Failed to list inspections")
+	util.Check(err, "failed to list inspections")
 
 	client.Info("Export finished")
 

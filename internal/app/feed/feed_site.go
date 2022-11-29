@@ -75,31 +75,22 @@ func (f *SiteFeed) CreateSchema(exporter Exporter) error {
 
 // Export exports the feed to the supplied exporter
 func (f *SiteFeed) Export(ctx context.Context, apiClient *api.Client, exporter Exporter, orgID string) error {
-	logger := util.GetLogger().With(
-		"feed", f.Name(),
-		"org_id", orgID,
-	)
+	logger := util.GetLogger().With("feed", f.Name(), "org_id", orgID)
 
-	logger.Info("exporting")
-
-	exporter.InitFeed(f, &InitFeedOptions{
+	if err := exporter.InitFeed(f, &InitFeedOptions{
 		// Truncate files if upserts aren't supported.
-		// This ensure that the export does not contain duplicate rows
+		// This ensures that the export does not contain duplicate rows
 		Truncate: !exporter.SupportsUpsert(),
-	})
+	}); err != nil {
+		return fmt.Errorf("init feed: %w", err)
+	}
 
-	showOnlyLeafNodes := !f.IncludeFullHierarchy
-	err := apiClient.DrainFeed(ctx, &api.GetFeedRequest{
-		InitialURL: "/feed/sites",
-		Params: api.GetFeedParams{
-			IncludeDeleted:    f.IncludeDeleted,
-			ShowOnlyLeafNodes: &showOnlyLeafNodes,
-		},
-	}, func(resp *api.GetFeedResponse) error {
+	drainFn := func(resp *api.GetFeedResponse) error {
 		var rows []*Site
 
-		err := json.Unmarshal(resp.Data, &rows)
-		util.Check(err, "Failed to unmarshal sites data to struct")
+		if err := json.Unmarshal(resp.Data, &rows); err != nil {
+			return fmt.Errorf("map data: %w", err)
+		}
 
 		if len(rows) != 0 {
 			// Calculate the size of the batch we can insert into the DB at once. Column count + buffer to account for primary keys
@@ -111,8 +102,9 @@ func (f *SiteFeed) Export(ctx context.Context, apiClient *api.Client, exporter E
 					j = len(rows)
 				}
 
-				err = exporter.WriteRows(f, rows[i:j])
-				util.Check(err, "Failed to write data to exporter")
+				if err := exporter.WriteRows(f, rows[i:j]); err != nil {
+					return fmt.Errorf("exporter: %w", err)
+				}
 			}
 		}
 
@@ -122,8 +114,19 @@ func (f *SiteFeed) Export(ctx context.Context, apiClient *api.Client, exporter E
 			"export_duration_ms", exporter.GetDuration().Milliseconds(),
 		).Info("export batch complete")
 		return nil
-	})
+	}
 
-	util.CheckFeedError(logger, err, fmt.Sprintf("Failed to export feed %q", f.Name()))
+	showOnlyLeafNodes := !f.IncludeFullHierarchy
+	req := &api.GetFeedRequest{
+		InitialURL: "/feed/sites",
+		Params: api.GetFeedParams{
+			IncludeDeleted:    f.IncludeDeleted,
+			ShowOnlyLeafNodes: &showOnlyLeafNodes,
+		},
+	}
+
+	if err := apiClient.DrainFeed(ctx, req, drainFn); err != nil {
+		return fmt.Errorf("feed %q: %w", f.Name(), err)
+	}
 	return exporter.FinaliseExport(f, &[]*Site{})
 }
