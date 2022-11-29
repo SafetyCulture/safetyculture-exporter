@@ -1,6 +1,7 @@
 package configure
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -9,6 +10,7 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+// Configuration is the equivalent struct of YAML
 type Configuration struct {
 	AccessToken string `yaml:"access_token"`
 	API         struct {
@@ -62,6 +64,7 @@ type Configuration struct {
 
 type yamlTime time.Time
 
+// UnmarshalYAML custom unmarshaler for time.Time since empty strings throws an error
 func (yt *yamlTime) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	var timeString string
 	err := unmarshal(&timeString)
@@ -89,19 +92,24 @@ func (yt *yamlTime) Time() time.Time {
 	return time.Time(*yt)
 }
 
+// ConfigurationManager wrapper for configuration and fileName
 type ConfigurationManager struct {
 	fileName      string
 	Configuration *Configuration
 }
 
-func (c *ConfigurationManager) CreateEmptyConfiguration() error {
-	// check if file already exists
-	// create file
-	// update permissions
+func (c *ConfigurationManager) createEmptyConfiguration() error {
+	data, err := yaml.Marshal(c.Configuration)
+	if err != nil {
+		return fmt.Errorf("marshal: %w", err)
+	}
+	if err := os.WriteFile(c.fileName, data, 0666); err != nil {
+		return fmt.Errorf("writing file %s: %w", c.fileName, err)
+	}
 	return nil
 }
 
-func (c *ConfigurationManager) LoadConfiguration() error {
+func (c *ConfigurationManager) loadConfiguration() error {
 	yamlContents, err := os.ReadFile(c.fileName)
 	if err != nil {
 		return fmt.Errorf("read file: %w", err)
@@ -117,9 +125,10 @@ func (c *ConfigurationManager) SaveConfiguration() error {
 }
 
 // NewConfigurationManager creates a new ConfigurationManager.
-// If the configuration file exists, will be loaded
-// If the configuration file doesn't exist, will be created (WIP)
-func NewConfigurationManager(fn string) (error, *ConfigurationManager) {
+// fn - filename
+// autoLoad - If the configuration file exists, will be loaded
+// autoCreate - If the configuration file doesn't exist, will be created
+func NewConfigurationManager(fn string, autoLoad bool, autoCreate bool) (error, *ConfigurationManager) {
 	if len(strings.TrimSpace(fn)) == 0 || !strings.HasSuffix(fn, ".yaml") {
 		return fmt.Errorf("invalid file name provided"), nil
 	}
@@ -130,12 +139,28 @@ func NewConfigurationManager(fn string) (error, *ConfigurationManager) {
 	}
 
 	_, err := os.Stat(fn)
-	if err == nil {
+
+	switch {
+	case err == nil:
 		// file exists
-		err := cm.LoadConfiguration()
-		if err != nil {
-			return err, nil
+		if autoLoad {
+			err := cm.loadConfiguration()
+			if err != nil {
+				return err, nil
+			}
 		}
+		return nil, cm
+
+	case errors.Is(err, os.ErrNotExist):
+		if autoCreate {
+			// create the configuration
+			err := cm.createEmptyConfiguration()
+			if err != nil {
+				return err, nil
+			}
+		}
+		return nil, cm
+	default:
+		return err, nil
 	}
-	return nil, cm
 }
