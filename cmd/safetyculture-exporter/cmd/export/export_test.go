@@ -1,6 +1,7 @@
 package export_test
 
 import (
+	"fmt"
 	"testing"
 	"time"
 
@@ -72,6 +73,14 @@ func TestMapViperConfigToConfigurationOptions_ShouldEnforceIssuesLimit(t *testin
 	viperConfig.Set("export.issue.limit", 101)
 	cfg := export.MapViperConfigToConfigurationOptions(viperConfig)
 	assert.EqualValues(t, 100, cfg.ExportConfig.IssueConfig.BatchLimit)
+}
+
+func TestMapViperConfigToConfigurationOptions_ModifiedAfter(t *testing.T) {
+	viperConfig := viper.New()
+	viperConfig.Set("export.modified_after", "")
+	cfg := export.MapViperConfigToConfigurationOptions(viperConfig)
+	fmt.Println(cfg.ExportConfig.ModifiedAfter)
+
 }
 
 func TestMapViperConfigToConfigurationOptions(t *testing.T) {
