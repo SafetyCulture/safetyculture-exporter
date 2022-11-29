@@ -69,28 +69,21 @@ func (f *TemplatePermissionFeed) CreateSchema(exporter Exporter) error {
 
 // Export exports the feed to the supplied exporter
 func (f *TemplatePermissionFeed) Export(ctx context.Context, apiClient *api.Client, exporter Exporter, orgID string) error {
-	logger := util.GetLogger().With(
-		"feed", f.Name(),
-		"org_id", orgID,
-	)
+	logger := util.GetLogger().With("feed", f.Name(), "org_id", orgID)
 
-	logger.Info("exporting")
-
-	exporter.InitFeed(f, &InitFeedOptions{
+	if err := exporter.InitFeed(f, &InitFeedOptions{
 		// Always truncate. This data must be refreshed in order to be accurate
 		Truncate: true,
-	})
+	}); err != nil {
+		return fmt.Errorf("init feed: %w", err)
+	}
 
-	err := apiClient.DrainFeed(ctx, &api.GetFeedRequest{
-		InitialURL: "/feed/template_permissions",
-		Params: api.GetFeedParams{
-			ModifiedAfter: f.ModifiedAfter,
-		},
-	}, func(resp *api.GetFeedResponse) error {
+	drainFn := func(resp *api.GetFeedResponse) error {
 		var rows []*TemplatePermission
 
-		err := json.Unmarshal(resp.Data, &rows)
-		util.Check(err, "Failed to unmarshal templates-permissions data to struct")
+		if err := json.Unmarshal(resp.Data, &rows); err != nil {
+			return fmt.Errorf("map data: %w", err)
+		}
 
 		if len(rows) != 0 {
 			// Calculate the size of the batch we can insert into the DB at once. Column count + buffer to account for primary keys
@@ -102,8 +95,9 @@ func (f *TemplatePermissionFeed) Export(ctx context.Context, apiClient *api.Clie
 					j = len(rows)
 				}
 
-				err = exporter.WriteRows(f, rows[i:j])
-				util.Check(err, "Failed to write data to exporter")
+				if err := exporter.WriteRows(f, rows[i:j]); err != nil {
+					return fmt.Errorf("exporter: %w", err)
+				}
 			}
 		}
 
@@ -114,8 +108,16 @@ func (f *TemplatePermissionFeed) Export(ctx context.Context, apiClient *api.Clie
 		).Info("export batch complete")
 
 		return nil
-	})
+	}
 
-	util.CheckFeedError(logger, err, fmt.Sprintf("Failed to export feed %q", f.Name()))
+	req := &api.GetFeedRequest{
+		InitialURL: "/feed/template_permissions",
+		Params: api.GetFeedParams{
+			ModifiedAfter: f.ModifiedAfter,
+		},
+	}
+	if err := apiClient.DrainFeed(ctx, req, drainFn); err != nil {
+		return fmt.Errorf("feed %q: %w", f.Name(), err)
+	}
 	return exporter.FinaliseExport(f, &[]*TemplatePermission{})
 }

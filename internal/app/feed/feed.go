@@ -1,5 +1,7 @@
 package feed
 
+//go:generate mockery --name Exporter --case underscore --output mocks --outpkg mocks --filename exporter_mock.go
+
 import (
 	"context"
 	"time"

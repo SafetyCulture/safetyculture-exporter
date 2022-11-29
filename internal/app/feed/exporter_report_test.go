@@ -497,7 +497,7 @@ func TestExportReports_should_return_error_for_unsupported_format(t *testing.T) 
 	exporterAppCfg := createEmptyConfigurationOptions()
 	exporterApp := feed.NewExporterApp(apiClient, nil, exporterAppCfg)
 	err = exporterApp.ExportInspectionReports(exporter)
-	assert.EqualError(t, err, "no valid export format specified")
+	assert.EqualError(t, err, "save reports: no valid export format specified")
 }
 
 func Test_GetWaitTime(t *testing.T) {

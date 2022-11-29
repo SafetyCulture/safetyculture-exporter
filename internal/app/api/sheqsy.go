@@ -40,7 +40,7 @@ func (a *Client) GetSheqsyCompany(ctx context.Context, companyID string) (*GetSh
 		failureV: &errMsg,
 	})
 	if err != nil {
-		return nil, errors.Wrap(err, "Failed request to API")
+		return nil, errors.Wrap(err, "api request")
 	}
 
 	return result, nil
