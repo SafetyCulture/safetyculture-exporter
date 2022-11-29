@@ -20,7 +20,7 @@ export:
     completed: "true"
     included_inactive_items: false
     limit: 100
-    skip_ids: ["ID1","ID2"]
+    skip_ids: ["ID1", "ID2"]
     web_report_link: private
   media: false
   media_path: ./export/media/
