@@ -1,3 +1,4 @@
+---
 access_token: "fake_token"
 api:
   proxy_url: https://fake_proxy.com
