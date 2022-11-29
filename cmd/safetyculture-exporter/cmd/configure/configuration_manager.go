@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 )
 
 // Configuration is the equivalent struct of YAML
@@ -40,10 +40,10 @@ type Configuration struct {
 			SkipIds               []string `yaml:"skip_ids"`
 			WebReportLink         string   `yaml:"web_report_link"`
 		} `yaml:"inspection"`
-		Media         bool     `yaml:"media"`
-		MediaPath     string   `yaml:"media_path"`
-		ModifiedAfter yamlTime `yaml:"modified_after"`
-		Path          string   `yaml:"path"`
+		Media         bool   `yaml:"media"`
+		MediaPath     string `yaml:"media_path"`
+		ModifiedAfter mTime  `yaml:"modified_after"`
+		Path          string `yaml:"path"`
 		Site          struct {
 			IncludeDeleted       bool `yaml:"include_deleted"`
 			IncludeFullHierarchy bool `yaml:"include_full_hierarchy"`
@@ -62,12 +62,14 @@ type Configuration struct {
 	SheqsyUsername  string `yaml:"sheqsy_username"`
 }
 
-type yamlTime time.Time
+type mTime struct {
+	time.Time
+}
 
 // UnmarshalYAML custom unmarshaler for time.Time since empty strings throws an error
-func (yt *yamlTime) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (yt *mTime) UnmarshalYAML(value *yaml.Node) error {
 	var timeString string
-	err := unmarshal(&timeString)
+	err := value.Decode(&timeString)
 	if err != nil {
 		return err
 	}
@@ -84,12 +86,16 @@ func (yt *yamlTime) UnmarshalYAML(unmarshal func(interface{}) error) error {
 		}
 	}
 
-	*yt = yamlTime(t)
+	yt.Time = t
 	return nil
 }
 
-func (yt *yamlTime) Time() time.Time {
-	return time.Time(*yt)
+func (yt mTime) MarshalYAML() (interface{}, error) {
+	if yt.Time.IsZero() {
+		return "", nil
+	}
+
+	return yt.Time.Format("2006-01-02"), nil
 }
 
 // ConfigurationManager wrapper for configuration and fileName

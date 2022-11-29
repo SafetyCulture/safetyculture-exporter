@@ -42,6 +42,7 @@ func TestNewConfiguration_should_create_when_valid_filename_does_not_exist(t *te
 }
 
 func TestNewConfiguration_should_not_create_when_valid_filename_does_not_exist(t *testing.T) {
+	os.Remove("fake_file.yaml")
 	err, cm := configure.NewConfigurationManager("fake_file.yaml", true, false)
 	assert.Nil(t, err)
 	assert.NotNil(t, cm)
@@ -91,7 +92,7 @@ func TestNewConfigurationManager_when_filename_exists_without_time(t *testing.T)
 	assert.False(t, cfg.Export.Media)
 	assert.Equal(t, "./export/media/", cfg.Export.MediaPath)
 	assert.Equal(t, "./export/", cfg.Export.Path)
-	assert.Equal(t, time.Time{}, cfg.Export.ModifiedAfter.Time())
+	assert.Equal(t, time.Time{}, cfg.Export.ModifiedAfter.Time)
 	assert.False(t, cfg.Export.Site.IncludeDeleted)
 	assert.False(t, cfg.Export.Site.IncludeFullHierarchy)
 	assert.Equal(t, []string{"TA1", "TA2", "TA3"}, cfg.Export.Tables)
@@ -112,5 +113,5 @@ func TestNewConfigurationManager_when_filename_exists_with_time(t *testing.T) {
 
 	cfg := cm.Configuration
 	exp, _ := time.Parse("2006-01-02", "2022-11-29")
-	assert.Equal(t, exp, cfg.Export.ModifiedAfter.Time())
+	assert.Equal(t, exp, cfg.Export.ModifiedAfter.Time)
 }
