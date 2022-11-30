@@ -128,6 +128,11 @@ func (c *ConfigurationManager) loadConfiguration() error {
 		return fmt.Errorf("unmarshal file: %w", err)
 	}
 
+	c.applySafetyGuards()
+	return nil
+}
+
+func (c *ConfigurationManager) applySafetyGuards() {
 	// caps action batch limit to 100
 	if c.Configuration.Export.Action.Limit > 100 {
 		c.Configuration.Export.Action.Limit = 100
@@ -136,8 +141,6 @@ func (c *ConfigurationManager) loadConfiguration() error {
 	if c.Configuration.Export.Issue.Limit > 100 {
 		c.Configuration.Export.Issue.Limit = 100
 	}
-
-	return nil
 }
 
 func (c *ConfigurationManager) SaveConfiguration() error {
@@ -185,9 +188,9 @@ func BuildConfigurationWithDefaults() *ExporterConfiguration {
 }
 
 // NewConfigurationManager creates a new ConfigurationManager.
-func NewConfigurationManager(fn string, autoLoad bool, autoCreate bool, defaultCfg *ExporterConfiguration) (error, *ConfigurationManager) {
+func NewConfigurationManager(fn string, autoLoad bool, autoCreate bool, defaultCfg *ExporterConfiguration) (*ConfigurationManager, error) {
 	if len(strings.TrimSpace(fn)) == 0 || !strings.HasSuffix(fn, ".yaml") {
-		return fmt.Errorf("invalid file name provided"), nil
+		return nil, fmt.Errorf("invalid file name provided")
 	}
 
 	var cfg *ExporterConfiguration = nil
@@ -210,21 +213,23 @@ func NewConfigurationManager(fn string, autoLoad bool, autoCreate bool, defaultC
 		if autoLoad {
 			err := cm.loadConfiguration()
 			if err != nil {
-				return err, nil
+				return nil, err
 			}
 		}
-		return nil, cm
+		cm.applySafetyGuards()
+		return cm, nil
 
 	case errors.Is(err, os.ErrNotExist):
 		if autoCreate {
 			// create the configuration
 			err := cm.createEmptyConfiguration()
 			if err != nil {
-				return err, nil
+				return nil, err
 			}
 		}
-		return nil, cm
+		cm.applySafetyGuards()
+		return cm, nil
 	default:
-		return err, nil
+		return nil, err
 	}
 }

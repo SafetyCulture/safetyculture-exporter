@@ -290,7 +290,7 @@ func (s *SafetyCultureExporter) RunPrintSchema() error {
 }
 
 func NewSafetyCultureExporter() *SafetyCultureExporter {
-	err, cm := config.NewConfigurationManager(viper.ConfigFileUsed(), true, false, nil)
+	cm, err := config.NewConfigurationManager(viper.ConfigFileUsed(), true, false, nil)
 	util.Check(err, "while loading config file")
 	return &SafetyCultureExporter{
 		cfg: cm.Configuration,

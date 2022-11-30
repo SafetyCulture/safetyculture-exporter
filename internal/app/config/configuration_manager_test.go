@@ -12,19 +12,19 @@ import (
 )
 
 func TestNewConfiguration_when_invalid_filename(t *testing.T) {
-	err, cm := config.NewConfigurationManager("fake_file", true, true, nil)
+	cm, err := config.NewConfigurationManager("fake_file", true, true, nil)
 	require.Nil(t, cm)
 	assert.Equal(t, "invalid file name provided", err.Error())
 }
 
 func TestNewConfiguration_when_empty_filename(t *testing.T) {
-	err, cm := config.NewConfigurationManager("  ", true, true, nil)
+	cm, err := config.NewConfigurationManager("  ", true, true, nil)
 	require.Nil(t, cm)
 	assert.Equal(t, "invalid file name provided", err.Error())
 }
 
 func TestNewConfigurationManager_should_not_read_file(t *testing.T) {
-	err, cm := config.NewConfigurationManager("fixtures/valid_no_time.yaml", false, false, nil)
+	cm, err := config.NewConfigurationManager("fixtures/valid_no_time.yaml", false, false, nil)
 	require.Nil(t, err)
 	assert.NotNil(t, cm)
 	assert.NotNil(t, cm.Configuration)
@@ -32,7 +32,7 @@ func TestNewConfigurationManager_should_not_read_file(t *testing.T) {
 
 func TestNewConfiguration_should_create_when_auto_create_is_true(t *testing.T) {
 	os.Remove("fake_file.yaml")
-	err, cm := config.NewConfigurationManager("fake_file.yaml", true, true, nil)
+	cm, err := config.NewConfigurationManager("fake_file.yaml", true, true, nil)
 	assert.Nil(t, err)
 	assert.NotNil(t, cm)
 	assert.NotNil(t, cm.Configuration)
@@ -43,7 +43,7 @@ func TestNewConfiguration_should_create_when_auto_create_is_true(t *testing.T) {
 
 func TestNewConfiguration_should_not_create_when_auto_create_is_false(t *testing.T) {
 	os.Remove("fake_file.yaml")
-	err, cm := config.NewConfigurationManager("fake_file.yaml", true, false, nil)
+	cm, err := config.NewConfigurationManager("fake_file.yaml", true, false, nil)
 	assert.Nil(t, err)
 	assert.NotNil(t, cm)
 	assert.NotNil(t, cm.Configuration)
@@ -53,7 +53,7 @@ func TestNewConfiguration_should_not_create_when_auto_create_is_false(t *testing
 }
 
 func TestNewConfigurationManager_when_filename_exists_without_time(t *testing.T) {
-	err, cm := config.NewConfigurationManager("fixtures/valid_no_time.yaml", true, true, nil)
+	cm, err := config.NewConfigurationManager("fixtures/valid_no_time.yaml", true, true, nil)
 	require.Nil(t, err)
 	require.NotNil(t, cm)
 	require.NotNil(t, cm.Configuration)
@@ -106,7 +106,7 @@ func TestNewConfigurationManager_when_filename_exists_without_time(t *testing.T)
 }
 
 func TestNewConfigurationManager_when_filename_exists_with_time(t *testing.T) {
-	err, cm := config.NewConfigurationManager("fixtures/valid_with_time.yaml", true, true, nil)
+	cm, err := config.NewConfigurationManager("fixtures/valid_with_time.yaml", true, true, nil)
 	require.Nil(t, err)
 	require.NotNil(t, cm)
 	require.NotNil(t, cm.Configuration)
@@ -118,7 +118,7 @@ func TestNewConfigurationManager_when_filename_exists_with_time(t *testing.T) {
 
 func TestNewConfigurationManager_should_apply_the_defaults(t *testing.T) {
 	defs := config.BuildConfigurationWithDefaults()
-	err, cm := config.NewConfigurationManager("new.yaml", false, false, defs)
+	cm, err := config.NewConfigurationManager("new.yaml", false, false, defs)
 	require.Nil(t, err)
 	require.NotNil(t, cm)
 	assert.Equal(t, "https://api.safetyculture.io", cm.Configuration.API.URL)
