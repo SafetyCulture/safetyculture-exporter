@@ -147,25 +147,6 @@ func (c *ConfigurationManager) SaveConfiguration() error {
 	return nil
 }
 
-// ConfigurationManagerDefaults specifies the defaults for the configuration file
-type ConfigurationManagerDefaults struct {
-	DefaultSheqsyURL                     string
-	DefaultSafetyCultureURL              string
-	DefaultCsvMaxRowsPerFile             int
-	DefaultDbDialect                     string
-	DefaultExportActionLimit             int
-	DefaultExportIncremental             bool
-	DefaultExportInspectionArchived      string
-	DefaultExportInspectionCompleted     string
-	DefaultExportInspectionLimit         int
-	DefaultExportInspectionWebReportLink string
-	DefaultExportMediaPath               string
-	DefaultExportPath                    string
-	DefaultReportFilenameConvention      string
-	DefaultReportFormat                  []string
-	DefaultReportRetryTimeout            int
-}
-
 func BuildConfigurationWithDefaults() *ExporterConfiguration {
 	cfg := &ExporterConfiguration{}
 	cfg.API.SheqsyURL = "https://app.sheqsy.com"
