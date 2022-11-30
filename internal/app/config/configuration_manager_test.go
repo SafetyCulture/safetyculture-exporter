@@ -1,4 +1,4 @@
-package configure_test
+package config_test
 
 import (
 	"errors"
@@ -6,33 +6,33 @@ import (
 	"testing"
 	"time"
 
-	"github.com/SafetyCulture/safetyculture-exporter/cmd/safetyculture-exporter/cmd/configure"
+	"github.com/SafetyCulture/safetyculture-exporter/internal/app/config"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestNewConfiguration_when_invalid_filename(t *testing.T) {
-	err, cm := configure.NewConfigurationManager("fake_file", true, true)
+	err, cm := config.NewConfigurationManager("fake_file", true, true, nil)
 	require.Nil(t, cm)
 	assert.Equal(t, "invalid file name provided", err.Error())
 }
 
 func TestNewConfiguration_when_empty_filename(t *testing.T) {
-	err, cm := configure.NewConfigurationManager(" ", true, true)
+	err, cm := config.NewConfigurationManager("  ", true, true, nil)
 	require.Nil(t, cm)
 	assert.Equal(t, "invalid file name provided", err.Error())
 }
 
 func TestNewConfigurationManager_should_not_read_file(t *testing.T) {
-	err, cm := configure.NewConfigurationManager("fixtures/valid_no_time.yaml", false, false)
+	err, cm := config.NewConfigurationManager("fixtures/valid_no_time.yaml", false, false, nil)
 	require.Nil(t, err)
 	assert.NotNil(t, cm)
 	assert.NotNil(t, cm.Configuration)
 }
 
-func TestNewConfiguration_should_create_when_valid_filename_does_not_exist(t *testing.T) {
+func TestNewConfiguration_should_create_when_auto_create_is_true(t *testing.T) {
 	os.Remove("fake_file.yaml")
-	err, cm := configure.NewConfigurationManager("fake_file.yaml", true, true)
+	err, cm := config.NewConfigurationManager("fake_file.yaml", true, true, nil)
 	assert.Nil(t, err)
 	assert.NotNil(t, cm)
 	assert.NotNil(t, cm.Configuration)
@@ -41,9 +41,9 @@ func TestNewConfiguration_should_create_when_valid_filename_does_not_exist(t *te
 	os.Remove("fake_file.yaml")
 }
 
-func TestNewConfiguration_should_not_create_when_valid_filename_does_not_exist(t *testing.T) {
+func TestNewConfiguration_should_not_create_when_auto_create_is_false(t *testing.T) {
 	os.Remove("fake_file.yaml")
-	err, cm := configure.NewConfigurationManager("fake_file.yaml", true, false)
+	err, cm := config.NewConfigurationManager("fake_file.yaml", true, false, nil)
 	assert.Nil(t, err)
 	assert.NotNil(t, cm)
 	assert.NotNil(t, cm.Configuration)
@@ -53,7 +53,7 @@ func TestNewConfiguration_should_not_create_when_valid_filename_does_not_exist(t
 }
 
 func TestNewConfigurationManager_when_filename_exists_without_time(t *testing.T) {
-	err, cm := configure.NewConfigurationManager("fixtures/valid_no_time.yaml", true, true)
+	err, cm := config.NewConfigurationManager("fixtures/valid_no_time.yaml", true, true, nil)
 	require.Nil(t, err)
 	require.NotNil(t, cm)
 	require.NotNil(t, cm.Configuration)
@@ -106,7 +106,7 @@ func TestNewConfigurationManager_when_filename_exists_without_time(t *testing.T)
 }
 
 func TestNewConfigurationManager_when_filename_exists_with_time(t *testing.T) {
-	err, cm := configure.NewConfigurationManager("fixtures/valid_with_time.yaml", true, true)
+	err, cm := config.NewConfigurationManager("fixtures/valid_with_time.yaml", true, true, nil)
 	require.Nil(t, err)
 	require.NotNil(t, cm)
 	require.NotNil(t, cm.Configuration)
@@ -114,4 +114,26 @@ func TestNewConfigurationManager_when_filename_exists_with_time(t *testing.T) {
 	cfg := cm.Configuration
 	exp, _ := time.Parse("2006-01-02", "2022-11-29")
 	assert.Equal(t, exp, cfg.Export.ModifiedAfter.Time)
+}
+
+func TestNewConfigurationManager_should_apply_the_defaults(t *testing.T) {
+	defs := config.BuildConfigurationWithDefaults()
+	err, cm := config.NewConfigurationManager("new.yaml", false, false, defs)
+	require.Nil(t, err)
+	require.NotNil(t, cm)
+	assert.Equal(t, "https://api.safetyculture.io", cm.Configuration.API.URL)
+	assert.Equal(t, "https://app.sheqsy.com", cm.Configuration.API.SheqsyURL)
+	assert.Equal(t, 1000000, cm.Configuration.Csv.MaxRowsPerFile)
+	assert.Equal(t, "mysql", cm.Configuration.Db.Dialect)
+	assert.Equal(t, 100, cm.Configuration.Export.Action.Limit)
+	assert.True(t, cm.Configuration.Export.Incremental)
+	assert.Equal(t, "false", cm.Configuration.Export.Inspection.Archived)
+	assert.Equal(t, "true", cm.Configuration.Export.Inspection.Completed)
+	assert.Equal(t, 100, cm.Configuration.Export.Inspection.Limit)
+	assert.Equal(t, "private", cm.Configuration.Export.Inspection.WebReportLink)
+	assert.Equal(t, "./export/media/", cm.Configuration.Export.MediaPath)
+	assert.Equal(t, "./export/", cm.Configuration.Export.Path)
+	assert.Equal(t, "INSPECTION_TITLE", cm.Configuration.Report.FilenameConvention)
+	assert.Equal(t, []string{"PDF"}, cm.Configuration.Report.Format)
+	assert.Equal(t, 15, cm.Configuration.Report.RetryTimeout)
 }

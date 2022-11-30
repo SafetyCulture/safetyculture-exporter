@@ -1,4 +1,4 @@
-package configure
+package config
 
 import (
 	"errors"
@@ -130,18 +130,62 @@ func (c *ConfigurationManager) SaveConfiguration() error {
 	return nil
 }
 
+// ConfigurationManagerDefaults specifies the defaults for the configuration file
+type ConfigurationManagerDefaults struct {
+	DefaultSheqsyURL                     string
+	DefaultSafetyCultureURL              string
+	DefaultCsvMaxRowsPerFile             int
+	DefaultDbDialect                     string
+	DefaultExportActionLimit             int
+	DefaultExportIncremental             bool
+	DefaultExportInspectionArchived      string
+	DefaultExportInspectionCompleted     string
+	DefaultExportInspectionLimit         int
+	DefaultExportInspectionWebReportLink string
+	DefaultExportMediaPath               string
+	DefaultExportPath                    string
+	DefaultReportFilenameConvention      string
+	DefaultReportFormat                  []string
+	DefaultReportRetryTimeout            int
+}
+
+func BuildConfigurationWithDefaults() *Configuration {
+	cfg := &Configuration{}
+	cfg.API.SheqsyURL = "https://app.sheqsy.com"
+	cfg.API.URL = "https://api.safetyculture.io"
+	cfg.Csv.MaxRowsPerFile = 1000000
+	cfg.Db.Dialect = "mysql"
+	cfg.Export.Action.Limit = 100
+	cfg.Export.Incremental = true
+	cfg.Export.Inspection.Archived = "false"
+	cfg.Export.Inspection.Completed = "true"
+	cfg.Export.Inspection.Limit = 100
+	cfg.Export.Inspection.WebReportLink = "private"
+	cfg.Export.MediaPath = "./export/media/"
+	cfg.Export.Path = "./export/"
+	cfg.Report.FilenameConvention = "INSPECTION_TITLE"
+	cfg.Report.Format = []string{"PDF"}
+	cfg.Report.RetryTimeout = 15
+	return cfg
+
+}
+
 // NewConfigurationManager creates a new ConfigurationManager.
-// fn - filename
-// autoLoad - If the configuration file exists, will be loaded
-// autoCreate - If the configuration file doesn't exist, will be created
-func NewConfigurationManager(fn string, autoLoad bool, autoCreate bool) (error, *ConfigurationManager) {
+func NewConfigurationManager(fn string, autoLoad bool, autoCreate bool, defaultCfg *Configuration) (error, *ConfigurationManager) {
 	if len(strings.TrimSpace(fn)) == 0 || !strings.HasSuffix(fn, ".yaml") {
 		return fmt.Errorf("invalid file name provided"), nil
 	}
 
+	var cfg *Configuration = nil
+	if defaultCfg != nil {
+		cfg = defaultCfg
+	} else {
+		cfg = &Configuration{}
+	}
+
 	cm := &ConfigurationManager{
 		fileName:      fn,
-		Configuration: &Configuration{},
+		Configuration: cfg,
 	}
 
 	_, err := os.Stat(fn)
