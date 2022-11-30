@@ -151,6 +151,12 @@ func MapViperConfigToConfigurationOptions(v *viper.Viper) *config.ConfigurationO
 		issueLimit = 100
 	}
 
+	// caps asset batch limit to 100
+	assetLimit := v.GetInt("export.asset.limit")
+	if assetLimit > 100 {
+		assetLimit = 100
+	}
+
 	return &config.ConfigurationOptions{
 		ApiConfig: &config.ApiConfig{
 			AccessToken: v.GetString("access_token"),
@@ -194,6 +200,9 @@ func MapViperConfigToConfigurationOptions(v *viper.Viper) *config.ConfigurationO
 			},
 			IssueConfig: &config.ExportIssueConfig{
 				BatchLimit: issueLimit,
+			},
+			AssetConfig: &config.ExportAssetConfig{
+				BatchLimit: assetLimit,
 			},
 		},
 		ReportConfig: &config.ReportConfig{

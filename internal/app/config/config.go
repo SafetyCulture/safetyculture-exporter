@@ -47,6 +47,11 @@ type ExportIssueConfig struct {
 	BatchLimit int // The limit for the number of issues that gets processed per batch
 }
 
+// ExportAssetConfig is a representation of the export.asset section from yaml configuration
+type ExportAssetConfig struct {
+	BatchLimit int // The limit for the number of assets that gets processed per batch
+}
+
 // ExportConfig is a representation of the EXPORT section from YAML configuration
 type ExportConfig struct {
 	Path               string    // The absolute or relative path to save exported data
@@ -56,6 +61,7 @@ type ExportConfig struct {
 	FilterByTableName  []string  // The CSV and/or SQL tables to export. Empty means all tables will be exported
 	SchemaOnly         bool
 	ActionConfig       *ExportActionConfig
+	AssetConfig        *ExportAssetConfig
 	IssueConfig        *ExportIssueConfig
 	InspectionConfig   *ExportInspectionConfig
 	SiteConfig         *ExportSiteConfig
