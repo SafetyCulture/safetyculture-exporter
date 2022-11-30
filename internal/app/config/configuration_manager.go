@@ -10,9 +10,10 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-// Configuration is the equivalent struct of YAML
-type Configuration struct {
+// ExporterConfiguration is the equivalent struct of YAML
+type ExporterConfiguration struct {
 	AccessToken string `yaml:"access_token"`
+	SchemaOnly  bool   `yaml:"schema_only"`
 	API         struct {
 		ProxyURL      string `yaml:"proxy_url"`
 		SheqsyURL     string `yaml:"sheqsy_url"`
@@ -40,6 +41,9 @@ type Configuration struct {
 			SkipIds               []string `yaml:"skip_ids"`
 			WebReportLink         string   `yaml:"web_report_link"`
 		} `yaml:"inspection"`
+		Issue struct {
+			Limit int `yaml:"limit"`
+		} `yaml:"issue"`
 		Media         bool   `yaml:"media"`
 		MediaPath     string `yaml:"media_path"`
 		ModifiedAfter mTime  `yaml:"modified_after"`
@@ -101,7 +105,7 @@ func (yt mTime) MarshalYAML() (interface{}, error) {
 // ConfigurationManager wrapper for configuration and fileName
 type ConfigurationManager struct {
 	fileName      string
-	Configuration *Configuration
+	Configuration *ExporterConfiguration
 }
 
 func (c *ConfigurationManager) createEmptyConfiguration() error {
@@ -123,6 +127,16 @@ func (c *ConfigurationManager) loadConfiguration() error {
 	if err := yaml.Unmarshal(yamlContents, c.Configuration); err != nil {
 		return fmt.Errorf("unmarshal file: %w", err)
 	}
+
+	// caps action batch limit to 100
+	if c.Configuration.Export.Action.Limit > 100 {
+		c.Configuration.Export.Action.Limit = 100
+	}
+	// caps issue batch limit to 100
+	if c.Configuration.Export.Issue.Limit > 100 {
+		c.Configuration.Export.Issue.Limit = 100
+	}
+
 	return nil
 }
 
@@ -149,8 +163,8 @@ type ConfigurationManagerDefaults struct {
 	DefaultReportRetryTimeout            int
 }
 
-func BuildConfigurationWithDefaults() *Configuration {
-	cfg := &Configuration{}
+func BuildConfigurationWithDefaults() *ExporterConfiguration {
+	cfg := &ExporterConfiguration{}
 	cfg.API.SheqsyURL = "https://app.sheqsy.com"
 	cfg.API.URL = "https://api.safetyculture.io"
 	cfg.Csv.MaxRowsPerFile = 1000000
@@ -171,16 +185,16 @@ func BuildConfigurationWithDefaults() *Configuration {
 }
 
 // NewConfigurationManager creates a new ConfigurationManager.
-func NewConfigurationManager(fn string, autoLoad bool, autoCreate bool, defaultCfg *Configuration) (error, *ConfigurationManager) {
+func NewConfigurationManager(fn string, autoLoad bool, autoCreate bool, defaultCfg *ExporterConfiguration) (error, *ConfigurationManager) {
 	if len(strings.TrimSpace(fn)) == 0 || !strings.HasSuffix(fn, ".yaml") {
 		return fmt.Errorf("invalid file name provided"), nil
 	}
 
-	var cfg *Configuration = nil
+	var cfg *ExporterConfiguration = nil
 	if defaultCfg != nil {
 		cfg = defaultCfg
 	} else {
-		cfg = &Configuration{}
+		cfg = &ExporterConfiguration{}
 	}
 
 	cm := &ConfigurationManager{
