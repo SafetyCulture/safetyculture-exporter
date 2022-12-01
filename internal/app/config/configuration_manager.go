@@ -47,7 +47,7 @@ type ExporterConfiguration struct {
 		MediaPath     string `yaml:"media_path"`
 		ModifiedAfter mTime  `yaml:"modified_after"`
 		Path          string `yaml:"path"`
-		SchemaOnly    bool   `yaml:"schema_only"`
+		SchemaOnly    bool   `yaml:"-"`
 		Site          struct {
 			IncludeDeleted       bool `yaml:"include_deleted"`
 			IncludeFullHierarchy bool `yaml:"include_full_hierarchy"`
@@ -161,11 +161,13 @@ func BuildConfigurationWithDefaults() *ExporterConfiguration {
 	cfg.Export.Inspection.Completed = "true"
 	cfg.Export.Inspection.Limit = 100
 	cfg.Export.Inspection.WebReportLink = "private"
+	cfg.Export.Issue.Limit = 100
 	cfg.Export.MediaPath = "./export/media/"
 	cfg.Export.Path = "./export/"
 	cfg.Report.FilenameConvention = "INSPECTION_TITLE"
 	cfg.Report.Format = []string{"PDF"}
 	cfg.Report.RetryTimeout = 15
+
 	return cfg
 }
 
@@ -179,7 +181,7 @@ func NewConfigurationManager(fn string, autoLoad bool, autoCreate bool, defaultC
 	if defaultCfg != nil {
 		cfg = defaultCfg
 	} else {
-		cfg = &ExporterConfiguration{}
+		cfg = BuildConfigurationWithDefaults()
 	}
 
 	cm := &ConfigurationManager{
@@ -191,7 +193,16 @@ func NewConfigurationManager(fn string, autoLoad bool, autoCreate bool, defaultC
 
 	switch {
 	case err == nil:
-		// file exists
+		if autoCreate {
+			// overwrite the configuration
+			cm.applySafetyGuards()
+			err := cm.SaveConfiguration()
+			if err != nil {
+				return nil, err
+			}
+		}
+
+		// file exists, load configuration
 		if autoLoad {
 			err := cm.loadConfiguration()
 			if err != nil {

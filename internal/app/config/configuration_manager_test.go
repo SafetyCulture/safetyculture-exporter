@@ -28,6 +28,7 @@ func TestNewConfigurationManager_should_not_read_file(t *testing.T) {
 	require.Nil(t, err)
 	assert.NotNil(t, cm)
 	assert.NotNil(t, cm.Configuration)
+	assert.EqualValues(t, "", cm.Configuration.Db.ConnectionString)
 }
 
 func TestNewConfiguration_should_create_when_auto_create_is_true(t *testing.T) {
@@ -53,7 +54,7 @@ func TestNewConfiguration_should_not_create_when_auto_create_is_false(t *testing
 }
 
 func TestNewConfigurationManager_when_filename_exists_without_time(t *testing.T) {
-	cm, err := config.NewConfigurationManager("fixtures/valid_no_time.yaml", true, true, nil)
+	cm, err := config.NewConfigurationManager("fixtures/valid_no_time.yaml", true, false, nil)
 	require.Nil(t, err)
 	require.NotNil(t, cm)
 	require.NotNil(t, cm.Configuration)
@@ -106,7 +107,7 @@ func TestNewConfigurationManager_when_filename_exists_without_time(t *testing.T)
 }
 
 func TestNewConfigurationManager_when_filename_exists_with_time(t *testing.T) {
-	cm, err := config.NewConfigurationManager("fixtures/valid_with_time.yaml", true, true, nil)
+	cm, err := config.NewConfigurationManager("fixtures/valid_with_time.yaml", true, false, nil)
 	require.Nil(t, err)
 	require.NotNil(t, cm)
 	require.NotNil(t, cm.Configuration)
@@ -151,7 +152,8 @@ func TestConfigurationManager_SaveConfiguration(t *testing.T) {
 	cm.Configuration.Export.Tables = []string{"users", "inspections"}
 	cm.Configuration.Db.Dialect = "sqlserver"
 	cm.Configuration.Export.Inspection.Limit = 25
-	cm.SaveConfiguration()
+	err = cm.SaveConfiguration()
+	assert.Nil(t, err)
 
 	// read the file as new
 	newCm, err := config.NewConfigurationManager("fake_file.yaml", true, false, nil)
