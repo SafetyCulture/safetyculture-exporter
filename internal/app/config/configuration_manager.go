@@ -13,7 +13,6 @@ import (
 // ExporterConfiguration is the equivalent struct of YAML
 type ExporterConfiguration struct {
 	AccessToken string `yaml:"access_token"`
-	SchemaOnly  bool   `yaml:"schema_only"`
 	API         struct {
 		ProxyURL      string `yaml:"proxy_url"`
 		SheqsyURL     string `yaml:"sheqsy_url"`
@@ -48,6 +47,7 @@ type ExporterConfiguration struct {
 		MediaPath     string `yaml:"media_path"`
 		ModifiedAfter mTime  `yaml:"modified_after"`
 		Path          string `yaml:"path"`
+		SchemaOnly    bool   `yaml:"schema_only"`
 		Site          struct {
 			IncludeDeleted       bool `yaml:"include_deleted"`
 			IncludeFullHierarchy bool `yaml:"include_full_hierarchy"`
@@ -66,12 +66,13 @@ type ExporterConfiguration struct {
 	SheqsyUsername  string `yaml:"sheqsy_username"`
 }
 
+// mTime wrapper around time.Time in order to have a custom YAML marshaller/un-marshaller
 type mTime struct {
 	time.Time
 }
 
-// UnmarshalYAML custom unmarshaler for time.Time since empty strings throws an error
-func (yt *mTime) UnmarshalYAML(value *yaml.Node) error {
+// UnmarshalYAML custom un-marshaller for time.Time since empty strings throws an error
+func (mt *mTime) UnmarshalYAML(value *yaml.Node) error {
 	var timeString string
 	err := value.Decode(&timeString)
 	if err != nil {
@@ -90,16 +91,18 @@ func (yt *mTime) UnmarshalYAML(value *yaml.Node) error {
 		}
 	}
 
-	yt.Time = t
+	mt.Time = t
 	return nil
 }
 
-func (yt mTime) MarshalYAML() (interface{}, error) {
-	if yt.Time.IsZero() {
+// MarshalYAML custom marshaller for time, when is ZERO, marshal as empty string
+// note: doesn't work with pointer receiver
+func (mt mTime) MarshalYAML() (interface{}, error) {
+	if mt.Time.IsZero() {
 		return "", nil
 	}
 
-	return yt.Time.Format("2006-01-02"), nil
+	return mt.Time.Format("2006-01-02"), nil
 }
 
 // ConfigurationManager wrapper for configuration and fileName
@@ -108,17 +111,7 @@ type ConfigurationManager struct {
 	Configuration *ExporterConfiguration
 }
 
-func (c *ConfigurationManager) createEmptyConfiguration() error {
-	data, err := yaml.Marshal(c.Configuration)
-	if err != nil {
-		return fmt.Errorf("marshal: %w", err)
-	}
-	if err := os.WriteFile(c.fileName, data, 0666); err != nil {
-		return fmt.Errorf("writing file %s: %w", c.fileName, err)
-	}
-	return nil
-}
-
+// loadConfiguration will load the specified YAML file and map it
 func (c *ConfigurationManager) loadConfiguration() error {
 	yamlContents, err := os.ReadFile(c.fileName)
 	if err != nil {
@@ -128,10 +121,10 @@ func (c *ConfigurationManager) loadConfiguration() error {
 		return fmt.Errorf("unmarshal file: %w", err)
 	}
 
-	c.applySafetyGuards()
 	return nil
 }
 
+// applySafetyGuards will adjust certain values to acceptable maximum values
 func (c *ConfigurationManager) applySafetyGuards() {
 	// caps action batch limit to 100
 	if c.Configuration.Export.Action.Limit > 100 {
@@ -143,10 +136,19 @@ func (c *ConfigurationManager) applySafetyGuards() {
 	}
 }
 
+// SaveConfiguration will save the configuration to the file
 func (c *ConfigurationManager) SaveConfiguration() error {
+	data, err := yaml.Marshal(c.Configuration)
+	if err != nil {
+		return fmt.Errorf("marshal: %w", err)
+	}
+	if err := os.WriteFile(c.fileName, data, 0666); err != nil {
+		return fmt.Errorf("writing file %s: %w", c.fileName, err)
+	}
 	return nil
 }
 
+// BuildConfigurationWithDefaults will set up an initial configuration with default values
 func BuildConfigurationWithDefaults() *ExporterConfiguration {
 	cfg := &ExporterConfiguration{}
 	cfg.API.SheqsyURL = "https://app.sheqsy.com"
@@ -165,7 +167,6 @@ func BuildConfigurationWithDefaults() *ExporterConfiguration {
 	cfg.Report.Format = []string{"PDF"}
 	cfg.Report.RetryTimeout = 15
 	return cfg
-
 }
 
 // NewConfigurationManager creates a new ConfigurationManager.
@@ -203,7 +204,8 @@ func NewConfigurationManager(fn string, autoLoad bool, autoCreate bool, defaultC
 	case errors.Is(err, os.ErrNotExist):
 		if autoCreate {
 			// create the configuration
-			err := cm.createEmptyConfiguration()
+			cm.applySafetyGuards()
+			err := cm.SaveConfiguration()
 			if err != nil {
 				return nil, err
 			}

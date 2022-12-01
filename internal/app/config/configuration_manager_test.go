@@ -31,18 +31,18 @@ func TestNewConfigurationManager_should_not_read_file(t *testing.T) {
 }
 
 func TestNewConfiguration_should_create_when_auto_create_is_true(t *testing.T) {
-	os.Remove("fake_file.yaml")
+	_ = os.Remove("fake_file.yaml")
 	cm, err := config.NewConfigurationManager("fake_file.yaml", true, true, nil)
 	assert.Nil(t, err)
 	assert.NotNil(t, cm)
 	assert.NotNil(t, cm.Configuration)
 	_, err = os.Stat("fake_file.yaml")
 	assert.Nil(t, err)
-	os.Remove("fake_file.yaml")
+	_ = os.Remove("fake_file.yaml")
 }
 
 func TestNewConfiguration_should_not_create_when_auto_create_is_false(t *testing.T) {
-	os.Remove("fake_file.yaml")
+	_ = os.Remove("fake_file.yaml")
 	cm, err := config.NewConfigurationManager("fake_file.yaml", true, false, nil)
 	assert.Nil(t, err)
 	assert.NotNil(t, cm)
@@ -136,4 +136,49 @@ func TestNewConfigurationManager_should_apply_the_defaults(t *testing.T) {
 	assert.Equal(t, "INSPECTION_TITLE", cm.Configuration.Report.FilenameConvention)
 	assert.Equal(t, []string{"PDF"}, cm.Configuration.Report.Format)
 	assert.Equal(t, 15, cm.Configuration.Report.RetryTimeout)
+}
+
+func TestConfigurationManager_SaveConfiguration(t *testing.T) {
+	_ = os.Remove("fake_file.yaml")
+	defs := config.BuildConfigurationWithDefaults()
+	cm, err := config.NewConfigurationManager("fake_file.yaml", false, true, defs)
+	require.Nil(t, err)
+	require.NotNil(t, cm)
+	require.NotNil(t, cm.Configuration)
+
+	// mutate
+	cm.Configuration.AccessToken = "new-access-token"
+	cm.Configuration.Export.Tables = []string{"users", "inspections"}
+	cm.Configuration.Db.Dialect = "sqlserver"
+	cm.Configuration.Export.Inspection.Limit = 25
+	cm.SaveConfiguration()
+
+	// read the file as new
+	newCm, err := config.NewConfigurationManager("fake_file.yaml", true, false, nil)
+	require.Nil(t, err)
+	require.NotNil(t, newCm)
+	require.NotNil(t, newCm.Configuration)
+
+	// changed values
+	assert.EqualValues(t, "new-access-token", newCm.Configuration.AccessToken)
+	assert.EqualValues(t, []string{"users", "inspections"}, newCm.Configuration.Export.Tables)
+	assert.EqualValues(t, "sqlserver", newCm.Configuration.Db.Dialect)
+	assert.EqualValues(t, 25, newCm.Configuration.Export.Inspection.Limit)
+
+	// existing defaults
+	assert.EqualValues(t, "https://api.safetyculture.io", newCm.Configuration.API.URL)
+	assert.EqualValues(t, "https://app.sheqsy.com", newCm.Configuration.API.SheqsyURL)
+	assert.EqualValues(t, 1000000, newCm.Configuration.Csv.MaxRowsPerFile)
+	assert.EqualValues(t, 100, newCm.Configuration.Export.Action.Limit)
+	assert.True(t, newCm.Configuration.Export.Incremental)
+	assert.EqualValues(t, "false", newCm.Configuration.Export.Inspection.Archived)
+	assert.EqualValues(t, "true", newCm.Configuration.Export.Inspection.Completed)
+	assert.EqualValues(t, "private", newCm.Configuration.Export.Inspection.WebReportLink)
+	assert.EqualValues(t, "./export/media/", newCm.Configuration.Export.MediaPath)
+	assert.EqualValues(t, "./export/", newCm.Configuration.Export.Path)
+	assert.EqualValues(t, "INSPECTION_TITLE", newCm.Configuration.Report.FilenameConvention)
+	assert.EqualValues(t, []string{"PDF"}, newCm.Configuration.Report.Format)
+	assert.EqualValues(t, 15, newCm.Configuration.Report.RetryTimeout)
+
+	_ = os.Remove("fake_file.yaml")
 }
