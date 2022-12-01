@@ -172,6 +172,8 @@ func BuildConfigurationWithDefaults() *ExporterConfiguration {
 }
 
 // NewConfigurationManager creates a new ConfigurationManager.
+// autoLoad will trigger to load the configuration from file
+// autoCreate will trigger to create a new file
 func NewConfigurationManager(fn string, autoLoad bool, autoCreate bool, defaultCfg *ExporterConfiguration) (*ConfigurationManager, error) {
 	if len(strings.TrimSpace(fn)) == 0 || !strings.HasSuffix(fn, ".yaml") {
 		return nil, fmt.Errorf("invalid file name provided")
