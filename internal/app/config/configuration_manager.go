@@ -1,7 +1,6 @@
 package config
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -111,8 +110,12 @@ type ConfigurationManager struct {
 	Configuration *ExporterConfiguration
 }
 
-// loadConfiguration will load the specified YAML file and map it
+// loadConfiguration will load the specified YAML file if exists and map it
 func (c *ConfigurationManager) loadConfiguration() error {
+	if len(strings.TrimSpace(c.fileName)) == 0 || !strings.HasSuffix(c.fileName, ".yaml") {
+		return fmt.Errorf("invalid file name provided")
+	}
+
 	yamlContents, err := os.ReadFile(c.fileName)
 	if err != nil {
 		return fmt.Errorf("read file: %w", err)
@@ -124,8 +127,8 @@ func (c *ConfigurationManager) loadConfiguration() error {
 	return nil
 }
 
-// applySafetyGuards will adjust certain values to acceptable maximum values
-func (c *ConfigurationManager) applySafetyGuards() {
+// ApplySafetyGuards will adjust certain values to acceptable maximum values
+func (c *ConfigurationManager) ApplySafetyGuards() {
 	// caps action batch limit to 100
 	if c.Configuration.Export.Action.Limit > 100 {
 		c.Configuration.Export.Action.Limit = 100
@@ -138,6 +141,10 @@ func (c *ConfigurationManager) applySafetyGuards() {
 
 // SaveConfiguration will save the configuration to the file
 func (c *ConfigurationManager) SaveConfiguration() error {
+	if len(strings.TrimSpace(c.fileName)) == 0 || !strings.HasSuffix(c.fileName, ".yaml") {
+		return fmt.Errorf("invalid file name provided")
+	}
+
 	data, err := yaml.Marshal(c.Configuration)
 	if err != nil {
 		return fmt.Errorf("marshal: %w", err)
@@ -171,61 +178,29 @@ func BuildConfigurationWithDefaults() *ExporterConfiguration {
 	return cfg
 }
 
-// NewConfigurationManager creates a new ConfigurationManager.
-// autoLoad will trigger to load the configuration from file
-// autoCreate will trigger to create a new file
-func NewConfigurationManager(fn string, autoLoad bool, autoCreate bool, defaultCfg *ExporterConfiguration) (*ConfigurationManager, error) {
-	if len(strings.TrimSpace(fn)) == 0 || !strings.HasSuffix(fn, ".yaml") {
-		return nil, fmt.Errorf("invalid file name provided")
-	}
-
-	var cfg *ExporterConfiguration = nil
-	if defaultCfg != nil {
-		cfg = defaultCfg
-	} else {
-		cfg = BuildConfigurationWithDefaults()
-	}
-
+// NewConfigurationManagerFromFile will create a ConfigurationManager with data from the specified file
+func NewConfigurationManagerFromFile(fileName string) (*ConfigurationManager, error) {
 	cm := &ConfigurationManager{
-		fileName:      fn,
-		Configuration: cfg,
+		fileName:      fileName,
+		Configuration: &ExporterConfiguration{},
 	}
 
-	_, err := os.Stat(fn)
-
-	switch {
-	case err == nil:
-		if autoCreate {
-			// overwrite the configuration
-			cm.applySafetyGuards()
-			err := cm.SaveConfiguration()
-			if err != nil {
-				return nil, err
-			}
-		}
-
-		// file exists, load configuration
-		if autoLoad {
-			err := cm.loadConfiguration()
-			if err != nil {
-				return nil, err
-			}
-		}
-		cm.applySafetyGuards()
-		return cm, nil
-
-	case errors.Is(err, os.ErrNotExist):
-		if autoCreate {
-			// create the configuration
-			cm.applySafetyGuards()
-			err := cm.SaveConfiguration()
-			if err != nil {
-				return nil, err
-			}
-		}
-		cm.applySafetyGuards()
-		return cm, nil
-	default:
+	err := cm.loadConfiguration()
+	if err != nil {
 		return nil, err
 	}
+
+	cm.ApplySafetyGuards()
+	return cm, nil
+}
+
+// NewConfigurationManager will create a ConfigurationManager with default data,
+func NewConfigurationManager(fileName string) *ConfigurationManager {
+	cm := &ConfigurationManager{
+		fileName:      fileName,
+		Configuration: BuildConfigurationWithDefaults(),
+	}
+
+	cm.ApplySafetyGuards()
+	return cm
 }

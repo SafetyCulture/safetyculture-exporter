@@ -1,7 +1,6 @@
 package config_test
 
 import (
-	"errors"
 	"os"
 	"testing"
 	"time"
@@ -11,51 +10,58 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestNewConfiguration_when_invalid_filename(t *testing.T) {
-	cm, err := config.NewConfigurationManager("fake_file", true, true, nil)
+func TestNewConfigurationManagerFromFile_when_invalid_filename(t *testing.T) {
+	cm, err := config.NewConfigurationManagerFromFile("fake_file")
 	require.Nil(t, cm)
 	assert.Equal(t, "invalid file name provided", err.Error())
 }
 
-func TestNewConfiguration_when_empty_filename(t *testing.T) {
-	cm, err := config.NewConfigurationManager("  ", true, true, nil)
+func TestNewConfigurationManagerFromFile_when_empty_filename(t *testing.T) {
+	cm, err := config.NewConfigurationManagerFromFile("  ")
 	require.Nil(t, cm)
 	assert.Equal(t, "invalid file name provided", err.Error())
 }
 
-func TestNewConfigurationManager_should_not_read_file(t *testing.T) {
-	cm, err := config.NewConfigurationManager("fixtures/valid_no_time.yaml", false, false, nil)
-	require.Nil(t, err)
+func TestNewConfigurationManagerFromFile_when_file_is_missing(t *testing.T) {
+	cm, err := config.NewConfigurationManagerFromFile("abc.yaml")
+	require.Nil(t, cm)
+	assert.Equal(t, "read file: open abc.yaml: no such file or directory", err.Error())
+}
+
+func TestNewConfigurationManager_should_use_empty_time(t *testing.T) {
+	cm := config.NewConfigurationManager("fixtures/valid_no_time.yaml")
 	assert.NotNil(t, cm)
 	assert.NotNil(t, cm.Configuration)
 	assert.EqualValues(t, "", cm.Configuration.Db.ConnectionString)
+	assert.EqualValues(t, time.Time{}, cm.Configuration.Export.ModifiedAfter.Time)
 }
 
-func TestNewConfiguration_should_create_when_auto_create_is_true(t *testing.T) {
-	_ = os.Remove("fake_file.yaml")
-	cm, err := config.NewConfigurationManager("fake_file.yaml", true, true, nil)
-	assert.Nil(t, err)
-	assert.NotNil(t, cm)
-	assert.NotNil(t, cm.Configuration)
-	_, err = os.Stat("fake_file.yaml")
-	assert.Nil(t, err)
-	_ = os.Remove("fake_file.yaml")
-}
-
-func TestNewConfiguration_should_not_create_when_auto_create_is_false(t *testing.T) {
-	_ = os.Remove("fake_file.yaml")
-	cm, err := config.NewConfigurationManager("fake_file.yaml", true, false, nil)
-	assert.Nil(t, err)
-	assert.NotNil(t, cm)
-	assert.NotNil(t, cm.Configuration)
-	_, err = os.Stat("fake_file.yaml")
-	assert.NotNil(t, err)
-	assert.True(t, errors.Is(err, os.ErrNotExist))
-}
-
-func TestNewConfigurationManager_when_filename_exists_without_time(t *testing.T) {
-	cm, err := config.NewConfigurationManager("fixtures/valid_no_time.yaml", true, false, nil)
+func TestNewConfigurationManagerFromFile_when_filename_exists_with_time(t *testing.T) {
+	cm, err := config.NewConfigurationManagerFromFile("fixtures/valid_with_time.yaml")
 	require.Nil(t, err)
+	require.NotNil(t, cm)
+	require.NotNil(t, cm.Configuration)
+
+	cfg := cm.Configuration
+	exp, _ := time.Parse("2006-01-02", "2022-11-29")
+	assert.Equal(t, exp, cfg.Export.ModifiedAfter.Time)
+}
+
+func TestNewConfigurationManagerFromFile_should_create_file(t *testing.T) {
+	_ = os.Remove("fake_file.yaml")
+	cm := config.NewConfigurationManager("fake_file.yaml")
+	err := cm.SaveConfiguration()
+	assert.Nil(t, err)
+	assert.NotNil(t, cm)
+	assert.NotNil(t, cm.Configuration)
+	_, err = os.Stat("fake_file.yaml")
+	assert.Nil(t, err)
+	_ = os.Remove("fake_file.yaml")
+}
+
+func TestNewConfigurationManagerFromFile_when_filename_exists_without_time(t *testing.T) {
+	cm, err := config.NewConfigurationManagerFromFile("fixtures/valid_no_time.yaml")
+	assert.Nil(t, err)
 	require.NotNil(t, cm)
 	require.NotNil(t, cm.Configuration)
 
@@ -106,44 +112,9 @@ func TestNewConfigurationManager_when_filename_exists_without_time(t *testing.T)
 	assert.Equal(t, []string{"PDF"}, cfg.Report.Format)
 }
 
-func TestNewConfigurationManager_when_filename_exists_with_time(t *testing.T) {
-	cm, err := config.NewConfigurationManager("fixtures/valid_with_time.yaml", true, false, nil)
-	require.Nil(t, err)
-	require.NotNil(t, cm)
-	require.NotNil(t, cm.Configuration)
-
-	cfg := cm.Configuration
-	exp, _ := time.Parse("2006-01-02", "2022-11-29")
-	assert.Equal(t, exp, cfg.Export.ModifiedAfter.Time)
-}
-
-func TestNewConfigurationManager_should_apply_the_defaults(t *testing.T) {
-	defs := config.BuildConfigurationWithDefaults()
-	cm, err := config.NewConfigurationManager("new.yaml", false, false, defs)
-	require.Nil(t, err)
-	require.NotNil(t, cm)
-	assert.Equal(t, "https://api.safetyculture.io", cm.Configuration.API.URL)
-	assert.Equal(t, "https://app.sheqsy.com", cm.Configuration.API.SheqsyURL)
-	assert.Equal(t, 1000000, cm.Configuration.Csv.MaxRowsPerFile)
-	assert.Equal(t, "mysql", cm.Configuration.Db.Dialect)
-	assert.Equal(t, 100, cm.Configuration.Export.Action.Limit)
-	assert.True(t, cm.Configuration.Export.Incremental)
-	assert.Equal(t, "false", cm.Configuration.Export.Inspection.Archived)
-	assert.Equal(t, "true", cm.Configuration.Export.Inspection.Completed)
-	assert.Equal(t, 100, cm.Configuration.Export.Inspection.Limit)
-	assert.Equal(t, "private", cm.Configuration.Export.Inspection.WebReportLink)
-	assert.Equal(t, "./export/media/", cm.Configuration.Export.MediaPath)
-	assert.Equal(t, "./export/", cm.Configuration.Export.Path)
-	assert.Equal(t, "INSPECTION_TITLE", cm.Configuration.Report.FilenameConvention)
-	assert.Equal(t, []string{"PDF"}, cm.Configuration.Report.Format)
-	assert.Equal(t, 15, cm.Configuration.Report.RetryTimeout)
-}
-
 func TestConfigurationManager_SaveConfiguration(t *testing.T) {
 	_ = os.Remove("fake_file.yaml")
-	defs := config.BuildConfigurationWithDefaults()
-	cm, err := config.NewConfigurationManager("fake_file.yaml", false, true, defs)
-	require.Nil(t, err)
+	cm := config.NewConfigurationManager("fake_file.yaml")
 	require.NotNil(t, cm)
 	require.NotNil(t, cm.Configuration)
 
@@ -152,11 +123,11 @@ func TestConfigurationManager_SaveConfiguration(t *testing.T) {
 	cm.Configuration.Export.Tables = []string{"users", "inspections"}
 	cm.Configuration.Db.Dialect = "sqlserver"
 	cm.Configuration.Export.Inspection.Limit = 25
-	err = cm.SaveConfiguration()
+	err := cm.SaveConfiguration()
 	assert.Nil(t, err)
 
 	// read the file as new
-	newCm, err := config.NewConfigurationManager("fake_file.yaml", true, false, nil)
+	newCm, err := config.NewConfigurationManagerFromFile("fake_file.yaml")
 	require.Nil(t, err)
 	require.NotNil(t, newCm)
 	require.NotNil(t, newCm.Configuration)
@@ -183,4 +154,20 @@ func TestConfigurationManager_SaveConfiguration(t *testing.T) {
 	assert.EqualValues(t, 15, newCm.Configuration.Report.RetryTimeout)
 
 	_ = os.Remove("fake_file.yaml")
+}
+
+func TestMapViperConfigToConfigurationOptions_ShouldRespectLimit(t *testing.T) {
+	cm, err := config.NewConfigurationManagerFromFile("fixtures/test_limit_50.yaml")
+	require.Nil(t, err)
+	require.NotNil(t, cm)
+	assert.EqualValues(t, 50, cm.Configuration.Export.Action.Limit)
+	assert.EqualValues(t, 50, cm.Configuration.Export.Issue.Limit)
+}
+
+func TestMapViperConfigToConfigurationOptions_ShouldEnforceLimit(t *testing.T) {
+	cm, err := config.NewConfigurationManagerFromFile("fixtures/test_limit_101.yaml")
+	require.Nil(t, err)
+	require.NotNil(t, cm)
+	assert.EqualValues(t, 100, cm.Configuration.Export.Action.Limit)
+	assert.EqualValues(t, 100, cm.Configuration.Export.Issue.Limit)
 }

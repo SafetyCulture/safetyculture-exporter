@@ -291,8 +291,9 @@ func (s *SafetyCultureExporter) RunPrintSchema() error {
 
 // NewSafetyCultureExporter create a new SafetyCultureExporter with configuration from Viper
 func NewSafetyCultureExporter(v *viper.Viper) *SafetyCultureExporter {
-	cfg := MapViperConfigToExporterConfiguration(v)
-	cm, err := config.NewConfigurationManager(v.ConfigFileUsed(), true, false, cfg)
+	cm, err := config.NewConfigurationManagerFromFile(v.ConfigFileUsed())
+	MapViperConfigToExporterConfiguration(v, cm.Configuration)
+	cm.ApplySafetyGuards()
 	util.Check(err, "while loading config file")
 
 	return &SafetyCultureExporter{
@@ -301,8 +302,7 @@ func NewSafetyCultureExporter(v *viper.Viper) *SafetyCultureExporter {
 }
 
 // MapViperConfigToExporterConfiguration maps Viper config to ExporterConfiguration structure
-func MapViperConfigToExporterConfiguration(v *viper.Viper) *config.ExporterConfiguration {
-	cfg := config.BuildConfigurationWithDefaults()
+func MapViperConfigToExporterConfiguration(v *viper.Viper, cfg *config.ExporterConfiguration) {
 	cfg.AccessToken = v.GetString("access_token")
 	cfg.SheqsyUsername = v.GetString("sheqsy_username")
 	cfg.SheqsyCompanyID = v.GetString("sheqsy_company_id")
@@ -331,6 +331,4 @@ func MapViperConfigToExporterConfiguration(v *viper.Viper) *config.ExporterConfi
 	cfg.Report.PreferenceID = v.GetString("report.preference_id")
 	cfg.Report.FilenameConvention = v.GetString("report.filename_convention")
 	cfg.Report.RetryTimeout = v.GetInt("report.retry_timeout")
-
-	return cfg
 }

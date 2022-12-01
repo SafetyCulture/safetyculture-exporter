@@ -20,8 +20,8 @@ func Cmd() *cobra.Command {
 }
 
 func generateYamlConfiguration(cmd *cobra.Command, args []string) error {
-	defs := config.BuildConfigurationWithDefaults()
-	_, err := config.NewConfigurationManager(viper.ConfigFileUsed(), false, true, defs)
+	cm := config.NewConfigurationManager(viper.ConfigFileUsed())
+	err := cm.SaveConfiguration()
 	util.Check(err, "while writing config to file")
 	fmt.Println("Config file created successfully \U0001f389")
 	return nil
