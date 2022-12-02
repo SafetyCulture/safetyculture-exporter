@@ -161,6 +161,10 @@ func (e *ExporterFeedClient) ExportFeeds(exporter Exporter) error {
 
 	logger.Info("Export finished")
 	if len(e.errs) != 0 {
+		logger.Warn("There were errors during the export:")
+		for i, theError := range e.errs {
+			logger.Infof("%d > %s", i, theError.Error())
+		}
 		// this is temporary code until we finish a follow-up ticket that will use structured errors
 		return e.errs[0]
 	}
