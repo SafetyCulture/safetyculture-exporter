@@ -166,3 +166,46 @@ func countFileLines(filePath string) (int, error) {
 		}
 	}
 }
+
+func createEmptyConfigurationOptions() *config.ConfigurationOptions {
+	return &config.ConfigurationOptions{
+		ApiConfig: &config.ApiConfig{
+			AccessToken: "",
+		},
+		SheqsyApiConfig: &config.SheqsyApiConfig{
+			UserName:  "",
+			CompanyID: "",
+		},
+		ExportConfig: &config.ExportConfig{
+			Incremental:        false,
+			ModifiedAfter:      time.Time{},
+			FilterByTemplateID: nil,
+			FilterByTableName:  nil,
+			ActionConfig: &config.ExportActionConfig{
+				BatchLimit: 0,
+			},
+			AssetConfig: &config.ExportAssetConfig{
+				BatchLimit: 0,
+			},
+			IssueConfig: &config.ExportIssueConfig{
+				BatchLimit: 0,
+			},
+			InspectionConfig: &config.ExportInspectionConfig{
+				Archived:             "",
+				Completed:            "",
+				IncludeInactiveItems: false,
+				BatchLimit:           0,
+				SkipIDs:              nil,
+				WebReportLink:        "",
+			},
+			SiteConfig: &config.ExportSiteConfig{
+				IncludeDeleted:       false,
+				IncludeFullHierarchy: false,
+			},
+			MediaConfig: &config.ExportMediaConfig{
+				Export: false,
+				Path:   "",
+			},
+		},
+	}
+}
