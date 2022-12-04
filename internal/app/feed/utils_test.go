@@ -185,6 +185,9 @@ func createEmptyConfigurationOptions() *config.ConfigurationOptions {
 			ActionConfig: &config.ExportActionConfig{
 				BatchLimit: 0,
 			},
+			AssetConfig: &config.ExportAssetConfig{
+				BatchLimit: 0,
+			},
 			IssueConfig: &config.ExportIssueConfig{
 				BatchLimit: 0,
 			},
