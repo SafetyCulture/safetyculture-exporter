@@ -219,7 +219,7 @@ func (e *ExporterFeedClient) GetFeeds() []Feed {
 		},
 		&AssetFeed{
 			Incremental: false, // Assets API doesn't support modified after filters
-			Limit:       e.exportConfig.AssetConfig.BatchLimit,
+			Limit:       e.configuration.Export.Asset.Limit,
 		},
 	}
 }

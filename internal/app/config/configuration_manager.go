@@ -30,6 +30,9 @@ type ExporterConfiguration struct {
 		Action struct {
 			Limit int `yaml:"limit"`
 		} `yaml:"action"`
+		Asset struct {
+			Limit int `yaml:"limit"`
+		} `yaml:"asset"`
 		Incremental bool `yaml:"incremental"`
 		Inspection  struct {
 			Archived              string   `yaml:"archived"`
