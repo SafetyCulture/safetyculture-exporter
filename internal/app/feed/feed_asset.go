@@ -18,7 +18,7 @@ type Asset struct {
 	TypeName   string    `json:"type_name" csv:"type_name"`
 	Fields     string    `json:"fields" csv:"fields"`
 	CreatedAt  time.Time `json:"created_at" csv:"created_at"`
-	ModifiedAt time.Time `json:"modified_at" csv:"modified_at" gorm:"index:idx_ass_modified_at,sort:desc"`
+	ModifiedAt time.Time `json:"modified_at" csv:"modified_at" gorm:"index:idx_ast_modified_at,sort:desc"`
 	SiteID     string    `json:"site_id" csv:"site_id" gorm:"size:41"`
 	State      string    `json:"state" csv:"state"`
 }
