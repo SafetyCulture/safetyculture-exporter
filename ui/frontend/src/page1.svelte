@@ -11,7 +11,7 @@
 </script>
 
 <div>
-    <h2>Enter your API key</h2>
+    <h2>Enter your API key here</h2>
     <input class="input" id="value" type="text" size="60" bind:value={apiKey} />&nbsp;&nbsp;
     {@debug apiKey}
     <button class="btn" on:click={validate}>Validate</button>
