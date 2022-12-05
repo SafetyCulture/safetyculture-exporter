@@ -176,10 +176,9 @@ func (e *SQLExporter) FinaliseExport(Feed, interface{}) error {
 
 // WriteMedia writes the media to a file
 func (e *SQLExporter) WriteMedia(auditID, mediaID, contentType string, body []byte) error {
-
 	exportMediaDir := filepath.Join(e.ExportMediaPath, auditID)
 	if err := os.MkdirAll(exportMediaDir, os.ModePerm); err != nil {
-		return fmt.Errorf("create directory %s: %w", exportMediaDir, err)
+		return events.NewEventErrorWithMessage(err, events.ErrorSeverityError, events.ErrorSubSystemFileOperations, false, fmt.Sprintf("create directory %s", exportMediaDir))
 	}
 
 	ext := strings.Split(contentType, "/")
@@ -187,13 +186,13 @@ func (e *SQLExporter) WriteMedia(auditID, mediaID, contentType string, body []by
 
 	file, err := os.OpenFile(exportFilePath, os.O_RDWR|os.O_CREATE, 0666)
 	if err != nil {
-		return fmt.Errorf("open file %v: %w", exportFilePath, err)
+		return events.NewEventErrorWithMessage(err, events.ErrorSeverityError, events.ErrorSubSystemFileOperations, false, fmt.Sprintf("open file %v", exportFilePath))
 	}
 	defer file.Close()
 
 	_, err = file.WriteAt(body, 0)
 	if err != nil {
-		return fmt.Errorf("write media to file: %w", err)
+		return events.NewEventErrorWithMessage(err, events.ErrorSeverityError, events.ErrorSubSystemFileOperations, false, "write media to file")
 	}
 
 	return nil
