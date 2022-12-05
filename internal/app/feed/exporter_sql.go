@@ -130,7 +130,7 @@ func (e *SQLExporter) UpdateRows(feed Feed, primaryKeys []string, element map[st
 		Where(primaryKeys).
 		Updates(element)
 	if result.Error != nil {
-		return 0, errors.Wrap(result.Error, "Unable to update rows")
+		return 0, events.NewEventErrorWithMessage(result.Error, events.ErrorSeverityError, events.ErrorSubSystemDB, false, "unable to updare rows")
 	}
 
 	return result.RowsAffected, nil
