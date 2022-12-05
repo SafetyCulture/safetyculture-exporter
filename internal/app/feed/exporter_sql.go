@@ -94,7 +94,7 @@ func (e *SQLExporter) DeleteRowsIfExist(feed Feed, query string, args ...interfa
 		}).
 		Delete(feed.Model())
 	if del.Error != nil {
-		return errors.Wrap(del.Error, "Unable to delete rows")
+		return events.NewEventErrorWithMessage(del.Error, events.ErrorSeverityError, events.ErrorSubSystemDataIntegrity, false, "unable to delete rows")
 	}
 
 	return nil
