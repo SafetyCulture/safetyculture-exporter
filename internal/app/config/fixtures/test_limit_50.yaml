@@ -1,0 +1,44 @@
+---
+access_token: "fake_token"
+api:
+  proxy_url: https://fake_proxy.com
+  sheqsy_url: https://app.sheqsy.com
+  tls_cert: ""
+  tls_skip_verify: false
+  url: https://api.safetyculture.io
+csv:
+  max_rows_per_file: 1000000
+db:
+  connection_string: "fake_connection_string"
+  dialect: mysql
+export:
+  action:
+    limit: 50
+  issue:
+    limit: 50
+  incremental: true
+  inspection:
+    archived: "false"
+    completed: "true"
+    included_inactive_items: false
+    limit: 100
+    skip_ids: ["ID1", "ID2"]
+    web_report_link: private
+  media: false
+  media_path: ./export/media/
+  modified_after: ""
+  path: ./export/
+  site:
+    include_deleted: false
+    include_full_hierarchy: false
+  tables: [TA1, TA2, TA3]
+  template_ids: []
+report:
+  filename_convention: INSPECTION_TITLE
+  format:
+    - PDF
+  preference_id: ""
+  retry_timeout: 15
+sheqsy_company_id: fake_company_id
+sheqsy_password: 123456
+sheqsy_username: fake_username

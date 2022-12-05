@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/SafetyCulture/safetyculture-exporter/internal/app/api"
+	"github.com/SafetyCulture/safetyculture-exporter/internal/app/config"
 	"github.com/SafetyCulture/safetyculture-exporter/internal/app/feed"
 	"github.com/stretchr/testify/require"
 	"gopkg.in/h2non/gock.v1"
@@ -41,10 +42,10 @@ func TestIntegrationDbCreateSchema_should_create_all_schemas(t *testing.T) {
 		  }
 		`)
 
-	exporterAppCfg := createEmptyConfigurationOptions()
-	exporterAppCfg.ApiConfig.AccessToken = "token-123"
+	cfg := &config.ExporterConfiguration{}
+	cfg.AccessToken = "token-123"
 
-	exporterApp := feed.NewExporterApp(nil, nil, exporterAppCfg)
+	exporterApp := feed.NewExporterApp(nil, nil, cfg)
 	err = exporterApp.ExportSchemas(exporter)
 	assert.NoError(t, err)
 
@@ -89,10 +90,10 @@ func TestIntegrationDbExportFeeds_should_export_all_feeds_to_file(t *testing.T) 
 		  }
 		`)
 
-	exporterAppCfg := createEmptyConfigurationOptions()
-	exporterAppCfg.ApiConfig.AccessToken = "token-123"
+	cfg := &config.ExporterConfiguration{}
+	cfg.AccessToken = "token-123"
 
-	exporterApp := feed.NewExporterApp(apiClient, apiClient, exporterAppCfg)
+	exporterApp := feed.NewExporterApp(apiClient, apiClient, cfg)
 	err = exporterApp.ExportFeeds(exporter)
 	assert.NoError(t, err)
 
@@ -144,17 +145,17 @@ func TestIntegrationDbExportFeeds_should_perform_incremental_update_on_second_ru
 		Reply(http.StatusOK).
 		File(path.Join("mocks", "set_2", "inspections_deleted_single_page.json"))
 
-	exporterAppCfg := createEmptyConfigurationOptions()
-	exporterAppCfg.ApiConfig.AccessToken = "token-123"
-	exporterAppCfg.ExportConfig.Incremental = true
+	cfg := &config.ExporterConfiguration{}
+	cfg.AccessToken = "token-123"
+	cfg.Export.Incremental = true
 
-	exporterApp := feed.NewExporterApp(apiClient, apiClient, exporterAppCfg)
+	exporterApp := feed.NewExporterApp(apiClient, apiClient, cfg)
 	err = exporterApp.ExportFeeds(exporter)
 	assert.NoError(t, err)
 
 	initMockFeedsSet2(apiClient.HTTPClient())
 
-	exporterApp = feed.NewExporterApp(apiClient, apiClient, exporterAppCfg)
+	exporterApp = feed.NewExporterApp(apiClient, apiClient, cfg)
 	err = exporterApp.ExportFeeds(exporter)
 	assert.NoError(t, err)
 
@@ -205,11 +206,11 @@ func TestIntegrationDbExportFeeds_should_handle_lots_of_rows_ok(t *testing.T) {
 		  }
 		`)
 
-	exporterAppCfg := createEmptyConfigurationOptions()
-	exporterAppCfg.ApiConfig.AccessToken = "token-123"
-	exporterAppCfg.ExportConfig.Incremental = true
+	cfg := &config.ExporterConfiguration{}
+	cfg.AccessToken = "token-123"
+	cfg.Export.Incremental = true
 
-	exporterApp := feed.NewExporterApp(apiClient, apiClient, exporterAppCfg)
+	exporterApp := feed.NewExporterApp(apiClient, apiClient, cfg)
 	err = exporterApp.ExportFeeds(exporter)
 	assert.NoError(t, err)
 
@@ -255,11 +256,11 @@ func TestIntegrationDbExportFeeds_should_update_action_assignees_on_second_run(t
 		Reply(http.StatusOK).
 		File(path.Join("mocks", "set_1", "inspections_deleted_single_page.json"))
 
-	exporterAppCfg := createEmptyConfigurationOptions()
-	exporterAppCfg.ApiConfig.AccessToken = "token-123"
-	exporterAppCfg.ExportConfig.Incremental = true
+	cfg := &config.ExporterConfiguration{}
+	cfg.AccessToken = "token-123"
+	cfg.Export.Incremental = true
 
-	exporterApp := feed.NewExporterApp(apiClient, apiClient, exporterAppCfg)
+	exporterApp := feed.NewExporterApp(apiClient, apiClient, cfg)
 	err = exporterApp.ExportFeeds(exporter)
 	assert.NoError(t, err)
 
@@ -267,7 +268,7 @@ func TestIntegrationDbExportFeeds_should_update_action_assignees_on_second_run(t
 
 	initMockFeedsSet2(apiClient.HTTPClient())
 
-	exporterApp = feed.NewExporterApp(apiClient, apiClient, exporterAppCfg)
+	exporterApp = feed.NewExporterApp(apiClient, apiClient, cfg)
 	err = exporterApp.ExportFeeds(exporter)
 	assert.NoError(t, err)
 	filesEqualish(t, "mocks/set_2/outputs/action_assignees.csv", filepath.Join(exporter.ExportPath, "action_assignees.csv"))
@@ -301,12 +302,12 @@ func TestGroupUserFeed_Export_should_filter_duplicates(t *testing.T) {
 		Reply(200).
 		File("mocks/set_5/feed_group_users_1.json")
 
-	exporterAppCfg := createEmptyConfigurationOptions()
-	exporterAppCfg.ApiConfig.AccessToken = "token-123"
-	exporterAppCfg.ExportConfig.Incremental = true
-	exporterAppCfg.ExportConfig.FilterByTableName = []string{"group_users"}
+	cfg := &config.ExporterConfiguration{}
+	cfg.AccessToken = "token-123"
+	cfg.Export.Incremental = true
+	cfg.Export.Tables = []string{"group_users"}
 
-	exporterApp := feed.NewExporterApp(apiClient, apiClient, exporterAppCfg)
+	exporterApp := feed.NewExporterApp(apiClient, apiClient, cfg)
 	err = exporterApp.ExportFeeds(exporter)
 	assert.NoError(t, err)
 

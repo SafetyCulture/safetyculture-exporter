@@ -51,11 +51,7 @@ func TestInspectionsExport(t *testing.T) {
 	exporterMock.On("SetLastModifiedAt", mock.Anything)
 	exporterMock.On("GetLastModifiedAt", mock.Anything).Return(nil)
 
-	exporterAppCfg := &config.ConfigurationOptions{
-		ExportConfig: &config.ExportConfig{
-			InspectionConfig: &config.ExportInspectionConfig{},
-		},
-	}
+	exporterAppCfg := config.BuildConfigurationWithDefaults()
 	inspectionClient := inspections.NewInspectionClient(exporterAppCfg, apiClient, exporterMock)
 	err := inspectionClient.Export(context.Background())
 	assert.NoError(t, err)
@@ -70,11 +66,7 @@ func TestInspectionsExport_WhenSkipID(t *testing.T) {
 	exporterMock.On("SetLastModifiedAt", mock.Anything)
 	exporterMock.On("GetLastModifiedAt", mock.Anything).Return(nil)
 
-	exporterAppCfg := &config.ConfigurationOptions{
-		ExportConfig: &config.ExportConfig{
-			InspectionConfig: &config.ExportInspectionConfig{},
-		},
-	}
+	exporterAppCfg := config.BuildConfigurationWithDefaults()
 	inspectionClient := inspections.NewInspectionClient(exporterAppCfg, apiClient, exporterMock)
 	inspectionClient.(*inspections.Client).SkipIDs = []string{"audit_d7e2f55b95094bd48fac601850e1db63"}
 	err := inspectionClient.Export(context.Background())
@@ -90,22 +82,14 @@ func TestInspectionsExport_WhenModifiedAtIsNotNil(t *testing.T) {
 	exporterMock.On("SetLastModifiedAt", mock.Anything)
 	exporterMock.On("GetLastModifiedAt", mock.Anything).Return(&time.Time{})
 
-	exporterAppCfg := &config.ConfigurationOptions{
-		ExportConfig: &config.ExportConfig{
-			InspectionConfig: &config.ExportInspectionConfig{},
-		},
-	}
+	exporterAppCfg := config.BuildConfigurationWithDefaults()
 	inspectionClient := inspections.NewInspectionClient(exporterAppCfg, apiClient, exporterMock)
 	err := inspectionClient.Export(context.Background())
 	assert.NoError(t, err)
 }
 
 func TestNewInspectionClient(t *testing.T) {
-	exporterAppCfg := &config.ConfigurationOptions{
-		ExportConfig: &config.ExportConfig{
-			InspectionConfig: &config.ExportInspectionConfig{},
-		},
-	}
+	exporterAppCfg := config.BuildConfigurationWithDefaults()
 	res := inspections.NewInspectionClient(exporterAppCfg, nil, nil)
 	require.NotNil(t, res)
 
