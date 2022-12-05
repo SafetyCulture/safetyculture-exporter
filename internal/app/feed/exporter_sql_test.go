@@ -30,9 +30,9 @@ func TestSQLExporterInitFeed_should_create_table_if_not_exists(t *testing.T) {
 	assert.NoError(t, err)
 
 	// This query will only work for SQLite
-	result := []struct {
+	var result []struct {
 		Name string
-	}{}
+	}
 
 	resp := exporter.DB.Raw("SELECT name FROM sqlite_master WHERE type='table';").Scan(&result)
 	assert.Nil(t, resp.Error)
@@ -134,7 +134,7 @@ func TestSQLExporterWriteRows_should_write_rows(t *testing.T) {
 	err = exporter.WriteRows(userFeed, users)
 	assert.NoError(t, err)
 
-	rows := []feed.User{}
+	var rows []feed.User
 	resp := exporter.DB.Table("users").Scan(&rows)
 	assert.Nil(t, resp.Error)
 
@@ -208,7 +208,7 @@ func TestSQLExporterWriteRows_should_update_rows(t *testing.T) {
 	err = exporter.WriteRows(userFeed, users)
 	assert.NoError(t, err)
 
-	rows := []feed.User{}
+	var rows []feed.User
 	resp := exporter.DB.Table("users").Scan(&rows)
 	assert.Nil(t, resp.Error)
 

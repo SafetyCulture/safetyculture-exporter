@@ -86,11 +86,13 @@ func (f *ActionAssigneeFeed) writeRows(ctx context.Context, exporter Exporter, r
 		}
 
 		// Delete the actions if already exist
-		err := exporter.DeleteRowsIfExist(f, "action_id IN ?", actionIDs)
-		util.Check(err, "Failed to delete rows in exporter")
+		if err := exporter.DeleteRowsIfExist(f, "action_id IN ?", actionIDs); err != nil {
+			return fmt.Errorf("delete rows: %w", err)
+		}
 
-		err = exporter.WriteRows(f, rows[i:j])
-		util.Check(err, "Failed to write data to exporter")
+		if err := exporter.WriteRows(f, rows[i:j]); err != nil {
+			return fmt.Errorf("exporter: %w", err)
+		}
 	}
 
 	return nil
@@ -98,38 +100,32 @@ func (f *ActionAssigneeFeed) writeRows(ctx context.Context, exporter Exporter, r
 
 // Export exports the feed to the supplied exporter
 func (f *ActionAssigneeFeed) Export(ctx context.Context, apiClient *api.Client, exporter Exporter, orgID string) error {
-	logger := util.GetLogger().With(
-		"feed", f.Name(),
-		"org_id", orgID,
-	)
+	logger := util.GetLogger().With("feed", f.Name(), "org_id", orgID)
 
-	exporter.InitFeed(f, &InitFeedOptions{
+	if err := exporter.InitFeed(f, &InitFeedOptions{
 		// Delete data if incremental refresh is disabled so there is no duplicates
 		Truncate: !f.Incremental,
-	})
+	}); err != nil {
+		return fmt.Errorf("init feed: %w", err)
+	}
 
 	var err error
 	f.ModifiedAfter, err = exporter.LastModifiedAt(f, f.ModifiedAfter, orgID)
-	util.Check(err, "unable to load modified after")
+	if err != nil {
+		return fmt.Errorf("unable to load modified after: %w", err)
+	}
 
-	logger.With(
-		"modified_after", f.ModifiedAfter.Format(time.RFC1123),
-	).Info("exporting")
+	drainFn := func(resp *api.GetFeedResponse) error {
+		var rows []*ActionAssignee
 
-	err = apiClient.DrainFeed(ctx, &api.GetFeedRequest{
-		InitialURL: "/feed/action_assignees",
-		Params: api.GetFeedParams{
-			ModifiedAfter: f.ModifiedAfter,
-		},
-	}, func(resp *api.GetFeedResponse) error {
-		rows := []*ActionAssignee{}
-
-		err := json.Unmarshal(resp.Data, &rows)
-		util.Check(err, "Failed to unmarshal action-assignees data to struct")
+		if err := json.Unmarshal(resp.Data, &rows); err != nil {
+			return fmt.Errorf("map data: %w", err)
+		}
 
 		if len(rows) != 0 {
-			err = f.writeRows(ctx, exporter, rows)
-			util.Check(err, "Failed to write data to exporter")
+			if err := f.writeRows(ctx, exporter, rows); err != nil {
+				return err
+			}
 		}
 
 		logger.With(
@@ -138,8 +134,17 @@ func (f *ActionAssigneeFeed) Export(ctx context.Context, apiClient *api.Client, 
 			"export_duration_ms", exporter.GetDuration().Milliseconds(),
 		).Info("export batch complete")
 		return nil
-	})
+	}
 
-	util.CheckFeedError(logger, err, fmt.Sprintf("Failed to export feed %q", f.Name()))
+	req := &api.GetFeedRequest{
+		InitialURL: "/feed/action_assignees",
+		Params: api.GetFeedParams{
+			ModifiedAfter: f.ModifiedAfter,
+		},
+	}
+
+	if err := apiClient.DrainFeed(ctx, req, drainFn); err != nil {
+		return fmt.Errorf("action assignees feed %q: %w", f.Name(), err)
+	}
 	return exporter.FinaliseExport(f, &[]*ActionAssignee{})
 }

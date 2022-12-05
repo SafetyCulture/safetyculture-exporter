@@ -8,10 +8,12 @@ import (
 	"os"
 
 	"github.com/SafetyCulture/safetyculture-exporter/internal/app/api"
+	"github.com/SafetyCulture/safetyculture-exporter/internal/app/config"
 	"github.com/SafetyCulture/safetyculture-exporter/internal/app/exporter"
 	"github.com/SafetyCulture/safetyculture-exporter/internal/app/feed"
 	"github.com/SafetyCulture/safetyculture-exporter/internal/app/inspections"
 	"github.com/SafetyCulture/safetyculture-exporter/internal/app/util"
+	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -133,103 +135,241 @@ func getSheqsyAPIClient() *api.Client {
 	)
 }
 
+// MapViperConfigToConfigurationOptions maps Viper config to ConfigurationOptions structure
+// doesn't map 100% every field. Just the ones I found needed.
+func MapViperConfigToConfigurationOptions(v *viper.Viper) *config.ConfigurationOptions {
+
+	// caps action batch limit to 100
+	actionLimit := v.GetInt("export.action.limit")
+	if actionLimit > 100 {
+		actionLimit = 100
+	}
+
+	// caps issue batch limit to 100
+	issueLimit := v.GetInt("export.issue.limit")
+	if issueLimit > 100 {
+		issueLimit = 100
+	}
+
+	// caps asset batch limit to 100
+	assetLimit := v.GetInt("export.asset.limit")
+	if assetLimit > 100 {
+		assetLimit = 100
+	}
+
+	return &config.ConfigurationOptions{
+		ApiConfig: &config.ApiConfig{
+			AccessToken: v.GetString("access_token"),
+		},
+		SheqsyApiConfig: &config.SheqsyApiConfig{
+			UserName:  v.GetString("sheqsy_username"),
+			CompanyID: v.GetString("sheqsy_company_id"),
+		},
+		DBConfig: &config.DBConfig{
+			Dialect:          v.GetString("db.dialect"),
+			ConnectionString: v.GetString("db.connection_string"),
+		},
+		CSVConfig: &config.CSVConfig{
+			MaxRowsPerFile: v.GetInt("csv.max_rows_per_file"),
+		},
+		ExportConfig: &config.ExportConfig{
+			Path:               v.GetString("export.path"),
+			Incremental:        v.GetBool("export.incremental"),
+			ModifiedAfter:      v.GetTime("export.modified_after"),
+			FilterByTemplateID: v.GetStringSlice("export.template_ids"),
+			FilterByTableName:  v.GetStringSlice("export.tables"),
+			SchemaOnly:         v.GetBool("export.schema_only"),
+			InspectionConfig: &config.ExportInspectionConfig{
+				IncludeInactiveItems: v.GetBool("export.inspection.included_inactive_items"),
+				Archived:             v.GetString("export.inspection.archived"),
+				Completed:            v.GetString("export.inspection.completed"),
+				SkipIDs:              v.GetStringSlice("export.inspection.skip_ids"),
+				BatchLimit:           v.GetInt("export.inspection.limit"),
+				WebReportLink:        v.GetString("export.inspection.web_report_link"),
+			},
+			SiteConfig: &config.ExportSiteConfig{
+				IncludeDeleted:       v.GetBool("export.site.include_deleted"),
+				IncludeFullHierarchy: v.GetBool("export.site.include_full_hierarchy"),
+			},
+			MediaConfig: &config.ExportMediaConfig{
+				Export: v.GetBool("export.media"),
+				Path:   v.GetString("export.media_path"),
+			},
+			ActionConfig: &config.ExportActionConfig{
+				BatchLimit: actionLimit,
+			},
+			IssueConfig: &config.ExportIssueConfig{
+				BatchLimit: issueLimit,
+			},
+			AssetConfig: &config.ExportAssetConfig{
+				BatchLimit: assetLimit,
+			},
+		},
+		ReportConfig: &config.ReportConfig{
+			Format:             v.GetStringSlice("report.format"),
+			PreferenceID:       v.GetString("report.preference_id"),
+			FileNameConvention: v.GetString("report.filename_convention"),
+			RetryTimeout:       v.GetInt("report.retry_timeout"),
+		},
+	}
+}
+
 func runSQL(cmd *cobra.Command, args []string) error {
-
-	var exportMediaPath string
-	exportMedia := viper.GetBool("export.media")
-	if exportMedia {
-		exportMediaPath = viper.GetString("export.media_path")
-
-		err := os.MkdirAll(exportMediaPath, os.ModePerm)
-		util.Check(err, fmt.Sprintf("Failed to create directory %s", exportMediaPath))
-	}
-
-	exporter, err := feed.NewSQLExporter(viper.GetString("db.dialect"), viper.GetString("db.connection_string"), true, exportMediaPath)
-	util.Check(err, "unable to create exporter")
-
-	if viper.GetBool("export.schema_only") {
-		return feed.CreateSchemas(viper.GetViper(), exporter)
-	}
-
-	return feed.ExportFeeds(
-		viper.GetViper(),
-		getAPIClient(),
-		getSheqsyAPIClient(),
-		exporter,
-	)
+	e := NewSafetyCultureExporter(viper.GetViper())
+	err := e.RunSQL()
+	util.Check(err, "error while exporting SQL")
+	return nil
 }
 
 func runInspectionJSON(cmd *cobra.Command, args []string) error {
-
-	exportPath := fmt.Sprintf("%s/json/", viper.GetString("export.path"))
-	err := os.MkdirAll(exportPath, os.ModePerm)
-	util.Check(err, fmt.Sprintf("Failed to create directory %s", exportPath))
-
-	inspectionsClient := inspections.NewInspectionClient(
-		viper.GetViper(),
-		getAPIClient(),
-		exporter.NewJSONExporter(exportPath),
-	)
-
-	return inspectionsClient.Export(context.Background())
+	e := NewSafetyCultureExporter(viper.GetViper())
+	err := e.RunInspectionJSON()
+	util.Check(err, "error while exporting JSON")
+	return nil
 }
 
 func runCSV(cmd *cobra.Command, args []string) error {
-
-	exportPath := viper.GetString("export.path")
-
-	err := os.MkdirAll(exportPath, os.ModePerm)
-	util.Check(err, fmt.Sprintf("Failed to create directory %s", exportPath))
-
-	var exportMediaPath string
-	exportMedia := viper.GetBool("export.media")
-	if exportMedia {
-		exportMediaPath = viper.GetString("export.media_path")
-		err := os.MkdirAll(exportMediaPath, os.ModePerm)
-		util.Check(err, fmt.Sprintf("Failed to create directory %s", exportMediaPath))
-	}
-
-	maxRowsPerFile := viper.GetInt("csv.max_rows_per_file")
-
-	exporter, err := feed.NewCSVExporter(exportPath, exportMediaPath, maxRowsPerFile)
-	util.Check(err, "unable to create exporter")
-
-	if viper.GetBool("export.schema_only") {
-		return feed.CreateSchemas(viper.GetViper(), exporter)
-	}
-
-	return feed.ExportFeeds(
-		viper.GetViper(),
-		getAPIClient(),
-		getSheqsyAPIClient(),
-		exporter,
-	)
+	e := NewSafetyCultureExporter(viper.GetViper())
+	err := e.RunCSV()
+	util.Check(err, "error while exporting CSV")
+	return nil
 }
 
 func printSchema(cmd *cobra.Command, args []string) error {
-	exporter, err := feed.NewSchemaExporter(os.Stdout)
-	util.Check(err, "unable to create exporter")
-
-	return feed.WriteSchemas(viper.GetViper(), exporter)
+	e := NewSafetyCultureExporter(viper.GetViper())
+	err := e.RunPrintSchema()
+	util.Check(err, "error while printing schema")
+	return nil
 }
 
 func runInspectionReports(cmd *cobra.Command, args []string) error {
-
-	exportPath := viper.GetString("export.path")
-	err := os.MkdirAll(exportPath, os.ModePerm)
-	util.Check(err, "unable to create export directory")
-
-	format := viper.GetStringSlice("report.format")
-	preferenceID := viper.GetString("report.preference_id")
-	filenameConvention := viper.GetString("report.filename_convention")
-
-	exporter, err := feed.NewReportExporter(exportPath, format, preferenceID, filenameConvention)
-	util.Check(err, "unable to create exporter")
-
-	apiClient := getAPIClient()
-
-	err = feed.ExportInspectionReports(viper.GetViper(), apiClient, exporter)
+	e := NewSafetyCultureExporter(viper.GetViper())
+	err := e.RunInspectionReports()
 	util.Check(err, "failed to generate reports")
+	return nil
+}
+
+type SafetyCultureExporter struct {
+	cfg *config.ConfigurationOptions
+}
+
+func (s *SafetyCultureExporter) RunInspectionJSON() error {
+	exportPath := fmt.Sprintf("%s/json/", s.cfg.ExportConfig.Path)
+	err := os.MkdirAll(exportPath, os.ModePerm)
+	if err != nil {
+		return errors.Wrapf(err, "Failed to create directory %s", exportPath)
+	}
+
+	e := exporter.NewJSONExporter(exportPath)
+	inspectionsClient := inspections.NewInspectionClient(s.cfg, getAPIClient(), e)
+
+	err = inspectionsClient.Export(context.Background())
+	if err != nil {
+		return errors.Wrap(err, "error while exporting JSON")
+	}
+	return nil
+}
+
+func (s *SafetyCultureExporter) RunSQL() error {
+	if s.cfg.ExportConfig.MediaConfig.Export {
+		err := os.MkdirAll(s.cfg.ExportConfig.MediaConfig.Path, os.ModePerm)
+		if err != nil {
+			return errors.Wrapf(err, "Failed to create directory %s", s.cfg.ExportConfig.MediaConfig.Path)
+		}
+	}
+
+	e, err := feed.NewSQLExporter(s.cfg.DBConfig.Dialect, s.cfg.DBConfig.ConnectionString, true, s.cfg.ExportConfig.MediaConfig.Path)
+	if err != nil {
+		return errors.Wrap(err, "create sql exporter")
+	}
+
+	exporterApp := feed.NewExporterApp(getAPIClient(), getSheqsyAPIClient(), s.cfg)
+	if s.cfg.ExportConfig.SchemaOnly {
+		return exporterApp.ExportSchemas(e)
+	}
+
+	if len(s.cfg.ApiConfig.AccessToken) != 0 {
+		err = exporterApp.ExportFeeds(e)
+		if err != nil {
+			return errors.Wrap(err, "exporting feeds")
+		}
+	}
 
 	return nil
+}
+
+func (s *SafetyCultureExporter) RunCSV() error {
+	exportPath := s.cfg.ExportConfig.Path
+
+	err := os.MkdirAll(exportPath, os.ModePerm)
+	if err != nil {
+		return errors.Wrapf(err, "Failed to create directory %s", exportPath)
+	}
+
+	if s.cfg.ExportConfig.MediaConfig.Export {
+		err := os.MkdirAll(s.cfg.ExportConfig.MediaConfig.Path, os.ModePerm)
+		if err != nil {
+			return errors.Wrapf(err, "Failed to create directory %s", s.cfg.ExportConfig.MediaConfig.Path)
+		}
+	}
+
+	e, err := feed.NewCSVExporter(exportPath, s.cfg.ExportConfig.MediaConfig.Path, s.cfg.CSVConfig.MaxRowsPerFile)
+	if err != nil {
+		return errors.Wrap(err, "unable to create csv exporter")
+	}
+
+	exporterApp := feed.NewExporterApp(getAPIClient(), getSheqsyAPIClient(), s.cfg)
+	if s.cfg.ExportConfig.SchemaOnly {
+		return exporterApp.ExportSchemas(e)
+	}
+
+	if len(s.cfg.ApiConfig.AccessToken) != 0 {
+		err = exporterApp.ExportFeeds(e)
+		if err != nil {
+			return errors.Wrap(err, "exporting feeds")
+		}
+	}
+
+	return nil
+}
+
+func (s *SafetyCultureExporter) RunInspectionReports() error {
+	err := os.MkdirAll(s.cfg.ExportConfig.Path, os.ModePerm)
+	if err != nil {
+		return errors.Wrapf(err, "Failed to create directory %s", s.cfg.ExportConfig.Path)
+	}
+
+	e, err := feed.NewReportExporter(s.cfg.ExportConfig.Path, s.cfg.ReportConfig)
+	if err != nil {
+		return errors.Wrap(err, "unable to create report exporter")
+	}
+
+	exporterApp := feed.NewExporterApp(getAPIClient(), getSheqsyAPIClient(), s.cfg)
+	err = exporterApp.ExportInspectionReports(e)
+	if err != nil {
+		return errors.Wrap(err, "generate reports")
+	}
+
+	return nil
+}
+
+func (s *SafetyCultureExporter) RunPrintSchema() error {
+	e, err := feed.NewSchemaExporter(os.Stdout)
+	if err != nil {
+		return errors.Wrap(err, "unable to create exporter")
+	}
+
+	exporterApp := feed.NewExporterApp(getAPIClient(), getSheqsyAPIClient(), s.cfg)
+	err = exporterApp.PrintSchemas(e)
+	if err != nil {
+		return errors.Wrap(err, "error while printing schema")
+	}
+
+	return nil
+}
+
+func NewSafetyCultureExporter(v *viper.Viper) *SafetyCultureExporter {
+	return &SafetyCultureExporter{
+		cfg: MapViperConfigToConfigurationOptions(v),
+	}
 }

@@ -24,7 +24,7 @@ type JSONExporter struct {
 }
 
 // NewJSONExporter creates new instance of JSONExporter
-func NewJSONExporter(exportPath string) Exporter {
+func NewJSONExporter(exportPath string) SafetyCultureJSONExporter {
 	return &JSONExporter{
 		exportPath: exportPath,
 	}
@@ -65,7 +65,7 @@ func (e *JSONExporter) GetLastModifiedAt(modifiedAfter time.Time) *time.Time {
 	}
 
 	b := make([]byte, 50)
-	_, err = e.lastModifiedFile.Read([]byte(b))
+	_, err = e.lastModifiedFile.Read(b)
 	util.Check(err, "Failed to read last-modified")
 
 	modifiedAt, err := time.Parse(layout, strings.TrimSpace(string(bytes.Trim(b, "\x00"))))
@@ -89,6 +89,6 @@ func (e *JSONExporter) WriteRow(name string, row *json.RawMessage) {
 	util.Check(err, "Failed to open file")
 	defer file.Close()
 
-	_, err = file.WriteAt([]byte(str), 0)
+	_, err = file.WriteAt(str, 0)
 	util.Check(err, "Failed to write inspection to a file")
 }

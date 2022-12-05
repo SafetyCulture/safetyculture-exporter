@@ -81,16 +81,15 @@ func (f *SheqsyShiftFeed) CreateSchema(exporter Exporter) error {
 
 // Export exports the feed to the supplied exporter
 func (f *SheqsyShiftFeed) Export(ctx context.Context, apiClient *api.Client, exporter Exporter, companyID string) error {
-	logger := util.GetLogger().With(
-		"feed", f.Name(),
-		"org_id", companyID,
-	)
+	logger := util.GetLogger().With("feed", f.Name(), "org_id", companyID)
 
-	exporter.InitFeed(f, &InitFeedOptions{
+	if err := exporter.InitFeed(f, &InitFeedOptions{
 		// Truncate files if upserts aren't supported.
-		// This ensure that the export does not contain duplicate rows
+		// This ensures that the export does not contain duplicate rows
 		Truncate: !exporter.SupportsUpsert(),
-	})
+	}); err != nil {
+		return fmt.Errorf("init feed: %w", err)
+	}
 
 	type apiResp struct {
 		Data         []*SheqsyShift `json:"data"`
@@ -104,7 +103,9 @@ func (f *SheqsyShiftFeed) Export(ctx context.Context, apiClient *api.Client, exp
 	version := 1
 	for version != 0 {
 		resp, err := apiClient.Get(ctx, fmt.Sprintf("/SheqsyIntegrationApi/api/v3/companies/%s/shifts/history?ver=%d", companyID, version))
-		util.Check(err, "failed fetch data")
+		if err != nil {
+			return fmt.Errorf("fetch data: %w", err)
+		}
 
 		var respBytes []byte
 		respBytes = *resp
@@ -116,16 +117,23 @@ func (f *SheqsyShiftFeed) Export(ctx context.Context, apiClient *api.Client, exp
 				fmt.Sprintf("data.%d.startDateTimeUTC", key.Int()),
 				value.Get("startDateTimeUTC").String()+"Z",
 			)
-			util.Check(err, "failed to fix timestamp")
+			if err != nil {
+				logger.Errorf("failed to fix timestamp: %v", err)
+				return false
+			}
+
 			respBytes, err = sjson.SetBytes(
 				respBytes,
 				fmt.Sprintf("data.%d.finishDateTimeUTC", key.Int()),
 				value.Get("finishDateTimeUTC").String()+"Z",
 			)
-			util.Check(err, "failed to fix timestamp")
+			if err != nil {
+				logger.Errorf("failed to fix timestamp: %v", err)
+				return false
+			}
 
 			// Departments needs to be a flat string
-			departments := []string{}
+			var departments []string
 			value.Get("departments").ForEach(func(key, value gjson.Result) bool {
 				departments = append(departments, value.String())
 				return true
@@ -136,12 +144,16 @@ func (f *SheqsyShiftFeed) Export(ctx context.Context, apiClient *api.Client, exp
 				fmt.Sprintf("data.%d.departments", key.Int()),
 				strings.Join(departments, ","),
 			)
-			util.Check(err, "failed to join departments")
+			if err != nil {
+				logger.Errorf("failed to join departments: %v", err)
+				return false
+			}
 			return true
 		})
 
-		err = json.Unmarshal(respBytes, &data)
-		util.Check(err, "failed to parse API response")
+		if err := json.Unmarshal(respBytes, &data); err != nil {
+			return fmt.Errorf("map data: %w", err)
+		}
 
 		if len(data.Data) != 0 {
 			// Calculate the size of the batch we can insert into the DB at once. Column count + buffer to account for primary keys
@@ -153,8 +165,9 @@ func (f *SheqsyShiftFeed) Export(ctx context.Context, apiClient *api.Client, exp
 					j = len(data.Data)
 				}
 
-				err = exporter.WriteRows(f, data.Data[i:j])
-				util.Check(err, "Failed to write data to exporter")
+				if err := exporter.WriteRows(f, data.Data[i:j]); err != nil {
+					return fmt.Errorf("exporter: %w", err)
+				}
 			}
 		}
 

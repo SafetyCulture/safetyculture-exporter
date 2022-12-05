@@ -72,25 +72,27 @@ type sheqsyEmployeeRaw struct {
 
 // Export exports the feed to the supplied exporter
 func (f *SheqsyDepartmentEmployeeFeed) Export(ctx context.Context, apiClient *api.Client, exporter Exporter, companyID string) error {
-	logger := util.GetLogger().With(
-		"feed", f.Name(),
-		"org_id", companyID,
-	)
+	logger := util.GetLogger().With("feed", f.Name(), "org_id", companyID)
 
-	exporter.InitFeed(f, &InitFeedOptions{
+	if err := exporter.InitFeed(f, &InitFeedOptions{
 		// Truncate files if upserts aren't supported.
-		// This ensure that the export does not contain duplicate rows
+		// This ensures that the export does not contain duplicate rows
 		Truncate: !exporter.SupportsUpsert(),
-	})
+	}); err != nil {
+		return fmt.Errorf("init feed: %w", err)
+	}
 
-	rows := []*SheqsyDepartmentEmployee{}
+	var rows []*SheqsyDepartmentEmployee
 
 	resp, err := apiClient.Get(ctx, fmt.Sprintf("/SheqsyIntegrationApi/api/v3/companies/%s/employees", companyID))
-	util.Check(err, "failed fetch data")
+	if err != nil {
+		return fmt.Errorf("fetch data: %w", err)
+	}
 
-	rawData := []sheqsyEmployeeRaw{}
-	err = json.Unmarshal(*resp, &rawData)
-	util.Check(err, "failed parse data")
+	var rawData []sheqsyEmployeeRaw
+	if err := json.Unmarshal(*resp, &rawData); err != nil {
+		return fmt.Errorf("map data: %w", err)
+	}
 
 	for _, row := range rawData {
 		for _, department := range row.Departments {
@@ -113,8 +115,9 @@ func (f *SheqsyDepartmentEmployeeFeed) Export(ctx context.Context, apiClient *ap
 				j = len(rows)
 			}
 
-			err = exporter.WriteRows(f, rows[i:j])
-			util.Check(err, "Failed to write data to exporter")
+			if err := exporter.WriteRows(f, rows[i:j]); err != nil {
+				return fmt.Errorf("exporter: %w", err)
+			}
 		}
 	}
 

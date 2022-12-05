@@ -133,6 +133,11 @@ func initMockFeedsSet1(httpClient *http.Client) {
 		MatchParam("ver", "36384957").
 		Reply(200).
 		File("mocks/set_1/sheqsy_activities_2.json")
+
+	gock.New("http://localhost:9999").
+		Get("/feed/assets").
+		Reply(200).
+		File("mocks/set_1/feed_assets_1.json")
 }
 
 func initMockFeedsSet2(httpClient *http.Client) {
@@ -223,6 +228,11 @@ func initMockFeedsSet2(httpClient *http.Client) {
 		Get("/feed/issues").
 		Reply(200).
 		File("mocks/set_1/feed_issues_2.json")
+
+	gock.New("http://localhost:9999").
+		Get("/feed/assets").
+		Reply(200).
+		File("mocks/set_1/feed_assets_1.json")
 }
 
 func initMockFeedsSet3(httpClient *http.Client) {
@@ -307,6 +317,11 @@ func initMockFeedsSet3(httpClient *http.Client) {
 		Get("/feed/issues").
 		Reply(200).
 		File("mocks/set_1/feed_issues_2.json")
+
+	gock.New("http://localhost:9999").
+		Get("/feed/assets").
+		Reply(200).
+		File("mocks/set_1/feed_assets_1.json")
 }
 
 func initMockIssuesFeed(httpClient *http.Client) {

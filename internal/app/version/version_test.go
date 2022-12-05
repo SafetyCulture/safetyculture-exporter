@@ -1,9 +1,10 @@
 package version_test
 
 import (
+	"testing"
+
 	"github.com/SafetyCulture/safetyculture-exporter/internal/app/version"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func TestGetVersion(t *testing.T) {

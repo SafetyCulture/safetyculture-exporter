@@ -1,5 +1,7 @@
 package feed
 
+//go:generate mockery --name Exporter --case underscore --output mocks --outpkg mocks --filename exporter_mock.go
+
 import (
 	"context"
 	"time"
@@ -26,7 +28,7 @@ type InitFeedOptions struct {
 	Truncate bool
 }
 
-// Exporter is an interface to a Feed exporter. It provides methods to write rows out to a implemented format
+// Exporter is an interface to a Feed exporter. It provides methods to write rows out to an implemented format
 type Exporter interface {
 	InitFeed(feed Feed, opts *InitFeedOptions) error
 	CreateSchema(feed Feed, rows interface{}) error
@@ -47,10 +49,10 @@ type Exporter interface {
 // DeduplicateList a list of T type and maintains the latest value
 func DeduplicateList[T any](pkFun func(element *T) string, elements []*T) []*T {
 	var dMap = map[string]*T{}
-	var filteredVals []*T
+	var filteredValues []*T
 
 	if len(elements) == 0 {
-		return filteredVals
+		return filteredValues
 	}
 
 	for _, row := range elements {
@@ -59,7 +61,7 @@ func DeduplicateList[T any](pkFun func(element *T) string, elements []*T) []*T {
 	}
 
 	for _, row := range dMap {
-		filteredVals = append(filteredVals, row)
+		filteredValues = append(filteredValues, row)
 	}
-	return filteredVals
+	return filteredValues
 }

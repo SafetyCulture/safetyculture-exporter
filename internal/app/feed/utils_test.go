@@ -11,7 +11,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/SafetyCulture/safetyculture-exporter/internal/app/config"
 	"github.com/SafetyCulture/safetyculture-exporter/internal/app/feed"
+	"github.com/SafetyCulture/safetyculture-exporter/internal/app/feed/mocks"
 	"github.com/gofrs/uuid"
 	"github.com/stretchr/testify/assert"
 )
@@ -33,6 +35,13 @@ func getTemporaryCSVExporter() (*feed.CSVExporter, error) {
 	return feed.NewCSVExporter(dir, "", 100000)
 }
 
+func getMockedExporter() *mocks.Exporter {
+	exporter := &mocks.Exporter{}
+	exporter.On("SupportsUpsert").Return(true)
+	exporter.On("ParameterLimit").Return(0)
+	return exporter
+}
+
 // getTemporaryCSVExporterWithMaxRowsLimit creates a CSVExporter that writes to a temp folder with row limit
 func getTemporaryCSVExporterWithMaxRowsLimit(maxRowsPerFile int) (*feed.CSVExporter, error) {
 	dir, err := os.MkdirTemp("", "export")
@@ -50,7 +59,13 @@ func getTemporaryReportExporter(format []string, preferenceID string, filename s
 		log.Fatal(err)
 	}
 
-	return feed.NewReportExporter(dir, format, preferenceID, filename)
+	cfg := &config.ReportConfig{
+		Format:             format,
+		PreferenceID:       preferenceID,
+		FileNameConvention: filename,
+		RetryTimeout:       10,
+	}
+	return feed.NewReportExporter(dir, cfg)
 }
 
 // getTemporaryCSVExporterWithRealSQLExporter creates a CSV exporter that writes a temporary folder
@@ -150,5 +165,48 @@ func countFileLines(filePath string) (int, error) {
 		case err != nil:
 			return count, err
 		}
+	}
+}
+
+func createEmptyConfigurationOptions() *config.ConfigurationOptions {
+	return &config.ConfigurationOptions{
+		ApiConfig: &config.ApiConfig{
+			AccessToken: "",
+		},
+		SheqsyApiConfig: &config.SheqsyApiConfig{
+			UserName:  "",
+			CompanyID: "",
+		},
+		ExportConfig: &config.ExportConfig{
+			Incremental:        false,
+			ModifiedAfter:      time.Time{},
+			FilterByTemplateID: nil,
+			FilterByTableName:  nil,
+			ActionConfig: &config.ExportActionConfig{
+				BatchLimit: 0,
+			},
+			AssetConfig: &config.ExportAssetConfig{
+				BatchLimit: 0,
+			},
+			IssueConfig: &config.ExportIssueConfig{
+				BatchLimit: 0,
+			},
+			InspectionConfig: &config.ExportInspectionConfig{
+				Archived:             "",
+				Completed:            "",
+				IncludeInactiveItems: false,
+				BatchLimit:           0,
+				SkipIDs:              nil,
+				WebReportLink:        "",
+			},
+			SiteConfig: &config.ExportSiteConfig{
+				IncludeDeleted:       false,
+				IncludeFullHierarchy: false,
+			},
+			MediaConfig: &config.ExportMediaConfig{
+				Export: false,
+				Path:   "",
+			},
+		},
 	}
 }

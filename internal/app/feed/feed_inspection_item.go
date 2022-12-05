@@ -170,7 +170,7 @@ func (f *InspectionItemFeed) writeRows(ctx context.Context, exporter Exporter, r
 
 		// Some audits in production have the same item ID multiple times
 		// We can't insert them simultaneously. This means we are dropping data, which sucks.
-		rowsToInsert := []*InspectionItem{}
+		var rowsToInsert []*InspectionItem
 		idSeen := map[string]bool{}
 		for _, row := range rows[i:j] {
 			skip := skipIDs[row.AuditID]
@@ -193,14 +193,16 @@ func (f *InspectionItemFeed) writeRows(ctx context.Context, exporter Exporter, r
 			for _, mediaURL := range mediaURLList {
 				wg.Add(1)
 
-				go func(mediaURL string) {
+				go func(mediaURL string) error {
 					defer wg.Done()
 					buffers <- true
 
-					err := fetchAndWriteMedia(ctx, apiClient, exporter, row.AuditID, mediaURL)
-					util.Check(err, fmt.Sprintf("Failed to write media of inspection: %s", row.AuditID))
+					if err := fetchAndWriteMedia(ctx, apiClient, exporter, row.AuditID, mediaURL); err != nil {
+						return fmt.Errorf("write media: %w", err)
+					}
 
 					<-buffers
+					return nil
 				}(mediaURL)
 			}
 			wg.Wait()
@@ -222,10 +224,7 @@ func (f *InspectionItemFeed) CreateSchema(exporter Exporter) error {
 
 // Export exports the feed to the supplied exporter
 func (f *InspectionItemFeed) Export(ctx context.Context, apiClient *api.Client, exporter Exporter, orgID string) error {
-	logger := util.GetLogger().With(
-		"feed", f.Name(),
-		"org_id", orgID,
-	)
+	logger := util.GetLogger().With("feed", f.Name(), "org_id", orgID)
 
 	exporter.InitFeed(f, &InitFeedOptions{
 		// Delete data if incremental refresh is disabled so there is no duplicates
@@ -234,13 +233,32 @@ func (f *InspectionItemFeed) Export(ctx context.Context, apiClient *api.Client, 
 
 	var err error
 	f.ModifiedAfter, err = exporter.LastModifiedAt(f, f.ModifiedAfter, orgID)
-	util.Check(err, "unable to load modified after")
+	if err != nil {
+		return fmt.Errorf("unable to load modified after: %w", err)
+	}
 
-	logger.With(
-		"modified_after", f.ModifiedAfter.Format(time.RFC1123),
-	).Info("exporting")
+	drainFn := func(resp *api.GetFeedResponse) error {
+		var rows []*InspectionItem
 
-	err = apiClient.DrainFeed(ctx, &api.GetFeedRequest{
+		if err := json.Unmarshal(resp.Data, &rows); err != nil {
+			return fmt.Errorf("map data: %w", err)
+		}
+
+		if len(rows) != 0 {
+			if err := f.writeRows(ctx, exporter, rows, apiClient); err != nil {
+				return err
+			}
+		}
+
+		logger.With(
+			"estimated_remaining", resp.Metadata.RemainingRecords,
+			"duration_ms", apiClient.Duration.Milliseconds(),
+			"export_duration_ms", exporter.GetDuration().Milliseconds(),
+		).Info("export batch complete")
+		return nil
+	}
+
+	req := &api.GetFeedRequest{
 		InitialURL: "/feed/inspection_items",
 		Params: api.GetFeedParams{
 			ModifiedAfter:   f.ModifiedAfter,
@@ -250,25 +268,10 @@ func (f *InspectionItemFeed) Export(ctx context.Context, apiClient *api.Client, 
 			IncludeInactive: f.IncludeInactive,
 			Limit:           f.Limit,
 		},
-	}, func(resp *api.GetFeedResponse) error {
-		rows := []*InspectionItem{}
+	}
 
-		err := json.Unmarshal(resp.Data, &rows)
-		util.Check(err, "Failed to unmarshal inspection-items data to struct")
-
-		if len(rows) != 0 {
-			err = f.writeRows(ctx, exporter, rows, apiClient)
-			util.Check(err, "Failed to write data to exporter")
-		}
-
-		logger.With(
-			"estimated_remaining", resp.Metadata.RemainingRecords,
-			"duration_ms", apiClient.Duration.Milliseconds(),
-			"export_duration_ms", exporter.GetDuration().Milliseconds(),
-		).Info("export batch complete")
-		return nil
-	})
-
-	util.CheckFeedError(logger, err, fmt.Sprintf("Failed to export feed %q", f.Name()))
+	if err := apiClient.DrainFeed(ctx, req, drainFn); err != nil {
+		return fmt.Errorf("feed %q: %w", f.Name(), err)
+	}
 	return exporter.FinaliseExport(f, &[]*InspectionItem{})
 }

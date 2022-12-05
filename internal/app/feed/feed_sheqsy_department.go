@@ -68,24 +68,26 @@ func (f *SheqsyDepartmentFeed) CreateSchema(exporter Exporter) error {
 
 // Export exports the feed to the supplied exporter
 func (f *SheqsyDepartmentFeed) Export(ctx context.Context, apiClient *api.Client, exporter Exporter, companyID string) error {
-	logger := util.GetLogger().With(
-		"feed", f.Name(),
-		"org_id", companyID,
-	)
+	logger := util.GetLogger().With("feed", f.Name(), "org_id", companyID)
 
-	exporter.InitFeed(f, &InitFeedOptions{
+	if err := exporter.InitFeed(f, &InitFeedOptions{
 		// Truncate files if upserts aren't supported.
-		// This ensure that the export does not contain duplicate rows
+		// This ensures that the export does not contain duplicate rows
 		Truncate: !exporter.SupportsUpsert(),
-	})
+	}); err != nil {
+		return fmt.Errorf("init feed: %w", err)
+	}
 
-	rows := []*SheqsyDepartment{}
+	var rows []*SheqsyDepartment
 
 	resp, err := apiClient.Get(ctx, fmt.Sprintf("/SheqsyIntegrationApi/api/v3/companies/%s/departments", companyID))
-	util.Check(err, "failed fetch data")
+	if err != nil {
+		return fmt.Errorf("fetch data: %w", err)
+	}
 
-	err = json.Unmarshal(*resp, &rows)
-	util.Check(err, "failed to parse API response")
+	if err := json.Unmarshal(*resp, &rows); err != nil {
+		return fmt.Errorf("map users data: %w", err)
+	}
 
 	if len(rows) != 0 {
 		// Calculate the size of the batch we can insert into the DB at once. Column count + buffer to account for primary keys
@@ -97,8 +99,9 @@ func (f *SheqsyDepartmentFeed) Export(ctx context.Context, apiClient *api.Client
 				j = len(rows)
 			}
 
-			err = exporter.WriteRows(f, rows[i:j])
-			util.Check(err, "Failed to write data to exporter")
+			if err := exporter.WriteRows(f, rows[i:j]); err != nil {
+				return fmt.Errorf("exporter: %w", err)
+			}
 		}
 	}
 
