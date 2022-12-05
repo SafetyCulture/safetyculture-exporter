@@ -173,10 +173,12 @@ func TestExporterFeedClient_ExportFeeds_should_err_when_InitFeed_errors(t *testi
 	exporter.
 		On("InitFeed", mock.Anything, mock.Anything).
 		Return(events.NewEventError(fmt.Errorf("unable to truncate table"), events.ErrorSeverityError, events.ErrorSubSystemDB, false))
-	exporterAppCfg := createEmptyConfigurationOptions()
-	exporterAppCfg.ApiConfig.AccessToken = "token-123"
-	exporterAppCfg.ExportConfig.FilterByTableName = []string{"users"}
-	exporterApp := feed.NewExporterApp(apiClient, apiClient, exporterAppCfg)
+
+	cfg := &config.ExporterConfiguration{}
+	cfg.AccessToken = "token-123"
+	cfg.Export.Tables = []string{"users"}
+
+	exporterApp := feed.NewExporterApp(apiClient, apiClient, cfg)
 	err := exporterApp.ExportFeeds(exporter)
 	ee, ok := err.(*events.EventError)
 	require.True(t, ok)
