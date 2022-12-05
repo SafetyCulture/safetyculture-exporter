@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/SafetyCulture/safetyculture-exporter/internal/app/api"
+	"github.com/SafetyCulture/safetyculture-exporter/internal/app/config"
 	"github.com/SafetyCulture/safetyculture-exporter/internal/app/events"
 	"github.com/SafetyCulture/safetyculture-exporter/internal/app/feed"
 	"github.com/stretchr/testify/assert"
@@ -20,11 +21,11 @@ func TestExporterFeedClient_ExportFeeds_should_create_all_schemas_to_file(t *tes
 	exporter, err := getTemporaryCSVExporter()
 	assert.NoError(t, err)
 
-	exporterAppCfg := createEmptyConfigurationOptions()
-	exporterAppCfg.ApiConfig.AccessToken = "token-123"
-	exporterAppCfg.ExportConfig.SiteConfig.IncludeDeleted = true
+	cfg := &config.ExporterConfiguration{}
+	cfg.AccessToken = "token-123"
+	cfg.Export.Site.IncludeDeleted = true
 
-	exporterApp := feed.NewExporterApp(nil, nil, exporterAppCfg)
+	exporterApp := feed.NewExporterApp(nil, nil, cfg)
 	err = exporterApp.ExportSchemas(exporter)
 	assert.NoError(t, err)
 
@@ -87,13 +88,13 @@ func TestExporterFeedClient_ExportFeeds_should_export_all_feeds_to_file(t *testi
 			"ssoSettings": null
 		}`)
 
-	exporterAppCfg := createEmptyConfigurationOptions()
-	exporterAppCfg.ApiConfig.AccessToken = "token-123"
-	exporterAppCfg.ExportConfig.SiteConfig.IncludeDeleted = true
-	exporterAppCfg.SheqsyApiConfig.UserName = "token-123"
-	exporterAppCfg.SheqsyApiConfig.CompanyID = "ada3042f-16a4-4249-915d-dc088adef92a"
+	cfg := &config.ExporterConfiguration{}
+	cfg.AccessToken = "token-123"
+	cfg.Export.Site.IncludeDeleted = true
+	cfg.SheqsyUsername = "token-123"
+	cfg.SheqsyCompanyID = "ada3042f-16a4-4249-915d-dc088adef92a"
 
-	exporterApp := feed.NewExporterApp(apiClient, apiClient, exporterAppCfg)
+	exporterApp := feed.NewExporterApp(apiClient, apiClient, cfg)
 	err = exporterApp.ExportFeeds(exporter)
 	assert.NoError(t, err)
 
@@ -143,9 +144,9 @@ func TestExporterFeedClient_ExportFeeds_should_err_when_not_auth(t *testing.T) {
 		}
 		`)
 
-	exporterAppCfg := createEmptyConfigurationOptions()
-	exporterAppCfg.ApiConfig.AccessToken = "token-123"
-	exporterApp := feed.NewExporterApp(apiClient, nil, exporterAppCfg)
+	cfg := &config.ExporterConfiguration{}
+	cfg.AccessToken = "token-123"
+	exporterApp := feed.NewExporterApp(apiClient, nil, cfg)
 	err = exporterApp.ExportFeeds(exporter)
 	assert.EqualError(t, err, "get details of the current user: api request: request error status: 401")
 }
@@ -226,10 +227,10 @@ func TestExporterFeedClient_ExportFeeds_should_err_when_cannot_unmarshal(t *test
 		Reply(http.StatusOK).
 		File(path.Join("mocks", "set_1", "inspections_deleted_single_page.json"))
 
-	exporterAppCfg := createEmptyConfigurationOptions()
-	exporterAppCfg.ApiConfig.AccessToken = "token-123"
-	exporterAppCfg.ExportConfig.FilterByTableName = []string{"inspections", "users"}
-	exporterApp := feed.NewExporterApp(apiClient, apiClient, exporterAppCfg)
+	cfg := &config.ExporterConfiguration{}
+	cfg.AccessToken = "token-123"
+	cfg.Export.Tables = []string{"inspections", "users"}
+	exporterApp := feed.NewExporterApp(apiClient, apiClient, cfg)
 	err = exporterApp.ExportFeeds(exporter)
 	assert.EqualError(t, err, `feed "users": map data: unexpected end of JSON input`)
 }
@@ -257,10 +258,10 @@ func TestExporterFeedClient_ExportFeeds_should_err_when_cannot_write_rows(t *tes
 		Reply(200).
 		File("mocks/set_1/feed_users_1.json")
 
-	exporterAppCfg := createEmptyConfigurationOptions()
-	exporterAppCfg.ApiConfig.AccessToken = "token-123"
-	exporterAppCfg.ExportConfig.FilterByTableName = []string{"users"}
-	exporterApp := feed.NewExporterApp(apiClient, apiClient, exporterAppCfg)
+	cfg := &config.ExporterConfiguration{}
+	cfg.AccessToken = "token-123"
+	cfg.Export.Tables = []string{"users"}
+	exporterApp := feed.NewExporterApp(apiClient, apiClient, cfg)
 
 	exporter := getMockedExporter()
 	exporter.On("InitFeed", mock.Anything, mock.Anything).Return(nil)
@@ -303,18 +304,18 @@ func TestExporterFeedClient_ExportFeeds_should_perform_incremental_update_on_sec
 	exporter, err := getTemporaryCSVExporter()
 	assert.NoError(t, err)
 
-	exporterAppCfg := createEmptyConfigurationOptions()
-	exporterAppCfg.ApiConfig.AccessToken = "token-123"
-	exporterAppCfg.ExportConfig.SiteConfig.IncludeDeleted = true
+	cfg := &config.ExporterConfiguration{}
+	cfg.AccessToken = "token-123"
+	cfg.Export.Site.IncludeDeleted = true
 
 	apiClient := api.GetTestClient()
 	initMockFeedsSet1(apiClient.HTTPClient())
-	exporterApp := feed.NewExporterApp(apiClient, nil, exporterAppCfg)
+	exporterApp := feed.NewExporterApp(apiClient, nil, cfg)
 	err = exporterApp.ExportFeeds(exporter)
 	assert.NoError(t, err)
 
 	initMockFeedsSet2(apiClient.HTTPClient())
-	exporterApp = feed.NewExporterApp(apiClient, nil, exporterAppCfg)
+	exporterApp = feed.NewExporterApp(apiClient, nil, cfg)
 	err = exporterApp.ExportFeeds(exporter)
 	assert.NoError(t, err)
 
@@ -365,11 +366,11 @@ func TestExporterFeedClient_ExportFeeds_should_handle_lots_of_rows_ok(t *testing
 		  }
 		`)
 
-	exporterAppCfg := createEmptyConfigurationOptions()
-	exporterAppCfg.ApiConfig.AccessToken = "token-123"
-	exporterAppCfg.ExportConfig.SiteConfig.IncludeDeleted = true
+	cfg := &config.ExporterConfiguration{}
+	cfg.AccessToken = "token-123"
+	cfg.Export.Site.IncludeDeleted = true
 
-	exporterApp := feed.NewExporterApp(apiClient, apiClient, exporterAppCfg)
+	exporterApp := feed.NewExporterApp(apiClient, apiClient, cfg)
 	err = exporterApp.ExportFeeds(exporter)
 	assert.NoError(t, err)
 

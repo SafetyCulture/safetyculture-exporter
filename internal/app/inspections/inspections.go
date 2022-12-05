@@ -35,16 +35,16 @@ type InspectionClient interface {
 }
 
 // NewInspectionClient returns a new instance of InspectionClient
-func NewInspectionClient(cfg *config.ConfigurationOptions, apiClient *api.Client, exporter exporter.SafetyCultureJSONExporter) InspectionClient {
+func NewInspectionClient(cfg *config.ExporterConfiguration, apiClient *api.Client, exporter exporter.SafetyCultureJSONExporter) InspectionClient {
 	return &Client{
 		apiClient:     apiClient,
 		exporter:      exporter,
-		SkipIDs:       cfg.ExportConfig.InspectionConfig.SkipIDs,
-		ModifiedAfter: cfg.ExportConfig.ModifiedAfter,
-		TemplateIDs:   cfg.ExportConfig.FilterByTemplateID,
-		Archived:      cfg.ExportConfig.InspectionConfig.Archived,
-		Completed:     cfg.ExportConfig.InspectionConfig.Completed,
-		Incremental:   cfg.ExportConfig.Incremental,
+		SkipIDs:       cfg.Export.Inspection.SkipIds,
+		ModifiedAfter: cfg.Export.ModifiedAfter.Time,
+		TemplateIDs:   cfg.Export.TemplateIds,
+		Archived:      cfg.Export.Inspection.Archived,
+		Completed:     cfg.Export.Inspection.Completed,
+		Incremental:   cfg.Export.Incremental,
 		SugaredLogger: util.GetLogger(),
 	}
 }

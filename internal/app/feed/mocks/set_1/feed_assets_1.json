@@ -1,0 +1,63 @@
+{
+  "metadata": {
+    "next_page": null,
+    "next_page_token": ""
+  },
+  "data": [
+    {
+      "id": "92dac48a-b8f1-4d49-918f-26cae210f16d",
+      "code": "asset1",
+      "type_id": "8c46aa37-e7e0-4c03-a195-bc925900fdd7",
+      "type_name": "custom type",
+      "fields": "{\"name\":\"Name\"|\"value\":\"name1\"|\"field_id\":\"ef1223ac-dfb5-11ec-9d64-0242ac120003\"}|{\"name\":\"custom field currency\"|\"value\":{\"currencyCode\":\"AUD\"|\"units\":111|\"nanos\":0}|\"field_id\":\"ffa38d3b-66f2-4215-80d5-0a7d774cf8eb\"}|{\"name\":\"custom field text\"|\"value\":\"text1\"|\"field_id\":\"38556eb6-186b-46b0-848d-1a7ea205c07e\"}|{\"name\":\"custom field time\"|\"value\":{\"seconds\":1669726800|\"nanos\":0}|\"field_id\":\"2d3f34f3-c89e-4ba3-99d1-90accdee8238\"}",
+      "created_at": "2022-11-29T23:32:15.700Z",
+      "modified_at": "2022-11-30T01:09:49.613Z",
+      "site_id": "location_664382d46bd448c8ae0f02d9dfbee252",
+      "state": "ASSET_STATE_ACTIVE"
+    },
+    {
+      "id": "90f7cbb3-14d6-4784-b7a6-c3003fbfc2ed",
+      "code": "asset2",
+      "type_id": "8c46aa37-e7e0-4c03-a195-bc925900fdd7",
+      "type_name": "custom type",
+      "fields": "{\"name\":\"Name\"|\"value\":\"name2\"|\"field_id\":\"ef1223ac-dfb5-11ec-9d64-0242ac120003\"}|{\"name\":\"custom field currency\"|\"value\":{\"currencyCode\":\"AUD\"|\"units\":222|\"nanos\":0}|\"field_id\":\"ffa38d3b-66f2-4215-80d5-0a7d774cf8eb\"}|{\"name\":\"custom field text\"|\"value\":\"text2\"|\"field_id\":\"38556eb6-186b-46b0-848d-1a7ea205c07e\"}|{\"name\":\"custom field time\"|\"value\":{\"seconds\":1669726800|\"nanos\":0}|\"field_id\":\"2d3f34f3-c89e-4ba3-99d1-90accdee8238\"}",
+      "created_at": "2022-11-30T01:05:08.894Z",
+      "modified_at": "2022-11-30T01:10:05.682Z",
+      "site_id": "location_664382d46bd448c8ae0f02d9dfbee252",
+      "state": "ASSET_STATE_ACTIVE"
+    },
+    {
+      "id": "1a156a16-3c6a-49ec-a719-2e7a559d5f50",
+      "code": "asset3",
+      "type_id": "8c46aa37-e7e0-4c03-a195-bc925900fdd7",
+      "type_name": "custom type",
+      "fields": "{\"name\":\"Name\"|\"value\":\"name string 3\"|\"field_id\":\"ef1223ac-dfb5-11ec-9d64-0242ac120003\"}|{\"name\":\"custom field currency\"|\"value\":{\"currencyCode\":\"AUD\"|\"units\":333|\"nanos\":0}|\"field_id\":\"ffa38d3b-66f2-4215-80d5-0a7d774cf8eb\"}|{\"name\":\"custom field text\"|\"value\":\"text field 3\"|\"field_id\":\"38556eb6-186b-46b0-848d-1a7ea205c07e\"}|{\"name\":\"custom field time\"|\"value\":{\"seconds\":1669726800|\"nanos\":0}|\"field_id\":\"2d3f34f3-c89e-4ba3-99d1-90accdee8238\"}",
+      "created_at": "2022-11-30T01:06:25.545Z",
+      "modified_at": "2022-11-30T01:06:35.809Z",
+      "site_id": "location_664382d46bd448c8ae0f02d9dfbee252",
+      "state": "ASSET_STATE_ACTIVE"
+    },
+    {
+      "id": "c68d5db9-f98e-44f7-8675-4fc7629a0eb6",
+      "code": "asset4",
+      "type_id": "8c46aa37-e7e0-4c03-a195-bc925900fdd7",
+      "type_name": "custom type",
+      "fields": "{\"name\":\"Name\"|\"value\":\"name4\"|\"field_id\":\"ef1223ac-dfb5-11ec-9d64-0242ac120003\"}|{\"name\":\"custom field currency\"|\"value\":{\"currencyCode\":\"AUD\"|\"units\":444|\"nanos\":0}|\"field_id\":\"ffa38d3b-66f2-4215-80d5-0a7d774cf8eb\"}|{\"name\":\"custom field text\"|\"value\":\"text4\"|\"field_id\":\"38556eb6-186b-46b0-848d-1a7ea205c07e\"}|{\"name\":\"custom field time\"|\"value\":{\"seconds\":1669726800|\"nanos\":0}|\"field_id\":\"2d3f34f3-c89e-4ba3-99d1-90accdee8238\"}",
+      "created_at": "2022-11-30T01:09:13.047Z",
+      "modified_at": "2022-11-30T01:09:13.047Z",
+      "site_id": "location_664382d46bd448c8ae0f02d9dfbee252",
+      "state": "ASSET_STATE_ACTIVE"
+    },
+    {
+      "id": "28f44026-9749-4430-88f6-3a3eddb10526",
+      "code": "asset5",
+      "type_id": "8c46aa37-e7e0-4c03-a195-bc925900fdd7",
+      "type_name": "custom type",
+      "fields": "{\"name\":\"custom field currency\"|\"value\":{\"currencyCode\":\"AUD\"|\"units\":555|\"nanos\":0}|\"field_id\":\"ffa38d3b-66f2-4215-80d5-0a7d774cf8eb\"}|{\"name\":\"custom field text\"|\"value\":\"text5\"|\"field_id\":\"38556eb6-186b-46b0-848d-1a7ea205c07e\"}|{\"name\":\"custom field time\"|\"value\":{\"seconds\":1669726800|\"nanos\":0}|\"field_id\":\"2d3f34f3-c89e-4ba3-99d1-90accdee8238\"}",
+      "created_at": "2022-11-30T01:09:30.166Z",
+      "modified_at": "2022-11-30T05:29:41.121Z",
+      "site_id": "location_664382d46bd448c8ae0f02d9dfbee252",
+      "state": "ASSET_STATE_ACTIVE"
+    }
+  ]
+}

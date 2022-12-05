@@ -366,7 +366,7 @@ func getFilePath(exportPath string, inspection *Inspection, format string, filen
 }
 
 // NewReportExporter returns a new instance of ReportExporter
-func NewReportExporter(exportPath string, reportCfg *config.ReportConfig) (*ReportExporter, error) {
+func NewReportExporter(exportPath string, reportCfg *config.ExporterConfiguration) (*ReportExporter, error) {
 	sqlExporter, err := NewSQLExporter("sqlite", filepath.Join(exportPath, "reports.db"), true, "")
 	if err != nil {
 		return nil, err
@@ -376,9 +376,9 @@ func NewReportExporter(exportPath string, reportCfg *config.ReportConfig) (*Repo
 		SQLExporter:  sqlExporter,
 		Logger:       sqlExporter.Logger,
 		ExportPath:   exportPath,
-		Format:       reportCfg.Format,
-		PreferenceID: reportCfg.PreferenceID,
-		Filename:     reportCfg.FileNameConvention,
-		retryTimeout: reportCfg.RetryTimeout,
+		Format:       reportCfg.Report.Format,
+		PreferenceID: reportCfg.Report.PreferenceID,
+		Filename:     reportCfg.Report.FilenameConvention,
+		retryTimeout: reportCfg.Report.RetryTimeout,
 	}, nil
 }
