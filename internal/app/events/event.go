@@ -4,7 +4,7 @@ type eventType string
 
 const (
 	EventTypeError        eventType = "TYPE_ERROR"
-	EventTypeFeedProgress           = "TYPE_FEED_PROGRESS"
+	EventTypeFeedProgress eventType = "TYPE_FEED_PROGRESS"
 )
 
 type Event struct {

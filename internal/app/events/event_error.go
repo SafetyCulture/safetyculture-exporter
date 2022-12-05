@@ -11,15 +11,15 @@ type errorSubSystem string
 
 const (
 	ErrorSeverityInfo    errorSeverity = "INFO"
-	ErrorSeverityWarning               = "WARNING"
-	ErrorSeverityError                 = "ERROR"
+	ErrorSeverityWarning errorSeverity = "WARNING"
+	ErrorSeverityError   errorSeverity = "ERROR"
 )
 
 const (
 	ErrorSubSystemDB             errorSubSystem = "DB"
-	ErrorSubSystemDataIntegrity                 = "Data Integrity"
-	ErrorSubSystemAPI                           = "API"
-	ErrorSubSystemFileOperations                = "File Operations"
+	ErrorSubSystemDataIntegrity  errorSubSystem = "Data Integrity"
+	ErrorSubSystemAPI            errorSubSystem = "API"
+	ErrorSubSystemFileOperations errorSubSystem = "File Operations"
 )
 
 type EventError struct {
@@ -66,30 +66,6 @@ func BuildNewEventError(severity errorSeverity, subsystem errorSubSystem, fatal 
 			isFatal:   fatal,
 		},
 		FeedInfo: nil,
-	}
-}
-
-func NewErrorEventInfo(err error, message string) *EventError {
-	return &EventError{
-		error:    err,
-		severity: ErrorSeverityInfo,
-		isFatal:  false,
-	}
-}
-
-func NewErrorEventWarning(err error, message string) *EventError {
-	return &EventError{
-		error:    err,
-		severity: ErrorSeverityWarning,
-		isFatal:  false,
-	}
-}
-
-func NewErrorEventError(err error, message string) error {
-	return &EventError{
-		error:    err,
-		severity: ErrorSeverityError,
-		isFatal:  false,
 	}
 }
 
