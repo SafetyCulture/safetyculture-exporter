@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/SafetyCulture/safetyculture-exporter/internal/app/events"
 	"github.com/gocarina/gocsv"
 
 	"go.uber.org/zap"
@@ -33,22 +34,22 @@ func (e *CSVExporter) CreateSchema(feed Feed, rows interface{}) error {
 	if os.IsNotExist(err) {
 		file, err := os.OpenFile(exportFilePath, os.O_RDWR|os.O_CREATE, 0666)
 		if err != nil {
-			return err
+			return events.NewEventError(err, events.ErrorSeverityError, events.ErrorSubSystemFileOperations, false)
 		}
 
-		return gocsv.Marshal(rows, file)
+		err = gocsv.Marshal(rows, file)
+		if err != nil {
+			return events.NewEventError(err, events.ErrorSeverityError, events.ErrorSubSystemDataIntegrity, false)
+		}
 	}
 
 	logger.Info("CSV file already exists, skipping")
-
 	return nil
 }
 
 // FinaliseExport closes out an export
 func (e *CSVExporter) FinaliseExport(feed Feed, rows interface{}) error {
-	logger := e.Logger.With(
-		"feed", feed.Name(),
-	)
+	logger := e.Logger.With("feed", feed.Name())
 	logger.Info("writing out CSV file")
 
 	err := e.cleanOldFiles(feed.Name())
@@ -71,7 +72,7 @@ func (e *CSVExporter) FinaliseExport(feed Feed, rows interface{}) error {
 			Offset(offset).
 			Scan(rows)
 		if resp.Error != nil {
-			return resp.Error
+			return events.NewEventError(err, events.ErrorSeverityError, events.ErrorSubSystemDB, false)
 		}
 		postQueryTime := time.Now()
 
@@ -95,13 +96,13 @@ func (e *CSVExporter) FinaliseExport(feed Feed, rows interface{}) error {
 
 			err = gocsv.Marshal(rows, file)
 			if err != nil {
-				return err
+				return events.NewEventError(err, events.ErrorSeverityError, events.ErrorSubSystemDataIntegrity, false)
 			}
 			rowsAdded = 0
 		} else {
 			err = gocsv.MarshalWithoutHeaders(rows, file)
 			if err != nil {
-				return err
+				return events.NewEventError(err, events.ErrorSeverityError, events.ErrorSubSystemDataIntegrity, false)
 			}
 		}
 
@@ -126,7 +127,7 @@ func (e *CSVExporter) createNewFile(feedName string) (*os.File, error) {
 	exportFilePath := filepath.Join(e.ExportPath, fmt.Sprintf("%s.csv", feedName))
 	file, err := os.OpenFile(exportFilePath, os.O_RDWR|os.O_CREATE|os.O_APPEND|os.O_TRUNC, 0666)
 	if err != nil {
-		return nil, err
+		return nil, events.NewEventError(err, events.ErrorSeverityError, events.ErrorSubSystemFileOperations, false)
 	}
 	return file, nil
 }
@@ -141,7 +142,7 @@ func (e *CSVExporter) createRolloverFile(file *os.File, feedName string) error {
 	if file != nil {
 		err := file.Close()
 		if err != nil {
-			return err
+			return events.NewEventError(err, events.ErrorSeverityError, events.ErrorSubSystemFileOperations, false)
 		}
 	}
 
@@ -150,12 +151,12 @@ func (e *CSVExporter) createRolloverFile(file *os.File, feedName string) error {
 
 	_, err := fileExists(exportFilePath)
 	if err != nil {
-		return err
+		return events.NewEventError(err, events.ErrorSeverityError, events.ErrorSubSystemFileOperations, false)
 	}
 
 	err = os.Rename(exportFilePath, newFilePath)
 	if err != nil {
-		return err
+		return events.NewEventError(err, events.ErrorSeverityError, events.ErrorSubSystemFileOperations, false)
 	}
 
 	return nil
@@ -164,13 +165,13 @@ func (e *CSVExporter) createRolloverFile(file *os.File, feedName string) error {
 func (e *CSVExporter) cleanOldFiles(feedName string) error {
 	files, err := filepath.Glob(filepath.Join(e.ExportPath, fmt.Sprintf("%s*.csv", feedName)))
 	if err != nil {
-		return err
+		return events.NewEventError(err, events.ErrorSeverityError, events.ErrorSubSystemFileOperations, false)
 	}
 
 	for _, f := range files {
 		err = os.Remove(f)
 		if err != nil {
-			return err
+			return events.NewEventError(err, events.ErrorSeverityError, events.ErrorSubSystemFileOperations, false)
 		}
 	}
 

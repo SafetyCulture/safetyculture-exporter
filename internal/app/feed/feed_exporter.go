@@ -8,6 +8,7 @@ import (
 
 	"github.com/SafetyCulture/safetyculture-exporter/internal/app/api"
 	"github.com/SafetyCulture/safetyculture-exporter/internal/app/config"
+	"github.com/SafetyCulture/safetyculture-exporter/internal/app/events"
 	"github.com/SafetyCulture/safetyculture-exporter/internal/app/util"
 )
 
@@ -159,6 +160,16 @@ func (e *ExporterFeedClient) ExportFeeds(exporter Exporter) error {
 
 	logger.Info("Export finished")
 	if len(e.errs) != 0 {
+		logger.Warn("There were errors during the export:")
+		for _, ee := range e.errs {
+			switch theError := ee.(type) {
+			case *events.EventError:
+				theError.Log(logger)
+			default:
+				logger.Infof(" > %s", theError.Error())
+			}
+
+		}
 		// this is temporary code until we finish a follow-up ticket that will use structured errors
 		return e.errs[0]
 	}

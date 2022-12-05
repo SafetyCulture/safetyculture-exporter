@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/SafetyCulture/safetyculture-exporter/internal/app/api"
+	"github.com/SafetyCulture/safetyculture-exporter/internal/app/events"
 	"github.com/SafetyCulture/safetyculture-exporter/internal/app/util"
 )
 
@@ -164,23 +165,23 @@ func (f *InspectionFeed) Export(ctx context.Context, apiClient *api.Client, expo
 		// Delete data if incremental refresh is disabled so there is no duplicates
 		Truncate: !f.Incremental,
 	}); err != nil {
-		return fmt.Errorf("init feed: %w", err)
+		return events.WrapEventError(err, "init feed")
 	}
 
 	var err error
 	f.ModifiedAfter, err = exporter.LastModifiedAt(f, f.ModifiedAfter, orgID)
 	if err != nil {
-		return fmt.Errorf("unable to load modified after: %w", err)
+		return events.NewEventErrorWithMessage(err, events.ErrorSeverityError, events.ErrorSubSystemDB, false, "unable to load modified after")
 	}
 
 	// Process Inspections
 	if err := f.processNewInspections(ctx, apiClient, exporter, orgID); err != nil {
-		return fmt.Errorf("export: %w", err)
+		return events.WrapEventError(err, "export")
 	}
 
 	// Process Deleted Inspections
 	if err := f.processDeletedInspections(ctx, apiClient, exporter); err != nil {
-		return fmt.Errorf("process deleted inspections. %w", err)
+		return events.WrapEventError(err, "process deleted inspections")
 	}
 
 	return exporter.FinaliseExport(f, &[]*Inspection{})
@@ -203,7 +204,7 @@ func (f *InspectionFeed) processNewInspections(ctx context.Context, apiClient *a
 		var rows []Inspection
 
 		if err := json.Unmarshal(resp.Data, &rows); err != nil {
-			return fmt.Errorf("map data: %w", err)
+			return events.NewEventErrorWithMessage(err, events.ErrorSeverityError, events.ErrorSubSystemDataIntegrity, false, "map data")
 		}
 
 		if len(rows) != 0 {

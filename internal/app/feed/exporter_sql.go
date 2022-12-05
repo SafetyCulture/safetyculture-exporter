@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/SafetyCulture/safetyculture-exporter/internal/app/events"
 	"github.com/SafetyCulture/safetyculture-exporter/internal/app/util"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
@@ -58,7 +59,7 @@ func (e *SQLExporter) InitFeed(feed Feed, opts *InitFeedOptions) error {
 	if e.AutoMigrate {
 		err := e.DB.AutoMigrate(model)
 		if err != nil {
-			return err
+			return events.NewEventError(err, events.ErrorSeverityError, events.ErrorSubSystemDB, false)
 		}
 	}
 
@@ -68,7 +69,7 @@ func (e *SQLExporter) InitFeed(feed Feed, opts *InitFeedOptions) error {
 		).Info("truncating")
 		result := e.DB.Session(&gorm.Session{AllowGlobalUpdate: true}).Unscoped().Delete(model)
 		if result.Error != nil {
-			return errors.Wrap(result.Error, "Unable to truncate table")
+			return events.NewEventError(result.Error, events.ErrorSeverityError, events.ErrorSubSystemDB, false)
 		}
 	}
 
@@ -93,7 +94,7 @@ func (e *SQLExporter) DeleteRowsIfExist(feed Feed, query string, args ...interfa
 		}).
 		Delete(feed.Model())
 	if del.Error != nil {
-		return errors.Wrap(del.Error, "Unable to delete rows")
+		return events.NewEventErrorWithMessage(del.Error, events.ErrorSeverityError, events.ErrorSubSystemDataIntegrity, false, "unable to delete rows")
 	}
 
 	return nil
@@ -116,7 +117,7 @@ func (e *SQLExporter) WriteRows(feed Feed, rows interface{}) error {
 		Create(rows)
 	e.duration = time.Since(start)
 	if insert.Error != nil {
-		return errors.Wrap(insert.Error, "Unable to insert rows")
+		return events.NewEventErrorWithMessage(insert.Error, events.ErrorSeverityError, events.ErrorSubSystemDB, false, "unable to insert rows")
 	}
 
 	return nil
@@ -129,7 +130,7 @@ func (e *SQLExporter) UpdateRows(feed Feed, primaryKeys []string, element map[st
 		Where(primaryKeys).
 		Updates(element)
 	if result.Error != nil {
-		return 0, errors.Wrap(result.Error, "Unable to update rows")
+		return 0, events.NewEventErrorWithMessage(result.Error, events.ErrorSeverityError, events.ErrorSubSystemDB, false, "unable to updare rows")
 	}
 
 	return result.RowsAffected, nil
@@ -175,10 +176,9 @@ func (e *SQLExporter) FinaliseExport(Feed, interface{}) error {
 
 // WriteMedia writes the media to a file
 func (e *SQLExporter) WriteMedia(auditID, mediaID, contentType string, body []byte) error {
-
 	exportMediaDir := filepath.Join(e.ExportMediaPath, auditID)
 	if err := os.MkdirAll(exportMediaDir, os.ModePerm); err != nil {
-		return fmt.Errorf("create directory %s: %w", exportMediaDir, err)
+		return events.NewEventErrorWithMessage(err, events.ErrorSeverityError, events.ErrorSubSystemFileOperations, false, fmt.Sprintf("create directory %s", exportMediaDir))
 	}
 
 	ext := strings.Split(contentType, "/")
@@ -186,13 +186,13 @@ func (e *SQLExporter) WriteMedia(auditID, mediaID, contentType string, body []by
 
 	file, err := os.OpenFile(exportFilePath, os.O_RDWR|os.O_CREATE, 0666)
 	if err != nil {
-		return fmt.Errorf("open file %v: %w", exportFilePath, err)
+		return events.NewEventErrorWithMessage(err, events.ErrorSeverityError, events.ErrorSubSystemFileOperations, false, fmt.Sprintf("open file %v", exportFilePath))
 	}
 	defer file.Close()
 
 	_, err = file.WriteAt(body, 0)
 	if err != nil {
-		return fmt.Errorf("write media to file: %w", err)
+		return events.NewEventErrorWithMessage(err, events.ErrorSeverityError, events.ErrorSubSystemFileOperations, false, "write media to file")
 	}
 
 	return nil

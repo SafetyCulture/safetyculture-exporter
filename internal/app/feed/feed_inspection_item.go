@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/SafetyCulture/safetyculture-exporter/internal/app/api"
+	"github.com/SafetyCulture/safetyculture-exporter/internal/app/events"
 	"github.com/SafetyCulture/safetyculture-exporter/internal/app/util"
 )
 
@@ -198,7 +199,7 @@ func (f *InspectionItemFeed) writeRows(ctx context.Context, exporter Exporter, r
 					buffers <- true
 
 					if err := fetchAndWriteMedia(ctx, apiClient, exporter, row.AuditID, mediaURL); err != nil {
-						return fmt.Errorf("write media: %w", err)
+						return events.WrapEventError(err, "write media")
 					}
 
 					<-buffers
@@ -234,14 +235,14 @@ func (f *InspectionItemFeed) Export(ctx context.Context, apiClient *api.Client, 
 	var err error
 	f.ModifiedAfter, err = exporter.LastModifiedAt(f, f.ModifiedAfter, orgID)
 	if err != nil {
-		return fmt.Errorf("unable to load modified after: %w", err)
+		return events.NewEventErrorWithMessage(err, events.ErrorSeverityError, events.ErrorSubSystemDB, false, "unable to load modified after")
 	}
 
 	drainFn := func(resp *api.GetFeedResponse) error {
 		var rows []*InspectionItem
 
 		if err := json.Unmarshal(resp.Data, &rows); err != nil {
-			return fmt.Errorf("map data: %w", err)
+			return events.NewEventErrorWithMessage(err, events.ErrorSeverityError, events.ErrorSubSystemDataIntegrity, false, "map data")
 		}
 
 		if len(rows) != 0 {
@@ -271,7 +272,7 @@ func (f *InspectionItemFeed) Export(ctx context.Context, apiClient *api.Client, 
 	}
 
 	if err := apiClient.DrainFeed(ctx, req, drainFn); err != nil {
-		return fmt.Errorf("feed %q: %w", f.Name(), err)
+		return events.WrapEventError(err, fmt.Sprintf("feed %q", f.Name()))
 	}
 	return exporter.FinaliseExport(f, &[]*InspectionItem{})
 }
