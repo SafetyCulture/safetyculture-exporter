@@ -16,6 +16,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/SafetyCulture/safetyculture-exporter/internal/app/events"
 	"github.com/SafetyCulture/safetyculture-exporter/internal/app/util"
 	"github.com/SafetyCulture/safetyculture-exporter/internal/app/version"
 	"github.com/dghubble/sling"
@@ -313,10 +314,11 @@ func (a *Client) GetFeed(ctx context.Context, request *GetFeedRequest) (*GetFeed
 	})
 
 	if err != nil {
-		return nil, errors.Wrap(err, "api request")
+		return nil, events.NewEventErrorWithMessage(err, events.ErrorSeverityError, events.ErrorSubSystemAPI, false, "api request")
 	}
 
 	if httpRes != nil && (httpRes.StatusCode < 200 || httpRes.StatusCode > 299) {
+		//TODO?
 		return nil, util.HTTPError{
 			StatusCode: httpRes.StatusCode,
 			Resource:   request.InitialURL,
@@ -337,13 +339,13 @@ func (a *Client) DrainFeed(ctx context.Context, request *GetFeedRequest, feedFn 
 		request.URL = nextURL
 		resp, httpErr := a.GetFeed(ctx, request)
 		if httpErr != nil {
-			return httpErr
+			return events.NewEventError(httpErr, events.ErrorSeverityError, events.ErrorSubSystemAPI, false)
 		}
 		nextURL = resp.Metadata.NextPage
 
 		err := feedFn(resp)
 		if err != nil {
-			return err
+			return events.NewEventError(err, events.ErrorSeverityError, events.ErrorSubSystemAPI, false)
 		}
 	}
 
@@ -372,13 +374,13 @@ func (a *Client) ListOrganisationActivityLog(ctx context.Context, request *GetAc
 		failureV: &errMsg,
 	})
 	if err != nil {
-		return nil, errors.Wrap(err, "api request")
+		return nil, events.NewEventErrorWithMessage(err, events.ErrorSeverityError, events.ErrorSubSystemAPI, false, "api request")
 	}
 
 	return &res, nil
 }
 
-// DrainAccountActivityHistoryLog cycle throgh GetAccountsActivityLogResponse and adapts the filter whule there is a next page
+// DrainAccountActivityHistoryLog cycle through GetAccountsActivityLogResponse and adapts the filter while there is a next page
 func (a *Client) DrainAccountActivityHistoryLog(ctx context.Context, req *GetAccountsActivityLogRequestParams, feedFn func(*GetAccountsActivityLogResponse) error) error {
 	for {
 		res, err := a.ListOrganisationActivityLog(ctx, req)

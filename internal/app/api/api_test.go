@@ -224,7 +224,7 @@ func TestAPIClientDrainFeed_should_bubble_up_errors_from_callback(t *testing.T) 
 	}, func(data *api.GetFeedResponse) error {
 		return expectedErr
 	})
-	assert.Equal(t, expectedErr, err)
+	assert.EqualValues(t, expectedErr.Error(), err.Error())
 }
 
 func TestClient_DrainFeed_WhenApiReturns403Error(t *testing.T) {

@@ -1,7 +1,6 @@
 package events
 
 type eventType string
-type errorSeverity string
 
 const (
 	EventTypeError        eventType = "TYPE_ERROR"

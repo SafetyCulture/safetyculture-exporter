@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/SafetyCulture/safetyculture-exporter/internal/app/events"
 	"github.com/SafetyCulture/safetyculture-exporter/internal/app/util"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
@@ -58,7 +59,7 @@ func (e *SQLExporter) InitFeed(feed Feed, opts *InitFeedOptions) error {
 	if e.AutoMigrate {
 		err := e.DB.AutoMigrate(model)
 		if err != nil {
-			return err
+			return events.NewEventError(err, events.ErrorSeverityError, events.ErrorSubSystemDB, false)
 		}
 	}
 
@@ -68,7 +69,7 @@ func (e *SQLExporter) InitFeed(feed Feed, opts *InitFeedOptions) error {
 		).Info("truncating")
 		result := e.DB.Session(&gorm.Session{AllowGlobalUpdate: true}).Unscoped().Delete(model)
 		if result.Error != nil {
-			return errors.Wrap(result.Error, "Unable to truncate table")
+			return events.NewEventError(result.Error, events.ErrorSeverityError, events.ErrorSubSystemDB, false)
 		}
 	}
 
@@ -116,7 +117,7 @@ func (e *SQLExporter) WriteRows(feed Feed, rows interface{}) error {
 		Create(rows)
 	e.duration = time.Since(start)
 	if insert.Error != nil {
-		return errors.Wrap(insert.Error, "Unable to insert rows")
+		return events.NewEventErrorWithMessage(insert.Error, events.ErrorSeverityError, events.ErrorSubSystemDB, false, "unable to insert rows")
 	}
 
 	return nil

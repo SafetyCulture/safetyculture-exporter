@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/SafetyCulture/safetyculture-exporter/internal/app/api"
+	"github.com/SafetyCulture/safetyculture-exporter/internal/app/events"
 	"github.com/SafetyCulture/safetyculture-exporter/internal/app/feed"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -149,6 +150,40 @@ func TestExporterFeedClient_ExportFeeds_should_err_when_not_auth(t *testing.T) {
 	assert.EqualError(t, err, "get details of the current user: api request: request error status: 401")
 }
 
+func TestExporterFeedClient_ExportFeeds_should_err_when_InitFeed_errors(t *testing.T) {
+	defer gock.Off()
+
+	apiClient := api.GetTestClient()
+	gock.InterceptClient(apiClient.HTTPClient())
+
+	gock.New("http://localhost:9999").
+		Get("/accounts/user/v1/user:WhoAmI").
+		Reply(200).
+		BodyString(`
+		{
+			"user_id": "user_123",
+			"organisation_id": "role_123",
+			"firstname": "Test",
+			"lastname": "Test"
+		  }
+		`)
+
+	exporter := getMockedExporter()
+	exporter.
+		On("InitFeed", mock.Anything, mock.Anything).
+		Return(events.NewEventError(fmt.Errorf("unable to truncate table"), events.ErrorSeverityError, events.ErrorSubSystemDB, false))
+	exporterAppCfg := createEmptyConfigurationOptions()
+	exporterAppCfg.ApiConfig.AccessToken = "token-123"
+	exporterAppCfg.ExportConfig.FilterByTableName = []string{"users"}
+	exporterApp := feed.NewExporterApp(apiClient, apiClient, exporterAppCfg)
+	err := exporterApp.ExportFeeds(exporter)
+	ee, ok := err.(*events.EventError)
+	require.True(t, ok)
+	assert.True(t, ee.IsError())
+	assert.False(t, ee.IsFatal())
+	assert.EqualValues(t, "init feed: unable to truncate table", ee.Error())
+}
+
 func TestExporterFeedClient_ExportFeeds_should_err_when_cannot_unmarshal(t *testing.T) {
 	defer gock.Off()
 
@@ -232,7 +267,7 @@ func TestExporterFeedClient_ExportFeeds_should_err_when_cannot_write_rows(t *tes
 	exporter.On("WriteRows", mock.Anything, mock.Anything).Return(fmt.Errorf("cannot write rows"))
 
 	err := exporterApp.ExportFeeds(exporter)
-	assert.EqualError(t, err, `feed "users": exporter: cannot write rows`)
+	assert.EqualError(t, err, `feed "users": write rows: cannot write rows`)
 }
 
 // Expectation of this test is that group_users and schedule_assignees are truncated and refreshed
