@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/SafetyCulture/safetyculture-exporter/internal/app/api"
+	"github.com/SafetyCulture/safetyculture-exporter/internal/app/events"
 	"github.com/SafetyCulture/safetyculture-exporter/internal/app/util"
 )
 
@@ -79,7 +80,7 @@ func (f *SheqsyDepartmentEmployeeFeed) Export(ctx context.Context, apiClient *ap
 		// This ensures that the export does not contain duplicate rows
 		Truncate: !exporter.SupportsUpsert(),
 	}); err != nil {
-		return fmt.Errorf("init feed: %w", err)
+		return events.WrapEventError(err, "init feed")
 	}
 
 	var rows []*SheqsyDepartmentEmployee
@@ -91,7 +92,7 @@ func (f *SheqsyDepartmentEmployeeFeed) Export(ctx context.Context, apiClient *ap
 
 	var rawData []sheqsyEmployeeRaw
 	if err := json.Unmarshal(*resp, &rawData); err != nil {
-		return fmt.Errorf("map data: %w", err)
+		return events.NewEventErrorWithMessage(err, events.ErrorSeverityError, events.ErrorSubSystemDataIntegrity, false, "map data")
 	}
 
 	for _, row := range rawData {
@@ -116,7 +117,7 @@ func (f *SheqsyDepartmentEmployeeFeed) Export(ctx context.Context, apiClient *ap
 			}
 
 			if err := exporter.WriteRows(f, rows[i:j]); err != nil {
-				return fmt.Errorf("exporter: %w", err)
+				return events.WrapEventError(err, "write rows")
 			}
 		}
 	}

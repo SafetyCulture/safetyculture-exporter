@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/SafetyCulture/safetyculture-exporter/internal/app/api"
+	"github.com/SafetyCulture/safetyculture-exporter/internal/app/events"
 	"github.com/SafetyCulture/safetyculture-exporter/internal/app/util"
 )
 
@@ -87,14 +88,14 @@ func (f *TemplateFeed) Export(ctx context.Context, apiClient *api.Client, export
 		// Delete data if incremental refresh is disabled so there is no duplicates
 		Truncate: !f.Incremental,
 	}); err != nil {
-		return fmt.Errorf("init feed: %w", err)
+		return events.WrapEventError(err, "init feed")
 	}
 
 	drainFn := func(resp *api.GetFeedResponse) error {
 		var rows []*Template
 
 		if err := json.Unmarshal(resp.Data, &rows); err != nil {
-			return fmt.Errorf("map data: %w", err)
+			return events.NewEventErrorWithMessage(err, events.ErrorSeverityError, events.ErrorSubSystemDataIntegrity, false, "map data")
 		}
 
 		if len(rows) != 0 {
@@ -108,7 +109,7 @@ func (f *TemplateFeed) Export(ctx context.Context, apiClient *api.Client, export
 				}
 
 				if err := exporter.WriteRows(f, rows[i:j]); err != nil {
-					return fmt.Errorf("exporter: %w", err)
+					return events.WrapEventError(err, "write rows")
 				}
 			}
 		}
@@ -124,7 +125,7 @@ func (f *TemplateFeed) Export(ctx context.Context, apiClient *api.Client, export
 	var err error
 	f.ModifiedAfter, err = exporter.LastModifiedAt(f, f.ModifiedAfter, orgID)
 	if err != nil {
-		return fmt.Errorf("unable to load modified after: %w", err)
+		return events.NewEventErrorWithMessage(err, events.ErrorSeverityError, events.ErrorSubSystemDB, false, "unable to load modified after")
 	}
 
 	logger.With(
@@ -138,7 +139,7 @@ func (f *TemplateFeed) Export(ctx context.Context, apiClient *api.Client, export
 		},
 	}
 	if err := apiClient.DrainFeed(ctx, req, drainFn); err != nil {
-		return fmt.Errorf("feed %q: %w", f.Name(), err)
+		return events.WrapEventError(err, fmt.Sprintf("feed %q", f.Name()))
 	}
 	return exporter.FinaliseExport(f, &[]*Template{})
 }

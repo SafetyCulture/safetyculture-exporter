@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/SafetyCulture/safetyculture-exporter/internal/app/api"
+	"github.com/SafetyCulture/safetyculture-exporter/internal/app/events"
 	"github.com/SafetyCulture/safetyculture-exporter/internal/app/util"
 )
 
@@ -77,14 +78,14 @@ func (f *UserFeed) Export(ctx context.Context, apiClient *api.Client, exporter E
 		// This ensures that the export does not contain duplicate rows
 		Truncate: !exporter.SupportsUpsert(),
 	}); err != nil {
-		return fmt.Errorf("init feed: %w", err)
+		return events.WrapEventError(err, "init feed")
 	}
 
 	drainFn := func(resp *api.GetFeedResponse) error {
 		var rows []*User
 
 		if err := json.Unmarshal(resp.Data, &rows); err != nil {
-			return fmt.Errorf("map data: %w", err)
+			return events.NewEventErrorWithMessage(err, events.ErrorSeverityError, events.ErrorSubSystemDataIntegrity, false, "map data")
 		}
 
 		if len(rows) != 0 {
@@ -98,7 +99,7 @@ func (f *UserFeed) Export(ctx context.Context, apiClient *api.Client, exporter E
 				}
 
 				if err := exporter.WriteRows(f, rows[i:j]); err != nil {
-					return fmt.Errorf("exporter: %w", err)
+					return events.WrapEventError(err, "write rows")
 				}
 			}
 		}
@@ -113,7 +114,7 @@ func (f *UserFeed) Export(ctx context.Context, apiClient *api.Client, exporter E
 
 	req := &api.GetFeedRequest{InitialURL: "/feed/users", Params: api.GetFeedParams{}}
 	if err := apiClient.DrainFeed(ctx, req, drainFn); err != nil {
-		return fmt.Errorf("feed %q: %w", f.Name(), err)
+		return events.WrapEventError(err, fmt.Sprintf("feed %q", f.Name()))
 	}
 	return exporter.FinaliseExport(f, &[]*User{})
 }

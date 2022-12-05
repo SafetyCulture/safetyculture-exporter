@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/SafetyCulture/safetyculture-exporter/internal/app/api"
+	"github.com/SafetyCulture/safetyculture-exporter/internal/app/events"
 	"github.com/SafetyCulture/safetyculture-exporter/internal/app/util"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
@@ -111,7 +112,7 @@ func (f *SheqsyActivityFeed) Export(ctx context.Context, apiClient *api.Client, 
 		// This ensures that the export does not contain duplicate rows
 		Truncate: !exporter.SupportsUpsert(),
 	}); err != nil {
-		return fmt.Errorf("init feed: %w", err)
+		return events.WrapEventError(err, "init feed")
 	}
 
 	type apiResp struct {
@@ -175,7 +176,7 @@ func (f *SheqsyActivityFeed) Export(ctx context.Context, apiClient *api.Client, 
 		})
 
 		if err := json.Unmarshal(respBytes, &data); err != nil {
-			return fmt.Errorf("map data: %w", err)
+			return events.NewEventErrorWithMessage(err, events.ErrorSeverityError, events.ErrorSubSystemDataIntegrity, false, "map data")
 		}
 
 		if len(data.Data) != 0 {
@@ -189,7 +190,7 @@ func (f *SheqsyActivityFeed) Export(ctx context.Context, apiClient *api.Client, 
 				}
 
 				if err := exporter.WriteRows(f, data.Data[i:j]); err != nil {
-					return fmt.Errorf("exporter: %w", err)
+					return events.WrapEventError(err, "write rows")
 				}
 			}
 		}

@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/SafetyCulture/safetyculture-exporter/internal/app/api"
+	"github.com/SafetyCulture/safetyculture-exporter/internal/app/events"
 	"github.com/SafetyCulture/safetyculture-exporter/internal/app/util"
 )
 
@@ -70,19 +71,19 @@ func (f *GroupUserFeed) Export(ctx context.Context, apiClient *api.Client, expor
 		// This ensures that the export does not contain duplicate rows
 		Truncate: false,
 	}); err != nil {
-		return fmt.Errorf("init feed: %w", err)
+		return events.WrapEventError(err, "init feed")
 	}
 
 	// Delete the actions if already exist
 	if err := exporter.DeleteRowsIfExist(f, "organisation_id = ?", orgID); err != nil {
-		return fmt.Errorf("delete row: %w", err)
+		return events.WrapEventError(err, "delete row")
 	}
 
 	drainFn := func(resp *api.GetFeedResponse) error {
 		var rows []*GroupUser
 
 		if err := json.Unmarshal(resp.Data, &rows); err != nil {
-			return fmt.Errorf("map data: %w", err)
+			return events.NewEventErrorWithMessage(err, events.ErrorSeverityError, events.ErrorSubSystemDataIntegrity, false, "map data")
 		}
 
 		// deduplicate rows (hotfix) because the feed Api GetUserGroups returns duplicates and this creates PK violations issues
@@ -101,7 +102,7 @@ func (f *GroupUserFeed) Export(ctx context.Context, apiClient *api.Client, expor
 				}
 
 				if err := exporter.WriteRows(f, deDupedRows[i:j]); err != nil {
-					return fmt.Errorf("exporter: %w", err)
+					return events.WrapEventError(err, "write rows")
 				}
 			}
 		}
@@ -120,7 +121,7 @@ func (f *GroupUserFeed) Export(ctx context.Context, apiClient *api.Client, expor
 	}
 
 	if err := apiClient.DrainFeed(ctx, req, drainFn); err != nil {
-		return fmt.Errorf("feed %q: %w", f.Name(), err)
+		return events.WrapEventError(err, fmt.Sprintf("feed %q", f.Name()))
 	}
 	return exporter.FinaliseExport(f, &[]*GroupUser{})
 }
