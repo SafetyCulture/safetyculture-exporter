@@ -211,48 +211,45 @@ func NewConfigurationManager(fileName string) *ConfigurationManager {
 }
 
 func (ec *ExporterConfiguration) ToExporterConfig() *feed.ExporterFeedCfg {
-	//TODO REFACTOR
 	return &feed.ExporterFeedCfg{
-		AccessToken:                           "",
-		ExportTables:                          nil,
-		SheqsyUsername:                        "",
-		SheqsyCompanyID:                       "",
-		ExportInspectionSkipIds:               nil,
-		ExportModifiedAfterTime:               time.Time{},
-		ExportTemplateIds:                     nil,
-		ExportInspectionArchived:              "",
-		ExportInspectionCompleted:             "",
-		ExportInspectionIncludedInactiveItems: false,
-		ExportInspectionWebReportLink:         "",
-		ExportIncremental:                     false,
-		ExportInspectionLimit:                 0,
-		ExportMedia:                           false,
-		ExportSiteIncludeDeleted:              false,
-		ExportActionLimit:                     0,
-		ExportSiteIncludeFullHierarchy:        false,
-		ExportIssueLimit:                      0,
-		ExportAssetLimit:                      0,
+		AccessToken:                           ec.AccessToken,
+		ExportTables:                          ec.Export.Tables,
+		SheqsyUsername:                        ec.SheqsyUsername,
+		SheqsyCompanyID:                       ec.SheqsyCompanyID,
+		ExportInspectionSkipIds:               ec.Export.Inspection.SkipIds,
+		ExportModifiedAfterTime:               ec.Export.ModifiedAfter.Time,
+		ExportTemplateIds:                     ec.Export.TemplateIds,
+		ExportInspectionArchived:              ec.Export.Inspection.Archived,
+		ExportInspectionCompleted:             ec.Export.Inspection.Completed,
+		ExportInspectionIncludedInactiveItems: ec.Export.Inspection.IncludedInactiveItems,
+		ExportInspectionWebReportLink:         ec.Export.Inspection.WebReportLink,
+		ExportIncremental:                     ec.Export.Incremental,
+		ExportInspectionLimit:                 ec.Export.Inspection.Limit,
+		ExportMedia:                           ec.Export.Media,
+		ExportSiteIncludeDeleted:              ec.Export.Site.IncludeDeleted,
+		ExportActionLimit:                     ec.Export.Action.Limit,
+		ExportSiteIncludeFullHierarchy:        ec.Export.Site.IncludeFullHierarchy,
+		ExportIssueLimit:                      ec.Export.Issue.Limit,
+		ExportAssetLimit:                      ec.Export.Asset.Limit,
 	}
 }
 
 func (ec *ExporterConfiguration) ToReporterConfig() *feed.ReportExporterCfg {
-	//TODO REFACTOR
 	return &feed.ReportExporterCfg{
-		Format:       nil,
-		PreferenceID: "",
-		Filename:     "",
-		RetryTimeout: 0,
+		Format:       ec.Report.Format,
+		PreferenceID: ec.Report.PreferenceID,
+		Filename:     ec.Report.FilenameConvention,
+		RetryTimeout: ec.Report.RetryTimeout,
 	}
 }
 
 func (ec *ExporterConfiguration) ToInspectionConfig() *inspections.InspectionClientCfg {
-	//TODO REFACTOR
 	return &inspections.InspectionClientCfg{
-		SkipIDs:       nil,
-		ModifiedAfter: time.Time{},
-		TemplateIDs:   nil,
-		Archived:      "",
-		Completed:     "",
-		Incremental:   false,
+		SkipIDs:       ec.Export.Inspection.SkipIds,
+		ModifiedAfter: ec.Export.ModifiedAfter.Time,
+		TemplateIDs:   ec.Export.TemplateIds,
+		Archived:      ec.Export.Inspection.Archived,
+		Completed:     ec.Export.Inspection.Completed,
+		Incremental:   ec.Export.Incremental,
 	}
 }
