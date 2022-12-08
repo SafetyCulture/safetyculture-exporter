@@ -7,9 +7,9 @@ import (
 
 	"github.com/SafetyCulture/safetyculture-exporter/cmd/safetyculture-exporter/cmd/configure"
 	"github.com/SafetyCulture/safetyculture-exporter/cmd/safetyculture-exporter/cmd/export"
-	"github.com/SafetyCulture/safetyculture-exporter/internal/app/util"
-	"github.com/SafetyCulture/safetyculture-exporter/internal/app/version"
-	"github.com/SafetyCulture/safetyculture-exporter/internal/update"
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/core/update"
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/core/util"
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/core/version"
 	"github.com/gookit/color"
 	"github.com/spf13/cobra"
 	"github.com/spf13/cobra/doc"
