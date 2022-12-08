@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/SafetyCulture/safetyculture-exporter/cmd/safetyculture-exporter/cmd/export"
-	"github.com/SafetyCulture/safetyculture-exporter/pkg/coreexporter/config"
+	exporterAPI "github.com/SafetyCulture/safetyculture-exporter/pkg/external/api"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -48,7 +48,7 @@ func TestSQLCmd(t *testing.T) {
 }
 
 func TestNewConfigurationManagerFromFile_should_apply_the_viper_defaults(t *testing.T) {
-	cm := config.NewConfigurationManager("new.yaml")
+	cm := exporterAPI.NewConfigurationManager("new.yaml")
 	require.NotNil(t, cm)
 
 	viperConfig := viper.New()

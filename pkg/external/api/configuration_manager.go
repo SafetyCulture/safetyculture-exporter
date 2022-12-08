@@ -1,4 +1,4 @@
-package config
+package api
 
 import (
 	"fmt"
@@ -6,6 +6,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/coreexporter/feed"
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/coreexporter/inspections"
 	"gopkg.in/yaml.v3"
 )
 
@@ -206,4 +208,51 @@ func NewConfigurationManager(fileName string) *ConfigurationManager {
 
 	cm.ApplySafetyGuards()
 	return cm
+}
+
+func (ec *ExporterConfiguration) ToExporterConfig() *feed.ExporterFeedCfg {
+	//TODO REFACTOR
+	return &feed.ExporterFeedCfg{
+		AccessToken:                           "",
+		ExportTables:                          nil,
+		SheqsyUsername:                        "",
+		SheqsyCompanyID:                       "",
+		ExportInspectionSkipIds:               nil,
+		ExportModifiedAfterTime:               time.Time{},
+		ExportTemplateIds:                     nil,
+		ExportInspectionArchived:              "",
+		ExportInspectionCompleted:             "",
+		ExportInspectionIncludedInactiveItems: false,
+		ExportInspectionWebReportLink:         "",
+		ExportIncremental:                     false,
+		ExportInspectionLimit:                 0,
+		ExportMedia:                           false,
+		ExportSiteIncludeDeleted:              false,
+		ExportActionLimit:                     0,
+		ExportSiteIncludeFullHierarchy:        false,
+		ExportIssueLimit:                      0,
+		ExportAssetLimit:                      0,
+	}
+}
+
+func (ec *ExporterConfiguration) ToReporterConfig() *feed.ReportExporterCfg {
+	//TODO REFACTOR
+	return &feed.ReportExporterCfg{
+		Format:       nil,
+		PreferenceID: "",
+		Filename:     "",
+		RetryTimeout: 0,
+	}
+}
+
+func (ec *ExporterConfiguration) ToInspectionConfig() *inspections.InspectionClientCfg {
+	//TODO REFACTOR
+	return &inspections.InspectionClientCfg{
+		SkipIDs:       nil,
+		ModifiedAfter: time.Time{},
+		TemplateIDs:   nil,
+		Archived:      "",
+		Completed:     "",
+		Incremental:   false,
+	}
 }

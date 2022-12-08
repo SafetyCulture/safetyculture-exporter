@@ -5,9 +5,9 @@ import (
 	"errors"
 	"fmt"
 	"sync"
+	"time"
 
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/coreexporter/api"
-	"github.com/SafetyCulture/safetyculture-exporter/pkg/coreexporter/config"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/coreexporter/events"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/coreexporter/util"
 )
@@ -31,8 +31,30 @@ type SafetyCultureFeedExporter interface {
 	ExportInspectionReports(exporter *ReportExporter) error
 }
 
+type ExporterFeedCfg struct {
+	AccessToken                           string
+	ExportTables                          []string
+	SheqsyUsername                        string
+	SheqsyCompanyID                       string
+	ExportInspectionSkipIds               []string
+	ExportModifiedAfterTime               time.Time
+	ExportTemplateIds                     []string
+	ExportInspectionArchived              string
+	ExportInspectionCompleted             string
+	ExportInspectionIncludedInactiveItems bool
+	ExportInspectionWebReportLink         string
+	ExportIncremental                     bool
+	ExportInspectionLimit                 int
+	ExportMedia                           bool
+	ExportSiteIncludeDeleted              bool
+	ExportActionLimit                     int
+	ExportSiteIncludeFullHierarchy        bool
+	ExportIssueLimit                      int
+	ExportAssetLimit                      int
+}
+
 type ExporterFeedClient struct {
-	configuration   *config.ExporterConfiguration
+	configuration   *ExporterFeedCfg
 	apiClient       *api.Client
 	sheqsyApiClient *api.Client
 	errMu           sync.Mutex
@@ -61,7 +83,7 @@ func (e *ExporterFeedClient) ExportFeeds(exporter Exporter) error {
 	logger := util.GetLogger()
 	ctx := context.Background()
 
-	tables := e.configuration.Export.Tables
+	tables := e.configuration.ExportTables
 	tablesMap := map[string]bool{}
 	for _, table := range tables {
 		tablesMap[table] = true
@@ -182,69 +204,69 @@ func (e *ExporterFeedClient) GetFeeds() []Feed {
 	return []Feed{
 		e.getInspectionFeed(),
 		&InspectionItemFeed{
-			SkipIDs:         e.configuration.Export.Inspection.SkipIds,
-			ModifiedAfter:   e.configuration.Export.ModifiedAfter.Time,
-			TemplateIDs:     e.configuration.Export.TemplateIds,
-			Archived:        e.configuration.Export.Inspection.Archived,
-			Completed:       e.configuration.Export.Inspection.Completed,
-			IncludeInactive: e.configuration.Export.Inspection.IncludedInactiveItems,
-			Incremental:     e.configuration.Export.Incremental,
-			Limit:           e.configuration.Export.Inspection.Limit,
-			ExportMedia:     e.configuration.Export.Media,
+			SkipIDs:         e.configuration.ExportInspectionSkipIds,
+			ModifiedAfter:   e.configuration.ExportModifiedAfterTime,
+			TemplateIDs:     e.configuration.ExportTemplateIds,
+			Archived:        e.configuration.ExportInspectionArchived,
+			Completed:       e.configuration.ExportInspectionCompleted,
+			IncludeInactive: e.configuration.ExportInspectionIncludedInactiveItems,
+			Incremental:     e.configuration.ExportIncremental,
+			Limit:           e.configuration.ExportInspectionLimit,
+			ExportMedia:     e.configuration.ExportMedia,
 		},
 		&TemplateFeed{
-			Incremental: e.configuration.Export.Incremental,
+			Incremental: e.configuration.ExportIncremental,
 		},
 		&TemplatePermissionFeed{
-			Incremental: e.configuration.Export.Incremental,
+			Incremental: e.configuration.ExportIncremental,
 		},
 		&SiteFeed{
-			IncludeDeleted:       e.configuration.Export.Site.IncludeDeleted,
-			IncludeFullHierarchy: e.configuration.Export.Site.IncludeFullHierarchy,
+			IncludeDeleted:       e.configuration.ExportSiteIncludeDeleted,
+			IncludeFullHierarchy: e.configuration.ExportSiteIncludeFullHierarchy,
 		},
 		&SiteMemberFeed{},
 		&UserFeed{},
 		&GroupFeed{},
 		&GroupUserFeed{},
 		&ScheduleFeed{
-			TemplateIDs: e.configuration.Export.TemplateIds,
+			TemplateIDs: e.configuration.ExportTemplateIds,
 		},
 		&ScheduleAssigneeFeed{
-			TemplateIDs: e.configuration.Export.TemplateIds,
+			TemplateIDs: e.configuration.ExportTemplateIds,
 		},
 		&ScheduleOccurrenceFeed{
-			TemplateIDs: e.configuration.Export.TemplateIds,
+			TemplateIDs: e.configuration.ExportTemplateIds,
 		},
 		&ActionFeed{
-			ModifiedAfter: e.configuration.Export.ModifiedAfter.Time,
-			Incremental:   e.configuration.Export.Incremental,
-			Limit:         e.configuration.Export.Action.Limit,
+			ModifiedAfter: e.configuration.ExportModifiedAfterTime,
+			Incremental:   e.configuration.ExportIncremental,
+			Limit:         e.configuration.ExportActionLimit,
 		},
 		&ActionAssigneeFeed{
-			ModifiedAfter: e.configuration.Export.ModifiedAfter.Time,
-			Incremental:   e.configuration.Export.Incremental,
+			ModifiedAfter: e.configuration.ExportModifiedAfterTime,
+			Incremental:   e.configuration.ExportIncremental,
 		},
 		&IssueFeed{
 			Incremental: false, //this was disabled on request. Issues API doesn't support modified After filters
-			Limit:       e.configuration.Export.Issue.Limit,
+			Limit:       e.configuration.ExportIssueLimit,
 		},
 		&AssetFeed{
 			Incremental: false, // Assets API doesn't support modified after filters
-			Limit:       e.configuration.Export.Asset.Limit,
+			Limit:       e.configuration.ExportAssetLimit,
 		},
 	}
 }
 
 func (e *ExporterFeedClient) getInspectionFeed() *InspectionFeed {
 	return &InspectionFeed{
-		SkipIDs:       e.configuration.Export.Inspection.SkipIds,
-		ModifiedAfter: e.configuration.Export.ModifiedAfter.Time,
-		TemplateIDs:   e.configuration.Export.TemplateIds,
-		Archived:      e.configuration.Export.Inspection.Archived,
-		Completed:     e.configuration.Export.Inspection.Completed,
-		Incremental:   e.configuration.Export.Incremental,
-		Limit:         e.configuration.Export.Inspection.Limit,
-		WebReportLink: e.configuration.Export.Inspection.WebReportLink,
+		SkipIDs:       e.configuration.ExportInspectionSkipIds,
+		ModifiedAfter: e.configuration.ExportModifiedAfterTime,
+		TemplateIDs:   e.configuration.ExportTemplateIds,
+		Archived:      e.configuration.ExportInspectionArchived,
+		Completed:     e.configuration.ExportInspectionCompleted,
+		Incremental:   e.configuration.ExportIncremental,
+		Limit:         e.configuration.ExportInspectionLimit,
+		WebReportLink: e.configuration.ExportInspectionWebReportLink,
 	}
 }
 
@@ -297,7 +319,7 @@ func (e *ExporterFeedClient) ExportInspectionReports(exporter *ReportExporter) e
 	return err
 }
 
-func NewExporterApp(scApiClient *api.Client, sheqsyApiClient *api.Client, cfg *config.ExporterConfiguration) *ExporterFeedClient {
+func NewExporterApp(scApiClient *api.Client, sheqsyApiClient *api.Client, cfg *ExporterFeedCfg) *ExporterFeedClient {
 	return &ExporterFeedClient{
 		configuration:   cfg,
 		apiClient:       scApiClient,

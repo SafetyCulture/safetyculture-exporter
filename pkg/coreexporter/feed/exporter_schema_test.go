@@ -7,8 +7,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/SafetyCulture/safetyculture-exporter/pkg/coreexporter/config"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/coreexporter/feed"
+	exporterAPI "github.com/SafetyCulture/safetyculture-exporter/pkg/external/api"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -31,8 +31,8 @@ func TestSchemaWriter_should_write_schema(t *testing.T) {
 		buf.Reset()
 	}
 
-	cfg := &config.ExporterConfiguration{}
-	exporterApp := feed.NewExporterApp(nil, nil, cfg)
+	cfg := &exporterAPI.ExporterConfiguration{}
+	exporterApp := feed.NewExporterApp(nil, nil, cfg.ToExporterConfig())
 
 	for _, f := range exporterApp.GetFeeds() {
 		fmt.Printf("TESTING FEED: %s\n", f.Name())
@@ -50,8 +50,8 @@ func TestSchemaWriter_should_write_all_schemas(t *testing.T) {
 	exporter, err := feed.NewSchemaExporter(&buf)
 	assert.NoError(t, err)
 
-	cfg := &config.ExporterConfiguration{}
-	exporterApp := feed.NewExporterApp(nil, nil, cfg)
+	cfg := &exporterAPI.ExporterConfiguration{}
+	exporterApp := feed.NewExporterApp(nil, nil, cfg.ToExporterConfig())
 
 	err = exporterApp.PrintSchemas(exporter)
 	assert.NoError(t, err)

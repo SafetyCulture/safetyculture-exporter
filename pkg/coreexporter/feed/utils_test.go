@@ -11,9 +11,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/SafetyCulture/safetyculture-exporter/pkg/coreexporter/config"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/coreexporter/feed"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/coreexporter/feed/mocks"
+	exporterAPI "github.com/SafetyCulture/safetyculture-exporter/pkg/external/api"
 	"github.com/gofrs/uuid"
 	"github.com/stretchr/testify/assert"
 )
@@ -59,12 +59,12 @@ func getTemporaryReportExporter(format []string, preferenceID string, filename s
 		log.Fatal(err)
 	}
 
-	cfg := &config.ExporterConfiguration{}
+	cfg := &exporterAPI.ExporterConfiguration{}
 	cfg.Report.Format = format
 	cfg.Report.PreferenceID = preferenceID
 	cfg.Report.FilenameConvention = filename
 	cfg.Report.RetryTimeout = 10
-	return feed.NewReportExporter(dir, cfg)
+	return feed.NewReportExporter(dir, cfg.ToReporterConfig())
 }
 
 // getTemporaryCSVExporterWithRealSQLExporter creates a CSV exporter that writes a temporary folder

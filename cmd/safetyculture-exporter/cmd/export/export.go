@@ -1,19 +1,13 @@
 package export
 
 import (
-	"context"
 	"encoding/base64"
 	"fmt"
 	"net/url"
-	"os"
 
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/coreexporter/api"
-	"github.com/SafetyCulture/safetyculture-exporter/pkg/coreexporter/config"
-	"github.com/SafetyCulture/safetyculture-exporter/pkg/coreexporter/exporter"
-	"github.com/SafetyCulture/safetyculture-exporter/pkg/coreexporter/feed"
-	"github.com/SafetyCulture/safetyculture-exporter/pkg/coreexporter/inspections"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/coreexporter/util"
-	"github.com/pkg/errors"
+	exporterAPI "github.com/SafetyCulture/safetyculture-exporter/pkg/external/api"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -83,6 +77,83 @@ func ReportCmd() *cobra.Command {
 	}
 }
 
+func runSQL(cmd *cobra.Command, args []string) error {
+	exp := NewSafetyCultureExporter(viper.GetViper())
+	err := exp.RunSQL()
+	util.Check(err, "error while exporting SQL")
+	return nil
+}
+
+func runInspectionJSON(cmd *cobra.Command, args []string) error {
+	exp := NewSafetyCultureExporter(viper.GetViper())
+	err := exp.RunInspectionJSON()
+	util.Check(err, "error while exporting JSON")
+	return nil
+}
+
+func runCSV(cmd *cobra.Command, args []string) error {
+	exp := NewSafetyCultureExporter(viper.GetViper())
+	err := exp.RunCSV()
+	util.Check(err, "error while exporting CSV")
+	return nil
+}
+
+func printSchema(cmd *cobra.Command, args []string) error {
+	exp := NewSafetyCultureExporter(viper.GetViper())
+	err := exp.RunPrintSchema()
+	util.Check(err, "error while printing schema")
+	return nil
+}
+
+func runInspectionReports(cmd *cobra.Command, args []string) error {
+	exp := NewSafetyCultureExporter(viper.GetViper())
+	err := exp.RunInspectionReports()
+	util.Check(err, "failed to generate reports")
+	return nil
+}
+
+// NewSafetyCultureExporter create a new SafetyCultureExporter with configuration from Viper
+func NewSafetyCultureExporter(v *viper.Viper) *exporterAPI.SafetyCultureExporter {
+	cm, err := exporterAPI.NewConfigurationManagerFromFile(v.ConfigFileUsed())
+	MapViperConfigToExporterConfiguration(v, cm.Configuration)
+	cm.ApplySafetyGuards()
+	util.Check(err, "while loading config file")
+
+	return exporterAPI.NewSafetyCultureExporter(cm.Configuration, getAPIClient(), getSheqsyAPIClient())
+}
+
+// MapViperConfigToExporterConfiguration maps Viper config to ExporterConfiguration structure
+func MapViperConfigToExporterConfiguration(v *viper.Viper, cfg *exporterAPI.ExporterConfiguration) {
+	cfg.AccessToken = v.GetString("access_token")
+	cfg.SheqsyUsername = v.GetString("sheqsy_username")
+	cfg.SheqsyCompanyID = v.GetString("sheqsy_company_id")
+	cfg.Db.Dialect = v.GetString("db.dialect")
+	cfg.Db.ConnectionString = v.GetString("db.connection_string")
+	cfg.Csv.MaxRowsPerFile = v.GetInt("csv.max_rows_per_file")
+	cfg.Export.Path = v.GetString("export.path")
+	cfg.Export.Incremental = v.GetBool("export.incremental")
+	cfg.Export.ModifiedAfter.Time = v.GetTime("export.modified_after")
+	cfg.Export.TemplateIds = v.GetStringSlice("export.template_ids")
+	cfg.Export.Tables = v.GetStringSlice("export.tables")
+	cfg.Export.SchemaOnly = v.GetBool("export.schema_only")
+	cfg.Export.Inspection.IncludedInactiveItems = v.GetBool("export.inspection.included_inactive_items")
+	cfg.Export.Inspection.Archived = v.GetString("export.inspection.archived")
+	cfg.Export.Inspection.Completed = v.GetString("export.inspection.completed")
+	cfg.Export.Inspection.SkipIds = v.GetStringSlice("export.inspection.skip_ids")
+	cfg.Export.Inspection.Limit = v.GetInt("export.inspection.limit")
+	cfg.Export.Inspection.WebReportLink = v.GetString("export.inspection.web_report_link")
+	cfg.Export.Site.IncludeDeleted = v.GetBool("export.site.include_deleted")
+	cfg.Export.Site.IncludeFullHierarchy = v.GetBool("export.site.include_full_hierarchy")
+	cfg.Export.Media = v.GetBool("export.media")
+	cfg.Export.MediaPath = v.GetString("export.media_path")
+	cfg.Export.Action.Limit = v.GetInt("export.action.limit")
+	cfg.Export.Issue.Limit = v.GetInt("export.issue.limit")
+	cfg.Report.Format = v.GetStringSlice("report.format")
+	cfg.Report.PreferenceID = v.GetString("report.preference_id")
+	cfg.Report.FilenameConvention = v.GetString("report.filename_convention")
+	cfg.Report.RetryTimeout = v.GetInt("report.retry_timeout")
+}
+
 func getAPIClient() *api.Client {
 	apiOpts := []api.Opt{}
 	if viper.GetBool("api.tls_skip_verify") {
@@ -133,202 +204,4 @@ func getSheqsyAPIClient() *api.Client {
 		fmt.Sprintf("Basic %s", token),
 		apiOpts...,
 	)
-}
-
-func runSQL(cmd *cobra.Command, args []string) error {
-	exp := NewSafetyCultureExporter(viper.GetViper())
-	err := exp.RunSQL()
-	util.Check(err, "error while exporting SQL")
-	return nil
-}
-
-func runInspectionJSON(cmd *cobra.Command, args []string) error {
-	exp := NewSafetyCultureExporter(viper.GetViper())
-	err := exp.RunInspectionJSON()
-	util.Check(err, "error while exporting JSON")
-	return nil
-}
-
-func runCSV(cmd *cobra.Command, args []string) error {
-	exp := NewSafetyCultureExporter(viper.GetViper())
-	err := exp.RunCSV()
-	util.Check(err, "error while exporting CSV")
-	return nil
-}
-
-func printSchema(cmd *cobra.Command, args []string) error {
-	exp := NewSafetyCultureExporter(viper.GetViper())
-	err := exp.RunPrintSchema()
-	util.Check(err, "error while printing schema")
-	return nil
-}
-
-func runInspectionReports(cmd *cobra.Command, args []string) error {
-	exp := NewSafetyCultureExporter(viper.GetViper())
-	err := exp.RunInspectionReports()
-	util.Check(err, "failed to generate reports")
-	return nil
-}
-
-type SafetyCultureExporter struct {
-	cfg *config.ExporterConfiguration
-}
-
-func (s *SafetyCultureExporter) RunInspectionJSON() error {
-	exportPath := fmt.Sprintf("%s/json/", s.cfg.Export.Path)
-	err := os.MkdirAll(exportPath, os.ModePerm)
-	if err != nil {
-		return errors.Wrapf(err, "Failed to create directory %s", exportPath)
-	}
-
-	e := exporter.NewJSONExporter(exportPath)
-	inspectionsClient := inspections.NewInspectionClient(s.cfg, getAPIClient(), e)
-
-	err = inspectionsClient.Export(context.Background())
-	if err != nil {
-		return errors.Wrap(err, "error while exporting JSON")
-	}
-	return nil
-}
-
-func (s *SafetyCultureExporter) RunSQL() error {
-	if s.cfg.Export.Media {
-		err := os.MkdirAll(s.cfg.Export.MediaPath, os.ModePerm)
-		if err != nil {
-			return errors.Wrapf(err, "Failed to create directory %s", s.cfg.Export.MediaPath)
-		}
-	}
-
-	e, err := feed.NewSQLExporter(s.cfg.Db.Dialect, s.cfg.Db.ConnectionString, true, s.cfg.Export.MediaPath)
-	if err != nil {
-		return errors.Wrap(err, "create sql exporter")
-	}
-
-	exporterApp := feed.NewExporterApp(getAPIClient(), getSheqsyAPIClient(), s.cfg)
-	if s.cfg.Export.SchemaOnly {
-		return exporterApp.ExportSchemas(e)
-	}
-
-	if len(s.cfg.AccessToken) != 0 {
-		err = exporterApp.ExportFeeds(e)
-		if err != nil {
-			return errors.Wrap(err, "exporting feeds")
-		}
-	}
-
-	return nil
-}
-
-func (s *SafetyCultureExporter) RunCSV() error {
-	exportPath := s.cfg.Export.Path
-
-	err := os.MkdirAll(exportPath, os.ModePerm)
-	if err != nil {
-		return errors.Wrapf(err, "Failed to create directory %s", exportPath)
-	}
-
-	if s.cfg.Export.Media {
-		err := os.MkdirAll(s.cfg.Export.MediaPath, os.ModePerm)
-		if err != nil {
-			return errors.Wrapf(err, "Failed to create directory %s", s.cfg.Export.MediaPath)
-		}
-	}
-
-	e, err := feed.NewCSVExporter(exportPath, s.cfg.Export.MediaPath, s.cfg.Csv.MaxRowsPerFile)
-	if err != nil {
-		return errors.Wrap(err, "unable to create csv exporter")
-	}
-
-	exporterApp := feed.NewExporterApp(getAPIClient(), getSheqsyAPIClient(), s.cfg)
-	if s.cfg.Export.SchemaOnly {
-		return exporterApp.ExportSchemas(e)
-	}
-
-	if len(s.cfg.AccessToken) != 0 {
-		err = exporterApp.ExportFeeds(e)
-		if err != nil {
-			return errors.Wrap(err, "exporting feeds")
-		}
-	}
-
-	return nil
-}
-
-func (s *SafetyCultureExporter) RunInspectionReports() error {
-	err := os.MkdirAll(s.cfg.Export.Path, os.ModePerm)
-	if err != nil {
-		return errors.Wrapf(err, "Failed to create directory %s", s.cfg.Export.Path)
-	}
-
-	e, err := feed.NewReportExporter(s.cfg.Export.Path, s.cfg)
-	if err != nil {
-		return errors.Wrap(err, "unable to create report exporter")
-	}
-
-	exporterApp := feed.NewExporterApp(getAPIClient(), getSheqsyAPIClient(), s.cfg)
-	err = exporterApp.ExportInspectionReports(e)
-	if err != nil {
-		return errors.Wrap(err, "generate reports")
-	}
-
-	return nil
-}
-
-func (s *SafetyCultureExporter) RunPrintSchema() error {
-	e, err := feed.NewSchemaExporter(os.Stdout)
-	if err != nil {
-		return errors.Wrap(err, "unable to create exporter")
-	}
-
-	exporterApp := feed.NewExporterApp(getAPIClient(), getSheqsyAPIClient(), s.cfg)
-	err = exporterApp.PrintSchemas(e)
-	if err != nil {
-		return errors.Wrap(err, "error while printing schema")
-	}
-
-	return nil
-}
-
-// NewSafetyCultureExporter create a new SafetyCultureExporter with configuration from Viper
-func NewSafetyCultureExporter(v *viper.Viper) *SafetyCultureExporter {
-	cm, err := config.NewConfigurationManagerFromFile(v.ConfigFileUsed())
-	MapViperConfigToExporterConfiguration(v, cm.Configuration)
-	cm.ApplySafetyGuards()
-	util.Check(err, "while loading config file")
-
-	return &SafetyCultureExporter{
-		cfg: cm.Configuration,
-	}
-}
-
-// MapViperConfigToExporterConfiguration maps Viper config to ExporterConfiguration structure
-func MapViperConfigToExporterConfiguration(v *viper.Viper, cfg *config.ExporterConfiguration) {
-	cfg.AccessToken = v.GetString("access_token")
-	cfg.SheqsyUsername = v.GetString("sheqsy_username")
-	cfg.SheqsyCompanyID = v.GetString("sheqsy_company_id")
-	cfg.Db.Dialect = v.GetString("db.dialect")
-	cfg.Db.ConnectionString = v.GetString("db.connection_string")
-	cfg.Csv.MaxRowsPerFile = v.GetInt("csv.max_rows_per_file")
-	cfg.Export.Path = v.GetString("export.path")
-	cfg.Export.Incremental = v.GetBool("export.incremental")
-	cfg.Export.ModifiedAfter.Time = v.GetTime("export.modified_after")
-	cfg.Export.TemplateIds = v.GetStringSlice("export.template_ids")
-	cfg.Export.Tables = v.GetStringSlice("export.tables")
-	cfg.Export.SchemaOnly = v.GetBool("export.schema_only")
-	cfg.Export.Inspection.IncludedInactiveItems = v.GetBool("export.inspection.included_inactive_items")
-	cfg.Export.Inspection.Archived = v.GetString("export.inspection.archived")
-	cfg.Export.Inspection.Completed = v.GetString("export.inspection.completed")
-	cfg.Export.Inspection.SkipIds = v.GetStringSlice("export.inspection.skip_ids")
-	cfg.Export.Inspection.Limit = v.GetInt("export.inspection.limit")
-	cfg.Export.Inspection.WebReportLink = v.GetString("export.inspection.web_report_link")
-	cfg.Export.Site.IncludeDeleted = v.GetBool("export.site.include_deleted")
-	cfg.Export.Site.IncludeFullHierarchy = v.GetBool("export.site.include_full_hierarchy")
-	cfg.Export.Media = v.GetBool("export.media")
-	cfg.Export.MediaPath = v.GetString("export.media_path")
-	cfg.Export.Action.Limit = v.GetInt("export.action.limit")
-	cfg.Export.Issue.Limit = v.GetInt("export.issue.limit")
-	cfg.Report.Format = v.GetStringSlice("report.format")
-	cfg.Report.PreferenceID = v.GetString("report.preference_id")
-	cfg.Report.FilenameConvention = v.GetString("report.filename_convention")
-	cfg.Report.RetryTimeout = v.GetInt("report.retry_timeout")
 }

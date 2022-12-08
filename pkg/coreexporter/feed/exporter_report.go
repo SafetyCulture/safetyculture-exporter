@@ -12,7 +12,6 @@ import (
 	"time"
 
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/coreexporter/api"
-	"github.com/SafetyCulture/safetyculture-exporter/pkg/coreexporter/config"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
@@ -365,8 +364,15 @@ func getFilePath(exportPath string, inspection *Inspection, format string, filen
 	}
 }
 
+type ReportExporterCfg struct {
+	Format       []string
+	PreferenceID string
+	Filename     string
+	RetryTimeout int
+}
+
 // NewReportExporter returns a new instance of ReportExporter
-func NewReportExporter(exportPath string, reportCfg *config.ExporterConfiguration) (*ReportExporter, error) {
+func NewReportExporter(exportPath string, reportCfg *ReportExporterCfg) (*ReportExporter, error) {
 	sqlExporter, err := NewSQLExporter("sqlite", filepath.Join(exportPath, "reports.db"), true, "")
 	if err != nil {
 		return nil, err
@@ -376,9 +382,9 @@ func NewReportExporter(exportPath string, reportCfg *config.ExporterConfiguratio
 		SQLExporter:  sqlExporter,
 		Logger:       sqlExporter.Logger,
 		ExportPath:   exportPath,
-		Format:       reportCfg.Report.Format,
-		PreferenceID: reportCfg.Report.PreferenceID,
-		Filename:     reportCfg.Report.FilenameConvention,
-		retryTimeout: reportCfg.Report.RetryTimeout,
+		Format:       reportCfg.Format,
+		PreferenceID: reportCfg.PreferenceID,
+		Filename:     reportCfg.Filename,
+		retryTimeout: reportCfg.RetryTimeout,
 	}, nil
 }

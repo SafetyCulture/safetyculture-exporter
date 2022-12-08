@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/SafetyCulture/safetyculture-exporter/pkg/coreexporter/config"
+	exporterAPI "github.com/SafetyCulture/safetyculture-exporter/pkg/external/api"
 	"github.com/stretchr/testify/require"
 
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/coreexporter/api"
@@ -51,8 +51,8 @@ func TestInspectionsExport(t *testing.T) {
 	exporterMock.On("SetLastModifiedAt", mock.Anything)
 	exporterMock.On("GetLastModifiedAt", mock.Anything).Return(nil)
 
-	exporterAppCfg := config.BuildConfigurationWithDefaults()
-	inspectionClient := inspections.NewInspectionClient(exporterAppCfg, apiClient, exporterMock)
+	exporterAppCfg := exporterAPI.BuildConfigurationWithDefaults()
+	inspectionClient := inspections.NewInspectionClient(exporterAppCfg.ToInspectionConfig(), apiClient, exporterMock)
 	err := inspectionClient.Export(context.Background())
 	assert.NoError(t, err)
 }
@@ -66,8 +66,8 @@ func TestInspectionsExport_WhenSkipID(t *testing.T) {
 	exporterMock.On("SetLastModifiedAt", mock.Anything)
 	exporterMock.On("GetLastModifiedAt", mock.Anything).Return(nil)
 
-	exporterAppCfg := config.BuildConfigurationWithDefaults()
-	inspectionClient := inspections.NewInspectionClient(exporterAppCfg, apiClient, exporterMock)
+	exporterAppCfg := exporterAPI.BuildConfigurationWithDefaults()
+	inspectionClient := inspections.NewInspectionClient(exporterAppCfg.ToInspectionConfig(), apiClient, exporterMock)
 	inspectionClient.(*inspections.Client).SkipIDs = []string{"audit_d7e2f55b95094bd48fac601850e1db63"}
 	err := inspectionClient.Export(context.Background())
 	assert.NoError(t, err)
@@ -82,15 +82,15 @@ func TestInspectionsExport_WhenModifiedAtIsNotNil(t *testing.T) {
 	exporterMock.On("SetLastModifiedAt", mock.Anything)
 	exporterMock.On("GetLastModifiedAt", mock.Anything).Return(&time.Time{})
 
-	exporterAppCfg := config.BuildConfigurationWithDefaults()
-	inspectionClient := inspections.NewInspectionClient(exporterAppCfg, apiClient, exporterMock)
+	exporterAppCfg := exporterAPI.BuildConfigurationWithDefaults()
+	inspectionClient := inspections.NewInspectionClient(exporterAppCfg.ToInspectionConfig(), apiClient, exporterMock)
 	err := inspectionClient.Export(context.Background())
 	assert.NoError(t, err)
 }
 
 func TestNewInspectionClient(t *testing.T) {
-	exporterAppCfg := config.BuildConfigurationWithDefaults()
-	res := inspections.NewInspectionClient(exporterAppCfg, nil, nil)
+	exporterAppCfg := exporterAPI.BuildConfigurationWithDefaults()
+	res := inspections.NewInspectionClient(exporterAppCfg.ToInspectionConfig(), nil, nil)
 	require.NotNil(t, res)
 
 	client, ok := res.(*inspections.Client)

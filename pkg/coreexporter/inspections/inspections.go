@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/coreexporter/api"
-	"github.com/SafetyCulture/safetyculture-exporter/pkg/coreexporter/config"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/coreexporter/exporter"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/coreexporter/util"
 	"go.uber.org/zap"
@@ -34,17 +33,26 @@ type InspectionClient interface {
 	Export(ctx context.Context) error
 }
 
+type InspectionClientCfg struct {
+	SkipIDs       []string
+	ModifiedAfter time.Time
+	TemplateIDs   []string
+	Archived      string
+	Completed     string
+	Incremental   bool
+}
+
 // NewInspectionClient returns a new instance of InspectionClient
-func NewInspectionClient(cfg *config.ExporterConfiguration, apiClient *api.Client, exporter exporter.SafetyCultureJSONExporter) InspectionClient {
+func NewInspectionClient(cfg *InspectionClientCfg, apiClient *api.Client, exporter exporter.SafetyCultureJSONExporter) InspectionClient {
 	return &Client{
 		apiClient:     apiClient,
 		exporter:      exporter,
-		SkipIDs:       cfg.Export.Inspection.SkipIds,
-		ModifiedAfter: cfg.Export.ModifiedAfter.Time,
-		TemplateIDs:   cfg.Export.TemplateIds,
-		Archived:      cfg.Export.Inspection.Archived,
-		Completed:     cfg.Export.Inspection.Completed,
-		Incremental:   cfg.Export.Incremental,
+		SkipIDs:       cfg.SkipIDs,
+		ModifiedAfter: cfg.ModifiedAfter,
+		TemplateIDs:   cfg.TemplateIDs,
+		Archived:      cfg.Archived,
+		Completed:     cfg.Completed,
+		Incremental:   cfg.Incremental,
 		SugaredLogger: util.GetLogger(),
 	}
 }
