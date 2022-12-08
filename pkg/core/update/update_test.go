@@ -3,7 +3,7 @@ package update_test
 import (
 	"testing"
 
-	"github.com/SafetyCulture/safetyculture-exporter/internal/update"
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/core/update"
 )
 
 func Test_versionGreaterThanOrEqual(t *testing.T) {
