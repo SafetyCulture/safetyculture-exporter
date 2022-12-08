@@ -1,9 +1,7 @@
-package api
+package httpapi
 
 import (
 	"net/http"
-
-	"github.com/dghubble/sling"
 )
 
 // Header is used to represent name of a header
@@ -24,25 +22,6 @@ type HTTPDoer interface {
 	Do() (*http.Response, error)
 	URL() string
 	Error() interface{}
-}
-
-type slingHTTPDoer struct {
-	sl       *sling.Sling
-	req      *http.Request
-	successV interface{}
-	failureV interface{}
-}
-
-func (b *slingHTTPDoer) Do() (*http.Response, error) {
-	return b.sl.Do(b.req, b.successV, b.failureV)
-}
-
-func (b *slingHTTPDoer) URL() string {
-	return b.req.URL.String()
-}
-
-func (b *slingHTTPDoer) Error() interface{} {
-	return b.failureV
 }
 
 type defaultHTTPDoer struct {

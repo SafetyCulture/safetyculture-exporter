@@ -8,7 +8,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/SafetyCulture/safetyculture-exporter/pkg/external/api"
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/httpapi"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/events"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/util"
 )
@@ -125,10 +125,11 @@ func (f *InspectionItemFeed) Order() string {
 	return "modified_at ASC, id"
 }
 
-func fetchAndWriteMedia(ctx context.Context, apiClient *api.Client, exporter Exporter, auditID, mediaURL string) error {
-	resp, err := apiClient.GetMedia(
+func fetchAndWriteMedia(ctx context.Context, apiClient *httpapi.Client, exporter Exporter, auditID, mediaURL string) error {
+	resp, err := GetMedia(
 		ctx,
-		&api.GetMediaRequest{
+		apiClient,
+		&GetMediaRequest{
 			URL:     mediaURL,
 			AuditID: auditID,
 		},
@@ -150,7 +151,7 @@ func fetchAndWriteMedia(ctx context.Context, apiClient *api.Client, exporter Exp
 	return nil
 }
 
-func (f *InspectionItemFeed) writeRows(ctx context.Context, exporter Exporter, rows []*InspectionItem, apiClient *api.Client) error {
+func (f *InspectionItemFeed) writeRows(ctx context.Context, exporter Exporter, rows []*InspectionItem, apiClient *httpapi.Client) error {
 	logger := util.GetLogger()
 	skipIDs := map[string]bool{}
 	for _, id := range f.SkipIDs {
@@ -224,7 +225,7 @@ func (f *InspectionItemFeed) CreateSchema(exporter Exporter) error {
 }
 
 // Export exports the feed to the supplied exporter
-func (f *InspectionItemFeed) Export(ctx context.Context, apiClient *api.Client, exporter Exporter, orgID string) error {
+func (f *InspectionItemFeed) Export(ctx context.Context, apiClient *httpapi.Client, exporter Exporter, orgID string) error {
 	logger := util.GetLogger().With("feed", f.Name(), "org_id", orgID)
 
 	exporter.InitFeed(f, &InitFeedOptions{
@@ -238,7 +239,7 @@ func (f *InspectionItemFeed) Export(ctx context.Context, apiClient *api.Client, 
 		return events.NewEventErrorWithMessage(err, events.ErrorSeverityError, events.ErrorSubSystemDB, false, "unable to load modified after")
 	}
 
-	drainFn := func(resp *api.GetFeedResponse) error {
+	drainFn := func(resp *GetFeedResponse) error {
 		var rows []*InspectionItem
 
 		if err := json.Unmarshal(resp.Data, &rows); err != nil {
@@ -259,9 +260,9 @@ func (f *InspectionItemFeed) Export(ctx context.Context, apiClient *api.Client, 
 		return nil
 	}
 
-	req := &api.GetFeedRequest{
+	req := &GetFeedRequest{
 		InitialURL: "/feed/inspection_items",
-		Params: api.GetFeedParams{
+		Params: GetFeedParams{
 			ModifiedAfter:   f.ModifiedAfter,
 			TemplateIDs:     f.TemplateIDs,
 			Archived:        f.Archived,
@@ -271,7 +272,7 @@ func (f *InspectionItemFeed) Export(ctx context.Context, apiClient *api.Client, 
 		},
 	}
 
-	if err := apiClient.DrainFeed(ctx, req, drainFn); err != nil {
+	if err := DrainFeed(ctx, apiClient, req, drainFn); err != nil {
 		return events.WrapEventError(err, fmt.Sprintf("feed %q", f.Name()))
 	}
 	return exporter.FinaliseExport(f, &[]*InspectionItem{})
