@@ -9,7 +9,7 @@ import (
 	exporterAPI "github.com/SafetyCulture/safetyculture-exporter/pkg/external/api"
 	"github.com/stretchr/testify/require"
 
-	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/api"
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/external/api"
 	exportermock "github.com/SafetyCulture/safetyculture-exporter/pkg/internal/exporter/mocks"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/inspections"
 	"github.com/stretchr/testify/assert"

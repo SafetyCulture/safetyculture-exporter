@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/h2non/gock.v1"
 
-	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/api"
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/external/api"
 )
 
 func TestInspectionItemFeedExport_should_export_rows_to_sql_db(t *testing.T) {

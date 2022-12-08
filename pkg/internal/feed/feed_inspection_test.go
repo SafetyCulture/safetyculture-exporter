@@ -12,7 +12,7 @@ import (
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/feed"
 	"github.com/stretchr/testify/assert"
 
-	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/api"
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/external/api"
 )
 
 func TestInspectionFeedExport_should_export_rows_to_sql_db(t *testing.T) {

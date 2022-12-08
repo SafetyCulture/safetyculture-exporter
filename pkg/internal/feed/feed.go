@@ -6,7 +6,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/api"
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/external/api"
 )
 
 // Feed is an interface to a data feed. It provides methods to export the data to an exporter
