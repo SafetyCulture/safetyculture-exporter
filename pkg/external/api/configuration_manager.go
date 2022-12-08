@@ -6,8 +6,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/SafetyCulture/safetyculture-exporter/pkg/coreexporter/feed"
-	"github.com/SafetyCulture/safetyculture-exporter/pkg/coreexporter/inspections"
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/feed"
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/inspections"
 	"gopkg.in/yaml.v3"
 )
 

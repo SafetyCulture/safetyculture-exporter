@@ -3,7 +3,7 @@ package configure
 import (
 	"fmt"
 
-	"github.com/SafetyCulture/safetyculture-exporter/pkg/coreexporter/util"
+	util "github.com/SafetyCulture/safetyculture-exporter/cmd/safetyculture-exporter/cmd/utils"
 	exporterAPI "github.com/SafetyCulture/safetyculture-exporter/pkg/external/api"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
