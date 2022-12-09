@@ -1,0 +1,8 @@
++-----------------+----------+-------------+
+|      NAME       |   TYPE   | PRIMARY KEY |
++-----------------+----------+-------------+
+| group_id        | TEXT     | true        |
+| name            | TEXT     |             |
+| organisation_id | TEXT     |             |
+| exported_at     | datetime |             |
++-----------------+----------+-------------+

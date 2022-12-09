@@ -1,0 +1,37 @@
++---------------------------+----------+-------------+
+|           NAME            |   TYPE   | PRIMARY KEY |
++---------------------------+----------+-------------+
+| id                        | TEXT     | true        |
+| item_id                   | TEXT     |             |
+| audit_id                  | TEXT     |             |
+| item_index                | INTEGER  |             |
+| template_id               | TEXT     |             |
+| parent_id                 | TEXT     |             |
+| created_at                | datetime |             |
+| modified_at               | datetime |             |
+| exported_at               | datetime |             |
+| type                      | TEXT     |             |
+| category                  | TEXT     |             |
+| category_id               | TEXT     |             |
+| organisation_id           | TEXT     |             |
+| parent_ids                | TEXT     |             |
+| label                     | TEXT     |             |
+| response                  | TEXT     |             |
+| response_id               | TEXT     |             |
+| response_set_id           | TEXT     |             |
+| is_failed_response        | numeric  |             |
+| comment                   | TEXT     |             |
+| media_files               | TEXT     |             |
+| media_ids                 | TEXT     |             |
+| media_hypertext_reference | TEXT     |             |
+| score                     | REAL     |             |
+| max_score                 | REAL     |             |
+| score_percentage          | REAL     |             |
+| combined_score            | REAL     |             |
+| combined_max_score        | REAL     |             |
+| combined_score_percentage | REAL     |             |
+| mandatory                 | numeric  |             |
+| inactive                  | numeric  |             |
+| location_latitude         | REAL     |             |
+| location_longitude        | REAL     |             |
++---------------------------+----------+-------------+
