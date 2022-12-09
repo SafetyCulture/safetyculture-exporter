@@ -5,8 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"sync"
+	"time"
 
-	"github.com/SafetyCulture/safetyculture-exporter/pkg/external/api"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/httpapi"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/events"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/util"
@@ -32,11 +32,41 @@ type SafetyCultureFeedExporter interface {
 }
 
 type ExporterFeedClient struct {
-	configuration   *api.ExporterFeedCfg
+	configuration   *ExporterFeedCfg
 	apiClient       *httpapi.Client
 	sheqsyApiClient *httpapi.Client
 	errMu           sync.Mutex
 	errs            []error
+}
+
+type ExporterFeedCfg struct {
+	AccessToken                           string
+	ExportTables                          []string
+	SheqsyUsername                        string
+	SheqsyCompanyID                       string
+	ExportInspectionSkipIds               []string
+	ExportModifiedAfterTime               time.Time
+	ExportTemplateIds                     []string
+	ExportInspectionArchived              string
+	ExportInspectionCompleted             string
+	ExportInspectionIncludedInactiveItems bool
+	ExportInspectionWebReportLink         string
+	ExportIncremental                     bool
+	ExportInspectionLimit                 int
+	ExportMedia                           bool
+	ExportSiteIncludeDeleted              bool
+	ExportActionLimit                     int
+	ExportSiteIncludeFullHierarchy        bool
+	ExportIssueLimit                      int
+	ExportAssetLimit                      int
+}
+
+func NewExporterApp(scApiClient *httpapi.Client, sheqsyApiClient *httpapi.Client, cfg *ExporterFeedCfg) *ExporterFeedClient {
+	return &ExporterFeedClient{
+		configuration:   cfg,
+		apiClient:       scApiClient,
+		sheqsyApiClient: sheqsyApiClient,
+	}
 }
 
 // ExportSchemas generates schemas for the data feeds without fetching any data
@@ -295,12 +325,4 @@ func (e *ExporterFeedClient) ExportInspectionReports(exporter *ReportExporter) e
 	}
 
 	return err
-}
-
-func NewExporterApp(scApiClient *httpapi.Client, sheqsyApiClient *httpapi.Client, cfg *api.ExporterFeedCfg) *ExporterFeedClient {
-	return &ExporterFeedClient{
-		configuration:   cfg,
-		apiClient:       scApiClient,
-		sheqsyApiClient: sheqsyApiClient,
-	}
 }

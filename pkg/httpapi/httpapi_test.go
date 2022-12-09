@@ -1,13 +1,10 @@
-package feed_test
+package httpapi_test
 
 import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
-	"github.com/SafetyCulture/safetyculture-exporter/pkg/httpapi"
-	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/feed"
 	"net/http"
 	"net/url"
 	"path"
@@ -15,11 +12,23 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/require"
-
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/httpapi"
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/feed"
+	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"gopkg.in/h2non/gock.v1"
 )
+
+// GetTestClient creates a new test apiClient
+func GetTestClient(opts ...httpapi.Opt) *httpapi.Client {
+	apiClient := httpapi.NewClient("http://localhost:9999", "abc123", opts...)
+	apiClient.RetryWaitMin = 10 * time.Millisecond
+	apiClient.RetryWaitMax = 10 * time.Millisecond
+	apiClient.CheckForRetry = httpapi.DefaultRetryPolicy
+	apiClient.RetryMax = 1
+	return apiClient
+}
 
 func TestClient_DrainDeletedInspections(t *testing.T) {
 	defer gock.Off()
@@ -368,151 +377,6 @@ func TestClient_WhoAmI_WhenNotOK(t *testing.T) {
 	assert.EqualValues(t, "api request: http://localhost:9999/accounts/user/v1/user:WhoAmI giving up after 2 attempt(s)", err.Error())
 }
 
-func TestAPIClientDrainInspections_should_return_for_as_long_next_page_set(t *testing.T) {
-	defer gock.Off()
-
-	gock.New("http://localhost:9999").
-		Get("/audits/search").
-		Reply(200).
-		BodyString(`{
-			"count": 2,
-			"total": 2,
-			"audits": [
-				{
-					"audit_id": "audit_8E2B1F3CB9C94D8792957F9F99E2E4BD"
-				},
-				{
-					"audit_id": "audit_1743ae1aaa8741e6a23db83300e56efe"
-				}
-			]
-		}`)
-
-	apiClient := GetTestClient()
-	gock.InterceptClient(apiClient.HTTPClient())
-
-	var auditIDs []string
-	err := feed.DrainInspections(
-		context.Background(),
-		&feed.ListInspectionsParams{},
-		func(data *feed.ListInspectionsResponse) error {
-			for _, inspection := range data.Inspections {
-				auditIDs = append(auditIDs, inspection.ID)
-			}
-			return nil
-		})
-	assert.NoError(t, err)
-
-	assert.Equal(t, []string{
-		"audit_8E2B1F3CB9C94D8792957F9F99E2E4BD",
-		"audit_1743ae1aaa8741e6a23db83300e56efe",
-	}, auditIDs)
-}
-
-func TestAPIClientGetInspection(t *testing.T) {
-	defer gock.Off()
-
-	auditID := "audit_8E2B1F3CB9C94D8792957F9F99E2E4BD"
-	gock.New("http://localhost:9999").
-		Get(fmt.Sprintf("/audits/%s", auditID)).
-		Reply(200).
-		BodyString(`{
-			"audit_id": "audit_8E2B1F3CB9C94D8792957F9F99E2E4BD"
-		}`)
-
-	apiClient := GetTestClient()
-	gock.InterceptClient(apiClient.HTTPClient())
-
-	resp, err := feed.GetInspection(context.Background(), apiClient, auditID)
-	assert.NoError(t, err)
-
-	rows := map[string]string{}
-	err = json.Unmarshal(*resp, &rows)
-	assert.NoError(t, err)
-
-	expected, ok := rows["audit_id"]
-	assert.Equal(t, true, ok)
-	assert.Equal(t, expected, auditID)
-}
-
-func TestAPIClientGetInspectionWithError(t *testing.T) {
-	defer gock.Off()
-
-	auditID := "audit_8E2B1F3CB9C94D8792957F9F99E2E4BD"
-	gock.New("http://localhost:9999").
-		Get(fmt.Sprintf("/audits/%s", auditID)).
-		ReplyError(fmt.Errorf("test error"))
-
-	apiClient := GetTestClient()
-	gock.InterceptClient(apiClient.HTTPClient())
-
-	_, err := feed.GetInspection(context.Background(), apiClient, auditID)
-	assert.NotNil(t, err)
-}
-
-func TestAPIClientListInspectionWithError(t *testing.T) {
-	defer gock.Off()
-
-	gock.New("http://localhost:9999").
-		Get("/audits/search").
-		ReplyError(fmt.Errorf("test error"))
-
-	apiClient := GetTestClient()
-	gock.InterceptClient(apiClient.HTTPClient())
-
-	_, err := feed.ListInspections(context.Background(), apiClient, nil)
-	assert.NotNil(t, err)
-}
-
-func TestDrainInspectionsWithAPIError(t *testing.T) {
-	defer gock.Off()
-
-	gock.New("http://localhost:9999").
-		Get("/audits/search").
-		ReplyError(fmt.Errorf("test error"))
-
-	apiClient := GetTestClient()
-	gock.InterceptClient(apiClient.HTTPClient())
-
-	err := feed.DrainInspections(
-		context.Background(),
-		&feed.ListInspectionsParams{},
-		func(data *feed.ListInspectionsResponse) error {
-			return nil
-		})
-	assert.NotNil(t, err)
-}
-
-func TestDrainInspectionsWithCallbackError(t *testing.T) {
-	defer gock.Off()
-
-	gock.New("http://localhost:9999").
-		Get("/audits/search").
-		Reply(200).
-		BodyString(`{
-			"count": 2,
-			"total": 2,
-			"audits": [
-				{
-					"audit_id": "audit_8E2B1F3CB9C94D8792957F9F99E2E4BD"
-				},
-				{
-					"audit_id": "audit_1743ae1aaa8741e6a23db83300e56efe"
-				}
-			]
-		}`)
-
-	apiClient := GetTestClient()
-	gock.InterceptClient(apiClient.HTTPClient())
-
-	err := feed.DrainInspections(
-		context.Background(),
-		&feed.ListInspectionsParams{},
-		func(data *feed.ListInspectionsResponse) error {
-			return fmt.Errorf("test error")
-		})
-	assert.NotNil(t, err)
-}
-
 func TestGetMediaWithAPIError(t *testing.T) {
 	defer gock.Off()
 
@@ -839,48 +703,4 @@ func TestAPIClientDownloadInspectionReportFile_should_return_error_on_failure(t 
 			}
 		})
 	}
-}
-
-func TestAPIClientBackoff429TooManyRequest(t *testing.T) {
-	defer gock.Off()
-
-	req := gock.New("http://localhost:9999").
-		Get(fmt.Sprintf("/audits/%s", "1234")).
-		Reply(429)
-	req.SetHeader("X-RateLimit-Reset", "1")
-
-	tests := []struct {
-		name string
-		bo   httpapi.Backoff
-		err  string
-	}{
-		{
-			name: "default_backoff_policy",
-			bo:   httpapi.DefaultBackoff,
-			err:  "giving up after 2 attempt(s)",
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			apiClient := GetTestClient()
-			gock.InterceptClient(apiClient.HTTPClient())
-			apiClient.RetryMax = 1
-
-			_, err := feed.GetInspection(context.Background(), apiClient, "1234")
-			if err == nil || !strings.HasSuffix(err.Error(), tt.err) {
-				t.Fatalf("expected giving up error, got: %#v", err)
-			}
-		})
-	}
-}
-
-// GetTestClient creates a new test apiClient
-func GetTestClient(opts ...httpapi.Opt) *httpapi.Client {
-	apiClient := httpapi.NewClient("http://localhost:9999", "abc123", opts...)
-	apiClient.RetryWaitMin = 10 * time.Millisecond
-	apiClient.RetryWaitMax = 10 * time.Millisecond
-	apiClient.CheckForRetry = httpapi.DefaultRetryPolicy
-	apiClient.RetryMax = 1
-	return apiClient
 }

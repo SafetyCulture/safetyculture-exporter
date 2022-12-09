@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"time"
 
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/httpapi"
 
@@ -46,28 +45,6 @@ type ReportExporterCfg struct {
 	PreferenceID string
 	Filename     string
 	RetryTimeout int
-}
-
-type ExporterFeedCfg struct {
-	AccessToken                           string
-	ExportTables                          []string
-	SheqsyUsername                        string
-	SheqsyCompanyID                       string
-	ExportInspectionSkipIds               []string
-	ExportModifiedAfterTime               time.Time
-	ExportTemplateIds                     []string
-	ExportInspectionArchived              string
-	ExportInspectionCompleted             string
-	ExportInspectionIncludedInactiveItems bool
-	ExportInspectionWebReportLink         string
-	ExportIncremental                     bool
-	ExportInspectionLimit                 int
-	ExportMedia                           bool
-	ExportSiteIncludeDeleted              bool
-	ExportActionLimit                     int
-	ExportSiteIncludeFullHierarchy        bool
-	ExportIssueLimit                      int
-	ExportAssetLimit                      int
 }
 
 type SafetyCultureExporter struct {

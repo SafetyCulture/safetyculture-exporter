@@ -3,7 +3,7 @@ package util_test
 import (
 	"testing"
 
-	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/util"
+	util "github.com/SafetyCulture/safetyculture-exporter/cmd/safetyculture-exporter/cmd/utils"
 	"github.com/stretchr/testify/assert"
 )
 

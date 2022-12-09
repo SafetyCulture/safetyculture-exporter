@@ -1,13 +1,12 @@
-package inspections_test
+package api_test
 
 import (
 	"context"
-	"github.com/SafetyCulture/safetyculture-exporter/pkg/httpapi"
 	"net/http"
 	"testing"
 	"time"
 
-	exporterAPI "github.com/SafetyCulture/safetyculture-exporter/pkg/external/api"
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/external/api"
 	"github.com/stretchr/testify/require"
 
 	exportermock "github.com/SafetyCulture/safetyculture-exporter/pkg/internal/exporter/mocks"
@@ -51,7 +50,7 @@ func TestInspectionsExport(t *testing.T) {
 	exporterMock.On("SetLastModifiedAt", mock.Anything)
 	exporterMock.On("GetLastModifiedAt", mock.Anything).Return(nil)
 
-	exporterAppCfg := exporterAPI.BuildConfigurationWithDefaults()
+	exporterAppCfg := api.BuildConfigurationWithDefaults()
 	inspectionClient := inspections.NewInspectionClient(exporterAppCfg.ToInspectionConfig(), apiClient, exporterMock)
 	err := inspectionClient.Export(context.Background())
 	assert.NoError(t, err)
@@ -66,7 +65,7 @@ func TestInspectionsExport_WhenSkipID(t *testing.T) {
 	exporterMock.On("SetLastModifiedAt", mock.Anything)
 	exporterMock.On("GetLastModifiedAt", mock.Anything).Return(nil)
 
-	exporterAppCfg := exporterAPI.BuildConfigurationWithDefaults()
+	exporterAppCfg := api.BuildConfigurationWithDefaults()
 	inspectionClient := inspections.NewInspectionClient(exporterAppCfg.ToInspectionConfig(), apiClient, exporterMock)
 	inspectionClient.(*inspections.Client).SkipIDs = []string{"audit_d7e2f55b95094bd48fac601850e1db63"}
 	err := inspectionClient.Export(context.Background())
@@ -82,14 +81,14 @@ func TestInspectionsExport_WhenModifiedAtIsNotNil(t *testing.T) {
 	exporterMock.On("SetLastModifiedAt", mock.Anything)
 	exporterMock.On("GetLastModifiedAt", mock.Anything).Return(&time.Time{})
 
-	exporterAppCfg := exporterAPI.BuildConfigurationWithDefaults()
+	exporterAppCfg := api.BuildConfigurationWithDefaults()
 	inspectionClient := inspections.NewInspectionClient(exporterAppCfg.ToInspectionConfig(), apiClient, exporterMock)
 	err := inspectionClient.Export(context.Background())
 	assert.NoError(t, err)
 }
 
 func TestNewInspectionClient(t *testing.T) {
-	exporterAppCfg := exporterAPI.BuildConfigurationWithDefaults()
+	exporterAppCfg := api.BuildConfigurationWithDefaults()
 	res := inspections.NewInspectionClient(exporterAppCfg.ToInspectionConfig(), nil, nil)
 	require.NotNil(t, res)
 
@@ -98,14 +97,4 @@ func TestNewInspectionClient(t *testing.T) {
 	require.NotNil(t, client)
 
 	assert.EqualValues(t, "inspections", client.Name())
-}
-
-// GetTestClient creates a new test apiClient
-func GetTestClient(opts ...httpapi.Opt) *httpapi.Client {
-	apiClient := httpapi.NewClient("http://localhost:9999", "abc123", opts...)
-	apiClient.RetryWaitMin = 10 * time.Millisecond
-	apiClient.RetryWaitMax = 10 * time.Millisecond
-	apiClient.CheckForRetry = httpapi.DefaultRetryPolicy
-	apiClient.RetryMax = 1
-	return apiClient
 }

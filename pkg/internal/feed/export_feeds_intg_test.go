@@ -9,7 +9,6 @@ import (
 	"path/filepath"
 	"testing"
 
-	github.com/SafetyCulture/safetyculture-exporter/pkg/external/api
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/config"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/feed"
 	"github.com/stretchr/testify/require"

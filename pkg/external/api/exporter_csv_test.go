@@ -1,25 +1,27 @@
-package feed_test
+package api_test
 
 import (
-	"log"
 	"os"
+	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/require"
+
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/feed"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 )
 
-func TestSQLExporterSupportsUpsert_should_return_true(t *testing.T) {
-	exporter, err := getInmemorySQLExporter("")
+func TestCSVExporterSupportsUpsert_should_return_true(t *testing.T) {
+	exporter, err := getTemporaryCSVExporter()
 	assert.NoError(t, err)
 
 	assert.True(t, exporter.SupportsUpsert())
 }
 
-func TestSQLExporterInitFeed_should_create_table_if_not_exists(t *testing.T) {
-	exporter, err := getInmemorySQLExporter("")
+func TestCSVExporterInitFeed_should_create_table_if_not_exists(t *testing.T) {
+	exporter, err := getTemporaryCSVExporter()
 	assert.NoError(t, err)
 
 	userFeed := &feed.UserFeed{}
@@ -41,8 +43,8 @@ func TestSQLExporterInitFeed_should_create_table_if_not_exists(t *testing.T) {
 	assert.Equal(t, "users", result[0].Name)
 }
 
-func TestSQLExporterInitFeed_should_truncate_table_if_truncate_is_true(t *testing.T) {
-	exporter, err := getInmemorySQLExporter("")
+func TestCSVExporterInitFeed_should_truncate_table_if_truncate_is_true(t *testing.T) {
+	exporter, err := getTemporaryCSVExporter()
 	assert.NoError(t, err)
 
 	userFeed := &feed.UserFeed{}
@@ -74,8 +76,8 @@ func TestSQLExporterInitFeed_should_truncate_table_if_truncate_is_true(t *testin
 	assert.Equal(t, int64(0), rowCount)
 }
 
-func TestSQLExporterInitFeed_should_not_truncate_table_if_truncate_is_false(t *testing.T) {
-	exporter, err := getInmemorySQLExporter("")
+func TestCSVExporterInitFeed_should_not_truncate_table_if_truncate_is_false(t *testing.T) {
+	exporter, err := getTemporaryCSVExporter()
 	assert.NoError(t, err)
 
 	userFeed := &feed.UserFeed{}
@@ -107,8 +109,8 @@ func TestSQLExporterInitFeed_should_not_truncate_table_if_truncate_is_false(t *t
 	assert.Equal(t, int64(1), rowCount)
 }
 
-func TestSQLExporterWriteRows_should_write_rows(t *testing.T) {
-	exporter, err := getInmemorySQLExporter("")
+func TestCSVExporterWriteRows_should_write_rows(t *testing.T) {
+	exporter, err := getTemporaryCSVExporter()
 	assert.NoError(t, err)
 
 	userFeed := &feed.UserFeed{}
@@ -143,40 +145,8 @@ func TestSQLExporterWriteRows_should_write_rows(t *testing.T) {
 	assert.Equal(t, "user_2", rows[1].ID)
 }
 
-func TestSQLExporter_WriteRows_should_upsert_when_pk_conflict(t *testing.T) {
-	exporter, err := getInmemorySQLExporter("")
-	require.Nil(t, err)
-	require.NotNil(t, exporter)
-
-	groupUserFeed := feed.GroupUserFeed{}
-	feedOptions := feed.InitFeedOptions{
-		Truncate: false,
-	}
-
-	err = exporter.InitFeed(&groupUserFeed, &feedOptions)
-	require.Nil(t, err)
-
-	feedData := []feed.GroupUser{
-		{UserID: "UID_1", GroupID: "GID_1", OrganisationID: "OID_1"},
-		{UserID: "UID_2", GroupID: "GID_1", OrganisationID: "OID_1"},
-		{UserID: "UID_3", GroupID: "GID_1", OrganisationID: "OID_1"},
-		{UserID: "UID_4", GroupID: "GID_2", OrganisationID: "OID_1"},
-		{UserID: "UID_1", GroupID: "GID_1", OrganisationID: "OID_1b"}, // should upsert there
-	}
-	err = exporter.WriteRows(&groupUserFeed, feedData)
-	require.Nil(t, err)
-
-	var dbData []feed.GroupUser
-	sqlRes := exporter.DB.Table("group_users").Scan(&dbData)
-	assert.Nil(t, sqlRes.Error)
-	assert.EqualValues(t, 4, len(dbData))
-	assert.EqualValues(t, "UID_1", dbData[0].UserID)
-	assert.EqualValues(t, "GID_1", dbData[0].GroupID)
-	assert.EqualValues(t, "OID_1b", dbData[0].OrganisationID)
-}
-
-func TestSQLExporterWriteRows_should_update_rows(t *testing.T) {
-	exporter, err := getInmemorySQLExporter("")
+func TestCSVExporterWriteRows_should_update_rows(t *testing.T) {
+	exporter, err := getTemporaryCSVExporter()
 	assert.NoError(t, err)
 
 	userFeed := &feed.UserFeed{}
@@ -218,8 +188,8 @@ func TestSQLExporterWriteRows_should_update_rows(t *testing.T) {
 	assert.Equal(t, "User One", rows[0].Lastname)
 }
 
-func TestSQLExporterLastModifiedAt_should_return_latest_modified_at(t *testing.T) {
-	exporter, err := getInmemorySQLExporter("")
+func TestCSVExporterLastModifiedAt_should_return_latest_modified_at(t *testing.T) {
+	exporter, err := getTemporaryCSVExporter()
 	assert.NoError(t, err)
 
 	inspectionFeed := &feed.InspectionFeed{}
@@ -301,8 +271,8 @@ func TestSQLExporterLastModifiedAt_should_return_latest_modified_at(t *testing.T
 	assert.Equal(t, now.Add(time.Hour*-2).Format(time.RFC3339), lastModifiedAt.Format(time.RFC3339))
 }
 
-func TestSQLExporterLastModifiedAt_should_return_modified_after_if_latest(t *testing.T) {
-	exporter, err := getInmemorySQLExporter("")
+func TestCSVExporterLastModifiedAt_should_return_modified_after_if_latest(t *testing.T) {
+	exporter, err := getTemporaryCSVExporter()
 	assert.NoError(t, err)
 
 	inspectionFeed := &feed.InspectionFeed{}
@@ -384,33 +354,190 @@ func TestSQLExporterLastModifiedAt_should_return_modified_after_if_latest(t *tes
 	assert.Equal(t, now.Add(time.Hour).Format(time.RFC3339), lastModifiedAt.Format(time.RFC3339))
 }
 
-func TestNewSQLExporter_should_create_exporter_for_sqlite(t *testing.T) {
-	sqlExporter, err := feed.NewSQLExporter("sqlite", "file::memory:", true, "")
+func TestCSVExporter_should_fail_if_path_is_wrong(t *testing.T) {
+	exporter, err := feed.NewCSVExporter("/xyz", "", 1)
+	require.Nil(t, exporter)
+	require.NotNil(t, err)
+}
+
+func TestCSVExporter_should_do_rollover_files(t *testing.T) {
+	exporter, err := getTemporaryCSVExporterWithMaxRowsLimit(1)
+	require.Nil(t, err)
+
+	userFeed := &feed.UserFeed{}
+
+	err = exporter.InitFeed(userFeed, &feed.InitFeedOptions{
+		Truncate: false,
+	})
 	assert.NoError(t, err)
 
-	assert.NotNil(t, sqlExporter)
-}
-
-func TestNewSQLExporter_should_return_error_for_invalid_dialect(t *testing.T) {
-	sqlExporter, err := feed.NewSQLExporter("not-supported", "file::memory:", true, "")
-	assert.NotNil(t, err)
-	assert.Nil(t, sqlExporter)
-}
-
-func TestNewSQLExporter_should_return_error_for_connection_errors(t *testing.T) {
-	sqlExporter, err := feed.NewSQLExporter("sqlite", "*$////bad connection string", true, "")
-	assert.NotNil(t, err)
-	assert.Nil(t, sqlExporter)
-}
-
-func TestSQLExporterWriteMedia(t *testing.T) {
-	dir, err := os.MkdirTemp("", "export")
-	if err != nil {
-		log.Fatal(err)
+	users := []feed.User{
+		{
+			ID:             "user_1",
+			OrganisationID: "role_123",
+			Email:          "user.1@test.com",
+			Firstname:      "User 1",
+			Lastname:       "User 1",
+		},
+		{
+			ID:             "user_2",
+			OrganisationID: "role_123",
+			Email:          "user.2@test.com",
+			Firstname:      "User 2",
+			Lastname:       "User 2",
+		},
 	}
 
-	sqlExporter, err := feed.NewSQLExporter("sqlite", "file::memory:", true, dir)
+	err = exporter.WriteRows(userFeed, users)
 	assert.NoError(t, err)
 
-	sqlExporter.WriteMedia("1234", "12345", "image/jpeg", []byte("sample-string"))
+	err = exporter.FinaliseExport(userFeed, &[]feed.User{})
+	assert.NoError(t, err)
+
+	content, err := os.ReadFile(filepath.Join(exporter.ExportPath, "users.csv"))
+	assert.NoError(t, err)
+
+	contentString := dateRegex.ReplaceAllLiteralString(strings.TrimSpace(string(content)), "--date--")
+
+	expected := `user_id,organisation_id,email,firstname,lastname,active,last_seen_at,exported_at
+user_2,role_123,user.2@test.com,User 2,User 2,false,,--date--`
+	assert.Equal(t, strings.TrimSpace(expected), contentString)
+}
+
+func TestCSVExporterFinaliseExport_should_write_rows_out_to_file(t *testing.T) {
+	exporter, err := getTemporaryCSVExporter()
+	assert.NoError(t, err)
+
+	userFeed := &feed.UserFeed{}
+
+	err = exporter.InitFeed(userFeed, &feed.InitFeedOptions{
+		Truncate: false,
+	})
+	assert.NoError(t, err)
+
+	users := []feed.User{
+		{
+			ID:             "user_1",
+			OrganisationID: "role_123",
+			Email:          "user.1@test.com",
+			Firstname:      "User 1",
+			Lastname:       "User 1",
+		},
+		{
+			ID:             "user_2",
+			OrganisationID: "role_123",
+			Email:          "user.2@test.com",
+			Firstname:      "User 2",
+			Lastname:       "User 2",
+		},
+	}
+
+	err = exporter.WriteRows(userFeed, users)
+	assert.NoError(t, err)
+
+	users = []feed.User{
+		{
+			ID:             "user_1",
+			OrganisationID: "role_123",
+			Email:          "user.1@test.com",
+			Firstname:      "User 1",
+			Lastname:       "User 1",
+		},
+		{
+			ID:             "user_2",
+			OrganisationID: "role_123",
+			Email:          "user.2@test.com",
+			Firstname:      "User 2",
+			Lastname:       "User 2",
+		},
+		{
+			ID:             "user_3",
+			OrganisationID: "role_123",
+			Email:          "user.3@test.com",
+			Firstname:      "User 3",
+			Lastname:       "User 3",
+		},
+	}
+
+	err = exporter.WriteRows(userFeed, users)
+	assert.NoError(t, err)
+
+	err = exporter.FinaliseExport(userFeed, &[]feed.User{})
+	assert.NoError(t, err)
+
+	content, err := os.ReadFile(filepath.Join(exporter.ExportPath, "users.csv"))
+	assert.NoError(t, err)
+
+	contentString := dateRegex.ReplaceAllLiteralString(strings.TrimSpace(string(content)), "--date--")
+
+	expected := `user_id,organisation_id,email,firstname,lastname,active,last_seen_at,exported_at
+user_1,role_123,user.1@test.com,User 1,User 1,false,,--date--
+user_2,role_123,user.2@test.com,User 2,User 2,false,,--date--
+user_3,role_123,user.3@test.com,User 3,User 3,false,,--date--`
+	assert.Equal(t, strings.TrimSpace(expected), contentString)
+}
+
+func TestCSVExporterFinaliseExport_should_write_rows_to_multiple_file(t *testing.T) {
+	exporter, err := getTemporaryCSVExporterWithMaxRowsLimit(2)
+	assert.NoError(t, err)
+
+	userFeed := &feed.UserFeed{}
+
+	err = exporter.InitFeed(userFeed, &feed.InitFeedOptions{
+		Truncate: false,
+	})
+	assert.NoError(t, err)
+
+	users := []feed.User{
+		{
+			ID:             "user_1",
+			OrganisationID: "role_123",
+			Email:          "user.1@test.com",
+			Firstname:      "User 1",
+			Lastname:       "User 1",
+		},
+		{
+			ID:             "user_2",
+			OrganisationID: "role_123",
+			Email:          "user.2@test.com",
+			Firstname:      "User 2",
+			Lastname:       "User 2",
+		},
+		{
+			ID:             "user_3",
+			OrganisationID: "role_123",
+			Email:          "user.3@test.com",
+			Firstname:      "User 3",
+			Lastname:       "User 3",
+		},
+	}
+
+	err = exporter.WriteRows(userFeed, users)
+	assert.NoError(t, err)
+
+	err = exporter.FinaliseExport(userFeed, &[]feed.User{})
+	assert.NoError(t, err)
+
+	files, err := filepath.Glob(filepath.Join(exporter.ExportPath, "users*.csv"))
+	assert.NoError(t, err)
+	assert.Equal(t, 2, len(files))
+
+	content1, err := os.ReadFile(files[0])
+	assert.NoError(t, err)
+
+	content1String := dateRegex.ReplaceAllLiteralString(strings.TrimSpace(string(content1)), "--date--")
+
+	expected1 := `user_id,organisation_id,email,firstname,lastname,active,last_seen_at,exported_at
+user_1,role_123,user.1@test.com,User 1,User 1,false,,--date--
+user_2,role_123,user.2@test.com,User 2,User 2,false,,--date--`
+	assert.Equal(t, strings.TrimSpace(expected1), content1String)
+
+	content2, err := os.ReadFile(files[1])
+	assert.NoError(t, err)
+
+	content2String := dateRegex.ReplaceAllLiteralString(strings.TrimSpace(string(content2)), "--date--")
+
+	expected2 := `user_id,organisation_id,email,firstname,lastname,active,last_seen_at,exported_at
+user_3,role_123,user.3@test.com,User 3,User 3,false,,--date--`
+	assert.Equal(t, strings.TrimSpace(expected2), content2String)
 }

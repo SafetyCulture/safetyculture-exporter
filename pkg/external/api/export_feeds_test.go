@@ -1,17 +1,19 @@
-package feed_test
+package api_test
 
 import (
 	"fmt"
-	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/events"
-	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/feed"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
-	"github.com/stretchr/testify/require"
-	"gopkg.in/h2non/gock.v1"
 	"net/http"
 	"path"
 	"path/filepath"
 	"testing"
+
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/events"
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/feed"
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/feed/mocks"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
+	"gopkg.in/h2non/gock.v1"
 )
 
 func TestExporterFeedClient_ExportFeeds_should_create_all_schemas_to_file(t *testing.T) {
@@ -383,4 +385,11 @@ func TestExporterFeedClient_ExportFeeds_should_handle_lots_of_rows_ok(t *testing
 	inspectionItemsLines, err := countFileLines(filepath.Join(exporter.ExportPath, "inspection_items.csv"))
 	assert.NoError(t, err)
 	assert.Equal(t, 230, inspectionItemsLines)
+}
+
+func getMockedExporter() *mocks.Exporter {
+	exporter := &mocks.Exporter{}
+	exporter.On("SupportsUpsert").Return(true)
+	exporter.On("ParameterLimit").Return(0)
+	return exporter
 }

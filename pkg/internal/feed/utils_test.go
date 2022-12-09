@@ -1,71 +1,13 @@
 package feed_test
 
 import (
-	"bytes"
 	"fmt"
-	"io"
-	"log"
 	"os"
-	"regexp"
 	"strings"
-	"testing"
-	"time"
 
-	exporterAPI "github.com/SafetyCulture/safetyculture-exporter/pkg/external/api"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/feed"
-	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/feed/mocks"
 	"github.com/gofrs/uuid"
-	"github.com/stretchr/testify/assert"
 )
-
-var dateRegex = regexp.MustCompile(`(?m)(-?(?:[1-9][0-9]*)?[0-9]{4})-(1[0-2]|0[1-9])-(3[01]|0[1-9]|[12][0-9])T(2[0-3]|[01][0-9]):([0-5][0-9]):([0-5][0-9])(\.[0-9]+)?(\+|Z)(2[0-3]|[01][0-9])?:?([0-5][0-9])?`)
-
-// getInmemorySQLExporter creates a SQLExporter that uses an inmemory DB
-func getInmemorySQLExporter(exportMediaPath string) (*feed.SQLExporter, error) {
-	return feed.NewSQLExporter("sqlite", "file::memory:", true, exportMediaPath)
-}
-
-// getTemporaryCSVExporter creates a CSVExporter that writes to a temp folder
-func getTemporaryCSVExporter() (*feed.CSVExporter, error) {
-	dir, err := os.MkdirTemp("", "export")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	return feed.NewCSVExporter(dir, "", 100000)
-}
-
-func getMockedExporter() *mocks.Exporter {
-	exporter := &mocks.Exporter{}
-	exporter.On("SupportsUpsert").Return(true)
-	exporter.On("ParameterLimit").Return(0)
-	return exporter
-}
-
-// getTemporaryCSVExporterWithMaxRowsLimit creates a CSVExporter that writes to a temp folder with row limit
-func getTemporaryCSVExporterWithMaxRowsLimit(maxRowsPerFile int) (*feed.CSVExporter, error) {
-	dir, err := os.MkdirTemp("", "export")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	return feed.NewCSVExporter(dir, "", maxRowsPerFile)
-}
-
-// getTemporaryReportExporter creates a ReportExporter that writes to a temp folder
-func getTemporaryReportExporter(format []string, preferenceID string, filename string) (*feed.ReportExporter, error) {
-	dir, err := os.MkdirTemp("", "export")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	cfg := &exporterAPI.ExporterConfiguration{}
-	cfg.Report.Format = format
-	cfg.Report.PreferenceID = preferenceID
-	cfg.Report.FilenameConvention = filename
-	cfg.Report.RetryTimeout = 10
-	return feed.NewReportExporter(dir, cfg.ToReporterConfig())
-}
 
 // getTemporaryCSVExporterWithRealSQLExporter creates a CSV exporter that writes a temporary folder
 // but also uses a real DB as an intermediary
@@ -114,55 +56,4 @@ func getTestingSQLExporter() (*feed.SQLExporter, error) {
 	connectionString = strings.Replace(connectionString, "master", dbName, 1)
 
 	return feed.NewSQLExporter(dialect, connectionString, true, "")
-}
-
-// filesEqualish checks if files are equal enough (ignoring dates)
-func filesEqualish(t *testing.T, expectedPath, actualPath string) {
-	expectedFile, err := os.ReadFile(expectedPath)
-	assert.NoError(t, err)
-
-	actualFile, err := os.ReadFile(actualPath)
-	assert.NoError(t, err)
-
-	assert.Equal(t,
-		dateRegex.ReplaceAllLiteralString(strings.TrimSpace(string(expectedFile)), "--date--"),
-		dateRegex.ReplaceAllLiteralString(strings.TrimSpace(string(actualFile)), "--date--"),
-	)
-}
-
-func fileExists(t *testing.T, expectedPath string) {
-	_, err := os.Stat(expectedPath)
-	assert.NoError(t, err)
-}
-
-func getFileModTime(filePath string) (time.Time, error) {
-	file, err := os.Stat(filePath)
-	if err != nil {
-		return time.Time{}, err
-	}
-	return file.ModTime(), nil
-}
-
-func countFileLines(filePath string) (int, error) {
-	file, err := os.Open(filePath)
-	if err != nil {
-		return 0, err
-	}
-
-	buf := make([]byte, 32*1024)
-	count := 0
-	lineSep := []byte{'\n'}
-
-	for {
-		c, err := file.Read(buf)
-		count += bytes.Count(buf[:c], lineSep)
-
-		switch {
-		case err == io.EOF:
-			return count, nil
-
-		case err != nil:
-			return count, err
-		}
-	}
 }

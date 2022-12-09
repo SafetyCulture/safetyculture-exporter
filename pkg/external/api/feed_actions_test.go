@@ -1,10 +1,9 @@
-package feed_test
+package api_test
 
 import (
 	"context"
 	"testing"
 
-	"github.com/SafetyCulture/safetyculture-exporter/pkg/external/api"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/feed"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/h2non/gock.v1"
@@ -14,7 +13,7 @@ func TestActionFeedExport_should_export_rows_to_sql_db(t *testing.T) {
 	exporter, err := getInmemorySQLExporter("")
 	assert.NoError(t, err)
 
-	apiClient := api.GetTestClient()
+	apiClient := GetTestClient()
 	initMockFeedsSet1(apiClient.HTTPClient())
 
 	actionsFeed := feed.ActionFeed{
@@ -36,7 +35,7 @@ func TestActionFeed_Export_ShouldNotFailWhen403(t *testing.T) {
 	exporter, err := getInmemorySQLExporter("")
 	assert.NoError(t, err)
 
-	apiClient := api.GetTestClient()
+	apiClient := GetTestClient()
 	gock.InterceptClient(apiClient.HTTPClient())
 	gock.New("http://localhost:9999").
 		Get("/feed/actions").

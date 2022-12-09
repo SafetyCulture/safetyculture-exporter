@@ -1,4 +1,4 @@
-package feed_test
+package api_test
 
 import (
 	"context"
@@ -11,15 +11,13 @@ import (
 
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/feed"
 	"github.com/stretchr/testify/assert"
-
-	"github.com/SafetyCulture/safetyculture-exporter/pkg/external/api"
 )
 
 func TestInspectionFeedExport_should_export_rows_to_sql_db(t *testing.T) {
 	exporter, err := getInmemorySQLExporter("")
 	assert.NoError(t, err)
 
-	apiClient := api.GetTestClient()
+	apiClient := GetTestClient()
 	initMockFeedsSet1(apiClient.HTTPClient())
 	gock.New("http://localhost:9999").
 		Post("/accounts/history/v1/activity_log/list").
