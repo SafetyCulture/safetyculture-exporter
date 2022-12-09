@@ -4,12 +4,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"sync"
-	"time"
-
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/external/api"
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/httpapi"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/events"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/util"
+	"sync"
 )
 
 /*
@@ -31,32 +30,10 @@ type SafetyCultureFeedExporter interface {
 	ExportInspectionReports(exporter *ReportExporter) error
 }
 
-type ExporterFeedCfg struct {
-	AccessToken                           string
-	ExportTables                          []string
-	SheqsyUsername                        string
-	SheqsyCompanyID                       string
-	ExportInspectionSkipIds               []string
-	ExportModifiedAfterTime               time.Time
-	ExportTemplateIds                     []string
-	ExportInspectionArchived              string
-	ExportInspectionCompleted             string
-	ExportInspectionIncludedInactiveItems bool
-	ExportInspectionWebReportLink         string
-	ExportIncremental                     bool
-	ExportInspectionLimit                 int
-	ExportMedia                           bool
-	ExportSiteIncludeDeleted              bool
-	ExportActionLimit                     int
-	ExportSiteIncludeFullHierarchy        bool
-	ExportIssueLimit                      int
-	ExportAssetLimit                      int
-}
-
 type ExporterFeedClient struct {
-	configuration   *ExporterFeedCfg
-	apiClient       *api.Client
-	sheqsyApiClient *api.Client
+	configuration   *api.ExporterFeedCfg
+	apiClient       *httpapi.Client
+	sheqsyApiClient *httpapi.Client
 	errMu           sync.Mutex
 	errs            []error
 }
@@ -147,7 +124,7 @@ func (e *ExporterFeedClient) ExportFeeds(exporter Exporter) error {
 			}
 		}
 
-		resp, err := e.sheqsyApiClient.GetSheqsyCompany(ctx, e.configuration.SheqsyCompanyID)
+		resp, err := GetSheqsyCompany(ctx, e.sheqsyApiClient, e.configuration.SheqsyCompanyID)
 		if err != nil {
 			return fmt.Errorf("get details of the current user: %w", err)
 		}
@@ -247,7 +224,7 @@ func (e *ExporterFeedClient) GetFeeds() []Feed {
 			Incremental:   e.configuration.ExportIncremental,
 		},
 		&IssueFeed{
-			Incremental: false, //this was disabled on request. Issues API doesn't support modified After filters
+			Incremental: false, // this was disabled on request. Issues API doesn't support modified After filters
 			Limit:       e.configuration.ExportIssueLimit,
 		},
 		&AssetFeed{
@@ -319,7 +296,7 @@ func (e *ExporterFeedClient) ExportInspectionReports(exporter *ReportExporter) e
 	return err
 }
 
-func NewExporterApp(scApiClient *api.Client, sheqsyApiClient *api.Client, cfg *ExporterFeedCfg) *ExporterFeedClient {
+func NewExporterApp(scApiClient *httpapi.Client, sheqsyApiClient *httpapi.Client, cfg *api.ExporterFeedCfg) *ExporterFeedClient {
 	return &ExporterFeedClient{
 		configuration:   cfg,
 		apiClient:       scApiClient,

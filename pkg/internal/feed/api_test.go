@@ -1,4 +1,4 @@
-package api_test
+package feed_test
 
 import (
 	"bytes"
@@ -15,7 +15,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/SafetyCulture/safetyculture-exporter/pkg/external/api"
 	"github.com/stretchr/testify/require"
 
 	"github.com/stretchr/testify/assert"
@@ -54,18 +53,18 @@ func TestClient_DrainDeletedInspections(t *testing.T) {
 
 	fakeTime, err := time.Parse(time.RFC3339, "2022-06-30T10:43:17Z")
 	require.Nil(t, err)
-	req := api.NewGetAccountsActivityLogRequest(4, fakeTime)
+	req := feed.NewGetAccountsActivityLogRequest(4, fakeTime)
 
 	calls := 0
 	var deletedIds = make([]string, 0, 15)
-	fn := func(res *api.GetAccountsActivityLogResponse) error {
+	fn := func(res *feed.GetAccountsActivityLogResponse) error {
 		calls++
 		for _, a := range res.Activities {
 			deletedIds = append(deletedIds, a.Metadata["inspection_id"])
 		}
 		return nil
 	}
-	err = apiClient.DrainAccountActivityHistoryLog(context.TODO(), req, fn)
+	err = feed.DrainAccountActivityHistoryLog(context.TODO(), apiClient, req, fn)
 	require.Nil(t, err)
 	assert.EqualValues(t, 4, calls)
 	require.EqualValues(t, 15, len(deletedIds))
@@ -100,11 +99,11 @@ func TestClient_DrainDeletedInspections_WhenApiReturnsError(t *testing.T) {
 
 	fakeTime, err := time.Parse(time.RFC3339, "2022-06-30T10:43:17Z")
 	require.Nil(t, err)
-	req := api.NewGetAccountsActivityLogRequest(14, fakeTime)
-	fn := func(res *api.GetAccountsActivityLogResponse) error {
+	req := feed.NewGetAccountsActivityLogRequest(14, fakeTime)
+	fn := func(res *feed.GetAccountsActivityLogResponse) error {
 		return nil
 	}
-	err = apiClient.DrainAccountActivityHistoryLog(context.TODO(), req, fn)
+	err = feed.DrainAccountActivityHistoryLog(context.TODO(), apiClient, req, fn)
 	require.NotNil(t, err)
 	assert.EqualValues(t, "api request: http://localhost:9999/accounts/history/v1/activity_log/list giving up after 2 attempt(s)", err.Error())
 }
@@ -123,12 +122,12 @@ func TestClient_DrainDeletedInspections_WhenFeedFnReturnsError(t *testing.T) {
 
 	fakeTime, err := time.Parse(time.RFC3339, "2022-06-30T10:43:17Z")
 	require.Nil(t, err)
-	req := api.NewGetAccountsActivityLogRequest(4, fakeTime)
+	req := feed.NewGetAccountsActivityLogRequest(4, fakeTime)
 
-	fn := func(res *api.GetAccountsActivityLogResponse) error {
+	fn := func(res *feed.GetAccountsActivityLogResponse) error {
 		return fmt.Errorf("ERROR_GetAccountsActivityLogResponse")
 	}
-	err = apiClient.DrainAccountActivityHistoryLog(context.TODO(), req, fn)
+	err = feed.DrainAccountActivityHistoryLog(context.TODO(), apiClient, req, fn)
 	require.NotNil(t, err)
 	assert.EqualValues(t, "ERROR_GetAccountsActivityLogResponse", err.Error())
 }
@@ -177,9 +176,9 @@ func TestAPIClientDrainFeed_should_return_for_as_long_next_page_set(t *testing.T
 
 	calls := 0
 	var auditIDs []string
-	err := apiClient.DrainFeed(context.Background(), &api.GetFeedRequest{
+	err := feed.DrainFeed(context.Background(), apiClient, &feed.GetFeedRequest{
 		InitialURL: "/feed/inspections",
-	}, func(data *api.GetFeedResponse) error {
+	}, func(data *feed.GetFeedResponse) error {
 		calls += 1
 
 		var rows []map[string]string
@@ -221,9 +220,9 @@ func TestAPIClientDrainFeed_should_bubble_up_errors_from_callback(t *testing.T) 
 	gock.InterceptClient(apiClient.HTTPClient())
 
 	expectedErr := errors.New("test error")
-	err := apiClient.DrainFeed(context.Background(), &api.GetFeedRequest{
+	err := feed.DrainFeed(context.Background(), apiClient, &feed.GetFeedRequest{
 		InitialURL: "/feed/inspections",
-	}, func(data *api.GetFeedResponse) error {
+	}, func(data *feed.GetFeedResponse) error {
 		return expectedErr
 	})
 	assert.EqualValues(t, expectedErr.Error(), err.Error())
@@ -241,9 +240,9 @@ func TestClient_DrainFeed_WhenApiReturns403Error(t *testing.T) {
 	apiClient := GetTestClient()
 	gock.InterceptClient(apiClient.HTTPClient())
 
-	err := apiClient.DrainFeed(context.Background(), &api.GetFeedRequest{
+	err := feed.DrainFeed(context.Background(), apiClient, &feed.GetFeedRequest{
 		InitialURL: "/feed/inspections",
-	}, func(data *api.GetFeedResponse) error {
+	}, func(data *feed.GetFeedResponse) error {
 		return nil
 	})
 	assert.EqualValues(t, `{"status_code":403,"resource":"/feed/inspections","message":"{\"statusCode\":403,\"error\":\"Forbidden\",\"message\":\"The caller does not have permission to execute the specified operation\"}"}`, err.Error())
@@ -259,12 +258,12 @@ func TestAPIClientDrainFeed_should_return_api_errors(t *testing.T) {
 
 	tests := []struct {
 		name string
-		cr   api.CheckForRetry
+		cr   httpapi.CheckForRetry
 		err  string
 	}{
 		{
 			name: "default_retry_policy",
-			cr:   api.DefaultRetryPolicy,
+			cr:   httpapi.DefaultRetryPolicy,
 			err:  "giving up after 2 attempt(s)",
 		},
 	}
@@ -274,9 +273,9 @@ func TestAPIClientDrainFeed_should_return_api_errors(t *testing.T) {
 			apiClient := GetTestClient()
 			gock.InterceptClient(apiClient.HTTPClient())
 
-			err := apiClient.DrainFeed(context.Background(), &api.GetFeedRequest{
+			err := feed.DrainFeed(context.Background(), apiClient, &feed.GetFeedRequest{
 				InitialURL: "/feed/inspections",
-			}, func(data *api.GetFeedResponse) error {
+			}, func(data *feed.GetFeedResponse) error {
 				return nil
 			})
 			if err == nil || !strings.HasSuffix(err.Error(), tt.err) {
@@ -287,50 +286,50 @@ func TestAPIClientDrainFeed_should_return_api_errors(t *testing.T) {
 }
 
 func TestApiOptSetTimeout_should_set_timeout(t *testing.T) {
-	apiClient := GetTestClient(api.OptSetTimeout(time.Second * 21))
+	apiClient := GetTestClient(httpapi.OptSetTimeout(time.Second * 21))
 
 	assert.Equal(t, time.Second*21, apiClient.HTTPClient().Timeout)
 }
 
 func TestClient_OptSetTimeout(t *testing.T) {
-	client := api.NewClient("fake_addr", "fake_token")
+	client := httpapi.NewClient("fake_addr", "fake_token")
 	require.NotNil(t, client)
 
-	opt := api.OptSetTimeout(time.Second * 10)
+	opt := httpapi.OptSetTimeout(time.Second * 10)
 	opt(client)
 	require.NotNil(t, opt)
 	assert.EqualValues(t, time.Second*10, client.HTTPClient().Timeout)
 }
 
 func TestClient_OptAddTLSCert_WhenEmptyPath(t *testing.T) {
-	client := api.NewClient("fake_addr", "fake_token")
+	client := httpapi.NewClient("fake_addr", "fake_token")
 	require.NotNil(t, client)
 
-	opt := api.OptAddTLSCert("")
+	opt := httpapi.OptAddTLSCert("")
 	opt(client)
 	require.NotNil(t, opt)
 	assert.Nil(t, client.HTTPTransport().TLSClientConfig)
 }
 
 func TestClient_OptSetProxy(t *testing.T) {
-	client := api.NewClient("fake_addr", "fake_token")
+	client := httpapi.NewClient("fake_addr", "fake_token")
 	require.NotNil(t, client)
 
 	u := url.URL{
 		Scheme: "https",
 		Host:   "fake.com",
 	}
-	opt := api.OptSetProxy(&u)
+	opt := httpapi.OptSetProxy(&u)
 	opt(client)
 
 	require.NotNil(t, opt)
 }
 
 func TestClient_OptSetInsecureTLS_WhenTrue(t *testing.T) {
-	client := api.NewClient("fake_addr", "fake_token")
+	client := httpapi.NewClient("fake_addr", "fake_token")
 	require.NotNil(t, client)
 
-	opt := api.OptSetInsecureTLS(true)
+	opt := httpapi.OptSetInsecureTLS(true)
 	opt(client)
 	require.NotNil(t, opt)
 	assert.True(t, client.HTTPTransport().TLSClientConfig.InsecureSkipVerify)
@@ -392,10 +391,10 @@ func TestAPIClientDrainInspections_should_return_for_as_long_next_page_set(t *te
 	gock.InterceptClient(apiClient.HTTPClient())
 
 	var auditIDs []string
-	err := apiClient.DrainInspections(
+	err := feed.DrainInspections(
 		context.Background(),
-		&api.ListInspectionsParams{},
-		func(data *api.ListInspectionsResponse) error {
+		&feed.ListInspectionsParams{},
+		func(data *feed.ListInspectionsResponse) error {
 			for _, inspection := range data.Inspections {
 				auditIDs = append(auditIDs, inspection.ID)
 			}
@@ -423,7 +422,7 @@ func TestAPIClientGetInspection(t *testing.T) {
 	apiClient := GetTestClient()
 	gock.InterceptClient(apiClient.HTTPClient())
 
-	resp, err := apiClient.GetInspection(context.Background(), auditID)
+	resp, err := feed.GetInspection(context.Background(), apiClient, auditID)
 	assert.NoError(t, err)
 
 	rows := map[string]string{}
@@ -446,7 +445,7 @@ func TestAPIClientGetInspectionWithError(t *testing.T) {
 	apiClient := GetTestClient()
 	gock.InterceptClient(apiClient.HTTPClient())
 
-	_, err := apiClient.GetInspection(context.Background(), auditID)
+	_, err := feed.GetInspection(context.Background(), apiClient, auditID)
 	assert.NotNil(t, err)
 }
 
@@ -460,7 +459,7 @@ func TestAPIClientListInspectionWithError(t *testing.T) {
 	apiClient := GetTestClient()
 	gock.InterceptClient(apiClient.HTTPClient())
 
-	_, err := apiClient.ListInspections(context.Background(), nil)
+	_, err := feed.ListInspections(context.Background(), apiClient, nil)
 	assert.NotNil(t, err)
 }
 
@@ -474,10 +473,10 @@ func TestDrainInspectionsWithAPIError(t *testing.T) {
 	apiClient := GetTestClient()
 	gock.InterceptClient(apiClient.HTTPClient())
 
-	err := apiClient.DrainInspections(
+	err := feed.DrainInspections(
 		context.Background(),
-		&api.ListInspectionsParams{},
-		func(data *api.ListInspectionsResponse) error {
+		&feed.ListInspectionsParams{},
+		func(data *feed.ListInspectionsResponse) error {
 			return nil
 		})
 	assert.NotNil(t, err)
@@ -505,10 +504,10 @@ func TestDrainInspectionsWithCallbackError(t *testing.T) {
 	apiClient := GetTestClient()
 	gock.InterceptClient(apiClient.HTTPClient())
 
-	err := apiClient.DrainInspections(
+	err := feed.DrainInspections(
 		context.Background(),
-		&api.ListInspectionsParams{},
-		func(data *api.ListInspectionsResponse) error {
+		&feed.ListInspectionsParams{},
+		func(data *feed.ListInspectionsResponse) error {
 			return fmt.Errorf("test error")
 		})
 	assert.NotNil(t, err)
@@ -524,9 +523,10 @@ func TestGetMediaWithAPIError(t *testing.T) {
 	apiClient := GetTestClient()
 	gock.InterceptClient(apiClient.HTTPClient())
 
-	_, err := apiClient.GetMedia(
+	_, err := feed.GetMedia(
 		context.Background(),
-		&api.GetMediaRequest{
+		apiClient,
+		&feed.GetMediaRequest{
 			URL:     "http://localhost:9999/audits/1234/media/12345",
 			AuditID: "1234",
 		},
@@ -545,9 +545,10 @@ func TestGetMediaWith403Error(t *testing.T) {
 	apiClient := GetTestClient()
 	gock.InterceptClient(apiClient.HTTPClient())
 
-	_, err := apiClient.GetMedia(
+	_, err := feed.GetMedia(
 		context.Background(),
-		&api.GetMediaRequest{
+		apiClient,
+		&feed.GetMediaRequest{
 			URL:     "http://localhost:9999/audits/1234/media/12345",
 			AuditID: "1234",
 		},
@@ -566,9 +567,10 @@ func TestGetMediaWith404Error(t *testing.T) {
 	apiClient := GetTestClient()
 	gock.InterceptClient(apiClient.HTTPClient())
 
-	_, err := apiClient.GetMedia(
+	_, err := feed.GetMedia(
 		context.Background(),
-		&api.GetMediaRequest{
+		apiClient,
+		&feed.GetMediaRequest{
 			URL:     "http://localhost:9999/audits/1234/media/12345",
 			AuditID: "1234",
 		},
@@ -587,9 +589,10 @@ func TestGetMediaWith405Error(t *testing.T) {
 	apiClient := GetTestClient()
 	gock.InterceptClient(apiClient.HTTPClient())
 
-	_, err := apiClient.GetMedia(
+	_, err := feed.GetMedia(
 		context.Background(),
-		&api.GetMediaRequest{
+		apiClient,
+		&feed.GetMediaRequest{
 			URL:     "http://localhost:9999/audits/1234/media/12345",
 			AuditID: "1234",
 		},
@@ -609,9 +612,10 @@ func TestGetMediaWith204Error(t *testing.T) {
 	apiClient := GetTestClient()
 	gock.InterceptClient(apiClient.HTTPClient())
 
-	resp, err := apiClient.GetMedia(
+	resp, err := feed.GetMedia(
 		context.Background(),
-		&api.GetMediaRequest{
+		apiClient,
+		&feed.GetMediaRequest{
 			URL:     "http://localhost:9999/audits/1234/media/12345",
 			AuditID: "1234",
 		},
@@ -632,9 +636,10 @@ func TestGetMediaWithNoContentType(t *testing.T) {
 	apiClient := GetTestClient()
 	gock.InterceptClient(apiClient.HTTPClient())
 
-	_, err := apiClient.GetMedia(
+	_, err := feed.GetMedia(
 		context.Background(),
-		&api.GetMediaRequest{
+		apiClient,
+		&feed.GetMediaRequest{
 			URL:     "http://localhost:9999/audits/1234/media/12345",
 			AuditID: "1234",
 		},
@@ -660,8 +665,9 @@ func TestGetMedia(t *testing.T) {
 		Body:        []byte(result),
 		MediaID:     "12345",
 	}
-	resp, err := apiClient.GetMedia(
+	resp, err := feed.GetMedia(
 		context.Background(),
+		apiClient,
 		&feed.GetMediaRequest{
 			URL:     "http://localhost:9999/audits/1234/media/12345",
 			AuditID: "1234",
@@ -861,7 +867,7 @@ func TestAPIClientBackoff429TooManyRequest(t *testing.T) {
 			gock.InterceptClient(apiClient.HTTPClient())
 			apiClient.RetryMax = 1
 
-			_, err := feed.GetInspection(context.Background(), "1234")
+			_, err := feed.GetInspection(context.Background(), apiClient, "1234")
 			if err == nil || !strings.HasSuffix(err.Error(), tt.err) {
 				t.Fatalf("expected giving up error, got: %#v", err)
 			}

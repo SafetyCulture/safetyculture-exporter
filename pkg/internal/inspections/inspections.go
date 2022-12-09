@@ -18,7 +18,7 @@ const maxGoRoutines = 10
 type Client struct {
 	*zap.SugaredLogger
 
-	apiClient     *api.Client
+	apiClient     *httpapi.Client
 	exporter      exporter.SafetyCultureJSONExporter
 	SkipIDs       []string
 	ModifiedAfter time.Time
@@ -43,7 +43,7 @@ type InspectionClientCfg struct {
 }
 
 // NewInspectionClient returns a new instance of InspectionClient
-func NewInspectionClient(cfg *InspectionClientCfg, apiClient *api.Client, exporter exporter.SafetyCultureJSONExporter) InspectionClient {
+func NewInspectionClient(cfg *InspectionClientCfg, apiClient *httpapi.Client, exporter exporter.SafetyCultureJSONExporter) InspectionClient {
 	return &Client{
 		apiClient:     apiClient,
 		exporter:      exporter,

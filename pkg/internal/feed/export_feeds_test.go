@@ -2,18 +2,16 @@ package feed_test
 
 import (
 	"fmt"
-	"net/http"
-	"path"
-	"path/filepath"
-	"testing"
-
-	"github.com/SafetyCulture/safetyculture-exporter/pkg/external/api"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/events"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/feed"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	"gopkg.in/h2non/gock.v1"
+	"net/http"
+	"path"
+	"path/filepath"
+	"testing"
 )
 
 func TestExporterFeedClient_ExportFeeds_should_create_all_schemas_to_file(t *testing.T) {
@@ -48,7 +46,7 @@ func TestExporterFeedClient_ExportFeeds_should_export_all_feeds_to_file(t *testi
 	exporter, err := getTemporaryCSVExporter()
 	assert.NoError(t, err)
 
-	apiClient := api.GetTestClient()
+	apiClient := GetTestClient()
 	initMockFeedsSet1(apiClient.HTTPClient())
 
 	gock.New("http://localhost:9999").
@@ -126,7 +124,7 @@ func TestExporterFeedClient_ExportFeeds_should_err_when_not_auth(t *testing.T) {
 	exporter, err := getTemporaryCSVExporter()
 	require.NoError(t, err)
 
-	apiClient := api.GetTestClient()
+	apiClient := GetTestClient()
 	gock.InterceptClient(apiClient.HTTPClient())
 
 	gock.New("http://localhost:9999").
@@ -151,7 +149,7 @@ func TestExporterFeedClient_ExportFeeds_should_err_when_not_auth(t *testing.T) {
 func TestExporterFeedClient_ExportFeeds_should_err_when_InitFeed_errors(t *testing.T) {
 	defer gock.Off()
 
-	apiClient := api.GetTestClient()
+	apiClient := GetTestClient()
 	gock.InterceptClient(apiClient.HTTPClient())
 
 	gock.New("http://localhost:9999").
@@ -191,7 +189,7 @@ func TestExporterFeedClient_ExportFeeds_should_err_when_cannot_unmarshal(t *test
 	exporter, err := getTemporaryCSVExporter()
 	require.NoError(t, err)
 
-	apiClient := api.GetTestClient()
+	apiClient := GetTestClient()
 	gock.InterceptClient(apiClient.HTTPClient())
 
 	gock.New("http://localhost:9999").
@@ -239,7 +237,7 @@ func TestExporterFeedClient_ExportFeeds_should_err_when_cannot_unmarshal(t *test
 func TestExporterFeedClient_ExportFeeds_should_err_when_cannot_write_rows(t *testing.T) {
 	defer gock.Off()
 
-	apiClient := api.GetTestClient()
+	apiClient := GetTestClient()
 	gock.InterceptClient(apiClient.HTTPClient())
 
 	gock.New("http://localhost:9999").
@@ -311,7 +309,7 @@ func TestExporterFeedClient_ExportFeeds_should_perform_incremental_update_on_sec
 		ExportSiteIncludeDeleted: true,
 	}
 
-	apiClient := api.GetTestClient()
+	apiClient := GetTestClient()
 	initMockFeedsSet1(apiClient.HTTPClient())
 	exporterApp := feed.NewExporterApp(apiClient, nil, cfg)
 	err = exporterApp.ExportFeeds(exporter)
@@ -348,7 +346,7 @@ func TestExporterFeedClient_ExportFeeds_should_handle_lots_of_rows_ok(t *testing
 	exporter, err := getTemporaryCSVExporter()
 	assert.NoError(t, err)
 
-	apiClient := api.GetTestClient()
+	apiClient := GetTestClient()
 	initMockFeedsSet3(apiClient.HTTPClient())
 
 	gock.New("http://localhost:9999").

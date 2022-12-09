@@ -6,7 +6,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/feed"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/inspections"
 	"gopkg.in/yaml.v3"
 )
@@ -210,8 +209,8 @@ func NewConfigurationManager(fileName string) *ConfigurationManager {
 	return cm
 }
 
-func (ec *ExporterConfiguration) ToExporterConfig() *feed.ExporterFeedCfg {
-	return &feed.ExporterFeedCfg{
+func (ec *ExporterConfiguration) ToExporterConfig() *ExporterFeedCfg {
+	return &ExporterFeedCfg{
 		AccessToken:                           ec.AccessToken,
 		ExportTables:                          ec.Export.Tables,
 		SheqsyUsername:                        ec.SheqsyUsername,
@@ -234,8 +233,8 @@ func (ec *ExporterConfiguration) ToExporterConfig() *feed.ExporterFeedCfg {
 	}
 }
 
-func (ec *ExporterConfiguration) ToReporterConfig() *feed.ReportExporterCfg {
-	return &feed.ReportExporterCfg{
+func (ec *ExporterConfiguration) ToReporterConfig() *ReportExporterCfg {
+	return &ReportExporterCfg{
 		Format:       ec.Report.Format,
 		PreferenceID: ec.Report.PreferenceID,
 		Filename:     ec.Report.FilenameConvention,

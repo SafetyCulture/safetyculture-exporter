@@ -41,6 +41,21 @@ func ListOrganisationActivityLog(ctx context.Context, apiClient *httpapi.Client,
 	return &res, nil
 }
 
+// NewGetAccountsActivityLogRequest build a request for AccountsActivityLog
+// for now it serves the purposes only for inspection.deleted. If we need later, we can change this builder
+func NewGetAccountsActivityLogRequest(pageSize int, from time.Time) *GetAccountsActivityLogRequestParams {
+	return &GetAccountsActivityLogRequestParams{
+		PageSize: pageSize,
+		Filters: accountsActivityLogFilter{
+			Timeframe: timeFrame{
+				From: from,
+			},
+			Limit:      pageSize,
+			EventTypes: []string{"inspection.deleted"},
+		},
+	}
+}
+
 // GetAccountsActivityLogRequestParams contains fields required to make a post request to activity log history api
 type GetAccountsActivityLogRequestParams struct {
 	OrgID     string                    `json:"org_id"`

@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/SafetyCulture/safetyculture-exporter/pkg/external/api"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/events"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/util"
 )
@@ -68,7 +67,7 @@ func (f *SheqsyDepartmentFeed) CreateSchema(exporter Exporter) error {
 }
 
 // Export exports the feed to the supplied exporter
-func (f *SheqsyDepartmentFeed) Export(ctx context.Context, apiClient *api.Client, exporter Exporter, companyID string) error {
+func (f *SheqsyDepartmentFeed) Export(ctx context.Context, apiClient *httpapi.Client, exporter Exporter, companyID string) error {
 	logger := util.GetLogger().With("feed", f.Name(), "org_id", companyID)
 
 	if err := exporter.InitFeed(f, &InitFeedOptions{

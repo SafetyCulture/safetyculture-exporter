@@ -2,6 +2,7 @@ package inspections_test
 
 import (
 	"context"
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/httpapi"
 	"net/http"
 	"testing"
 	"time"
@@ -9,7 +10,6 @@ import (
 	exporterAPI "github.com/SafetyCulture/safetyculture-exporter/pkg/external/api"
 	"github.com/stretchr/testify/require"
 
-	"github.com/SafetyCulture/safetyculture-exporter/pkg/external/api"
 	exportermock "github.com/SafetyCulture/safetyculture-exporter/pkg/internal/exporter/mocks"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/inspections"
 	"github.com/stretchr/testify/assert"
@@ -43,7 +43,7 @@ func initMockInspections(httpClient *http.Client) {
 
 func TestInspectionsExport(t *testing.T) {
 
-	apiClient := api.GetTestClient()
+	apiClient := GetTestClient()
 	initMockInspections(apiClient.HTTPClient())
 
 	exporterMock := new(exportermock.Exporter)
@@ -58,7 +58,7 @@ func TestInspectionsExport(t *testing.T) {
 }
 
 func TestInspectionsExport_WhenSkipID(t *testing.T) {
-	apiClient := api.GetTestClient()
+	apiClient := GetTestClient()
 	initMockInspections(apiClient.HTTPClient())
 
 	exporterMock := new(exportermock.Exporter)
@@ -74,7 +74,7 @@ func TestInspectionsExport_WhenSkipID(t *testing.T) {
 }
 
 func TestInspectionsExport_WhenModifiedAtIsNotNil(t *testing.T) {
-	apiClient := api.GetTestClient()
+	apiClient := GetTestClient()
 	initMockInspections(apiClient.HTTPClient())
 
 	exporterMock := new(exportermock.Exporter)
@@ -98,4 +98,14 @@ func TestNewInspectionClient(t *testing.T) {
 	require.NotNil(t, client)
 
 	assert.EqualValues(t, "inspections", client.Name())
+}
+
+// GetTestClient creates a new test apiClient
+func GetTestClient(opts ...httpapi.Opt) *httpapi.Client {
+	apiClient := httpapi.NewClient("http://localhost:9999", "abc123", opts...)
+	apiClient.RetryWaitMin = 10 * time.Millisecond
+	apiClient.RetryWaitMax = 10 * time.Millisecond
+	apiClient.CheckForRetry = httpapi.DefaultRetryPolicy
+	apiClient.RetryMax = 1
+	return apiClient
 }

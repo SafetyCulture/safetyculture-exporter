@@ -81,7 +81,7 @@ func (f *IssueFeed) CreateSchema(exporter Exporter) error {
 }
 
 // Export exports the feed to the supplied exporter
-func (f *IssueFeed) Export(ctx context.Context, apiClient *api.Client, exporter Exporter, orgID string) error {
+func (f *IssueFeed) Export(ctx context.Context, apiClient *httpapi.Client, exporter Exporter, orgID string) error {
 	logger := util.GetLogger().With("feed", f.Name(), "org_id", orgID)
 
 	if err := exporter.InitFeed(f, &InitFeedOptions{

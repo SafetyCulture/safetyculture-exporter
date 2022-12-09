@@ -4,9 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/httpapi"
 	"time"
 
-	"github.com/SafetyCulture/safetyculture-exporter/pkg/external/api"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/events"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/util"
 )
@@ -70,7 +70,7 @@ func (f *UserFeed) CreateSchema(exporter Exporter) error {
 }
 
 // Export exports the feed to the supplied exporter
-func (f *UserFeed) Export(ctx context.Context, apiClient *api.Client, exporter Exporter, orgID string) error {
+func (f *UserFeed) Export(ctx context.Context, apiClient *httpapi.Client, exporter Exporter, orgID string) error {
 	logger := util.GetLogger().With("feed", f.Name(), "org_id", orgID)
 
 	if err := exporter.InitFeed(f, &InitFeedOptions{
@@ -81,7 +81,7 @@ func (f *UserFeed) Export(ctx context.Context, apiClient *api.Client, exporter E
 		return events.WrapEventError(err, "init feed")
 	}
 
-	drainFn := func(resp *api.GetFeedResponse) error {
+	drainFn := func(resp *GetFeedResponse) error {
 		var rows []*User
 
 		if err := json.Unmarshal(resp.Data, &rows); err != nil {
@@ -112,8 +112,8 @@ func (f *UserFeed) Export(ctx context.Context, apiClient *api.Client, exporter E
 		return nil
 	}
 
-	req := &api.GetFeedRequest{InitialURL: "/feed/users", Params: api.GetFeedParams{}}
-	if err := apiClient.DrainFeed(ctx, req, drainFn); err != nil {
+	req := &GetFeedRequest{InitialURL: "/feed/users", Params: GetFeedParams{}}
+	if err := DrainFeed(ctx, apiClient, req, drainFn); err != nil {
 		return events.WrapEventError(err, fmt.Sprintf("feed %q", f.Name()))
 	}
 	return exporter.FinaliseExport(f, &[]*User{})

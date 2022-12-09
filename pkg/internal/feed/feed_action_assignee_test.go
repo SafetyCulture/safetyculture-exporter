@@ -7,15 +7,13 @@ import (
 
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/feed"
 	"github.com/stretchr/testify/assert"
-
-	"github.com/SafetyCulture/safetyculture-exporter/pkg/external/api"
 )
 
 func TestActionAssigneeFeedExport_should_export_rows_to_sql_db(t *testing.T) {
 	exporter, err := getInmemorySQLExporter("")
 	assert.NoError(t, err)
 
-	apiClient := api.GetTestClient()
+	apiClient := GetTestClient()
 	initMockFeedsSet1(apiClient.HTTPClient())
 
 	actionAssigneeFeed := feed.ActionAssigneeFeed{

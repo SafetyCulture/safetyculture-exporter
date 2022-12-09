@@ -160,7 +160,7 @@ func (f *InspectionFeed) CreateSchema(exporter Exporter) error {
 }
 
 // Export exports the feed to the supplied exporter
-func (f *InspectionFeed) Export(ctx context.Context, apiClient *api.Client, exporter Exporter, orgID string) error {
+func (f *InspectionFeed) Export(ctx context.Context, apiClient *httpapi.Client, exporter Exporter, orgID string) error {
 	if err := exporter.InitFeed(f, &InitFeedOptions{
 		// Delete data if incremental refresh is disabled so there is no duplicates
 		Truncate: !f.Incremental,
@@ -187,7 +187,7 @@ func (f *InspectionFeed) Export(ctx context.Context, apiClient *api.Client, expo
 	return exporter.FinaliseExport(f, &[]*Inspection{})
 }
 
-func (f *InspectionFeed) processNewInspections(ctx context.Context, apiClient *api.Client, exporter Exporter, orgID string) error {
+func (f *InspectionFeed) processNewInspections(ctx context.Context, apiClient *httpapi.Client, exporter Exporter, orgID string) error {
 	logger := util.GetLogger().With("feed", f.Name(), "org_id", orgID)
 	req := api.GetFeedRequest{
 		InitialURL: "/feed/inspections",
@@ -226,7 +226,7 @@ func (f *InspectionFeed) processNewInspections(ctx context.Context, apiClient *a
 	return apiClient.DrainFeed(ctx, &req, feedFn)
 }
 
-func (f *InspectionFeed) processDeletedInspections(ctx context.Context, apiClient *api.Client, exporter Exporter) error {
+func (f *InspectionFeed) processDeletedInspections(ctx context.Context, apiClient *httpapi.Client, exporter Exporter) error {
 	lg := util.GetLogger()
 	dreq := api.NewGetAccountsActivityLogRequest(f.Limit, f.ModifiedAfter)
 	delFn := func(resp *api.GetAccountsActivityLogResponse) error {

@@ -3,6 +3,8 @@ package api
 import (
 	"context"
 	"fmt"
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/external/api"
+
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/httpapi"
 	"os"
 
@@ -12,7 +14,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-func NewSafetyCultureExporter(cfg *ExporterConfiguration, apiClient *httpapi.Client, sheqsyApiClient *httpapi.Client) *SafetyCultureExporter {
+func NewSafetyCultureExporter(cfg *api.ExporterConfiguration, apiClient *httpapi.Client, sheqsyApiClient *httpapi.Client) *SafetyCultureExporter {
 	return &SafetyCultureExporter{
 		apiClient:       apiClient,
 		sheqsyApiClient: sheqsyApiClient,
@@ -23,7 +25,7 @@ func NewSafetyCultureExporter(cfg *ExporterConfiguration, apiClient *httpapi.Cli
 type SafetyCultureExporter struct {
 	apiClient       *httpapi.Client
 	sheqsyApiClient *httpapi.Client
-	cfg             *ExporterConfiguration
+	cfg             *api.ExporterConfiguration
 }
 
 func (s *SafetyCultureExporter) RunInspectionJSON() error {

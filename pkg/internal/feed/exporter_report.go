@@ -3,6 +3,8 @@ package feed
 import (
 	"context"
 	"fmt"
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/external/api"
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/httpapi"
 	"io"
 	"os"
 	"path/filepath"
@@ -11,7 +13,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/SafetyCulture/safetyculture-exporter/pkg/external/api"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
@@ -51,7 +52,7 @@ type reportExportResult struct {
 }
 
 // SaveReports downloads and stores inspection reports on disk
-func (e *ReportExporter) SaveReports(ctx context.Context, apiClient *api.Client, feed *InspectionFeed) error {
+func (e *ReportExporter) SaveReports(ctx context.Context, apiClient *httpapi.Client, feed *InspectionFeed) error {
 	e.Logger.Info("Generating inspection reports")
 
 	format, err := e.getFormats()
@@ -157,7 +158,7 @@ func (e *ReportExporter) getFormats() (*reportExportFormat, error) {
 	return format, nil
 }
 
-func (e *ReportExporter) saveReport(ctx context.Context, apiClient *api.Client, inspection *Inspection, format *reportExportFormat) *reportExport {
+func (e *ReportExporter) saveReport(ctx context.Context, apiClient *httpapi.Client, inspection *Inspection, format *reportExportFormat) *reportExport {
 	exportPDF, exportWORD := format.PDF, format.WORD
 
 	report := &reportExport{}
@@ -216,8 +217,8 @@ func (e *ReportExporter) GetDuration() time.Duration {
 	return 0
 }
 
-func (e *ReportExporter) exportInspection(ctx context.Context, apiClient *api.Client, inspection *Inspection, format string) error {
-	messageID, err := apiClient.InitiateInspectionReportExport(ctx, inspection.ID, format, e.PreferenceID)
+func (e *ReportExporter) exportInspection(ctx context.Context, apiClient *httpapi.Client, inspection *Inspection, format string) error {
+	messageID, err := InitiateInspectionReportExport(ctx, apiClient, inspection.ID, format, e.PreferenceID)
 	if err != nil {
 		return err
 	}
@@ -228,12 +229,12 @@ func (e *ReportExporter) exportInspection(ctx context.Context, apiClient *api.Cl
 		// wait for stipulated time before checking for report completion
 		time.Sleep(GetWaitTime(e.retryTimeout) * time.Second)
 
-		rec, cErr := apiClient.CheckInspectionReportExportCompletion(ctx, inspection.ID, messageID)
+		rec, cErr := CheckInspectionReportExportCompletion(ctx, apiClient, inspection.ID, messageID)
 		if cErr != nil {
 			err = cErr
 			break
 		} else if rec.Status == "SUCCESS" {
-			resp, dErr := apiClient.DownloadInspectionReportFile(ctx, rec.URL)
+			resp, dErr := DownloadInspectionReportFile(ctx, apiClient, rec.URL)
 			if dErr != nil {
 				err = dErr
 				break
@@ -364,15 +365,8 @@ func getFilePath(exportPath string, inspection *Inspection, format string, filen
 	}
 }
 
-type ReportExporterCfg struct {
-	Format       []string
-	PreferenceID string
-	Filename     string
-	RetryTimeout int
-}
-
 // NewReportExporter returns a new instance of ReportExporter
-func NewReportExporter(exportPath string, reportCfg *ReportExporterCfg) (*ReportExporter, error) {
+func NewReportExporter(exportPath string, reportCfg *api.ReportExporterCfg) (*ReportExporter, error) {
 	sqlExporter, err := NewSQLExporter("sqlite", filepath.Join(exportPath, "reports.db"), true, "")
 	if err != nil {
 		return nil, err

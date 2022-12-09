@@ -5,7 +5,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/SafetyCulture/safetyculture-exporter/pkg/external/api"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/feed"
 	"github.com/stretchr/testify/assert"
 )
@@ -14,7 +13,7 @@ func TestIssueFeed_Export_ShouldExportRows(t *testing.T) {
 	exporter, err := getInmemorySQLExporter("")
 	assert.NoError(t, err)
 
-	apiClient := api.GetTestClient()
+	apiClient := GetTestClient()
 	defer resetMocks(apiClient.HTTPClient())
 	initMockIssuesFeed(apiClient.HTTPClient())
 

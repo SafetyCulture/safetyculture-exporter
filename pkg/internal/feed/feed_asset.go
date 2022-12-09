@@ -4,9 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/httpapi"
 	"time"
 
-	"github.com/SafetyCulture/safetyculture-exporter/pkg/external/api"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/util"
 )
 
@@ -74,7 +74,7 @@ func (f *AssetFeed) CreateSchema(exporter Exporter) error {
 }
 
 // Export exports the feed to the supplied exporter
-func (f *AssetFeed) Export(ctx context.Context, apiClient *api.Client, exporter Exporter, orgID string) error {
+func (f *AssetFeed) Export(ctx context.Context, apiClient *httpapi.Client, exporter Exporter, orgID string) error {
 	logger := util.GetLogger().With("feed", f.Name(), "org_id", orgID)
 
 	if err := exporter.InitFeed(f, &InitFeedOptions{
@@ -84,7 +84,7 @@ func (f *AssetFeed) Export(ctx context.Context, apiClient *api.Client, exporter 
 		return fmt.Errorf("init feed: %w", err)
 	}
 
-	drainFn := func(resp *api.GetFeedResponse) error {
+	drainFn := func(resp *GetFeedResponse) error {
 		var rows []*Asset
 
 		if err := json.Unmarshal(resp.Data, &rows); err != nil {
@@ -93,7 +93,7 @@ func (f *AssetFeed) Export(ctx context.Context, apiClient *api.Client, exporter 
 
 		if len(rows) != 0 {
 			// Calculate the size of the batch we can insert into the DB at once.
-			//Column count + buffer to account for primary keys
+			// Column count + buffer to account for primary keys
 			batchSize := exporter.ParameterLimit() / (len(f.Columns()) + 4)
 
 			for i := 0; i < len(rows); i += batchSize {
@@ -116,14 +116,14 @@ func (f *AssetFeed) Export(ctx context.Context, apiClient *api.Client, exporter 
 		return nil
 	}
 
-	req := &api.GetFeedRequest{
+	req := &GetFeedRequest{
 		InitialURL: "/feed/assets",
-		Params: api.GetFeedParams{
+		Params: GetFeedParams{
 			Limit: f.Limit,
 		},
 	}
 
-	if err := apiClient.DrainFeed(ctx, req, drainFn); err != nil {
+	if err := DrainFeed(ctx, apiClient, req, drainFn); err != nil {
 		return fmt.Errorf("assets feed %q: %w", f.Name(), err)
 	}
 	return exporter.FinaliseExport(f, &[]*Asset{})

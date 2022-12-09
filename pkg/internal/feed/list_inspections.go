@@ -1,7 +1,9 @@
 package feed
 
 import (
+	"context"
 	"encoding/json"
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/httpapi"
 
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/external/version"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/util"
@@ -9,27 +11,27 @@ import (
 )
 
 // ListInspections retrieves the list of inspections from SafetyCulture
-func ListInspections(ctx context.Context, params *ListInspectionsParams) (*ListInspectionsResponse, error) {
+func ListInspections(ctx context.Context, a *httpapi.Client, params *ListInspectionsParams) (*ListInspectionsResponse, error) {
 	var (
 		result *ListInspectionsResponse
 		errMsg json.RawMessage
 	)
 
-	sl := a.sling.New().Get("/audits/search").
-		Set(string(Authorization), a.authorizationHeader).
-		Set(string(IntegrationID), "safetyculture-exporter").
-		Set(string(IntegrationVersion), version.GetVersion()).
-		Set(string(XRequestID), util.RequestIDFromContext(ctx))
+	sl := a.Sling.New().Get("/audits/search").
+		Set(string(httpapi.Authorization), a.AuthorizationHeader).
+		Set(string(httpapi.IntegrationID), "safetyculture-exporter").
+		Set(string(httpapi.IntegrationVersion), version.GetVersion()).
+		Set(string(httpapi.XRequestID), util.RequestIDFromContext(ctx))
 
 	sl.QueryStruct(params)
 	req, _ := sl.Request()
 	req = req.WithContext(ctx)
 
-	_, err := a.do(&slingHTTPDoer{
-		sl:       sl,
-		req:      req,
-		successV: &result,
-		failureV: &errMsg,
+	_, err := a.Do(&util.SlingHTTPDoer{
+		Sl:       sl,
+		Req:      req,
+		SuccessV: &result,
+		FailureV: &errMsg,
 	})
 	if err != nil {
 		return nil, errors.Wrap(err, "api request")

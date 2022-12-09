@@ -9,15 +9,13 @@ import (
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/feed"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/h2non/gock.v1"
-
-	"github.com/SafetyCulture/safetyculture-exporter/pkg/external/api"
 )
 
 func TestInspectionItemFeedExport_should_export_rows_to_sql_db(t *testing.T) {
 	exporter, err := getInmemorySQLExporter("")
 	assert.NoError(t, err)
 
-	apiClient := api.GetTestClient()
+	apiClient := GetTestClient()
 	initMockFeedsSet1(apiClient.HTTPClient())
 
 	inspectionItemFeed := feed.InspectionItemFeed{
@@ -53,7 +51,7 @@ func TestInspectionItemFeedExportWithMedia(t *testing.T) {
 		BodyString(result)
 	req.SetHeader("Content-Type", "image/test-content")
 
-	apiClient := api.GetTestClient()
+	apiClient := GetTestClient()
 	gock.InterceptClient(apiClient.HTTPClient())
 	initMockFeedsSet1(apiClient.HTTPClient())
 
