@@ -6,6 +6,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/httpapi"
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/feed"
 	"net/http"
 	"net/url"
 	"path"
@@ -653,14 +655,14 @@ func TestGetMedia(t *testing.T) {
 	apiClient := GetTestClient()
 	gock.InterceptClient(apiClient.HTTPClient())
 
-	expected := &api.GetMediaResponse{
+	expected := &feed.GetMediaResponse{
 		ContentType: "test-content",
 		Body:        []byte(result),
 		MediaID:     "12345",
 	}
 	resp, err := apiClient.GetMedia(
 		context.Background(),
-		&api.GetMediaRequest{
+		&feed.GetMediaRequest{
 			URL:     "http://localhost:9999/audits/1234/media/12345",
 			AuditID: "1234",
 		},
@@ -686,7 +688,7 @@ func TestAPIClientInitiateInspectionReportExport_should_return_messageID(t *test
 	apiClient := GetTestClient()
 	gock.InterceptClient(apiClient.HTTPClient())
 
-	mId, err := apiClient.InitiateInspectionReportExport(context.Background(), "audit_123", "PDF", "p123")
+	mId, err := feed.InitiateInspectionReportExport(context.Background(), apiClient, "audit_123", "PDF", "p123")
 
 	assert.NoError(t, err)
 	assert.Equal(t, "abc", mId)
@@ -703,12 +705,12 @@ func TestAPIClientInitiateInspectionReportExport_should_return_error_on_failure(
 
 	tests := []struct {
 		name string
-		cr   api.CheckForRetry
+		cr   httpapi.CheckForRetry
 		err  string
 	}{
 		{
 			name: "default_retry_policy",
-			cr:   api.DefaultRetryPolicy,
+			cr:   httpapi.DefaultRetryPolicy,
 			err:  "giving up after 2 attempt(s)",
 		},
 	}
@@ -718,7 +720,7 @@ func TestAPIClientInitiateInspectionReportExport_should_return_error_on_failure(
 			apiClient := GetTestClient()
 			gock.InterceptClient(apiClient.HTTPClient())
 
-			_, err := apiClient.InitiateInspectionReportExport(context.Background(), "audit_123", "PDF", "")
+			_, err := feed.InitiateInspectionReportExport(context.Background(), apiClient, "audit_123", "PDF", "")
 			if err == nil || !strings.HasSuffix(err.Error(), tt.err) {
 				t.Fatalf("expected giving up error, got: %#v", err)
 			}
@@ -740,7 +742,7 @@ func TestAPIClientCheckInspectionReportExportCompletion_should_return_status(t *
 	apiClient := GetTestClient()
 	gock.InterceptClient(apiClient.HTTPClient())
 
-	res, err := apiClient.CheckInspectionReportExportCompletion(context.Background(), "audit_123", "abc")
+	res, err := feed.CheckInspectionReportExportCompletion(context.Background(), apiClient, "audit_123", "abc")
 
 	assert.NoError(t, err)
 	assert.Equal(t, res.Status, "SUCCESS")
@@ -757,12 +759,12 @@ func TestAPIClientCheckInspectionReportExportCompletion_should_return_error_on_f
 
 	tests := []struct {
 		name string
-		cr   api.CheckForRetry
+		cr   httpapi.CheckForRetry
 		err  string
 	}{
 		{
 			name: "default_retry_policy",
-			cr:   api.DefaultRetryPolicy,
+			cr:   httpapi.DefaultRetryPolicy,
 			err:  "giving up after 2 attempt(s)",
 		},
 	}
@@ -772,7 +774,7 @@ func TestAPIClientCheckInspectionReportExportCompletion_should_return_error_on_f
 			apiClient := GetTestClient()
 			gock.InterceptClient(apiClient.HTTPClient())
 
-			_, err := apiClient.CheckInspectionReportExportCompletion(context.Background(), "audit_123", "abc")
+			_, err := feed.CheckInspectionReportExportCompletion(context.Background(), apiClient, "audit_123", "abc")
 			if err == nil || !strings.HasSuffix(err.Error(), tt.err) {
 				t.Fatalf("expected giving up error, got: %#v", err)
 			}
@@ -791,7 +793,7 @@ func TestAPIClientDownloadInspectionReportFile_should_return_status(t *testing.T
 	apiClient := GetTestClient()
 	gock.InterceptClient(apiClient.HTTPClient())
 
-	res, err := apiClient.DownloadInspectionReportFile(context.Background(), "http://localhost:9999/report-exports/abc")
+	res, err := feed.DownloadInspectionReportFile(context.Background(), apiClient, "http://localhost:9999/report-exports/abc")
 
 	assert.NoError(t, err)
 
@@ -810,12 +812,12 @@ func TestAPIClientDownloadInspectionReportFile_should_return_error_on_failure(t 
 
 	tests := []struct {
 		name string
-		cr   api.CheckForRetry
+		cr   httpapi.CheckForRetry
 		err  string
 	}{
 		{
 			name: "default_retry_policy",
-			cr:   api.DefaultRetryPolicy,
+			cr:   httpapi.DefaultRetryPolicy,
 			err:  "giving up after 2 attempt(s)",
 		},
 	}
@@ -825,7 +827,7 @@ func TestAPIClientDownloadInspectionReportFile_should_return_error_on_failure(t 
 			apiClient := GetTestClient()
 			gock.InterceptClient(apiClient.HTTPClient())
 
-			_, err := apiClient.DownloadInspectionReportFile(context.Background(), "http://localhost:9999/report-exports/abc")
+			_, err := feed.DownloadInspectionReportFile(context.Background(), apiClient, "http://localhost:9999/report-exports/abc")
 			if err == nil || !strings.HasSuffix(err.Error(), tt.err) {
 				t.Fatalf("expected giving up error, got: %#v", err)
 			}
@@ -843,12 +845,12 @@ func TestAPIClientBackoff429TooManyRequest(t *testing.T) {
 
 	tests := []struct {
 		name string
-		bo   api.Backoff
+		bo   httpapi.Backoff
 		err  string
 	}{
 		{
 			name: "default_backoff_policy",
-			bo:   api.DefaultBackoff,
+			bo:   httpapi.DefaultBackoff,
 			err:  "giving up after 2 attempt(s)",
 		},
 	}
@@ -859,7 +861,7 @@ func TestAPIClientBackoff429TooManyRequest(t *testing.T) {
 			gock.InterceptClient(apiClient.HTTPClient())
 			apiClient.RetryMax = 1
 
-			_, err := apiClient.GetInspection(context.Background(), "1234")
+			_, err := feed.GetInspection(context.Background(), "1234")
 			if err == nil || !strings.HasSuffix(err.Error(), tt.err) {
 				t.Fatalf("expected giving up error, got: %#v", err)
 			}
@@ -868,11 +870,11 @@ func TestAPIClientBackoff429TooManyRequest(t *testing.T) {
 }
 
 // GetTestClient creates a new test apiClient
-func GetTestClient(opts ...api.Opt) *api.Client {
-	apiClient := api.NewClient("http://localhost:9999", "abc123", opts...)
+func GetTestClient(opts ...httpapi.Opt) *httpapi.Client {
+	apiClient := httpapi.NewClient("http://localhost:9999", "abc123", opts...)
 	apiClient.RetryWaitMin = 10 * time.Millisecond
 	apiClient.RetryWaitMax = 10 * time.Millisecond
-	apiClient.CheckForRetry = api.DefaultRetryPolicy
+	apiClient.CheckForRetry = httpapi.DefaultRetryPolicy
 	apiClient.RetryMax = 1
 	return apiClient
 }

@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"fmt"
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/httpapi"
 	"os"
 
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/exporter"
@@ -11,7 +12,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-func NewSafetyCultureExporter(cfg *ExporterConfiguration, apiClient *Client, sheqsyApiClient *Client) *SafetyCultureExporter {
+func NewSafetyCultureExporter(cfg *ExporterConfiguration, apiClient *httpapi.Client, sheqsyApiClient *httpapi.Client) *SafetyCultureExporter {
 	return &SafetyCultureExporter{
 		apiClient:       apiClient,
 		sheqsyApiClient: sheqsyApiClient,
@@ -20,8 +21,8 @@ func NewSafetyCultureExporter(cfg *ExporterConfiguration, apiClient *Client, she
 }
 
 type SafetyCultureExporter struct {
-	apiClient       *Client
-	sheqsyApiClient *Client
+	apiClient       *httpapi.Client
+	sheqsyApiClient *httpapi.Client
 	cfg             *ExporterConfiguration
 }
 
