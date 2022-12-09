@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/SafetyCulture/safetyculture-exporter/pkg/external/api"
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/httpapi"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/events"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/util"
 )
@@ -189,9 +189,9 @@ func (f *InspectionFeed) Export(ctx context.Context, apiClient *httpapi.Client, 
 
 func (f *InspectionFeed) processNewInspections(ctx context.Context, apiClient *httpapi.Client, exporter Exporter, orgID string) error {
 	logger := util.GetLogger().With("feed", f.Name(), "org_id", orgID)
-	req := api.GetFeedRequest{
+	req := GetFeedRequest{
 		InitialURL: "/feed/inspections",
-		Params: api.GetFeedParams{
+		Params: GetFeedParams{
 			ModifiedAfter: f.ModifiedAfter,
 			TemplateIDs:   f.TemplateIDs,
 			Archived:      f.Archived,
@@ -200,7 +200,7 @@ func (f *InspectionFeed) processNewInspections(ctx context.Context, apiClient *h
 			WebReportLink: f.WebReportLink,
 		},
 	}
-	feedFn := func(resp *api.GetFeedResponse) error {
+	feedFn := func(resp *GetFeedResponse) error {
 		var rows []Inspection
 
 		if err := json.Unmarshal(resp.Data, &rows); err != nil {
@@ -223,13 +223,13 @@ func (f *InspectionFeed) processNewInspections(ctx context.Context, apiClient *h
 		return nil
 	}
 
-	return apiClient.DrainFeed(ctx, &req, feedFn)
+	return DrainFeed(ctx, apiClient, &req, feedFn)
 }
 
 func (f *InspectionFeed) processDeletedInspections(ctx context.Context, apiClient *httpapi.Client, exporter Exporter) error {
 	lg := util.GetLogger()
-	dreq := api.NewGetAccountsActivityLogRequest(f.Limit, f.ModifiedAfter)
-	delFn := func(resp *api.GetAccountsActivityLogResponse) error {
+	dreq := NewGetAccountsActivityLogRequest(f.Limit, f.ModifiedAfter)
+	delFn := func(resp *GetAccountsActivityLogResponse) error {
 		var pkeys = make([]string, 0, len(resp.Activities))
 		for _, a := range resp.Activities {
 			uid := getPrefixID(a.Metadata["inspection_id"])
@@ -247,9 +247,24 @@ func (f *InspectionFeed) processDeletedInspections(ctx context.Context, apiClien
 
 		return nil
 	}
-	return apiClient.DrainAccountActivityHistoryLog(ctx, dreq, delFn)
+	return DrainAccountActivityHistoryLog(ctx, apiClient, dreq, delFn)
 }
 
 func getPrefixID(id string) string {
 	return fmt.Sprintf("audit_%s", strings.ReplaceAll(id, "-", ""))
+}
+
+// NewGetAccountsActivityLogRequest build a request for AccountsActivityLog
+// for now it serves the purposes only for inspection.deleted. If we need later, we can change this builder
+func NewGetAccountsActivityLogRequest(pageSize int, from time.Time) *GetAccountsActivityLogRequestParams {
+	return &GetAccountsActivityLogRequestParams{
+		PageSize: pageSize,
+		Filters: accountsActivityLogFilter{
+			Timeframe: timeFrame{
+				From: from,
+			},
+			Limit:      pageSize,
+			EventTypes: []string{"inspection.deleted"},
+		},
+	}
 }
