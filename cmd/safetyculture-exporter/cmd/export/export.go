@@ -3,9 +3,9 @@ package export
 import (
 	"encoding/base64"
 	"fmt"
-	"github.com/SafetyCulture/safetyculture-exporter/pkg/httpapi"
-	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/api"
 	"net/url"
+
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/httpapi"
 
 	util "github.com/SafetyCulture/safetyculture-exporter/cmd/safetyculture-exporter/cmd/utils"
 	exporterAPI "github.com/SafetyCulture/safetyculture-exporter/pkg/external/api"
@@ -114,13 +114,13 @@ func runInspectionReports(cmd *cobra.Command, args []string) error {
 }
 
 // NewSafetyCultureExporter create a new SafetyCultureExporter with configuration from Viper
-func NewSafetyCultureExporter(v *viper.Viper) *api.SafetyCultureExporter {
+func NewSafetyCultureExporter(v *viper.Viper) *exporterAPI.SafetyCultureExporter {
 	cm, err := exporterAPI.NewConfigurationManagerFromFile(v.ConfigFileUsed())
 	MapViperConfigToExporterConfiguration(v, cm.Configuration)
 	cm.ApplySafetyGuards()
 	util.Check(err, "while loading config file")
 
-	return api.NewSafetyCultureExporter(cm.Configuration, getAPIClient(), getSheqsyAPIClient())
+	return exporterAPI.NewSafetyCultureExporter(cm.Configuration, getAPIClient(), getSheqsyAPIClient())
 }
 
 // MapViperConfigToExporterConfiguration maps Viper config to ExporterConfiguration structure

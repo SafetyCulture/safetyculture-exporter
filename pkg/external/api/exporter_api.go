@@ -3,10 +3,11 @@ package api
 import (
 	"context"
 	"fmt"
-	"github.com/SafetyCulture/safetyculture-exporter/pkg/external/api"
+	"os"
+	"path/filepath"
+	"time"
 
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/httpapi"
-	"os"
 
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/exporter"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/feed"
@@ -14,7 +15,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-func NewSafetyCultureExporter(cfg *api.ExporterConfiguration, apiClient *httpapi.Client, sheqsyApiClient *httpapi.Client) *SafetyCultureExporter {
+func NewSafetyCultureExporter(cfg *ExporterConfiguration, apiClient *httpapi.Client, sheqsyApiClient *httpapi.Client) *SafetyCultureExporter {
 	return &SafetyCultureExporter{
 		apiClient:       apiClient,
 		sheqsyApiClient: sheqsyApiClient,
@@ -22,10 +23,57 @@ func NewSafetyCultureExporter(cfg *api.ExporterConfiguration, apiClient *httpapi
 	}
 }
 
+// NewReportExporter returns a new instance of ReportExporter
+func NewReportExporter(exportPath string, reportCfg *ReportExporterCfg) (*feed.ReportExporter, error) {
+	sqlExporter, err := feed.NewSQLExporter("sqlite", filepath.Join(exportPath, "reports.db"), true, "")
+	if err != nil {
+		return nil, err
+	}
+
+	return &feed.ReportExporter{
+		SQLExporter:  sqlExporter,
+		Logger:       sqlExporter.Logger,
+		ExportPath:   exportPath,
+		Format:       reportCfg.Format,
+		PreferenceID: reportCfg.PreferenceID,
+		Filename:     reportCfg.Filename,
+		RetryTimeout: reportCfg.RetryTimeout,
+	}, nil
+}
+
+type ReportExporterCfg struct {
+	Format       []string
+	PreferenceID string
+	Filename     string
+	RetryTimeout int
+}
+
+type ExporterFeedCfg struct {
+	AccessToken                           string
+	ExportTables                          []string
+	SheqsyUsername                        string
+	SheqsyCompanyID                       string
+	ExportInspectionSkipIds               []string
+	ExportModifiedAfterTime               time.Time
+	ExportTemplateIds                     []string
+	ExportInspectionArchived              string
+	ExportInspectionCompleted             string
+	ExportInspectionIncludedInactiveItems bool
+	ExportInspectionWebReportLink         string
+	ExportIncremental                     bool
+	ExportInspectionLimit                 int
+	ExportMedia                           bool
+	ExportSiteIncludeDeleted              bool
+	ExportActionLimit                     int
+	ExportSiteIncludeFullHierarchy        bool
+	ExportIssueLimit                      int
+	ExportAssetLimit                      int
+}
+
 type SafetyCultureExporter struct {
 	apiClient       *httpapi.Client
 	sheqsyApiClient *httpapi.Client
-	cfg             *api.ExporterConfiguration
+	cfg             *ExporterConfiguration
 }
 
 func (s *SafetyCultureExporter) RunInspectionJSON() error {
@@ -122,7 +170,7 @@ func (s *SafetyCultureExporter) RunInspectionReports() error {
 		return errors.Wrapf(err, "Failed to create directory %s", s.cfg.Export.Path)
 	}
 
-	e, err := feed.NewReportExporter(s.cfg.Export.Path, s.cfg.ToReporterConfig())
+	e, err := NewReportExporter(s.cfg.Export.Path, s.cfg.ToReporterConfig())
 	if err != nil {
 		return errors.Wrap(err, "unable to create report exporter")
 	}

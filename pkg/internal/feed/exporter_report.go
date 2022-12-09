@@ -3,8 +3,6 @@ package feed
 import (
 	"context"
 	"fmt"
-	"github.com/SafetyCulture/safetyculture-exporter/pkg/external/api"
-	"github.com/SafetyCulture/safetyculture-exporter/pkg/httpapi"
 	"io"
 	"os"
 	"path/filepath"
@@ -12,6 +10,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/httpapi"
 
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
@@ -28,7 +28,7 @@ type ReportExporter struct {
 	Filename     string
 	Format       []string
 	Mu           sync.Mutex
-	retryTimeout int
+	RetryTimeout int
 }
 
 type reportExportFormat struct {
@@ -227,7 +227,7 @@ func (e *ReportExporter) exportInspection(ctx context.Context, apiClient *httpap
 
 	for {
 		// wait for stipulated time before checking for report completion
-		time.Sleep(GetWaitTime(e.retryTimeout) * time.Second)
+		time.Sleep(GetWaitTime(e.RetryTimeout) * time.Second)
 
 		rec, cErr := CheckInspectionReportExportCompletion(ctx, apiClient, inspection.ID, messageID)
 		if cErr != nil {
@@ -363,22 +363,4 @@ func getFilePath(exportPath string, inspection *Inspection, format string, filen
 			return "", err
 		}
 	}
-}
-
-// NewReportExporter returns a new instance of ReportExporter
-func NewReportExporter(exportPath string, reportCfg *api.ReportExporterCfg) (*ReportExporter, error) {
-	sqlExporter, err := NewSQLExporter("sqlite", filepath.Join(exportPath, "reports.db"), true, "")
-	if err != nil {
-		return nil, err
-	}
-
-	return &ReportExporter{
-		SQLExporter:  sqlExporter,
-		Logger:       sqlExporter.Logger,
-		ExportPath:   exportPath,
-		Format:       reportCfg.Format,
-		PreferenceID: reportCfg.PreferenceID,
-		Filename:     reportCfg.Filename,
-		retryTimeout: reportCfg.RetryTimeout,
-	}, nil
 }

@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/SafetyCulture/safetyculture-exporter/pkg/external/api"
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/httpapi"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/events"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/util"
 )
@@ -91,7 +91,7 @@ func (f *TemplateFeed) Export(ctx context.Context, apiClient *httpapi.Client, ex
 		return events.WrapEventError(err, "init feed")
 	}
 
-	drainFn := func(resp *api.GetFeedResponse) error {
+	drainFn := func(resp *GetFeedResponse) error {
 		var rows []*Template
 
 		if err := json.Unmarshal(resp.Data, &rows); err != nil {
@@ -132,13 +132,13 @@ func (f *TemplateFeed) Export(ctx context.Context, apiClient *httpapi.Client, ex
 		"modified_after", f.ModifiedAfter,
 	).Info("exporting")
 
-	req := &api.GetFeedRequest{
+	req := &GetFeedRequest{
 		InitialURL: "/feed/templates",
-		Params: api.GetFeedParams{
+		Params: GetFeedParams{
 			ModifiedAfter: f.ModifiedAfter,
 		},
 	}
-	if err := apiClient.DrainFeed(ctx, req, drainFn); err != nil {
+	if err := DrainFeed(ctx, apiClient, req, drainFn); err != nil {
 		return events.WrapEventError(err, fmt.Sprintf("feed %q", f.Name()))
 	}
 	return exporter.FinaliseExport(f, &[]*Template{})

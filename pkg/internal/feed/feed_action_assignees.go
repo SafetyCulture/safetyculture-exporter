@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/SafetyCulture/safetyculture-exporter/pkg/external/api"
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/httpapi"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/events"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/util"
 )
@@ -116,7 +116,7 @@ func (f *ActionAssigneeFeed) Export(ctx context.Context, apiClient *httpapi.Clie
 		return events.NewEventErrorWithMessage(err, events.ErrorSeverityError, events.ErrorSubSystemDB, false, "unable to load modified after")
 	}
 
-	drainFn := func(resp *api.GetFeedResponse) error {
+	drainFn := func(resp *GetFeedResponse) error {
 		var rows []*ActionAssignee
 
 		if err := json.Unmarshal(resp.Data, &rows); err != nil {
@@ -137,14 +137,14 @@ func (f *ActionAssigneeFeed) Export(ctx context.Context, apiClient *httpapi.Clie
 		return nil
 	}
 
-	req := &api.GetFeedRequest{
+	req := &GetFeedRequest{
 		InitialURL: "/feed/action_assignees",
-		Params: api.GetFeedParams{
+		Params: GetFeedParams{
 			ModifiedAfter: f.ModifiedAfter,
 		},
 	}
 
-	if err := apiClient.DrainFeed(ctx, req, drainFn); err != nil {
+	if err := DrainFeed(ctx, apiClient, req, drainFn); err != nil {
 		return events.WrapEventError(err, fmt.Sprintf("feed %q", f.Name()))
 	}
 	return exporter.FinaliseExport(f, &[]*ActionAssignee{})

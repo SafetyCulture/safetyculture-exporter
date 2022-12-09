@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/SafetyCulture/safetyculture-exporter/pkg/external/api"
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/httpapi"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/events"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/util"
 )
@@ -75,7 +75,7 @@ func (f *GroupFeed) Export(ctx context.Context, apiClient *httpapi.Client, expor
 		return events.WrapEventError(err, "init feed")
 	}
 
-	drainFn := func(resp *api.GetFeedResponse) error {
+	drainFn := func(resp *GetFeedResponse) error {
 		var rows []*Group
 
 		if err := json.Unmarshal(resp.Data, &rows); err != nil {
@@ -106,12 +106,12 @@ func (f *GroupFeed) Export(ctx context.Context, apiClient *httpapi.Client, expor
 		return nil
 	}
 
-	req := &api.GetFeedRequest{
+	req := &GetFeedRequest{
 		InitialURL: "/feed/groups",
-		Params:     api.GetFeedParams{},
+		Params:     GetFeedParams{},
 	}
 
-	if err := apiClient.DrainFeed(ctx, req, drainFn); err != nil {
+	if err := DrainFeed(ctx, apiClient, req, drainFn); err != nil {
 		return events.WrapEventError(err, fmt.Sprintf("feed %q", f.Name()))
 	}
 	return exporter.FinaliseExport(f, &[]*Group{})

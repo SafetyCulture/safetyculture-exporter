@@ -253,18 +253,3 @@ func (f *InspectionFeed) processDeletedInspections(ctx context.Context, apiClien
 func getPrefixID(id string) string {
 	return fmt.Sprintf("audit_%s", strings.ReplaceAll(id, "-", ""))
 }
-
-// NewGetAccountsActivityLogRequest build a request for AccountsActivityLog
-// for now it serves the purposes only for inspection.deleted. If we need later, we can change this builder
-func NewGetAccountsActivityLogRequest(pageSize int, from time.Time) *GetAccountsActivityLogRequestParams {
-	return &GetAccountsActivityLogRequestParams{
-		PageSize: pageSize,
-		Filters: accountsActivityLogFilter{
-			Timeframe: timeFrame{
-				From: from,
-			},
-			Limit:      pageSize,
-			EventTypes: []string{"inspection.deleted"},
-		},
-	}
-}
