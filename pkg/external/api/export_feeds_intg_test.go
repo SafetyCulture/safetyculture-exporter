@@ -9,7 +9,6 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/config"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/feed"
 	"github.com/stretchr/testify/require"
 	"gopkg.in/h2non/gock.v1"
@@ -41,8 +40,9 @@ func TestIntegrationDbCreateSchema_should_create_all_schemas(t *testing.T) {
 		  }
 		`)
 
-	cfg := &config.ExporterConfiguration{}
-	cfg.AccessToken = "token-123"
+	cfg := &feed.ExporterFeedCfg{
+		AccessToken: "token-123",
+	}
 
 	exporterApp := feed.NewExporterApp(nil, nil, cfg)
 	err = exporterApp.ExportSchemas(exporter)
@@ -73,7 +73,7 @@ func TestIntegrationDbExportFeeds_should_export_all_feeds_to_file(t *testing.T) 
 	exporter, err := getTemporaryCSVExporterWithRealSQLExporter(sqlExporter)
 	require.NoError(t, err)
 
-	apiClient := api.GetTestClient()
+	apiClient := GetTestClient()
 	initMockFeedsSet1(apiClient.HTTPClient())
 
 	gock.New("http://localhost:9999").
@@ -89,8 +89,9 @@ func TestIntegrationDbExportFeeds_should_export_all_feeds_to_file(t *testing.T) 
 		  }
 		`)
 
-	cfg := &config.ExporterConfiguration{}
-	cfg.AccessToken = "token-123"
+	cfg := &feed.ExporterFeedCfg{
+		AccessToken: "token-123",
+	}
 
 	exporterApp := feed.NewExporterApp(apiClient, apiClient, cfg)
 	err = exporterApp.ExportFeeds(exporter)
@@ -123,7 +124,7 @@ func TestIntegrationDbExportFeeds_should_perform_incremental_update_on_second_ru
 	exporter, err := getTemporaryCSVExporterWithRealSQLExporter(sqlExporter)
 	require.NoError(t, err)
 
-	apiClient := api.GetTestClient()
+	apiClient := GetTestClient()
 	initMockFeedsSet1(apiClient.HTTPClient())
 
 	gock.New("http://localhost:9999").
@@ -144,9 +145,10 @@ func TestIntegrationDbExportFeeds_should_perform_incremental_update_on_second_ru
 		Reply(http.StatusOK).
 		File(path.Join("mocks", "set_2", "inspections_deleted_single_page.json"))
 
-	cfg := &config.ExporterConfiguration{}
-	cfg.AccessToken = "token-123"
-	cfg.Export.Incremental = true
+	cfg := &feed.ExporterFeedCfg{
+		AccessToken:       "token-123",
+		ExportIncremental: true,
+	}
 
 	exporterApp := feed.NewExporterApp(apiClient, apiClient, cfg)
 	err = exporterApp.ExportFeeds(exporter)
@@ -183,7 +185,7 @@ func TestIntegrationDbExportFeeds_should_handle_lots_of_rows_ok(t *testing.T) {
 	exporter, err := getTemporaryCSVExporterWithRealSQLExporter(sqlExporter)
 	require.NoError(t, err)
 
-	apiClient := api.GetTestClient()
+	apiClient := GetTestClient()
 	initMockFeedsSet3(apiClient.HTTPClient())
 
 	gock.New("http://localhost:9999").
@@ -205,9 +207,10 @@ func TestIntegrationDbExportFeeds_should_handle_lots_of_rows_ok(t *testing.T) {
 		  }
 		`)
 
-	cfg := &config.ExporterConfiguration{}
-	cfg.AccessToken = "token-123"
-	cfg.Export.Incremental = true
+	cfg := &feed.ExporterFeedCfg{
+		AccessToken:       "token-123",
+		ExportIncremental: true,
+	}
 
 	exporterApp := feed.NewExporterApp(apiClient, apiClient, cfg)
 	err = exporterApp.ExportFeeds(exporter)
@@ -241,7 +244,7 @@ func TestIntegrationDbExportFeeds_should_update_action_assignees_on_second_run(t
 		  }
 		`)
 
-	apiClient := api.GetTestClient()
+	apiClient := GetTestClient()
 	initMockFeedsSet1(apiClient.HTTPClient())
 	gock.New("http://localhost:9999").
 		Post("/accounts/history/v1/activity_log/list").
@@ -255,9 +258,10 @@ func TestIntegrationDbExportFeeds_should_update_action_assignees_on_second_run(t
 		Reply(http.StatusOK).
 		File(path.Join("mocks", "set_1", "inspections_deleted_single_page.json"))
 
-	cfg := &config.ExporterConfiguration{}
-	cfg.AccessToken = "token-123"
-	cfg.Export.Incremental = true
+	cfg := &feed.ExporterFeedCfg{
+		AccessToken:       "token-123",
+		ExportIncremental: true,
+	}
 
 	exporterApp := feed.NewExporterApp(apiClient, apiClient, cfg)
 	err = exporterApp.ExportFeeds(exporter)
@@ -281,7 +285,7 @@ func TestGroupUserFeed_Export_should_filter_duplicates(t *testing.T) {
 	exporter, err := getTemporaryCSVExporterWithRealSQLExporter(sqlExporter)
 	assert.NoError(t, err)
 
-	apiClient := api.GetTestClient()
+	apiClient := GetTestClient()
 	gock.InterceptClient(apiClient.HTTPClient())
 	gock.New("http://localhost:9999").
 		Get("/accounts/user/v1/user:WhoAmI").
@@ -301,10 +305,11 @@ func TestGroupUserFeed_Export_should_filter_duplicates(t *testing.T) {
 		Reply(200).
 		File("mocks/set_5/feed_group_users_1.json")
 
-	cfg := &config.ExporterConfiguration{}
-	cfg.AccessToken = "token-123"
-	cfg.Export.Incremental = true
-	cfg.Export.Tables = []string{"group_users"}
+	cfg := &feed.ExporterFeedCfg{
+		AccessToken:       "token-123",
+		ExportIncremental: true,
+		ExportTables:      []string{"group_users"},
+	}
 
 	exporterApp := feed.NewExporterApp(apiClient, apiClient, cfg)
 	err = exporterApp.ExportFeeds(exporter)
