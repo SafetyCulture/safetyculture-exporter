@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/SafetyCulture/safetyculture-exporter/pkg/external/api"
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/api"
 	"github.com/stretchr/testify/require"
 
 	exportermock "github.com/SafetyCulture/safetyculture-exporter/pkg/internal/exporter/mocks"

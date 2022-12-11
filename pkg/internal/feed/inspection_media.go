@@ -7,9 +7,9 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/SafetyCulture/safetyculture-exporter/pkg/external/version"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/httpapi"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/util"
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/version"
 )
 
 // GetMedia fetches the media object from SafetyCulture.

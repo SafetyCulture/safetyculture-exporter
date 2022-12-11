@@ -4,10 +4,10 @@ import (
 	"context"
 	"encoding/json"
 
-	"github.com/SafetyCulture/safetyculture-exporter/pkg/external/version"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/httpapi"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/events"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/util"
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/version"
 )
 
 // GetFeed executes the feed request and

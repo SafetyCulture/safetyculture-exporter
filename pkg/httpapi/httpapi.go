@@ -13,8 +13,8 @@ import (
 	"os"
 	"time"
 
-	"github.com/SafetyCulture/safetyculture-exporter/pkg/external/version"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/util"
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/version"
 	"github.com/dghubble/sling"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"

@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/SafetyCulture/safetyculture-exporter/cmd/safetyculture-exporter/cmd/export"
-	exporterAPI "github.com/SafetyCulture/safetyculture-exporter/pkg/external/api"
+	exporterAPI "github.com/SafetyCulture/safetyculture-exporter/pkg/api"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

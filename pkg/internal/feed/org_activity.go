@@ -5,10 +5,10 @@ import (
 	"encoding/json"
 	"time"
 
-	"github.com/SafetyCulture/safetyculture-exporter/pkg/external/version"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/httpapi"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/events"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/util"
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/version"
 )
 
 const activityHistoryLogURL = "/accounts/history/v1/activity_log/list"

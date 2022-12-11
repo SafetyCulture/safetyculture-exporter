@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	exporterAPI "github.com/SafetyCulture/safetyculture-exporter/pkg/external/api"
+	exporterAPI "github.com/SafetyCulture/safetyculture-exporter/pkg/api"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/feed"
 	"github.com/stretchr/testify/assert"
 )

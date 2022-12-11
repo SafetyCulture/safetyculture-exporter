@@ -8,7 +8,7 @@ import (
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/httpapi"
 
 	util "github.com/SafetyCulture/safetyculture-exporter/cmd/safetyculture-exporter/cmd/utils"
-	exporterAPI "github.com/SafetyCulture/safetyculture-exporter/pkg/external/api"
+	exporterAPI "github.com/SafetyCulture/safetyculture-exporter/pkg/api"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )

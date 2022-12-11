@@ -1,8 +1,9 @@
 package version_test
 
 import (
-	"github.com/SafetyCulture/safetyculture-exporter/pkg/external/version"
 	"testing"
+
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/version"
 
 	"github.com/stretchr/testify/assert"
 )

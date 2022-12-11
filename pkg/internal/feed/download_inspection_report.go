@@ -5,9 +5,9 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/SafetyCulture/safetyculture-exporter/pkg/external/version"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/httpapi"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/util"
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/version"
 )
 
 //TODO: move this to report package
