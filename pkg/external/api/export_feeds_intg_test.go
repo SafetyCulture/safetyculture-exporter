@@ -1,7 +1,7 @@
 //go:build sql
 // +build sql
 
-package feed_test
+package api_test
 
 import (
 	"net/http"
