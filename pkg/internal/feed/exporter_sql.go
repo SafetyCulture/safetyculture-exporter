@@ -2,13 +2,13 @@ package feed
 
 import (
 	"fmt"
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/logger"
 	"os"
 	"path/filepath"
 	"strings"
 	"time"
 
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/events"
-	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/util"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 	"gorm.io/driver/mysql"
@@ -214,14 +214,14 @@ func NewSQLExporter(dialect, connectionString string, autoMigrate bool, exportMe
 		return nil, fmt.Errorf("invalid database dialect %s", dialect)
 	}
 
-	l := util.GetLogger()
-	gormLogger := &util.GormLogger{
+	l := logger.GetLogger()
+	gormLogger := &logger.GormLogger{
 		SugaredLogger: l,
 		SlowThreshold: 30 * time.Second,
 	}
 
 	gormConfig := gorm.Config{
-		Logger: gormLogger, //use logger.Default.LogMode(logger.Info) for checking the statements (gorm.io/logger)
+		Logger: gormLogger, // use logger.Default.LogMode(logger.Info) for checking the statements (gorm.io/logger)
 	}
 
 	db, err := gorm.Open(dialector, &gormConfig)

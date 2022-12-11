@@ -4,12 +4,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/logger"
 	"sync"
 	"time"
 
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/httpapi"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/events"
-	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/util"
 )
 
 /*
@@ -88,7 +88,7 @@ func (e *ExporterFeedClient) addError(err error) {
 
 // ExportFeeds fetches all the feeds data from server and stores them in the format provided
 func (e *ExporterFeedClient) ExportFeeds(exporter Exporter) error {
-	logger := util.GetLogger()
+	logger := logger.GetLogger()
 	ctx := context.Background()
 
 	tables := e.configuration.ExportTables
@@ -304,7 +304,7 @@ func (e *ExporterFeedClient) PrintSchemas(exporter *SchemaExporter) error {
 }
 
 func (e *ExporterFeedClient) ExportInspectionReports(exporter *ReportExporter) error {
-	logger := util.GetLogger()
+	logger := logger.GetLogger()
 	ctx := context.Background()
 
 	resp, err := e.apiClient.WhoAmI(ctx)

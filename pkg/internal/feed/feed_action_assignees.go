@@ -4,11 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/logger"
 	"time"
 
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/httpapi"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/events"
-	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/util"
 )
 
 // ActionAssignee represents a row from the action_assignees feed
@@ -101,7 +101,7 @@ func (f *ActionAssigneeFeed) writeRows(ctx context.Context, exporter Exporter, r
 
 // Export exports the feed to the supplied exporter
 func (f *ActionAssigneeFeed) Export(ctx context.Context, apiClient *httpapi.Client, exporter Exporter, orgID string) error {
-	logger := util.GetLogger().With("feed", f.Name(), "org_id", orgID)
+	logger := logger.GetLogger().With("feed", f.Name(), "org_id", orgID)
 
 	if err := exporter.InitFeed(f, &InitFeedOptions{
 		// Delete data if incremental refresh is disabled so there is no duplicates

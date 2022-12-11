@@ -3,6 +3,7 @@ package inspections
 import (
 	"context"
 	"fmt"
+	util2 "github.com/SafetyCulture/safetyculture-exporter/pkg/logger"
 	"sync"
 	"time"
 
@@ -53,7 +54,7 @@ func NewInspectionClient(cfg *InspectionClientCfg, apiClient *httpapi.Client, ex
 		Archived:      cfg.Archived,
 		Completed:     cfg.Completed,
 		Incremental:   cfg.Incremental,
-		SugaredLogger: util.GetLogger(),
+		SugaredLogger: util2.GetLogger(),
 	}
 }
 

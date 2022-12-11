@@ -4,13 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/logger"
 	"strings"
 	"sync"
 	"time"
 
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/httpapi"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/events"
-	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/util"
 )
 
 const maxGoRoutines = 10
@@ -152,7 +152,7 @@ func fetchAndWriteMedia(ctx context.Context, apiClient *httpapi.Client, exporter
 }
 
 func (f *InspectionItemFeed) writeRows(ctx context.Context, exporter Exporter, rows []*InspectionItem, apiClient *httpapi.Client) error {
-	logger := util.GetLogger()
+	logger := logger.GetLogger()
 	skipIDs := map[string]bool{}
 	for _, id := range f.SkipIDs {
 		skipIDs[id] = true
@@ -226,7 +226,7 @@ func (f *InspectionItemFeed) CreateSchema(exporter Exporter) error {
 
 // Export exports the feed to the supplied exporter
 func (f *InspectionItemFeed) Export(ctx context.Context, apiClient *httpapi.Client, exporter Exporter, orgID string) error {
-	logger := util.GetLogger().With("feed", f.Name(), "org_id", orgID)
+	logger := logger.GetLogger().With("feed", f.Name(), "org_id", orgID)
 
 	exporter.InitFeed(f, &InitFeedOptions{
 		// Delete data if incremental refresh is disabled so there is no duplicates

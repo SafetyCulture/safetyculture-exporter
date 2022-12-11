@@ -4,11 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/logger"
 	"time"
 
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/httpapi"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/events"
-	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/util"
 )
 
 // ScheduleOccurrence represents a row from the schedule_occurrences feed
@@ -84,7 +84,7 @@ func (f *ScheduleOccurrenceFeed) CreateSchema(exporter Exporter) error {
 
 // Export exports the feed to the supplied exporter
 func (f *ScheduleOccurrenceFeed) Export(ctx context.Context, apiClient *httpapi.Client, exporter Exporter, orgID string) error {
-	logger := util.GetLogger().With("feed", f.Name(), "org_id", orgID)
+	logger := logger.GetLogger().With("feed", f.Name(), "org_id", orgID)
 
 	logger.Info("exporting")
 

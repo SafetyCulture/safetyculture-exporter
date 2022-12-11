@@ -1,6 +1,7 @@
 package util
 
 import (
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/logger"
 	"net/http"
 
 	"github.com/pkg/errors"
@@ -12,7 +13,7 @@ var lgr *zap.SugaredLogger
 // Check the error and exit the process when not nil
 func Check(err error, msg string) {
 	if lgr == nil {
-		lgr = GetLogger()
+		lgr = logger.GetLogger()
 	}
 
 	if err != nil {

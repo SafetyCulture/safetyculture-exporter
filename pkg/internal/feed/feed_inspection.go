@@ -4,12 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/logger"
 	"strings"
 	"time"
 
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/httpapi"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/events"
-	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/util"
 )
 
 // Inspection represents a row from the inspections feed
@@ -188,7 +188,7 @@ func (f *InspectionFeed) Export(ctx context.Context, apiClient *httpapi.Client, 
 }
 
 func (f *InspectionFeed) processNewInspections(ctx context.Context, apiClient *httpapi.Client, exporter Exporter, orgID string) error {
-	logger := util.GetLogger().With("feed", f.Name(), "org_id", orgID)
+	logger := logger.GetLogger().With("feed", f.Name(), "org_id", orgID)
 	req := GetFeedRequest{
 		InitialURL: "/feed/inspections",
 		Params: GetFeedParams{
@@ -227,7 +227,7 @@ func (f *InspectionFeed) processNewInspections(ctx context.Context, apiClient *h
 }
 
 func (f *InspectionFeed) processDeletedInspections(ctx context.Context, apiClient *httpapi.Client, exporter Exporter) error {
-	lg := util.GetLogger()
+	lg := logger.GetLogger()
 	dreq := NewGetAccountsActivityLogRequest(f.Limit, f.ModifiedAfter)
 	delFn := func(resp *GetAccountsActivityLogResponse) error {
 		var pkeys = make([]string, 0, len(resp.Activities))
