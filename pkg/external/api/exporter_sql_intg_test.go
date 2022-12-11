@@ -1,3 +1,6 @@
+//go:build sql
+// +build sql
+
 package api_test
 
 import (
