@@ -2,14 +2,17 @@ package api_test
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
 	exporterAPI "github.com/SafetyCulture/safetyculture-exporter/pkg/external/api"
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/httpapi"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/feed"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/h2non/gock.v1"
@@ -507,4 +510,168 @@ func Test_GetWaitTime(t *testing.T) {
 	assert.Equal(t, time.Duration(3), feed.GetWaitTime(50))
 	assert.Equal(t, time.Duration(4), feed.GetWaitTime(60))
 	assert.Equal(t, time.Duration(4), feed.GetWaitTime(90))
+}
+
+func TestAPIClientInitiateInspectionReportExport_should_return_messageID(t *testing.T) {
+	defer gock.Off()
+
+	gock.New("http://localhost:9999").
+		Post("/audits/audit_123/report").
+		JSON(`{
+			"format": "PDF",
+			"preference_id": "p123"
+		}`).
+		Reply(200).
+		JSON(`{
+			"messageId": "abc"
+		}`)
+
+	apiClient := GetTestClient()
+	gock.InterceptClient(apiClient.HTTPClient())
+
+	mId, err := feed.InitiateInspectionReportExport(context.Background(), apiClient, "audit_123", "PDF", "p123")
+
+	assert.NoError(t, err)
+	assert.Equal(t, "abc", mId)
+}
+
+func TestAPIClientInitiateInspectionReportExport_should_return_error_on_failure(t *testing.T) {
+	defer gock.Off()
+
+	gock.New("http://localhost:9999").
+		Post("/audits/audit_123/report").
+		JSON(`{"format": "PDF"}`).
+		Reply(500).
+		JSON(`{"error": "something bad happened"}`)
+
+	tests := []struct {
+		name string
+		cr   httpapi.CheckForRetry
+		err  string
+	}{
+		{
+			name: "default_retry_policy",
+			cr:   httpapi.DefaultRetryPolicy,
+			err:  "giving up after 2 attempt(s)",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			apiClient := GetTestClient()
+			gock.InterceptClient(apiClient.HTTPClient())
+
+			_, err := feed.InitiateInspectionReportExport(context.Background(), apiClient, "audit_123", "PDF", "")
+			if err == nil || !strings.HasSuffix(err.Error(), tt.err) {
+				t.Fatalf("expected giving up error, got: %#v", err)
+			}
+		})
+	}
+}
+
+func TestAPIClientCheckInspectionReportExportCompletion_should_return_status(t *testing.T) {
+	defer gock.Off()
+
+	gock.New("http://localhost:9999").
+		Get("/audits/audit_123/report/abc").
+		Reply(200).
+		JSON(`{
+			"status": "SUCCESS",
+			"url": "http://domain.com/report"
+		}`)
+
+	apiClient := GetTestClient()
+	gock.InterceptClient(apiClient.HTTPClient())
+
+	res, err := feed.CheckInspectionReportExportCompletion(context.Background(), apiClient, "audit_123", "abc")
+
+	assert.NoError(t, err)
+	assert.Equal(t, res.Status, "SUCCESS")
+	assert.Equal(t, res.URL, "http://domain.com/report")
+}
+
+func TestAPIClientCheckInspectionReportExportCompletion_should_return_error_on_failure(t *testing.T) {
+	defer gock.Off()
+
+	gock.New("http://localhost:9999").
+		Get("/audits/audit_123/report/abc").
+		Reply(500).
+		JSON(`{"error": "something bad happened"}`)
+
+	tests := []struct {
+		name string
+		cr   httpapi.CheckForRetry
+		err  string
+	}{
+		{
+			name: "default_retry_policy",
+			cr:   httpapi.DefaultRetryPolicy,
+			err:  "giving up after 2 attempt(s)",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			apiClient := GetTestClient()
+			gock.InterceptClient(apiClient.HTTPClient())
+
+			_, err := feed.CheckInspectionReportExportCompletion(context.Background(), apiClient, "audit_123", "abc")
+			if err == nil || !strings.HasSuffix(err.Error(), tt.err) {
+				t.Fatalf("expected giving up error, got: %#v", err)
+			}
+		})
+	}
+}
+
+func TestAPIClientDownloadInspectionReportFile_should_return_status(t *testing.T) {
+	defer gock.Off()
+
+	gock.New("http://localhost:9999").
+		Get("/report-exports/abc").
+		Reply(200).
+		Body(bytes.NewBuffer([]byte(`file content`)))
+
+	apiClient := GetTestClient()
+	gock.InterceptClient(apiClient.HTTPClient())
+
+	res, err := feed.DownloadInspectionReportFile(context.Background(), apiClient, "http://localhost:9999/report-exports/abc")
+
+	assert.NoError(t, err)
+
+	buf := new(bytes.Buffer)
+	buf.ReadFrom(res)
+	assert.Equal(t, buf.String(), "file content")
+}
+
+func TestAPIClientDownloadInspectionReportFile_should_return_error_on_failure(t *testing.T) {
+	defer gock.Off()
+
+	gock.New("http://localhost:9999").
+		Get("/report-exports/abc").
+		Reply(500).
+		BodyString("somthing bad happened")
+
+	tests := []struct {
+		name string
+		cr   httpapi.CheckForRetry
+		err  string
+	}{
+		{
+			name: "default_retry_policy",
+			cr:   httpapi.DefaultRetryPolicy,
+			err:  "giving up after 2 attempt(s)",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			apiClient := GetTestClient()
+			gock.InterceptClient(apiClient.HTTPClient())
+
+			_, err := feed.DownloadInspectionReportFile(context.Background(), apiClient, "http://localhost:9999/report-exports/abc")
+			if err == nil || !strings.HasSuffix(err.Error(), tt.err) {
+				t.Fatalf("expected giving up error, got: %#v", err)
+			}
+		})
+	}
 }
