@@ -18,7 +18,7 @@ repos:
     rev: 1.11.2
     hooks:
       - id: forbid-binary
-        exclude: (^docs/assets/|^ui/frontend/|^docs/assets/)
+        exclude: (^docs/assets/|^ui/frontend/)
       - id: git-check
   - repo: https://github.com/adrienverge/yamllint
     rev: v1.20.0
