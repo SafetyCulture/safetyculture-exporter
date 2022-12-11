@@ -12,8 +12,11 @@ repos:
     rev: v2.4.0
     hooks:
       - id: check-json
+        exclude: (^ui/frontend/)
       - id: end-of-file-fixer
+        exclude: (^ui/frontend/)
       - id: trailing-whitespace
+        exclude: (^ui/frontend/)
   - repo: https://github.com/jumanjihouse/pre-commit-hooks
     rev: 1.11.2
     hooks:
