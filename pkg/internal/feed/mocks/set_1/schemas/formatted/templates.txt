@@ -1,0 +1,16 @@
++-----------------+----------+-------------+
+|      NAME       |   TYPE   | PRIMARY KEY |
++-----------------+----------+-------------+
+| template_id     | TEXT     | true        |
+| archived        | numeric  |             |
+| name            | TEXT     |             |
+| description     | TEXT     |             |
+| organisation_id | TEXT     |             |
+| owner_name      | TEXT     |             |
+| owner_id        | TEXT     |             |
+| author_name     | TEXT     |             |
+| author_id       | TEXT     |             |
+| created_at      | datetime |             |
+| modified_at     | datetime |             |
+| exported_at     | datetime |             |
++-----------------+----------+-------------+

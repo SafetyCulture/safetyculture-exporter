@@ -3,8 +3,8 @@ package configure
 import (
 	"fmt"
 
-	"github.com/SafetyCulture/safetyculture-exporter/internal/app/config"
-	"github.com/SafetyCulture/safetyculture-exporter/internal/app/util"
+	util "github.com/SafetyCulture/safetyculture-exporter/cmd/safetyculture-exporter/cmd/utils"
+	exporterAPI "github.com/SafetyCulture/safetyculture-exporter/pkg/api"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -20,7 +20,7 @@ func Cmd() *cobra.Command {
 }
 
 func generateYamlConfiguration(cmd *cobra.Command, args []string) error {
-	cm := config.NewConfigurationManager(viper.ConfigFileUsed())
+	cm := exporterAPI.NewConfigurationManager(viper.ConfigFileUsed())
 	err := cm.SaveConfiguration()
 	util.Check(err, "while writing config to file")
 	fmt.Println("Config file created successfully \U0001f389")

@@ -1,19 +1,14 @@
 package export
 
 import (
-	"context"
 	"encoding/base64"
 	"fmt"
 	"net/url"
-	"os"
 
-	"github.com/SafetyCulture/safetyculture-exporter/internal/app/api"
-	"github.com/SafetyCulture/safetyculture-exporter/internal/app/config"
-	"github.com/SafetyCulture/safetyculture-exporter/internal/app/exporter"
-	"github.com/SafetyCulture/safetyculture-exporter/internal/app/feed"
-	"github.com/SafetyCulture/safetyculture-exporter/internal/app/inspections"
-	"github.com/SafetyCulture/safetyculture-exporter/internal/app/util"
-	"github.com/pkg/errors"
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/httpapi"
+
+	util "github.com/SafetyCulture/safetyculture-exporter/cmd/safetyculture-exporter/cmd/utils"
+	exporterAPI "github.com/SafetyCulture/safetyculture-exporter/pkg/api"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -83,58 +78,6 @@ func ReportCmd() *cobra.Command {
 	}
 }
 
-func getAPIClient() *api.Client {
-	apiOpts := []api.Opt{}
-	if viper.GetBool("api.tls_skip_verify") {
-		apiOpts = append(apiOpts, api.OptSetInsecureTLS(true))
-	}
-	if viper.GetString("api.tls_cert") != "" {
-		apiOpts = append(apiOpts, api.OptAddTLSCert(viper.GetString("api.tls_cert")))
-	}
-	if viper.GetString("api.proxy_url") != "" {
-		proxyURL, err := url.Parse(viper.GetString("api.proxy_url"))
-		util.Check(err, "Unable to parse proxy URL")
-		apiOpts = append(apiOpts, api.OptSetProxy(proxyURL))
-	}
-
-	return api.NewClient(
-		viper.GetString("api.url"),
-		fmt.Sprintf("Bearer %s", viper.GetString("access_token")),
-		apiOpts...,
-	)
-}
-
-func getSheqsyAPIClient() *api.Client {
-	apiOpts := []api.Opt{}
-	if viper.GetBool("api.tls_skip_verify") {
-		apiOpts = append(apiOpts, api.OptSetInsecureTLS(true))
-	}
-	if viper.GetString("api.tls_cert") != "" {
-		apiOpts = append(apiOpts, api.OptAddTLSCert(viper.GetString("api.tls_cert")))
-	}
-	if viper.GetString("api.proxy_url") != "" {
-		proxyURL, err := url.Parse(viper.GetString("api.proxy_url"))
-		util.Check(err, "Unable to parse proxy URL")
-		apiOpts = append(apiOpts, api.OptSetProxy(proxyURL))
-	}
-
-	token := base64.StdEncoding.EncodeToString(
-		[]byte(
-			fmt.Sprintf(
-				"%s:%s",
-				viper.GetString("sheqsy_username"),
-				viper.GetString("sheqsy_password"),
-			),
-		),
-	)
-
-	return api.NewClient(
-		viper.GetString("api.sheqsy_url"),
-		fmt.Sprintf("Basic %s", token),
-		apiOpts...,
-	)
-}
-
 func runSQL(cmd *cobra.Command, args []string) error {
 	exp := NewSafetyCultureExporter(viper.GetViper())
 	err := exp.RunSQL()
@@ -170,139 +113,18 @@ func runInspectionReports(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-type SafetyCultureExporter struct {
-	cfg *config.ExporterConfiguration
-}
-
-func (s *SafetyCultureExporter) RunInspectionJSON() error {
-	exportPath := fmt.Sprintf("%s/json/", s.cfg.Export.Path)
-	err := os.MkdirAll(exportPath, os.ModePerm)
-	if err != nil {
-		return errors.Wrapf(err, "Failed to create directory %s", exportPath)
-	}
-
-	e := exporter.NewJSONExporter(exportPath)
-	inspectionsClient := inspections.NewInspectionClient(s.cfg, getAPIClient(), e)
-
-	err = inspectionsClient.Export(context.Background())
-	if err != nil {
-		return errors.Wrap(err, "error while exporting JSON")
-	}
-	return nil
-}
-
-func (s *SafetyCultureExporter) RunSQL() error {
-	if s.cfg.Export.Media {
-		err := os.MkdirAll(s.cfg.Export.MediaPath, os.ModePerm)
-		if err != nil {
-			return errors.Wrapf(err, "Failed to create directory %s", s.cfg.Export.MediaPath)
-		}
-	}
-
-	e, err := feed.NewSQLExporter(s.cfg.Db.Dialect, s.cfg.Db.ConnectionString, true, s.cfg.Export.MediaPath)
-	if err != nil {
-		return errors.Wrap(err, "create sql exporter")
-	}
-
-	exporterApp := feed.NewExporterApp(getAPIClient(), getSheqsyAPIClient(), s.cfg)
-	if s.cfg.Export.SchemaOnly {
-		return exporterApp.ExportSchemas(e)
-	}
-
-	if len(s.cfg.AccessToken) != 0 {
-		err = exporterApp.ExportFeeds(e)
-		if err != nil {
-			return errors.Wrap(err, "exporting feeds")
-		}
-	}
-
-	return nil
-}
-
-func (s *SafetyCultureExporter) RunCSV() error {
-	exportPath := s.cfg.Export.Path
-
-	err := os.MkdirAll(exportPath, os.ModePerm)
-	if err != nil {
-		return errors.Wrapf(err, "Failed to create directory %s", exportPath)
-	}
-
-	if s.cfg.Export.Media {
-		err := os.MkdirAll(s.cfg.Export.MediaPath, os.ModePerm)
-		if err != nil {
-			return errors.Wrapf(err, "Failed to create directory %s", s.cfg.Export.MediaPath)
-		}
-	}
-
-	e, err := feed.NewCSVExporter(exportPath, s.cfg.Export.MediaPath, s.cfg.Csv.MaxRowsPerFile)
-	if err != nil {
-		return errors.Wrap(err, "unable to create csv exporter")
-	}
-
-	exporterApp := feed.NewExporterApp(getAPIClient(), getSheqsyAPIClient(), s.cfg)
-	if s.cfg.Export.SchemaOnly {
-		return exporterApp.ExportSchemas(e)
-	}
-
-	if len(s.cfg.AccessToken) != 0 {
-		err = exporterApp.ExportFeeds(e)
-		if err != nil {
-			return errors.Wrap(err, "exporting feeds")
-		}
-	}
-
-	return nil
-}
-
-func (s *SafetyCultureExporter) RunInspectionReports() error {
-	err := os.MkdirAll(s.cfg.Export.Path, os.ModePerm)
-	if err != nil {
-		return errors.Wrapf(err, "Failed to create directory %s", s.cfg.Export.Path)
-	}
-
-	e, err := feed.NewReportExporter(s.cfg.Export.Path, s.cfg)
-	if err != nil {
-		return errors.Wrap(err, "unable to create report exporter")
-	}
-
-	exporterApp := feed.NewExporterApp(getAPIClient(), getSheqsyAPIClient(), s.cfg)
-	err = exporterApp.ExportInspectionReports(e)
-	if err != nil {
-		return errors.Wrap(err, "generate reports")
-	}
-
-	return nil
-}
-
-func (s *SafetyCultureExporter) RunPrintSchema() error {
-	e, err := feed.NewSchemaExporter(os.Stdout)
-	if err != nil {
-		return errors.Wrap(err, "unable to create exporter")
-	}
-
-	exporterApp := feed.NewExporterApp(getAPIClient(), getSheqsyAPIClient(), s.cfg)
-	err = exporterApp.PrintSchemas(e)
-	if err != nil {
-		return errors.Wrap(err, "error while printing schema")
-	}
-
-	return nil
-}
-
 // NewSafetyCultureExporter create a new SafetyCultureExporter with configuration from Viper
-func NewSafetyCultureExporter(v *viper.Viper) *SafetyCultureExporter {
-	cm, err := config.NewConfigurationManagerFromFile(v.ConfigFileUsed())
+func NewSafetyCultureExporter(v *viper.Viper) *exporterAPI.SafetyCultureExporter {
+	cm, err := exporterAPI.NewConfigurationManagerFromFile(v.ConfigFileUsed())
 	MapViperConfigToExporterConfiguration(v, cm.Configuration)
 	cm.ApplySafetyGuards()
 	util.Check(err, "while loading config file")
 
-	return &SafetyCultureExporter{
-		cfg: cm.Configuration,
-	}
+	return exporterAPI.NewSafetyCultureExporter(cm.Configuration, getAPIClient(), getSheqsyAPIClient())
 }
 
 // MapViperConfigToExporterConfiguration maps Viper config to ExporterConfiguration structure
-func MapViperConfigToExporterConfiguration(v *viper.Viper, cfg *config.ExporterConfiguration) {
+func MapViperConfigToExporterConfiguration(v *viper.Viper, cfg *exporterAPI.ExporterConfiguration) {
 	cfg.AccessToken = v.GetString("access_token")
 	cfg.SheqsyUsername = v.GetString("sheqsy_username")
 	cfg.SheqsyCompanyID = v.GetString("sheqsy_company_id")
@@ -331,4 +153,56 @@ func MapViperConfigToExporterConfiguration(v *viper.Viper, cfg *config.ExporterC
 	cfg.Report.PreferenceID = v.GetString("report.preference_id")
 	cfg.Report.FilenameConvention = v.GetString("report.filename_convention")
 	cfg.Report.RetryTimeout = v.GetInt("report.retry_timeout")
+}
+
+func getAPIClient() *httpapi.Client {
+	apiOpts := []httpapi.Opt{}
+	if viper.GetBool("api.tls_skip_verify") {
+		apiOpts = append(apiOpts, httpapi.OptSetInsecureTLS(true))
+	}
+	if viper.GetString("api.tls_cert") != "" {
+		apiOpts = append(apiOpts, httpapi.OptAddTLSCert(viper.GetString("api.tls_cert")))
+	}
+	if viper.GetString("api.proxy_url") != "" {
+		proxyURL, err := url.Parse(viper.GetString("api.proxy_url"))
+		util.Check(err, "Unable to parse proxy URL")
+		apiOpts = append(apiOpts, httpapi.OptSetProxy(proxyURL))
+	}
+
+	return httpapi.NewClient(
+		viper.GetString("api.url"),
+		fmt.Sprintf("Bearer %s", viper.GetString("access_token")),
+		apiOpts...,
+	)
+}
+
+func getSheqsyAPIClient() *httpapi.Client {
+	var apiOpts []httpapi.Opt
+	if viper.GetBool("api.tls_skip_verify") {
+		apiOpts = append(apiOpts, httpapi.OptSetInsecureTLS(true))
+	}
+	if viper.GetString("api.tls_cert") != "" {
+		apiOpts = append(apiOpts, httpapi.OptAddTLSCert(viper.GetString("api.tls_cert")))
+	}
+	if viper.GetString("api.proxy_url") != "" {
+		proxyURL, err := url.Parse(viper.GetString("api.proxy_url"))
+		util.Check(err, "Unable to parse proxy URL")
+		apiOpts = append(apiOpts, httpapi.OptSetProxy(proxyURL))
+	}
+
+	token := base64.StdEncoding.EncodeToString(
+		[]byte(
+			fmt.Sprintf(
+				"%s:%s",
+				viper.GetString("sheqsy_username"),
+				viper.GetString("sheqsy_password"),
+			),
+		),
+	)
+
+	return httpapi.NewClient(
+		viper.GetString("api.sheqsy_url"),
+		fmt.Sprintf("Basic %s", token),
+		apiOpts...,
+	)
 }

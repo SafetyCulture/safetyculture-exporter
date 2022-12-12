@@ -7,9 +7,9 @@ import (
 
 	"github.com/SafetyCulture/safetyculture-exporter/cmd/safetyculture-exporter/cmd/configure"
 	"github.com/SafetyCulture/safetyculture-exporter/cmd/safetyculture-exporter/cmd/export"
-	"github.com/SafetyCulture/safetyculture-exporter/internal/app/util"
-	"github.com/SafetyCulture/safetyculture-exporter/internal/app/version"
-	"github.com/SafetyCulture/safetyculture-exporter/internal/update"
+	util "github.com/SafetyCulture/safetyculture-exporter/cmd/safetyculture-exporter/cmd/utils"
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/update"
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/version"
 	"github.com/gookit/color"
 	"github.com/spf13/cobra"
 	"github.com/spf13/cobra/doc"
@@ -129,7 +129,7 @@ func configFlags() {
 	templatesFlag.StringSlice("template-ids", []string{}, "Template IDs to filter inspections and schedules by (default all)")
 
 	tablesFlag = flag.NewFlagSet("tables", flag.ContinueOnError)
-	tablesFlag.StringSlice("tables", []string{}, "Tables to export (default all)")
+	tablesFlag.StringSlice("tables", []string{}, "ExportTables to export (default all)")
 
 	schemasFlag = flag.NewFlagSet("schemas", flag.ContinueOnError)
 	schemasFlag.Bool("create-schema-only", false, "Create schema only (default false)")

@@ -1,0 +1,18 @@
++-------------------+----------+-------------+
+|       NAME        |   TYPE   | PRIMARY KEY |
++-------------------+----------+-------------+
+| id                | TEXT     | true        |
+| schedule_id       | TEXT     |             |
+| occurrence_id     | TEXT     |             |
+| template_id       | TEXT     |             |
+| organisation_id   | TEXT     |             |
+| start_time        | datetime |             |
+| due_time          | datetime |             |
+| miss_time         | datetime |             |
+| occurrence_status | TEXT     |             |
+| audit_id          | TEXT     |             |
+| completed_at      | datetime |             |
+| exported_at       | datetime |             |
+| user_id           | TEXT     |             |
+| assignee_status   | TEXT     |             |
++-------------------+----------+-------------+
