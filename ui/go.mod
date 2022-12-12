@@ -2,10 +2,8 @@ module github.com/SafetyCulture/safetyculture-exporter/ui
 
 go 1.18
 
-replace github.com/SafetyCulture/safetyculture-exporter => /Users/gaurav.verma/Work/repos/safetyculture-exporter
-
 require (
-	github.com/SafetyCulture/safetyculture-exporter v0.0.0-00010101000000-000000000000
+	github.com/SafetyCulture/safetyculture-exporter v0.0.0-20221212213910-8d8b0a0d339b
 	github.com/wailsapp/wails/v2 v2.2.0
 )
 
