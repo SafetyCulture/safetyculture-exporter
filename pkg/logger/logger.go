@@ -213,6 +213,22 @@ func (logger *ExporterLogger) Trace(message string) {
 }
 
 func CreateSettingsDirectory() (string, error) {
+	settingDir, err := GetSettingDirectoryPath()
+	if err != nil {
+		return "", err
+	}
+
+	if _, err := os.Stat(settingDir); os.IsNotExist(err) {
+		err := os.MkdirAll(settingDir, 0700)
+		if err != nil {
+			return "", errors.New("can't create settings directory")
+		}
+	}
+
+	return settingDir, nil
+}
+
+func GetSettingDirectoryPath() (string, error) {
 	homeDir, err := os.UserHomeDir()
 	var settingDir string
 
@@ -230,13 +246,5 @@ func CreateSettingsDirectory() (string, error) {
 	default:
 		return "", errors.New("unsupported platform")
 	}
-
-	if _, err := os.Stat(settingDir); os.IsNotExist(err) {
-		err := os.MkdirAll(settingDir, 0700)
-		if err != nil {
-			return "", errors.New("can't create settings directory")
-		}
-	}
-
 	return settingDir, nil
 }
