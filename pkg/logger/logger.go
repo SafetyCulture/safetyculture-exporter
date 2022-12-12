@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
+	runtime2 "runtime"
 	"time"
 
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/version"
@@ -107,7 +109,8 @@ func GetLogger() *zap.SugaredLogger {
 	logFileEncoder := zapcore.NewJSONEncoder(prodConfig)
 	consoleEncoder := zapcore.NewConsoleEncoder(zap.NewDevelopmentEncoderConfig())
 
-	file, err := os.OpenFile("logs.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	settingDir, err := CreateSettingsDirectory()
+	file, err := os.OpenFile(filepath.Join(settingDir, "logs.log"), os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
 		log.Fatalf("unable to open log file %v", err)
 	}
@@ -131,4 +134,109 @@ func GetLogger() *zap.SugaredLogger {
 
 	slg = l.Sugar()
 	return slg
+}
+
+// GetExporterLogger returns a configured instance of the logger
+func GetExporterLogger() *ExporterLogger {
+	if slg != nil {
+		return &ExporterLogger{
+			l: slg,
+		}
+	}
+
+	prodConfig := zap.NewProductionEncoderConfig()
+	prodConfig.EncodeTime = zapcore.ISO8601TimeEncoder
+	logFileEncoder := zapcore.NewJSONEncoder(prodConfig)
+	// consoleEncoder := zapcore.NewConsoleEncoder(zap.NewDevelopmentEncoderConfig())
+
+	settingDir, err := CreateSettingsDirectory()
+	file, err := os.OpenFile(filepath.Join(settingDir, "logs.log"), os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	if err != nil {
+		log.Fatalf("unable to open log file %v", err)
+	}
+
+	logFileWriter := zapcore.Lock(file)
+	// consoleWriter := zapcore.Lock(os.Stderr)
+
+	// Log to both console and the log file. This allows for succinct console logs and
+	// Verbose detailed logs to review is something goes wrong.
+	core := zapcore.NewTee(
+		// zapcore.NewCore(consoleEncoder, consoleWriter, zap.InfoLevel),
+		zapcore.NewCore(logFileEncoder, logFileWriter, zap.DebugLevel),
+	)
+
+	// From a zapcore.Core, it's easy to construct a Logger.
+	l := zap.New(core).Named(fmt.Sprintf("safetyculture-exporter@%s", version.GetVersion()))
+	defer l.Sync()
+
+	// redirects output from the standard library's package-global logger to the supplied logger
+	zap.RedirectStdLog(l)
+
+	slg = l.Sugar()
+	return &ExporterLogger{
+		l: slg,
+	}
+}
+
+// ExporterLogger wraps sugared logged into an interface compatible for Wails
+type ExporterLogger struct {
+	l *zap.SugaredLogger
+}
+
+func (logger *ExporterLogger) Debug(message string) {
+	logger.l.Debugln(message)
+}
+
+func (logger *ExporterLogger) Info(message string) {
+	logger.l.Infoln(message)
+}
+
+func (logger *ExporterLogger) Warning(message string) {
+	logger.l.Warnln(message)
+}
+
+func (logger *ExporterLogger) Error(message string) {
+	logger.l.Errorln(message)
+}
+
+func (logger *ExporterLogger) Fatal(message string) {
+	logger.l.Fatalln(message)
+}
+
+func (logger *ExporterLogger) Print(message string) {
+	panic("don't use print")
+}
+
+func (logger *ExporterLogger) Trace(message string) {
+	// unimplemented
+	panic("don't use trace")
+}
+
+func CreateSettingsDirectory() (string, error) {
+	homeDir, err := os.UserHomeDir()
+	var settingDir string
+
+	if err != nil {
+		return "", errors.New("can't get user's home directory")
+	}
+
+	switch runtime2.GOOS {
+	case "windows":
+		settingDir = filepath.Join(homeDir, "/AppData/Local/safetyculture-exporter")
+	case "darwin":
+		settingDir = filepath.Join(homeDir, "/Library/Application Support/safetyculture-exporter")
+	case "linux":
+		settingDir = filepath.Join(homeDir, "/.var/app/app.safetyculture.Exporter/data")
+	default:
+		return "", errors.New("unsupported platform")
+	}
+
+	if _, err := os.Stat(settingDir); os.IsNotExist(err) {
+		err := os.MkdirAll(settingDir, 0700)
+		if err != nil {
+			return "", errors.New("can't create settings directory")
+		}
+	}
+
+	return settingDir, nil
 }

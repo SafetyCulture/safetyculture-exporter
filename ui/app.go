@@ -2,11 +2,9 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
-	"log"
-	"net/http"
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/httpapi"
+	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
 // App struct
@@ -22,6 +20,18 @@ func NewApp() *App {
 // startup is called when the app starts. The context is saved
 // so we can call the runtime methods
 func (a *App) startup(ctx context.Context) {
+	// settingsDir, err := logger.GetSettingsDirectory()
+	// if err != nil {
+	// 	panic("failed to get settings directory")
+	// }
+	//
+	//
+	//
+	// _, err = os.Create(filepath.Join(settingsDir, "logs.log"))
+	// if err != nil {
+	// 	fmt.Printf("error while creating log file %v", err)
+	// }
+
 	a.ctx = ctx
 }
 
@@ -36,49 +46,21 @@ func (a *App) ExportCSV() {
 
 // ValidateApiKey validates the api, returns true if valid, false otherwise
 func (a *App) ValidateApiKey(apiKey string) bool {
-	log.Printf("Api key -- >> %s", apiKey)
-	client := &http.Client{}
-	req, err := http.NewRequest("GET", "https://api.safetyculture.io/accounts/user/v1/user:WhoAmI", nil)
-	req.Header.Set("Authorization", fmt.Sprintf("%s%s", "Bearer ", apiKey))
+	var apiOpts []httpapi.Opt
+
+	c := httpapi.NewClient("https://api.safetyculture.io", fmt.Sprintf("Bearer %s", apiKey), apiOpts...)
+	res, err := c.WhoAmI(a.ctx)
+
 	if err != nil {
-		log.Fatal(err)
+		runtime.LogError(a.ctx, "something bad happened")
 		return false
 	}
 
-	res, err := client.Do(req)
-	if err != nil {
-		log.Fatal(err)
+	if res != nil && (res.UserID == "" || res.OrganisationID == "") {
+		runtime.LogError(a.ctx, "something bad happened")
 		return false
 	}
 
-	responseData, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		log.Fatal(err)
-		return false
-	}
-
-	var response *WhoAmIResponse
-	err = json.Unmarshal(responseData, &response)
-	if err != nil {
-		log.Println(err)
-		return false
-	}
-
-	if response == nil || len(response.UserID) == 0 || len(response.OrganisationID) == 0 {
-		return false
-	}
-
-	log.Printf("User ID -- >> %s", response.UserID)
-	log.Printf("Org ID -- >> %s", response.OrganisationID)
-	log.Printf("First Name -- >> %s", response.FirstName)
-	log.Printf("Last Name -- >> %s", response.LastName)
-
+	runtime.LogInfo(a.ctx, "api key is valid")
 	return true
-}
-
-type WhoAmIResponse struct {
-	UserID         string `json:"user_id"`
-	OrganisationID string `json:"organisation_id"`
-	FirstName      string `json:"firstname"`
-	LastName       string `json:"lastname"`
 }
