@@ -6,7 +6,6 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	runtime2 "runtime"
 	"time"
 
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/version"
@@ -101,6 +100,7 @@ var slg *zap.SugaredLogger
 // GetLogger returns a configured instance of the logger
 func GetLogger() *zap.SugaredLogger {
 	if slg != nil {
+		slg.Infof("GetLogger LOGGER %p", &slg)
 		return slg
 	}
 
@@ -109,8 +109,7 @@ func GetLogger() *zap.SugaredLogger {
 	logFileEncoder := zapcore.NewJSONEncoder(prodConfig)
 	consoleEncoder := zapcore.NewConsoleEncoder(zap.NewDevelopmentEncoderConfig())
 
-	settingDir, err := CreateSettingsDirectory()
-	file, err := os.OpenFile(filepath.Join(settingDir, "logs.log"), os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	file, err := os.OpenFile("logs.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
 		log.Fatalf("unable to open log file %v", err)
 	}
@@ -133,12 +132,14 @@ func GetLogger() *zap.SugaredLogger {
 	zap.RedirectStdLog(l)
 
 	slg = l.Sugar()
+	slg.Infof("Creating GetLogger LOGGER %p", &slg)
 	return slg
 }
 
 // GetExporterLogger returns a configured instance of the logger
-func GetExporterLogger() *ExporterLogger {
+func GetExporterLogger(path string) *ExporterLogger {
 	if slg != nil {
+		slg.Infof("GetExporterLogger LOGGER %p", &slg)
 		return &ExporterLogger{
 			l: slg,
 		}
@@ -149,8 +150,7 @@ func GetExporterLogger() *ExporterLogger {
 	logFileEncoder := zapcore.NewJSONEncoder(prodConfig)
 	// consoleEncoder := zapcore.NewConsoleEncoder(zap.NewDevelopmentEncoderConfig())
 
-	settingDir, err := CreateSettingsDirectory()
-	file, err := os.OpenFile(filepath.Join(settingDir, "logs.log"), os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	file, err := os.OpenFile(filepath.Join(path, "logs.log"), os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
 		log.Fatalf("unable to open log file %v", err)
 	}
@@ -173,6 +173,7 @@ func GetExporterLogger() *ExporterLogger {
 	zap.RedirectStdLog(l)
 
 	slg = l.Sugar()
+	slg.Infof("Creating GetExporterLogger LOGGER %p", &slg)
 	return &ExporterLogger{
 		l: slg,
 	}
@@ -210,41 +211,4 @@ func (logger *ExporterLogger) Print(message string) {
 func (logger *ExporterLogger) Trace(message string) {
 	// unimplemented
 	panic("don't use trace")
-}
-
-func CreateSettingsDirectory() (string, error) {
-	settingDir, err := GetSettingDirectoryPath()
-	if err != nil {
-		return "", err
-	}
-
-	if _, err := os.Stat(settingDir); os.IsNotExist(err) {
-		err := os.MkdirAll(settingDir, 0700)
-		if err != nil {
-			return "", errors.New("can't create settings directory")
-		}
-	}
-
-	return settingDir, nil
-}
-
-func GetSettingDirectoryPath() (string, error) {
-	homeDir, err := os.UserHomeDir()
-	var settingDir string
-
-	if err != nil {
-		return "", errors.New("can't get user's home directory")
-	}
-
-	switch runtime2.GOOS {
-	case "windows":
-		settingDir = filepath.Join(homeDir, "/AppData/Local/safetyculture-exporter")
-	case "darwin":
-		settingDir = filepath.Join(homeDir, "/Library/Application Support/safetyculture-exporter")
-	case "linux":
-		settingDir = filepath.Join(homeDir, "/.var/app/app.safetyculture.Exporter/data")
-	default:
-		return "", errors.New("unsupported platform")
-	}
-	return settingDir, nil
 }

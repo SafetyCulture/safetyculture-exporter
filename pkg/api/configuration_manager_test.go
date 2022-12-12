@@ -11,25 +11,25 @@ import (
 )
 
 func TestNewConfigurationManagerFromFile_when_invalid_filename(t *testing.T) {
-	cm, err := api.NewConfigurationManagerFromFile("fake_file")
+	cm, err := api.NewConfigurationManagerFromFile("", "fake_file")
 	require.Nil(t, cm)
 	assert.Equal(t, "invalid file name provided", err.Error())
 }
 
 func TestNewConfigurationManagerFromFile_when_empty_filename(t *testing.T) {
-	cm, err := api.NewConfigurationManagerFromFile("  ")
+	cm, err := api.NewConfigurationManagerFromFile("", "  ")
 	require.Nil(t, cm)
 	assert.Equal(t, "invalid file name provided", err.Error())
 }
 
 func TestNewConfigurationManagerFromFile_when_file_is_missing(t *testing.T) {
-	cm, err := api.NewConfigurationManagerFromFile("abc.yaml")
+	cm, err := api.NewConfigurationManagerFromFile("", "abc.yaml")
 	require.Nil(t, cm)
 	assert.Equal(t, "read file: open abc.yaml: no such file or directory", err.Error())
 }
 
 func TestNewConfigurationManager_should_use_empty_time(t *testing.T) {
-	cm := api.NewConfigurationManager("fixtures/valid_no_time.yaml")
+	cm := api.NewConfigurationManager("", "fixtures/valid_no_time.yaml")
 	assert.NotNil(t, cm)
 	assert.NotNil(t, cm.Configuration)
 	assert.EqualValues(t, "", cm.Configuration.Db.ConnectionString)
@@ -37,7 +37,7 @@ func TestNewConfigurationManager_should_use_empty_time(t *testing.T) {
 }
 
 func TestNewConfigurationManagerFromFile_when_filename_exists_with_time(t *testing.T) {
-	cm, err := api.NewConfigurationManagerFromFile("fixtures/valid_with_time.yaml")
+	cm, err := api.NewConfigurationManagerFromFile("", "fixtures/valid_with_time.yaml")
 	require.Nil(t, err)
 	require.NotNil(t, cm)
 	require.NotNil(t, cm.Configuration)
@@ -49,7 +49,7 @@ func TestNewConfigurationManagerFromFile_when_filename_exists_with_time(t *testi
 
 func TestNewConfigurationManagerFromFile_should_create_file(t *testing.T) {
 	_ = os.Remove("fake_file.yaml")
-	cm := api.NewConfigurationManager("fake_file.yaml")
+	cm := api.NewConfigurationManager("", "fake_file.yaml")
 	err := cm.SaveConfiguration()
 	assert.Nil(t, err)
 	assert.NotNil(t, cm)
@@ -60,7 +60,7 @@ func TestNewConfigurationManagerFromFile_should_create_file(t *testing.T) {
 }
 
 func TestNewConfigurationManagerFromFile_when_filename_exists_without_time(t *testing.T) {
-	cm, err := api.NewConfigurationManagerFromFile("fixtures/valid_no_time.yaml")
+	cm, err := api.NewConfigurationManagerFromFile("", "fixtures/valid_no_time.yaml")
 	assert.Nil(t, err)
 	require.NotNil(t, cm)
 	require.NotNil(t, cm.Configuration)
@@ -114,7 +114,7 @@ func TestNewConfigurationManagerFromFile_when_filename_exists_without_time(t *te
 
 func TestConfigurationManager_SaveConfiguration(t *testing.T) {
 	_ = os.Remove("fake_file.yaml")
-	cm := api.NewConfigurationManager("fake_file.yaml")
+	cm := api.NewConfigurationManager("", "fake_file.yaml")
 	require.NotNil(t, cm)
 	require.NotNil(t, cm.Configuration)
 
@@ -127,7 +127,7 @@ func TestConfigurationManager_SaveConfiguration(t *testing.T) {
 	assert.Nil(t, err)
 
 	// read the file as new
-	newCm, err := api.NewConfigurationManagerFromFile("fake_file.yaml")
+	newCm, err := api.NewConfigurationManagerFromFile("", "fake_file.yaml")
 	require.Nil(t, err)
 	require.NotNil(t, newCm)
 	require.NotNil(t, newCm.Configuration)
@@ -157,7 +157,7 @@ func TestConfigurationManager_SaveConfiguration(t *testing.T) {
 }
 
 func TestMapViperConfigToConfigurationOptions_ShouldRespectLimit(t *testing.T) {
-	cm, err := api.NewConfigurationManagerFromFile("fixtures/test_limit_50.yaml")
+	cm, err := api.NewConfigurationManagerFromFile("", "fixtures/test_limit_50.yaml")
 	require.Nil(t, err)
 	require.NotNil(t, cm)
 	assert.EqualValues(t, 50, cm.Configuration.Export.Action.Limit)
@@ -165,7 +165,7 @@ func TestMapViperConfigToConfigurationOptions_ShouldRespectLimit(t *testing.T) {
 }
 
 func TestMapViperConfigToConfigurationOptions_ShouldEnforceLimit(t *testing.T) {
-	cm, err := api.NewConfigurationManagerFromFile("fixtures/test_limit_101.yaml")
+	cm, err := api.NewConfigurationManagerFromFile("", "fixtures/test_limit_101.yaml")
 	require.Nil(t, err)
 	require.NotNil(t, cm)
 	assert.EqualValues(t, 100, cm.Configuration.Export.Action.Limit)

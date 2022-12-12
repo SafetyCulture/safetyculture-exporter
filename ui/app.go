@@ -2,7 +2,14 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"os"
+	"path"
+	"path/filepath"
+	runtime2 "runtime"
+
+	exporterAPI "github.com/SafetyCulture/safetyculture-exporter/pkg/api"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/httpapi"
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
@@ -10,6 +17,7 @@ import (
 // App struct
 type App struct {
 	ctx context.Context
+	cm *exporterAPI.ConfigurationManager
 }
 
 // NewApp creates a new App application struct
@@ -18,21 +26,41 @@ func NewApp() *App {
 }
 
 // startup is called when the app starts. The context is saved
-// so we can call the runtime methods
+// so, we can call the runtime methods
 func (a *App) startup(ctx context.Context) {
-	// settingsDir, err := logger.GetSettingsDirectory()
-	// if err != nil {
-	// 	panic("failed to get settings directory")
-	// }
-	//
-	//
-	//
-	// _, err = os.Create(filepath.Join(settingsDir, "logs.log"))
-	// if err != nil {
-	// 	fmt.Printf("error while creating log file %v", err)
-	// }
+	settingsDir, err := GetSettingDirectoryPath()
+	if err != nil {
+		runtime.LogError(ctx, "failed to get settings directory")
+		panic("failed to get settings directory")
+	}
+
+
+	if !checkForConfigFile(settingsDir) {
+		runtime.LogInfof(ctx, "creating configuration file: %s/safetyculture-exporter.yaml", settingsDir)
+		cm := exporterAPI.NewConfigurationManager(settingsDir, "safetyculture-exporter.yaml")
+		if err := cm.SaveConfiguration(); err != nil {
+			runtime.LogError(ctx, err.Error())
+			panic("failed to save configuration")
+		}
+		a.cm = cm
+	} else {
+		runtime.LogInfof(ctx, "loading configuration file: %s/safetyculture-exporter.yaml", settingsDir)
+		cm, err := exporterAPI.NewConfigurationManagerFromFile(settingsDir, "safetyculture-exporter.yaml")
+		if err != nil {
+			runtime.LogError(ctx, err.Error())
+			panic("failed to load configuration")
+		}
+		a.cm = cm
+	}
 
 	a.ctx = ctx
+}
+
+func checkForConfigFile(basePath string) bool {
+	if _, err := os.Stat(path.Join(basePath, "safetyculture-exporter.yaml")); os.IsNotExist(err) {
+		return false
+	}
+	return true
 }
 
 // Greet returns a greeting for the given name
@@ -52,15 +80,56 @@ func (a *App) ValidateApiKey(apiKey string) bool {
 	res, err := c.WhoAmI(a.ctx)
 
 	if err != nil {
-		runtime.LogError(a.ctx, "something bad happened")
+		runtime.LogErrorf(a.ctx, "cannot check WhoAmI: %s", err.Error())
 		return false
 	}
 
 	if res != nil && (res.UserID == "" || res.OrganisationID == "") {
-		runtime.LogError(a.ctx, "something bad happened")
+		runtime.LogErrorf(a.ctx, "cannot validate the credentials for the given ApiKey: %s", err.Error())
 		return false
 	}
 
-	runtime.LogInfo(a.ctx, "api key is valid")
+	runtime.LogInfo(a.ctx, "saving the key")
+	a.cm.Configuration.AccessToken = apiKey
+	if err := a.cm.SaveConfiguration(); err != nil {
+		runtime.LogErrorf(a.ctx, "cannot save configuration: %s", err.Error())
+	}
 	return true
+}
+
+func CreateSettingsDirectory() (string, error) {
+	settingDir, err := GetSettingDirectoryPath()
+	if err != nil {
+		return "", err
+	}
+
+	if _, err := os.Stat(settingDir); os.IsNotExist(err) {
+		err := os.MkdirAll(settingDir, 0700)
+		if err != nil {
+			return "", errors.New("can't create settings directory")
+		}
+	}
+
+	return settingDir, nil
+}
+
+func GetSettingDirectoryPath() (string, error) {
+	homeDir, err := os.UserHomeDir()
+	var settingDir string
+
+	if err != nil {
+		return "", errors.New("can't get user's home directory")
+	}
+
+	switch runtime2.GOOS {
+	case "windows":
+		settingDir = filepath.Join(homeDir, "/AppData/Local/safetyculture-exporter")
+	case "darwin":
+		settingDir = filepath.Join(homeDir, "/Library/Application Support/safetyculture-exporter")
+	case "linux":
+		settingDir = filepath.Join(homeDir, "/.var/app/app.safetyculture.Exporter/data")
+	default:
+		return "", errors.New("unsupported platform")
+	}
+	return settingDir, nil
 }

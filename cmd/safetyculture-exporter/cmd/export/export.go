@@ -115,7 +115,7 @@ func runInspectionReports(cmd *cobra.Command, args []string) error {
 
 // NewSafetyCultureExporter create a new SafetyCultureExporter with configuration from Viper
 func NewSafetyCultureExporter(v *viper.Viper) *exporterAPI.SafetyCultureExporter {
-	cm, err := exporterAPI.NewConfigurationManagerFromFile(v.ConfigFileUsed())
+	cm, err := exporterAPI.NewConfigurationManagerFromFile("", v.ConfigFileUsed())
 	MapViperConfigToExporterConfiguration(v, cm.Configuration)
 	cm.ApplySafetyGuards()
 	util.Check(err, "while loading config file")
