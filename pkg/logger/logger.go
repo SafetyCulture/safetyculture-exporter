@@ -100,7 +100,6 @@ var slg *zap.SugaredLogger
 // GetLogger returns a configured instance of the logger
 func GetLogger() *zap.SugaredLogger {
 	if slg != nil {
-		slg.Infof("GetLogger LOGGER %p", &slg)
 		return slg
 	}
 
@@ -132,14 +131,12 @@ func GetLogger() *zap.SugaredLogger {
 	zap.RedirectStdLog(l)
 
 	slg = l.Sugar()
-	slg.Infof("Creating GetLogger LOGGER %p", &slg)
 	return slg
 }
 
 // GetExporterLogger returns a configured instance of the logger
 func GetExporterLogger(path string) *ExporterLogger {
 	if slg != nil {
-		slg.Infof("GetExporterLogger LOGGER %p", &slg)
 		return &ExporterLogger{
 			l: slg,
 		}
@@ -173,7 +170,6 @@ func GetExporterLogger(path string) *ExporterLogger {
 	zap.RedirectStdLog(l)
 
 	slg = l.Sugar()
-	slg.Infof("Creating GetExporterLogger LOGGER %p", &slg)
 	return &ExporterLogger{
 		l: slg,
 	}
