@@ -1,4 +1,4 @@
-package feed
+package report
 
 import (
 	"context"
@@ -10,8 +10,6 @@ import (
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/version"
 	"github.com/pkg/errors"
 )
-
-//TODO: move this to report package
 
 // CheckInspectionReportExportCompletion checks if the report export is complete.
 func CheckInspectionReportExportCompletion(ctx context.Context, apiClient *httpapi.Client, auditID string, messageID string) (*InspectionReportExportCompletionResponse, error) {

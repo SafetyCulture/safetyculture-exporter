@@ -11,8 +11,6 @@ import (
 	"github.com/pkg/errors"
 )
 
-//TODO: move this to report package
-
 // GetInspection retrieves the inspection of the given id.
 func GetInspection(ctx context.Context, apiClient *httpapi.Client, id string) (*json.RawMessage, error) {
 	var (

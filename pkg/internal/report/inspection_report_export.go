@@ -1,4 +1,4 @@
-package feed
+package report
 
 import (
 	"context"
@@ -10,8 +10,6 @@ import (
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/version"
 	"github.com/pkg/errors"
 )
-
-//TODO: move this to report package
 
 // InitiateInspectionReportExport export the report of the given auditID.
 func InitiateInspectionReportExport(ctx context.Context, apiClient *httpapi.Client, auditID string, format string, preferenceID string) (string, error) {

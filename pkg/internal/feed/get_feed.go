@@ -48,7 +48,6 @@ func GetFeed(ctx context.Context, apiClient *httpapi.Client, request *GetFeedReq
 	}
 
 	if httpRes != nil && (httpRes.StatusCode < 200 || httpRes.StatusCode > 299) {
-		//TODO?
 		return nil, util.HTTPError{
 			StatusCode: httpRes.StatusCode,
 			Resource:   request.InitialURL,

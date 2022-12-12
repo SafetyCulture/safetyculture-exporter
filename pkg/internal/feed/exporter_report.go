@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/httpapi"
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/report"
 
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
@@ -218,7 +219,7 @@ func (e *ReportExporter) GetDuration() time.Duration {
 }
 
 func (e *ReportExporter) exportInspection(ctx context.Context, apiClient *httpapi.Client, inspection *Inspection, format string) error {
-	messageID, err := InitiateInspectionReportExport(ctx, apiClient, inspection.ID, format, e.PreferenceID)
+	messageID, err := report.InitiateInspectionReportExport(ctx, apiClient, inspection.ID, format, e.PreferenceID)
 	if err != nil {
 		return err
 	}
@@ -229,12 +230,12 @@ func (e *ReportExporter) exportInspection(ctx context.Context, apiClient *httpap
 		// wait for stipulated time before checking for report completion
 		time.Sleep(GetWaitTime(e.RetryTimeout) * time.Second)
 
-		rec, cErr := CheckInspectionReportExportCompletion(ctx, apiClient, inspection.ID, messageID)
+		rec, cErr := report.CheckInspectionReportExportCompletion(ctx, apiClient, inspection.ID, messageID)
 		if cErr != nil {
 			err = cErr
 			break
 		} else if rec.Status == "SUCCESS" {
-			resp, dErr := DownloadInspectionReportFile(ctx, apiClient, rec.URL)
+			resp, dErr := report.DownloadInspectionReportFile(ctx, apiClient, rec.URL)
 			if dErr != nil {
 				err = dErr
 				break

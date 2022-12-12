@@ -14,6 +14,7 @@ import (
 	exporterAPI "github.com/SafetyCulture/safetyculture-exporter/pkg/api"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/httpapi"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/feed"
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/report"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/h2non/gock.v1"
 )
@@ -529,7 +530,7 @@ func TestAPIClientInitiateInspectionReportExport_should_return_messageID(t *test
 	apiClient := GetTestClient()
 	gock.InterceptClient(apiClient.HTTPClient())
 
-	mId, err := feed.InitiateInspectionReportExport(context.Background(), apiClient, "audit_123", "PDF", "p123")
+	mId, err := report.InitiateInspectionReportExport(context.Background(), apiClient, "audit_123", "PDF", "p123")
 
 	assert.NoError(t, err)
 	assert.Equal(t, "abc", mId)
@@ -561,7 +562,7 @@ func TestAPIClientInitiateInspectionReportExport_should_return_error_on_failure(
 			apiClient := GetTestClient()
 			gock.InterceptClient(apiClient.HTTPClient())
 
-			_, err := feed.InitiateInspectionReportExport(context.Background(), apiClient, "audit_123", "PDF", "")
+			_, err := report.InitiateInspectionReportExport(context.Background(), apiClient, "audit_123", "PDF", "")
 			if err == nil || !strings.HasSuffix(err.Error(), tt.err) {
 				t.Fatalf("expected giving up error, got: %#v", err)
 			}
@@ -583,7 +584,7 @@ func TestAPIClientCheckInspectionReportExportCompletion_should_return_status(t *
 	apiClient := GetTestClient()
 	gock.InterceptClient(apiClient.HTTPClient())
 
-	res, err := feed.CheckInspectionReportExportCompletion(context.Background(), apiClient, "audit_123", "abc")
+	res, err := report.CheckInspectionReportExportCompletion(context.Background(), apiClient, "audit_123", "abc")
 
 	assert.NoError(t, err)
 	assert.Equal(t, res.Status, "SUCCESS")
@@ -615,7 +616,7 @@ func TestAPIClientCheckInspectionReportExportCompletion_should_return_error_on_f
 			apiClient := GetTestClient()
 			gock.InterceptClient(apiClient.HTTPClient())
 
-			_, err := feed.CheckInspectionReportExportCompletion(context.Background(), apiClient, "audit_123", "abc")
+			_, err := report.CheckInspectionReportExportCompletion(context.Background(), apiClient, "audit_123", "abc")
 			if err == nil || !strings.HasSuffix(err.Error(), tt.err) {
 				t.Fatalf("expected giving up error, got: %#v", err)
 			}
@@ -634,7 +635,7 @@ func TestAPIClientDownloadInspectionReportFile_should_return_status(t *testing.T
 	apiClient := GetTestClient()
 	gock.InterceptClient(apiClient.HTTPClient())
 
-	res, err := feed.DownloadInspectionReportFile(context.Background(), apiClient, "http://localhost:9999/report-exports/abc")
+	res, err := report.DownloadInspectionReportFile(context.Background(), apiClient, "http://localhost:9999/report-exports/abc")
 
 	assert.NoError(t, err)
 
@@ -668,7 +669,7 @@ func TestAPIClientDownloadInspectionReportFile_should_return_error_on_failure(t 
 			apiClient := GetTestClient()
 			gock.InterceptClient(apiClient.HTTPClient())
 
-			_, err := feed.DownloadInspectionReportFile(context.Background(), apiClient, "http://localhost:9999/report-exports/abc")
+			_, err := report.DownloadInspectionReportFile(context.Background(), apiClient, "http://localhost:9999/report-exports/abc")
 			if err == nil || !strings.HasSuffix(err.Error(), tt.err) {
 				t.Fatalf("expected giving up error, got: %#v", err)
 			}

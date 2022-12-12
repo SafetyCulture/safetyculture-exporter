@@ -1,4 +1,4 @@
-package feed
+package report
 
 import (
 	"context"
@@ -9,8 +9,6 @@ import (
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/util"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/version"
 )
-
-//TODO: move this to report package
 
 // DownloadInspectionReportFile downloads the report file of the inspection.
 func DownloadInspectionReportFile(ctx context.Context, apiClient *httpapi.Client, url string) (io.ReadCloser, error) {
