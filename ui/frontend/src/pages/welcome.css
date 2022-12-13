@@ -1,0 +1,138 @@
+body {
+    font-style: normal;
+    font-size: 1rem;
+    font-family: Tahoma, sans-serif;
+    -ms-overflow-style: none; /* for Internet Explorer, Edge */
+    scrollbar-width: none; /* for Firefox */
+    overflow-y: hidden;
+    overflow-x: hidden;
+    letter-spacing: .005rem;
+}
+
+body::-webkit-scrollbar {
+    display: none; /* for Chrome, Safari, and Opera */
+}
+
+a {
+    text-decoration: none;
+}
+
+.welcome-page {
+    display: flex;
+}
+
+.welcome-left-side {
+    width: 50%;
+    padding: 1.5rem;
+}
+
+.welcome-right-side {
+    width: 50%;
+}
+
+#welcome-page-logo {
+    width: 150px;
+}
+
+h1.welcome-title {
+    font-weight: 600;
+    font-size: 2rem;
+    margin-top: 16px;
+    margin-bottom: 16px;
+}
+
+div.token-validation-text {
+    margin-bottom: 8px;
+    color: #1D2330;
+}
+
+div.token-validation-text .link {
+    color: #4740D4;
+}
+
+
+
+#token-validation-input {
+    width: 100%;
+    padding: 12px 16px;
+    border-radius: 8px;
+    border: 1px solid #BFC5D4;
+    font-size: 1rem;
+    line-height: 1.5rem;
+}
+
+.token-validation-text {
+    font-style: normal;
+    font-weight: 400;
+    font-size: 1rem;
+    line-height: 1.5rem;
+}
+
+.token-input-group {
+    position: relative;
+    padding: 15px 0 0;
+    margin-top: 10px;
+    width: 50%;
+}
+
+.token-verify-button {
+    padding: 14px 16px;
+    border-radius: 12px;
+    background: #675DF4;
+    border-width: 0;
+
+    font-weight: 500;
+    font-size: 1rem;
+    line-height: 1.5rem;
+    color: #FFFFFF;
+
+    margin-top: 8px;
+}
+
+.note {
+    background-color: #EEF1F7;
+    padding: 16px;
+    color: #3F495A;
+    display: flex;
+    flex-direction: row;
+    gap: 16px;
+    font-size: 0.9rem;
+}
+
+.note .note-title {
+    font-weight: bold;
+    padding-bottom: 8px;
+}
+
+.note .note-body {
+    line-height: 1.5rem;
+}
+
+div.right-image {
+    max-width: 100%;
+    max-height: 100%;
+}
+
+.right-image img {
+    height: 100%;
+    width: 100%;
+    object-fit: contain;
+}
+
+div.error-block {
+    font-size: 0.8rem;
+    color: #1D2330;
+}
+
+div.error-block .error-block-title {
+    color: #A02228;
+}
+
+div.error-block .error-block-body ul {
+    margin-top: 2px;
+    margin-bottom: 2px;
+}
+
+section.storage-info {
+    margin-top: 24px;
+}
