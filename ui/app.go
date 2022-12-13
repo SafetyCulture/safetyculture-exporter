@@ -87,7 +87,7 @@ func (a *App) CheckApiKey() bool {
 func (a *App) ValidateApiKey(apiKey string) bool {
 	var apiOpts []httpapi.Opt
 
-	c := httpapi.NewClient("https://api.safetyculture.io", fmt.Sprintf("Bearer %s", apiKey), apiOpts...)
+	c := httpapi.NewClient(a.cm.Configuration.API.URL, fmt.Sprintf("Bearer %s", apiKey), apiOpts...)
 	res, err := c.WhoAmI(a.ctx)
 
 	if err != nil {
