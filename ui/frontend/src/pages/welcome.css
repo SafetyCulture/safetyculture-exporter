@@ -1,17 +1,10 @@
-#welcome-page-logo {
-    width: 150px;
-    height: 30px;
+body {
+    font-style: normal;
+    font-size: 1rem;
 }
 
-#token-validation-input {
-    width: 100%;
-    padding: 12px 16px;
-    border-radius: 8px;
-    border: 1px solid #BFC5D4;
-    font-family: inherit;
-    font-weight: 400;
-    font-size: 14px;
-    line-height: 24px;
+a {
+    text-decoration: none;
 }
 
 .welcome-page {
@@ -20,26 +13,42 @@
 
 .welcome-left-side {
     width: 50%;
-    padding: 24px;
+    padding: 1.5rem;
 }
 
 .welcome-right-side {
     width: 50%;
 }
 
-.welcome-title {
-    font-style: normal;
-    font-weight: 700;
-    font-size: 32px;
-    line-height: 40px;
-    letter-spacing: -1px;
+#welcome-page-logo {
+    width: 150px;
+    height: 30px;
+}
+
+h1.welcome-title {
+    font-weight: bold;
+    font-size: 2rem;
+}
+
+div.token-validation-text {
+    margin-bottom: 5px;
+}
+
+#token-validation-input {
+    width: 100%;
+    padding: 12px 16px;
+    border-radius: 8px;
+    border: 1px solid #BFC5D4;
+    font-size: 1rem;
+    line-height: 1.5rem;
+    margin-bottom: 5px;
 }
 
 .token-validation-text {
     font-style: normal;
     font-weight: 400;
-    font-size: 16px;
-    line-height: 24px;
+    font-size: 1rem;
+    line-height: 1.5rem;
 }
 
 .token-input-group {
@@ -53,15 +62,29 @@
     padding: 14px 16px;
     border-radius: 12px;
     background: #675DF4;
-    box-shadow: none;
+    border-width: 0;
 
-    font-style: normal;
     font-weight: 500;
-    font-size: 14px;
-    line-height: 20px;
+    font-size: 1rem;
+    line-height: 1.5rem;
     color: #FFFFFF;
 }
 
-a {
-    text-decoration: none;
+.note {
+    background-color: #EEF1F7;
+    padding: 16px;
+    color: #3F495A;
+    display: flex;
+    flex-direction: row;
+    gap: 16px;
 }
+
+.note .note-title {
+    font-weight: bold;
+    padding-bottom: 8px;
+}
+
+.note .note-body {
+    line-height: 2rem;
+}
+
