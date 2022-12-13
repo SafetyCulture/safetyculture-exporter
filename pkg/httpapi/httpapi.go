@@ -6,7 +6,6 @@ import (
 	"crypto/x509"
 	"encoding/json"
 	"fmt"
-	util2 "github.com/SafetyCulture/safetyculture-exporter/pkg/logger"
 	"log"
 	"net"
 	"net/http"
@@ -15,6 +14,7 @@ import (
 	"time"
 
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/util"
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/logger"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/version"
 	"github.com/dghubble/sling"
 	"github.com/pkg/errors"
@@ -67,7 +67,7 @@ func NewClient(addr string, authorizationHeader string, opts ...Opt) *Client {
 	}
 
 	a := &Client{
-		logger:              util2.GetLogger(),
+		logger:              logger.GetLogger(),
 		HttpClient:          httpClient,
 		BaseURL:             addr,
 		httpTransport:       httpTransport,

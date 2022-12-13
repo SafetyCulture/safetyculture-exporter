@@ -3,6 +3,7 @@ package api
 import (
 	"fmt"
 	"os"
+	"path"
 	"strings"
 	"time"
 
@@ -111,6 +112,7 @@ func (mt mTime) MarshalYAML() (interface{}, error) {
 
 // ConfigurationManager wrapper for configuration and fileName
 type ConfigurationManager struct {
+	path 		  string
 	fileName      string
 	Configuration *ExporterConfiguration
 }
@@ -121,7 +123,7 @@ func (c *ConfigurationManager) loadConfiguration() error {
 		return fmt.Errorf("invalid file name provided")
 	}
 
-	yamlContents, err := os.ReadFile(c.fileName)
+	yamlContents, err := os.ReadFile(path.Join(c.path, c.fileName))
 	if err != nil {
 		return fmt.Errorf("read file: %w", err)
 	}
@@ -154,7 +156,7 @@ func (c *ConfigurationManager) SaveConfiguration() error {
 	if err != nil {
 		return fmt.Errorf("marshal: %w", err)
 	}
-	if err := os.WriteFile(c.fileName, data, 0666); err != nil {
+	if err := os.WriteFile(path.Join(c.path, c.fileName), data, 0666); err != nil {
 		return fmt.Errorf("writing file %s: %w", c.fileName, err)
 	}
 	return nil
@@ -184,8 +186,9 @@ func BuildConfigurationWithDefaults() *ExporterConfiguration {
 }
 
 // NewConfigurationManagerFromFile will create a ConfigurationManager with data from the specified file
-func NewConfigurationManagerFromFile(fileName string) (*ConfigurationManager, error) {
+func NewConfigurationManagerFromFile(path string, fileName string) (*ConfigurationManager, error) {
 	cm := &ConfigurationManager{
+		path: path,
 		fileName:      fileName,
 		Configuration: &ExporterConfiguration{},
 	}
@@ -200,8 +203,9 @@ func NewConfigurationManagerFromFile(fileName string) (*ConfigurationManager, er
 }
 
 // NewConfigurationManager will create a ConfigurationManager with default data,
-func NewConfigurationManager(fileName string) *ConfigurationManager {
+func NewConfigurationManager(path string, fileName string) *ConfigurationManager {
 	cm := &ConfigurationManager{
+		path: path,
 		fileName:      fileName,
 		Configuration: BuildConfigurationWithDefaults(),
 	}

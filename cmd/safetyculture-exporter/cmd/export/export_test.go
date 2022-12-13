@@ -48,7 +48,7 @@ func TestSQLCmd(t *testing.T) {
 }
 
 func TestNewConfigurationManagerFromFile_should_apply_the_viper_defaults(t *testing.T) {
-	cm := exporterAPI.NewConfigurationManager("new.yaml")
+	cm := exporterAPI.NewConfigurationManager("", "new.yaml")
 	require.NotNil(t, cm)
 
 	viperConfig := viper.New()

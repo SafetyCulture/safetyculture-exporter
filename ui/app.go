@@ -2,16 +2,23 @@ package main
 
 import (
 	"context"
-	"encoding/json"
+	"errors"
 	"fmt"
-	"io/ioutil"
-	"log"
-	"net/http"
+	"os"
+	"path"
+	"path/filepath"
+	runtime2 "runtime"
+	"strings"
+
+	exporterAPI "github.com/SafetyCulture/safetyculture-exporter/pkg/api"
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/httpapi"
+	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
 // App struct
 type App struct {
 	ctx context.Context
+	cm  *exporterAPI.ConfigurationManager
 }
 
 // NewApp creates a new App application struct
@@ -20,9 +27,41 @@ func NewApp() *App {
 }
 
 // startup is called when the app starts. The context is saved
-// so we can call the runtime methods
+// so, we can call the runtime methods
 func (a *App) startup(ctx context.Context) {
+	settingsDir, err := GetSettingDirectoryPath()
+	if err != nil {
+		runtime.LogError(ctx, "failed to get settings directory")
+		panic("failed to get settings directory")
+	}
+
+
+	if !checkForConfigFile(settingsDir) {
+		runtime.LogInfof(ctx, "creating configuration file: %s/safetyculture-exporter.yaml", settingsDir)
+		cm := exporterAPI.NewConfigurationManager(settingsDir, "safetyculture-exporter.yaml")
+		if err := cm.SaveConfiguration(); err != nil {
+			runtime.LogError(ctx, err.Error())
+			panic("failed to save configuration")
+		}
+		a.cm = cm
+	} else {
+		runtime.LogInfof(ctx, "loading configuration file: %s/safetyculture-exporter.yaml", settingsDir)
+		cm, err := exporterAPI.NewConfigurationManagerFromFile(settingsDir, "safetyculture-exporter.yaml")
+		if err != nil {
+			runtime.LogError(ctx, err.Error())
+			panic("failed to load configuration")
+		}
+		a.cm = cm
+	}
+
 	a.ctx = ctx
+}
+
+func checkForConfigFile(basePath string) bool {
+	if _, err := os.Stat(path.Join(basePath, "safetyculture-exporter.yaml")); os.IsNotExist(err) {
+		return false
+	}
+	return true
 }
 
 // Greet returns a greeting for the given name
@@ -34,51 +73,77 @@ func (a *App) ExportCSV() {
 
 }
 
+// CheckApiKey validates the api key from the config file if it exists
+func (a *App) CheckApiKey() bool {
+	token := a.cm.Configuration.AccessToken
+	if len(token) == 0 {
+		return false
+	}
+
+	return a.ValidateApiKey(token)
+}
+
 // ValidateApiKey validates the api, returns true if valid, false otherwise
 func (a *App) ValidateApiKey(apiKey string) bool {
-	log.Printf("Api key -- >> %s", apiKey)
-	client := &http.Client{}
-	req, err := http.NewRequest("GET", "https://api.safetyculture.io/accounts/user/v1/user:WhoAmI", nil)
-	req.Header.Set("Authorization", fmt.Sprintf("%s%s", "Bearer ", apiKey))
+	var apiOpts []httpapi.Opt
+
+	c := httpapi.NewClient("https://api.safetyculture.io", fmt.Sprintf("Bearer %s", apiKey), apiOpts...)
+	res, err := c.WhoAmI(a.ctx)
+
 	if err != nil {
-		log.Fatal(err)
+		runtime.LogErrorf(a.ctx, "cannot check WhoAmI: %s", err.Error())
 		return false
 	}
 
-	res, err := client.Do(req)
-	if err != nil {
-		log.Fatal(err)
+	if res != nil && (res.UserID == "" || res.OrganisationID == "") {
+		runtime.LogErrorf(a.ctx, "cannot validate the credentials for the given ApiKey: %s", err.Error())
 		return false
 	}
 
-	responseData, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		log.Fatal(err)
-		return false
+	runtime.LogInfo(a.ctx, "saving the key")
+
+	if strings.Compare(apiKey, a.cm.Configuration.AccessToken) != 0 {
+		a.cm.Configuration.AccessToken = apiKey
+		if err := a.cm.SaveConfiguration(); err != nil {
+			runtime.LogErrorf(a.ctx, "cannot save configuration: %s", err.Error())
+		}
 	}
-
-	var response *WhoAmIResponse
-	err = json.Unmarshal(responseData, &response)
-	if err != nil {
-		log.Println(err)
-		return false
-	}
-
-	if response == nil || len(response.UserID) == 0 || len(response.OrganisationID) == 0 {
-		return false
-	}
-
-	log.Printf("User ID -- >> %s", response.UserID)
-	log.Printf("Org ID -- >> %s", response.OrganisationID)
-	log.Printf("First Name -- >> %s", response.FirstName)
-	log.Printf("Last Name -- >> %s", response.LastName)
-
 	return true
 }
 
-type WhoAmIResponse struct {
-	UserID         string `json:"user_id"`
-	OrganisationID string `json:"organisation_id"`
-	FirstName      string `json:"firstname"`
-	LastName       string `json:"lastname"`
+func CreateSettingsDirectory() (string, error) {
+	settingDir, err := GetSettingDirectoryPath()
+	if err != nil {
+		return "", err
+	}
+
+	if _, err := os.Stat(settingDir); os.IsNotExist(err) {
+		err := os.MkdirAll(settingDir, 0700)
+		if err != nil {
+			return "", errors.New("can't create settings directory")
+		}
+	}
+
+	return settingDir, nil
+}
+
+func GetSettingDirectoryPath() (string, error) {
+	homeDir, err := os.UserHomeDir()
+	var settingDir string
+
+	if err != nil {
+		return "", errors.New("can't get user's home directory")
+	}
+
+	switch runtime2.GOOS {
+	case "windows":
+		settingDir = filepath.Join(homeDir, "/AppData/Local/safetyculture-exporter")
+	case "darwin":
+		settingDir = filepath.Join(homeDir, "/Library/Application Support/safetyculture-exporter")
+	case "linux":
+		settingDir = filepath.Join(homeDir, "/.var/app/app.safetyculture.Exporter/data")
+	default:
+		return "", errors.New("unsupported platform")
+	}
+	return settingDir, nil
 }
