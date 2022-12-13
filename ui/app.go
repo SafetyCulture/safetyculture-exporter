@@ -8,6 +8,7 @@ import (
 	"path"
 	"path/filepath"
 	runtime2 "runtime"
+	"strings"
 
 	exporterAPI "github.com/SafetyCulture/safetyculture-exporter/pkg/api"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/httpapi"
@@ -17,7 +18,7 @@ import (
 // App struct
 type App struct {
 	ctx context.Context
-	cm *exporterAPI.ConfigurationManager
+	cm  *exporterAPI.ConfigurationManager
 }
 
 // NewApp creates a new App application struct
@@ -72,6 +73,16 @@ func (a *App) ExportCSV() {
 
 }
 
+// CheckApiKey validates the api key from the config file if it exists
+func (a *App) CheckApiKey() bool {
+	token := a.cm.Configuration.AccessToken
+	if len(token) == 0 {
+		return false
+	}
+
+	return a.ValidateApiKey(token)
+}
+
 // ValidateApiKey validates the api, returns true if valid, false otherwise
 func (a *App) ValidateApiKey(apiKey string) bool {
 	var apiOpts []httpapi.Opt
@@ -90,9 +101,12 @@ func (a *App) ValidateApiKey(apiKey string) bool {
 	}
 
 	runtime.LogInfo(a.ctx, "saving the key")
-	a.cm.Configuration.AccessToken = apiKey
-	if err := a.cm.SaveConfiguration(); err != nil {
-		runtime.LogErrorf(a.ctx, "cannot save configuration: %s", err.Error())
+
+	if strings.Compare(apiKey, a.cm.Configuration.AccessToken) != 0 {
+		a.cm.Configuration.AccessToken = apiKey
+		if err := a.cm.SaveConfiguration(); err != nil {
+			runtime.LogErrorf(a.ctx, "cannot save configuration: %s", err.Error())
+		}
 	}
 	return true
 }
