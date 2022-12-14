@@ -21,7 +21,7 @@
 		<section class="filters">
 			<div class="filter-title">
 				<div class="h3">Filters</div>
-				<div class="text-weak">Select which sets of data you want to export from your organization.</div>
+				<div class="text-weak m-top-8">Select which sets of data you want to export from your organization.</div>
 			</div>
 			<div class="label">Select templates</div>
 				<div class="template-button selector border-weak border-round-8">
@@ -32,9 +32,9 @@
 					</div>
 				</div>
 			<div class="label">Inspection date range</div>
-			<div class="text-weak">From:</div>
+			<div class="sub-label text-weak">From:</div>
 			<DatePicker></DatePicker>
-			<div class="text-weak">To:</div>
+			<div class="sub-label text-weak">To:</div>
 			<DatePicker></DatePicker>
 			<div class="label">Include inspections with the following status:</div>
 			<select name="status">

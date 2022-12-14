@@ -27,6 +27,7 @@
 
 .config-body {
     display: flex;
+    justify-content: space-between;
 }
 
 .filters {
@@ -40,4 +41,5 @@
 
 .template-button-right {
     display: flex;
+    align-items: center;
 }
