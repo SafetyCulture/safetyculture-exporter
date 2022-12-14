@@ -1,0 +1,83 @@
+body {
+    font-style: normal;
+    font-size: 1rem;
+    font-family: Tahoma, sans-serif;
+    -ms-overflow-style: none; /* for Internet Explorer, Edge */
+    scrollbar-width: none; /* for Firefox */
+    overflow-y: hidden;
+    overflow-x: hidden;
+    letter-spacing: .005rem;
+    color: #1D2330;
+}
+
+body::-webkit-scrollbar {
+    display: none; /* for Chrome, Safari, and Opera */
+}
+
+.h1 {
+    font-weight: 600;
+    font-size: 2rem;
+    margin-top: 16px;
+    margin-bottom: 16px;
+}
+
+.h2 {
+    font-weight: 600;
+    font-size: 1.5rem;
+}
+
+.h3 {
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.button {
+    padding: 14px 16px;
+    border-width: 1px;
+    font-weight: 500;
+    font-size: 1rem;
+    line-height: 1.5rem;
+}
+.button:hover {
+    cursor: pointer;
+}
+
+.button-white {
+    background: #FFFFFF;
+    color: #675DF4;
+    border-color: #545F70;
+}
+
+.button-purple {
+    background: #675DF4;
+    color: #FFFFFF;
+    border-color: #FFFFFF;
+}
+
+.m-top-8 {
+    margin-top: 8px;
+}
+
+.m-left-8 {
+    margin-left: 8px;
+}
+
+.p-48 {
+    padding: 48px;
+}
+
+.text-weak {
+    color: #545F70;
+}
+
+.border-weak {
+    border-color: #545F70
+}
+
+.border-round-8 {
+    border-radius: 8px;
+}
+
+.border-round-12 {
+    border-radius: 12px;
+}

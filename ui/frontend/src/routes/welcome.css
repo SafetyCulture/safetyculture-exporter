@@ -1,17 +1,4 @@
-body {
-    font-style: normal;
-    font-size: 1rem;
-    font-family: Tahoma, sans-serif;
-    -ms-overflow-style: none; /* for Internet Explorer, Edge */
-    scrollbar-width: none; /* for Firefox */
-    overflow-y: hidden;
-    overflow-x: hidden;
-    letter-spacing: .005rem;
-}
 
-body::-webkit-scrollbar {
-    display: none; /* for Chrome, Safari, and Opera */
-}
 
 a {
     text-decoration: none;
@@ -34,12 +21,6 @@ a {
     width: 150px;
 }
 
-h1.welcome-title {
-    font-weight: 600;
-    font-size: 2rem;
-    margin-top: 16px;
-    margin-bottom: 16px;
-}
 
 div.token-validation-text {
     margin-bottom: 8px;
@@ -73,20 +54,6 @@ div.token-validation-text .link {
     padding: 15px 0 0;
     margin-top: 10px;
     width: 50%;
-}
-
-.token-verify-button {
-    padding: 14px 16px;
-    border-radius: 12px;
-    background: #675DF4;
-    border-width: 0;
-
-    font-weight: 500;
-    font-size: 1rem;
-    line-height: 1.5rem;
-    color: #FFFFFF;
-
-    margin-top: 8px;
 }
 
 .token-verify-button:hover {
