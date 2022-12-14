@@ -1,7 +1,8 @@
 <script>
-	import {push} from 'svelte-spa-router'
+	import './common.css';
 	import './welcome.css';
 
+	import {push} from 'svelte-spa-router'
 	import {ValidateApiKey} from "../../wailsjs/go/main/App.js"
 
 	let isValid = false;
@@ -31,7 +32,7 @@
 				src="../images/logo.png"
 				alt="SafetyCulture logo"
 			/>
-			<h1 class="welcome-title">Welcome to SafetyCulture Exporter</h1>
+			<h1 class="page-title">Welcome to SafetyCulture Exporter</h1>
 		</section>
 		<section class="token-validation">
 			<div class="token-validation-text">Generate an API token from your SafetyCulture <span class="link">user profile</span>.</div>

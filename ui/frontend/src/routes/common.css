@@ -1,0 +1,21 @@
+body {
+    font-style: normal;
+    font-size: 1rem;
+    font-family: Tahoma, sans-serif;
+    -ms-overflow-style: none; /* for Internet Explorer, Edge */
+    scrollbar-width: none; /* for Firefox */
+    overflow-y: hidden;
+    overflow-x: hidden;
+    letter-spacing: .005rem;
+}
+
+body::-webkit-scrollbar {
+    display: none; /* for Chrome, Safari, and Opera */
+}
+
+h1.page-title {
+    font-weight: 600;
+    font-size: 2rem;
+    margin-top: 16px;
+    margin-bottom: 16px;
+}
