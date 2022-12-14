@@ -10,6 +10,10 @@ export function ExportCSV() {
   return window['go']['main']['App']['ExportCSV']();
 }
 
+export function GetSettings() {
+  return window['go']['main']['App']['GetSettings']();
+}
+
 export function Greet(arg1) {
   return window['go']['main']['App']['Greet'](arg1);
 }

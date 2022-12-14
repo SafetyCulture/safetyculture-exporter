@@ -111,6 +111,11 @@ func (a *App) ValidateApiKey(apiKey string) bool {
 	return true
 }
 
+// GetSettings gets the configuration
+func (a *App) GetSettings() *exporterAPI.ExporterConfiguration {
+	return a.cm.Configuration
+}
+
 func CreateSettingsDirectory() (string, error) {
 	settingDir, err := GetSettingDirectoryPath()
 	if err != nil {
