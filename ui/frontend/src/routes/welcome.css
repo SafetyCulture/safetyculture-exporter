@@ -89,6 +89,10 @@ div.token-validation-text .link {
     margin-top: 8px;
 }
 
+.token-verify-button:hover {
+    cursor: pointer;
+}
+
 .note {
     background-color: #EEF1F7;
     padding: 16px;

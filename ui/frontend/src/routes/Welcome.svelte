@@ -1,4 +1,5 @@
 <script>
+	import {push} from 'svelte-spa-router'
 	import './welcome.css';
 
 	import {ValidateApiKey} from "../../wailsjs/go/main/App.js"
@@ -15,6 +16,8 @@
 			if (isValid === false) {
 				buttonLabel = "Try again"
 				displayBadApiKeyErr = true
+			} else {
+				push("/config")
 			}
 		})
 	}
