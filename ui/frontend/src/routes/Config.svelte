@@ -1,7 +1,7 @@
 <script>
 	import './common.css';
 	import './config.css';
-	import SelectorDateButton from "../components/SelectorDateButton.svelte";
+	import DatePicker from "../components/DatePicker.svelte";
 </script>
 
 <div class="config-page p-48">
@@ -24,18 +24,18 @@
 				<div class="text-weak">Select which sets of data you want to export from your organization.</div>
 			</div>
 			<div class="label">Select templates</div>
-				<div class="template-button">
-					<div class="templates">templates</div>
+				<div class="template-button selector border-weak border-round-8">
+					<div class="templates">Surface Diamond Drill Safety Weekly Inspection Form</div>
 					<div class="template-button-right">
 						<div class="count">10</div>
-						<div class="right-arrow">(>)</div>
+						<img src="../images/arrow-right-compact.png" alt="right arrow icon" width="10" height="10">
 					</div>
 				</div>
 			<div class="label">Inspection date range</div>
 			<div class="text-weak">From:</div>
-			<SelectorDateButton></SelectorDateButton>
+			<DatePicker></DatePicker>
 			<div class="text-weak">To:</div>
-			<SelectorDateButton></SelectorDateButton>
+			<DatePicker></DatePicker>
 			<div class="label">Include inspections with the following status:</div>
 			<select name="status">
 				<option value="true">complete</option>

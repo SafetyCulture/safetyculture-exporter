@@ -29,6 +29,10 @@
     display: flex;
 }
 
+.filters {
+    width: 55%;
+}
+
 .template-button {
     display: flex;
     justify-content: space-between;

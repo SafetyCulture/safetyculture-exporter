@@ -54,6 +54,13 @@ body::-webkit-scrollbar {
     border-color: #FFFFFF;
 }
 
+.selector {
+    padding: 12px 16px;
+    font-weight: 400;
+    font-size: 1rem;
+    line-height: 1rem;
+}
+
 .m-top-8 {
     margin-top: 8px;
 }
@@ -71,7 +78,9 @@ body::-webkit-scrollbar {
 }
 
 .border-weak {
-    border-color: #545F70
+    border-color: #545F70;
+    border-style: solid;
+    border-width: 1px;
 }
 
 .border-round-8 {
