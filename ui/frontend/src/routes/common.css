@@ -22,22 +22,24 @@ body::-webkit-scrollbar {
 }
 
 .h2 {
-    font-weight: 600;
+    font-weight: 400;
     font-size: 1.5rem;
 }
 
 .h3 {
-    font-weight: 600;
+    font-weight: 400;
     font-size: 1rem;
 }
 
 .button {
     padding: 14px 16px;
     border-width: 1px;
+    border-radius: 12px;
     font-weight: 500;
     font-size: 1rem;
     line-height: 1.5rem;
 }
+
 .button:hover {
     cursor: pointer;
 }
@@ -52,6 +54,14 @@ body::-webkit-scrollbar {
     background: #675DF4;
     color: #FFFFFF;
     border-color: #FFFFFF;
+}
+
+.input {
+    padding: 12px 16px;
+    border-radius: 8px;
+    border: 1px solid #BFC5D4;
+    font-size: 1rem;
+    line-height: 1.5rem;
 }
 
 .m-top-8 {
