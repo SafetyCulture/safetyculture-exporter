@@ -22,12 +22,12 @@ body::-webkit-scrollbar {
 }
 
 .h2 {
-    font-weight: 600;
+    font-weight: 400;
     font-size: 1.5rem;
 }
 
 .h3 {
-    font-weight: 600;
+    font-weight: 400;
     font-size: 1rem;
 }
 
@@ -46,6 +46,14 @@ body::-webkit-scrollbar {
 .button {
     padding: 14px 16px;
     border-width: 1px;
+    font-weight: 400;
+    font-size: 1rem;
+}
+
+.button {
+    padding: 14px 16px;
+    border-width: 1px;
+    border-radius: 12px;
     font-weight: 500;
     font-size: 1rem;
     line-height: 1.5rem;
@@ -70,6 +78,12 @@ body::-webkit-scrollbar {
     background: #675DF4;
     color: #FFFFFF;
     border-color: #FFFFFF;
+}
+
+.checkbox-purple {
+    accent-color: #675DF4;
+    height: 20px;
+    width: 20px;
 }
 
 .selector {
@@ -111,16 +125,63 @@ body::-webkit-scrollbar {
     margin-top: 8px;
 }
 
+.m-top-16 {
+    margin-top: 16px;
+}
+
 .m-left-8 {
     margin-left: 8px;
+}
+
+.m-left-16 {
+    margin-left: 16px;
+}
+
+
+.m-left-32 {
+    margin-left: 32px;
+}
+
+.m-right-8 {
+    margin-right: 8px;
+}
+
+.m-right-16 {
+    margin-right: 16px;
 }
 
 .p-48 {
     padding: 48px;
 }
 
+.p-8 {
+    padding: 8px;
+}
+
+.p-left-8 {
+    padding-left: 8px;
+}
+
+.p-right-8 {
+    padding-right: 8px;
+}
+
+.p-horiz-8 {
+    padding-left: 8px;
+    padding-right: 8px;
+}
+
+.p-vert-8 {
+    padding-top: 8px;
+    padding-bottom: 8px;
+}
+
 .text-weak {
     color: #545F70;
+}
+
+.text-gray-2 {
+    color: #3F495A;
 }
 
 .border-weak {
