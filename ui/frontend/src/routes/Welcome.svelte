@@ -36,7 +36,7 @@
 		<section class="token-validation">
 			<div class="token-validation-text">Generate an API token from your SafetyCulture <span class="link">user profile</span>.</div>
 			<input
-				class="input token-validation-input"
+				class="input"
 				type="text"
 				placeholder="Enter API Token here"
 				bind:value={apiKey}
@@ -56,11 +56,11 @@
 				</div>
 			{/if}
 
-			<button class="button button-purple m-top-8" on:click={validate}>{buttonLabel}</button>
+			<button class="button button-purple m-top-8 border-round-12" on:click={validate}>{buttonLabel}</button>
 		</section>
 
 		<section class="storage-info">
-			<div class="note">
+			<div class="note border-round-8">
 				<div>
 					<img src="../images/round_exclamation_mark.png" alt="alert icon" width="20" height="20">
 				</div>
@@ -99,14 +99,6 @@
 	div.token-validation-text {
 		margin-bottom: 8px;
 		color: #1D2330;
-	}
-
-	div.token-validation-text .link {
-		color: #4740D4;
-	}
-
-	.token-validation-input {
-		width: 100%;
 	}
 
 	.token-validation-text {

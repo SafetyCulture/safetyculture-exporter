@@ -31,6 +31,25 @@ body::-webkit-scrollbar {
     font-size: 1rem;
 }
 
+.link {
+    color: #4740D4;
+}
+
+.text-size-small {
+    font-size: 0.8rem;
+}
+
+.text-size-medium {
+    font-size: 0.9rem;
+}
+
+.button {
+    padding: 14px 16px;
+    border-width: 1px;
+    font-weight: 400;
+    font-size: 1rem;
+}
+
 .button {
     padding: 14px 16px;
     border-width: 1px;
@@ -40,18 +59,23 @@ body::-webkit-scrollbar {
     line-height: 1.5rem;
 }
 
+.button-long {
+    display: flex;
+    justify-content: space-between;
+}
+
 .button:hover {
     cursor: pointer;
 }
 
 .button-white {
-    background-color: #FFFFFF;
+    background: #FFFFFF;
     color: #675DF4;
-    border-color: #545F70;
+    border-color: #BFC5D4;
 }
 
 .button-purple {
-    background-color: #675DF4;
+    background: #675DF4;
     color: #FFFFFF;
     border-color: #FFFFFF;
 }
@@ -62,12 +86,39 @@ body::-webkit-scrollbar {
     width: 20px;
 }
 
-.input {
+.selector {
+    margin-top: 4px;
     padding: 12px 16px;
+    font-weight: 400;
+    font-size: 1rem;
+    line-height: 1rem;
+}
+
+.input {
+    width: 100%;
+    padding: 10px 16px;
     border-radius: 8px;
     border: 1px solid #BFC5D4;
     font-size: 1rem;
     line-height: 1.5rem;
+}
+
+.label {
+    margin-top: 15px;
+    font-weight: 500;
+    font-size: 0.9rem;
+    line-height: 1rem;
+}
+
+.sub-label {
+    margin-top: 8px;
+    font-weight: 500;
+    font-size: 0.8rem;
+    line-height: 1rem;
+}
+
+.m-top-4 {
+    margin-top: 4px;
 }
 
 .m-top-8 {
@@ -134,7 +185,7 @@ body::-webkit-scrollbar {
 }
 
 .border-weak {
-    border-color: #545F70
+    border: 1px solid #BFC5D4;
 }
 
 .border-round-8 {
