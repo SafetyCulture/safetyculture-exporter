@@ -1,6 +1,37 @@
 <script>
 	import './common.css';
 	import DatePicker from "../components/DatePicker.svelte";
+	import Select from 'svelte-select';
+
+	const statusItems = [
+		{value: "true", label: "Completed only"},
+		{value: "false", label: "Incompleted only"},
+		{value: "both", label: "Both - completed and incompleted"}
+	]
+
+	const archivedItems = [
+		{value: "true", label: "Archived Only"},
+		{value: "false", label: "Unarchived Only"},
+		{value: "both", label: "Both - archived and unarchived"}
+	]
+
+	const dataFormatItems = [
+		{value: "csv", label: "CSV"},
+		{value: "sql", label: "SQL"}
+	]
+
+	const reportFormatItems = [
+		{value: "PDF", label: "PDF"},
+		{value: "WORD", label: "Word"},
+		{value: "both", label: "Both - PDF and Word"},
+	]
+
+	const timezoneItems = [
+		{value: "utc", label: "UTC"}
+	]
+
+	let templateCount = "N/A";
+	let templateNames = ["placeholder text"]
 </script>
 
 <div class="config-page p-48">
@@ -16,65 +47,73 @@
 			<button class="button button-purple m-left-8 border-round-12">Save and Export</button>
 		</div>
 	</section>
-	<div class="config-body">
+	<div class="config-body m-top-8">
 		<section class="filters">
 			<div class="filter-title">
 				<div class="h3">Filters</div>
 				<div class="text-weak m-top-8">Select which sets of data you want to export from your organization.</div>
 			</div>
 			<div class="label">Select templates</div>
-				<div class="template-button selector border-weak border-round-8">
-					<div class="templates">Surface Diamond Drill Safety Weekly Inspection Form</div>
+				<div class="button-long selector border-weak border-round-8">
+					<div class="templates">{templateNames}</div>
 					<div class="template-button-right">
-						<div class="count">10</div>
-						<img src="../images/arrow-right-compact.png" alt="right arrow icon" width="10" height="10">
+						<div class="count">{templateCount}</div>
+						<img class="m-left-8" src="../images/arrow-right-compact.png" alt="right arrow icon" width="4" height="8">
 					</div>
 				</div>
-			<div class="label">Inspection date range</div>
+			<div class="label">Date range</div>
 			<div class="sub-label text-weak">From:</div>
 			<DatePicker></DatePicker>
-			<div class="sub-label text-weak">To:</div>
-			<DatePicker></DatePicker>
 			<div class="label">Include inspections with the following status:</div>
-			<select name="status">
-				<option value="true">complete</option>
-				<option value="false">incomplete</option>
-				<option value="both">both</option>
-			</select>
+			<div class="border-weak border-round-8 m-top-4">
+				<Select
+					items={statusItems}
+					isClearable={false}
+					>
+				</Select>
+			</div>
 			<div class="label">Include archived inspections?</div>
-			<select name="status">
-				<option value="true">complete</option>
-				<option value="false">incomplete</option>
-				<option value="both">both</option>
-			</select>
+			<div class="border-weak border-round-8 m-top-4">
+				<Select
+					items={archivedItems}
+					isClearable={false}
+				>
+				</Select>
+			</div>
 		</section>
-		<section class="export-details">
+		<section class="export-details border-round-8">
 			<div class="h3">Export details</div>
 			<div class="label">Data export format</div>
-			<select name="export-format">
-				<option value="csv">csv</option>
-				<option value="sql">sql</option>
-			</select>
+			<div class="border-weak border-round-8 m-top-4">
+				<Select
+					items={dataFormatItems}
+					isClearable={false}
+				>
+				</Select>
+			</div>
 			<div class="label">Report format</div>
-			<select name="report-format">
-				<option value="pdf">PDF</option>
-				<option value="word">Word</option>
-				<option value="none">Don't export reports</option>
-			</select>
-			<div class="label">Folder location</div>
-			<div class="link">Want to change location?</div>
-			<div class="folder-selector">
-				<div>text</div>
-				<div>icon</div>
+			<Select
+				items={reportFormatItems}
+				isClearable={false}
+			>
+			</Select>
+			<div class="folder-title">
+				<div class="label">Folder location</div>
+				<div class="link text-size-small">Want to change location?</div>
+			</div>
+			<div class="button-long selector border-weak border-round-8">
+				<div class="text-weak">folder(unimplemented)</div>
+				<img src="../images/folder.png" alt="folder icon" width="15" height="15">
 			</div>
 			<div class="label">Export timezone</div>
-			<select name="export-format">
-				<option value="utc">utc</option>
-				<option value="1">utc+1</option>
-			</select>
+			<Select
+				items={timezoneItems}
+				isClearable={false}
+			>
+			</Select>
 			<div class="label">Include:</div>
 			<input type="checkbox" id="media" name="media" value="media">
-			<label for="media">Media</label>
+			<label class="text-size-medium" for="media">Media</label>
 		</section>
 	</div>
 </div>
@@ -112,13 +151,27 @@
 		width: 55%;
 	}
 
-	.template-button {
-		display: flex;
-		justify-content: space-between;
-	}
-
 	.template-button-right {
 		display: flex;
 		align-items: center;
+	}
+
+	.count {
+		background: #E5FAFF;
+		border-radius: 100px;
+		padding: 2px 10px;
+		color: #0D75B5;
+	}
+
+	.export-details {
+		width: 40%;
+		background-color: #E9EEF6;
+		padding: 16px;
+	}
+
+	.folder-title {
+		display: flex;
+		align-items: baseline;
+		justify-content: space-between;
 	}
 </style>

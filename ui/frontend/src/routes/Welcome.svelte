@@ -1,6 +1,5 @@
 <script>
 	import './common.css';
-	import './welcome.css';
 
 	import {push} from 'svelte-spa-router'
 	import {ValidateApiKey} from "../../wailsjs/go/main/App.js"
@@ -57,11 +56,11 @@
 				</div>
 			{/if}
 
-			<button class="button button-purple m-top-8" on:click={validate}>{buttonLabel}</button>
+			<button class="button button-purple m-top-8 border-round-12" on:click={validate}>{buttonLabel}</button>
 		</section>
 
 		<section class="storage-info">
-			<div class="note">
+			<div class="note border-round-8">
 				<div>
 					<img src="../images/round_exclamation_mark.png" alt="alert icon" width="20" height="20">
 				</div>
@@ -78,3 +77,91 @@
 		</div>
 	</section>
 </div>
+
+<style>
+	.welcome-page {
+		display: flex;
+	}
+
+	.welcome-left-side {
+		width: 50%;
+		padding: 1.5rem;
+	}
+
+	.welcome-right-side {
+		width: 50%;
+	}
+
+	#welcome-page-logo {
+		width: 150px;
+	}
+
+	div.token-validation-text {
+		margin-bottom: 8px;
+		color: #1D2330;
+	}
+
+	#token-validation-input {
+		width: 100%;
+		padding: 12px 16px;
+		border-radius: 8px;
+		border: 1px solid #BFC5D4;
+		font-size: 1rem;
+		line-height: 1.5rem;
+	}
+
+	.token-validation-text {
+		font-style: normal;
+		font-weight: 400;
+		font-size: 1rem;
+		line-height: 1.5rem;
+	}
+
+	.note {
+		background-color: #EEF1F7;
+		padding: 16px;
+		color: #3F495A;
+		display: flex;
+		flex-direction: row;
+		gap: 16px;
+		font-size: 0.9rem;
+	}
+
+	.note .note-title {
+		font-weight: bold;
+		padding-bottom: 8px;
+	}
+
+	.note .note-body {
+		line-height: 1.5rem;
+	}
+
+	div.right-image {
+		max-width: 100%;
+		max-height: 100%;
+	}
+
+	.right-image img {
+		height: 100%;
+		width: 100%;
+		object-fit: contain;
+	}
+
+	div.error-block {
+		font-size: 0.8rem;
+		color: #1D2330;
+	}
+
+	div.error-block .error-block-title {
+		color: #A02228;
+	}
+
+	div.error-block .error-block-body ul {
+		margin-top: 2px;
+		margin-bottom: 2px;
+	}
+
+	section.storage-info {
+		margin-top: 24px;
+	}
+</style>
