@@ -1,7 +1,7 @@
 <script>
-	import {push} from 'svelte-spa-router'
-	import './welcome.css';
+	import './common.css';
 
+	import {push} from 'svelte-spa-router'
 	import {ValidateApiKey} from "../../wailsjs/go/main/App.js"
 
 	let isValid = false;
@@ -31,12 +31,12 @@
 				src="../images/logo.png"
 				alt="SafetyCulture logo"
 			/>
-			<h1 class="welcome-title">Welcome to SafetyCulture Exporter</h1>
+			<div class="h1">Welcome to SafetyCulture Exporter</div>
 		</section>
 		<section class="token-validation">
 			<div class="token-validation-text">Generate an API token from your SafetyCulture <span class="link">user profile</span>.</div>
 			<input
-				id="token-validation-input"
+				class="input token-validation-input"
 				type="text"
 				placeholder="Enter API Token here"
 				bind:value={apiKey}
@@ -56,7 +56,7 @@
 				</div>
 			{/if}
 
-			<button class="token-verify-button" on:click={validate}>{buttonLabel}</button>
+			<button class="button button-purple m-top-8" on:click={validate}>{buttonLabel}</button>
 		</section>
 
 		<section class="storage-info">
@@ -77,3 +77,90 @@
 		</div>
 	</section>
 </div>
+
+<style>
+	.welcome-page {
+		display: flex;
+	}
+
+	.welcome-left-side {
+		width: 50%;
+		padding: 1.5rem;
+	}
+
+	.welcome-right-side {
+		width: 50%;
+	}
+
+	#welcome-page-logo {
+		width: 150px;
+	}
+
+	div.token-validation-text {
+		margin-bottom: 8px;
+		color: #1D2330;
+	}
+
+	div.token-validation-text .link {
+		color: #4740D4;
+	}
+
+	.token-validation-input {
+		width: 100%;
+	}
+
+	.token-validation-text {
+		font-style: normal;
+		font-weight: 400;
+		font-size: 1rem;
+		line-height: 1.5rem;
+	}
+
+	.note {
+		background-color: #EEF1F7;
+		padding: 16px;
+		color: #3F495A;
+		display: flex;
+		flex-direction: row;
+		gap: 16px;
+		font-size: 0.9rem;
+	}
+
+	.note .note-title {
+		font-weight: bold;
+		padding-bottom: 8px;
+	}
+
+	.note .note-body {
+		line-height: 1.5rem;
+	}
+
+	div.right-image {
+		max-width: 100%;
+		max-height: 100%;
+	}
+
+	.right-image img {
+		height: 100%;
+		width: 100%;
+		object-fit: contain;
+	}
+
+	div.error-block {
+		font-size: 0.8rem;
+		color: #1D2330;
+	}
+
+	div.error-block .error-block-title {
+		color: #A02228;
+	}
+
+	div.error-block .error-block-body ul {
+		margin-top: 2px;
+		margin-bottom: 2px;
+	}
+
+	section.storage-info {
+		margin-top: 24px;
+	}
+</style>

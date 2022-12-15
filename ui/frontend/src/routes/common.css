@@ -1,0 +1,146 @@
+body {
+    font-style: normal;
+    font-size: 1rem;
+    font-family: Tahoma, sans-serif;
+    -ms-overflow-style: none; /* for Internet Explorer, Edge */
+    scrollbar-width: none; /* for Firefox */
+    overflow-y: hidden;
+    overflow-x: hidden;
+    letter-spacing: .005rem;
+    color: #1D2330;
+}
+
+body::-webkit-scrollbar {
+    display: none; /* for Chrome, Safari, and Opera */
+}
+
+.h1 {
+    font-weight: 600;
+    font-size: 2rem;
+    margin-top: 16px;
+    margin-bottom: 16px;
+}
+
+.h2 {
+    font-weight: 400;
+    font-size: 1.5rem;
+}
+
+.h3 {
+    font-weight: 400;
+    font-size: 1rem;
+}
+
+.button {
+    padding: 14px 16px;
+    border-width: 1px;
+    border-radius: 12px;
+    font-weight: 500;
+    font-size: 1rem;
+    line-height: 1.5rem;
+}
+
+.button:hover {
+    cursor: pointer;
+}
+
+.button-white {
+    background-color: #FFFFFF;
+    color: #675DF4;
+    border-color: #545F70;
+}
+
+.button-purple {
+    background-color: #675DF4;
+    color: #FFFFFF;
+    border-color: #FFFFFF;
+}
+
+.checkbox-purple {
+    accent-color: #675DF4;
+    height: 20px;
+    width: 20px;
+}
+
+.input {
+    padding: 12px 16px;
+    border-radius: 8px;
+    border: 1px solid #BFC5D4;
+    font-size: 1rem;
+    line-height: 1.5rem;
+}
+
+.m-top-8 {
+    margin-top: 8px;
+}
+
+.m-top-16 {
+    margin-top: 16px;
+}
+
+.m-left-8 {
+    margin-left: 8px;
+}
+
+.m-left-16 {
+    margin-left: 16px;
+}
+
+
+.m-left-32 {
+    margin-left: 32px;
+}
+
+.m-right-8 {
+    margin-right: 8px;
+}
+
+.m-right-16 {
+    margin-right: 16px;
+}
+
+.p-48 {
+    padding: 48px;
+}
+
+.p-8 {
+    padding: 8px;
+}
+
+.p-left-8 {
+    padding-left: 8px;
+}
+
+.p-right-8 {
+    padding-right: 8px;
+}
+
+.p-horiz-8 {
+    padding-left: 8px;
+    padding-right: 8px;
+}
+
+.p-vert-8 {
+    padding-top: 8px;
+    padding-bottom: 8px;
+}
+
+.text-weak {
+    color: #545F70;
+}
+
+.text-gray-2 {
+    color: #3F495A;
+}
+
+.border-weak {
+    border-color: #545F70
+}
+
+.border-round-8 {
+    border-radius: 8px;
+}
+
+.border-round-12 {
+    border-radius: 12px;
+}
