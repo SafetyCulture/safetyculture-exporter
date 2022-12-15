@@ -36,7 +36,7 @@
 		<section class="token-validation">
 			<div class="token-validation-text">Generate an API token from your SafetyCulture <span class="link">user profile</span>.</div>
 			<input
-				id="token-validation-input"
+				class="input"
 				type="text"
 				placeholder="Enter API Token here"
 				bind:value={apiKey}
@@ -99,15 +99,6 @@
 	div.token-validation-text {
 		margin-bottom: 8px;
 		color: #1D2330;
-	}
-
-	#token-validation-input {
-		width: 100%;
-		padding: 12px 16px;
-		border-radius: 8px;
-		border: 1px solid #BFC5D4;
-		font-size: 1rem;
-		line-height: 1.5rem;
 	}
 
 	.token-validation-text {

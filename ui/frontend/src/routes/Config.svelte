@@ -1,37 +1,42 @@
 <script>
 	import './common.css';
-	import DatePicker from "../components/DatePicker.svelte";
 	import Select from 'svelte-select';
 
 	const statusItems = [
 		{value: "true", label: "Completed only"},
 		{value: "false", label: "Incompleted only"},
 		{value: "both", label: "Both - completed and incompleted"}
-	]
+	];
 
 	const archivedItems = [
 		{value: "true", label: "Archived Only"},
 		{value: "false", label: "Unarchived Only"},
 		{value: "both", label: "Both - archived and unarchived"}
-	]
+	];
 
-	const dataFormatItems = [
+	const dataExportFormatItems = [
 		{value: "csv", label: "CSV"},
 		{value: "sql", label: "SQL"}
-	]
+	];
 
 	const reportFormatItems = [
 		{value: "PDF", label: "PDF"},
 		{value: "WORD", label: "Word"},
 		{value: "both", label: "Both - PDF and Word"},
-	]
+	];
 
 	const timezoneItems = [
 		{value: "utc", label: "UTC"}
-	]
+	];
 
 	let templateCount = "N/A";
-	let templateNames = ["placeholder text"]
+	let templateNames = ["placeholder text"];
+	let dataExportFormat = "csv";
+
+	function handleDataExport(event) {
+		console.log(event.detail.value);
+		dataExportFormat = event.detail.value;
+	}
 </script>
 
 <div class="config-page p-48">
@@ -63,7 +68,10 @@
 				</div>
 			<div class="label">Date range</div>
 			<div class="sub-label text-weak">From:</div>
-			<DatePicker></DatePicker>
+			<div class="button-long selector border-weak border-round-8">
+				<div>Date Picker(Unimplemented)</div>
+				<img src="../images/calendar.png" alt="calendar icon" width="15" height="15">
+			</div>
 			<div class="label">Include inspections with the following status:</div>
 			<div class="border-weak border-round-8 m-top-4">
 				<Select
@@ -86,11 +94,28 @@
 			<div class="label">Data export format</div>
 			<div class="border-weak border-round-8 m-top-4">
 				<Select
-					items={dataFormatItems}
+					items={dataExportFormatItems}
 					isClearable={false}
+					on:select={handleDataExport}
 				>
 				</Select>
 			</div>
+			{#if dataExportFormat === "sql"}
+				<div>
+					<div class="label">Database details:</div>
+					<div class="sub-label text-weak">Host Address</div>
+					<input class="input" type="text">
+					<div class="sub-label text-weak">Host Port</div>
+					<input class="input" type="text">
+					<div class="sub-label text-weak">Username</div>
+					<input class="input" type="text">
+					<div class="sub-label text-weak">Password</div>
+					<input class="input" type="password">
+					<div class="sub-label text-weak">Name</div>
+					<input class="input" type="text">
+					<hr>
+				</div>
+			{/if}
 			<div class="label">Report format</div>
 			<Select
 				items={reportFormatItems}
@@ -164,9 +189,11 @@
 	}
 
 	.export-details {
-		width: 40%;
+		width: 380px;
+		height: 600px;
 		background-color: #E9EEF6;
 		padding: 16px;
+		overflow-y: auto;
 	}
 
 	.folder-title {

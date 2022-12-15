@@ -80,6 +80,15 @@ body::-webkit-scrollbar {
     line-height: 1rem;
 }
 
+.input {
+    width: 100%;
+    padding: 10px 16px;
+    border-radius: 8px;
+    border: 1px solid #BFC5D4;
+    font-size: 1rem;
+    line-height: 1.5rem;
+}
+
 .label {
     margin-top: 15px;
     font-weight: 500;
@@ -88,7 +97,7 @@ body::-webkit-scrollbar {
 }
 
 .sub-label {
-    margin-top: 12px;
+    margin-top: 8px;
     font-weight: 500;
     font-size: 0.8rem;
     line-height: 1rem;
