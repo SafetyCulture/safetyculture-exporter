@@ -1,6 +1,5 @@
 <script>
 	import './common.css';
-	import './config.css';
 	import DatePicker from "../components/DatePicker.svelte";
 </script>
 
@@ -79,3 +78,47 @@
 		</section>
 	</div>
 </div>
+
+<style>
+	.top-nav {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+	}
+
+	.nav-left {
+		display: flex;
+		align-items: center;
+
+		justify-content: flex-start;
+	}
+
+	.nav-left .arrow-left {
+		padding: 8px;
+	}
+
+	.nav-right {
+		display: flex;
+		align-items: center;
+		justify-content: flex-end;
+	}
+
+	.config-body {
+		display: flex;
+		justify-content: space-between;
+	}
+
+	.filters {
+		width: 55%;
+	}
+
+	.template-button {
+		display: flex;
+		justify-content: space-between;
+	}
+
+	.template-button-right {
+		display: flex;
+		align-items: center;
+	}
+</style>
