@@ -34,7 +34,6 @@
 	let dataExportFormat = "csv";
 
 	function handleDataExport(event) {
-		console.log(event.detail.value);
 		dataExportFormat = event.detail.value;
 	}
 </script>
