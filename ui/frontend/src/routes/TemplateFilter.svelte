@@ -49,7 +49,7 @@
 
     <section class="m-top-16">
         <div class="table-header text-gray-2">
-            <div class="table-row p-horiz-8">
+            <div class="table-row flex-spaced p-horiz-8">
                 <div class="nav-left">
                     <input type="checkbox" class="checkbox-purple"/>
                     <div class="m-left-32">Template</div>
@@ -62,7 +62,7 @@
         </div>
         <div class="table-body text-gray-2 m-top-8">
         {#each data as { id, name, date_modified }, i}
-            <div class="table-row p-horiz-8">
+            <div class="table-row flex-spaced p-horiz-8">
                 <div class="nav-left">
                     <input type="checkbox" class="checkbox-purple"/>
                     <img class="m-left-32" src="../images/template-icon.png" alt="template" width="28" height="28"/>
@@ -78,25 +78,6 @@
 </div>
 
 <style>
-    .top-nav {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-    }
-
-    .nav-left {
-        display: flex;
-        align-items: center;
-        justify-content: flex-start;
-    }
-
-    .nav-right {
-        display: flex;
-        align-items: center;
-        justify-content: flex-end;
-    }
-
-
     .table-header {
         background-color: #DBDFEB;
     }
@@ -112,7 +93,6 @@
     .table-row {
         display: flex;
         align-items: center;
-        justify-content: space-between;
     }
 
     input.search {

@@ -5,6 +5,7 @@
     import Config from "./routes/Config.svelte";
     import Page404 from "./routes/Page404.svelte";
     import TemplateFilter from "./routes/TemplateFilter.svelte";
+    import FeedFilter from "./routes/FeedFilter.svelte";
 </script>
 
 <Router routes={{
@@ -12,5 +13,6 @@
 	'/welcome': Welcome,
 	'/config': Config,
 	'/config/template': TemplateFilter,
+	'/config/tables': FeedFilter,
 	'*': Page404
 }} />

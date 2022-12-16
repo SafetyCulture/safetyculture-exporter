@@ -117,6 +117,8 @@ body::-webkit-scrollbar {
     line-height: 1rem;
 }
 
+/*ALIGNMENT*/
+
 .m-top-4 {
     margin-top: 4px;
 }
@@ -194,4 +196,25 @@ body::-webkit-scrollbar {
 
 .border-round-12 {
     border-radius: 12px;
+}
+
+.flex-spaced {
+    justify-content: space-between;
+}
+
+/* NAV */
+.top-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.nav-left {
+    display: flex;
+    align-items: center;
+}
+
+.nav-right {
+    display: flex;
+    align-items: center;
 }

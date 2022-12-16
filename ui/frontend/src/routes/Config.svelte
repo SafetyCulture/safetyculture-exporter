@@ -143,27 +143,8 @@
 </div>
 
 <style>
-	.top-nav {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-	}
-
-	.nav-left {
-		display: flex;
-		align-items: center;
-
-		justify-content: flex-start;
-	}
-
 	.nav-left .arrow-left {
 		padding: 8px;
-	}
-
-	.nav-right {
-		display: flex;
-		align-items: center;
-		justify-content: flex-end;
 	}
 
 	.config-body {
