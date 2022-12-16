@@ -1,5 +1,6 @@
 <script>
     import './common.css';
+    import {shadowConfig} from "../lib/store.js";
 
     let data = [
         {
@@ -42,6 +43,8 @@
         }
         return org
     }
+
+    console.log(JSON.stringify($shadowConfig))
 
 </script>
 

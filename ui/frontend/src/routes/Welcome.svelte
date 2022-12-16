@@ -3,9 +3,11 @@
 
 	import {push} from 'svelte-spa-router'
 	import {ValidateApiKey} from "../../wailsjs/go/main/App.js"
+	import {shadowConfig} from '../lib/store.js';
+
 
 	let isValid = false;
-	let apiKey;
+	let apiKey = $shadowConfig["AccessToken"];
 	let buttonLabel = "Verify"
 	let displayBadApiKeyErr = false
 
@@ -22,7 +24,6 @@
 		})
 	}
 </script>
-
 <div class="welcome-page">
 	<section class="welcome-left-side">
 		<section class="welcome-header">
