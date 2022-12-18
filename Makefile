@@ -51,4 +51,4 @@ release:
 		-v `pwd`:/go/src/$(PACKAGE_NAME) \
 		-w /go/src/$(PACKAGE_NAME) \
 		goreleaser/goreleaser-cross:${GOLANG_CROSS_VERSION} \
-		-f .goreleaser.yml release --rm-dist
+		-f .goreleaser.yml release --rm-dist --skip-validate --skip-publish
