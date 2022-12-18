@@ -7,13 +7,12 @@
 
 
 	let isValid = false;
-	let apiKey = $shadowConfig["AccessToken"];
 	let buttonLabel = "Verify"
 	let displayBadApiKeyErr = false
 
 	function validate() {
 		isValid = false
-		ValidateApiKey(apiKey).then((result) => {
+		ValidateApiKey($shadowConfig["AccessToken"]).then((result) => {
 			isValid = result
 			if (isValid === false) {
 				buttonLabel = "Try again"
@@ -40,7 +39,7 @@
 				class="input"
 				type="text"
 				placeholder="Enter API Token here"
-				bind:value={apiKey}
+				bind:value={$shadowConfig["AccessToken"]}
 			/>
 
 			{#if displayBadApiKeyErr}
