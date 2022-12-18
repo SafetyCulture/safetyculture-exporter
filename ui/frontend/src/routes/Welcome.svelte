@@ -3,15 +3,16 @@
 
 	import {push} from 'svelte-spa-router'
 	import {ValidateApiKey} from "../../wailsjs/go/main/App.js"
+	import {shadowConfig} from '../lib/store.js';
+
 
 	let isValid = false;
-	let apiKey;
 	let buttonLabel = "Verify"
 	let displayBadApiKeyErr = false
 
 	function validate() {
 		isValid = false
-		ValidateApiKey(apiKey).then((result) => {
+		ValidateApiKey($shadowConfig["AccessToken"]).then((result) => {
 			isValid = result
 			if (isValid === false) {
 				buttonLabel = "Try again"
@@ -22,7 +23,6 @@
 		})
 	}
 </script>
-
 <div class="welcome-page">
 	<section class="welcome-left-side">
 		<section class="welcome-header">
@@ -39,7 +39,7 @@
 				class="input"
 				type="text"
 				placeholder="Enter API Token here"
-				bind:value={apiKey}
+				bind:value={$shadowConfig["AccessToken"]}
 			/>
 
 			{#if displayBadApiKeyErr}

@@ -6,13 +6,18 @@
     import Page404 from "./routes/Page404.svelte";
     import TemplateFilter from "./routes/TemplateFilter.svelte";
     import FeedFilter from "./routes/FeedFilter.svelte";
+    import Debug from "./components/debug.svelte";
 </script>
+
+<Debug/>
 
 <Router routes={{
 	'/': Init,
 	'/welcome': Welcome,
 	'/config': Config,
-	'/config/template': TemplateFilter,
+	'/config/templates': TemplateFilter,
 	'/config/tables': FeedFilter,
 	'*': Page404
 }} />
+
+

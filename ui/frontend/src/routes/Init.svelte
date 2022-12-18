@@ -1,8 +1,12 @@
 <script>
     import {push} from 'svelte-spa-router'
     import {GetSettings, ValidateApiKey} from "../../wailsjs/go/main/App.js"
+    import {shadowConfig} from '../lib/store.js';
+
 
     GetSettings().then(result => {
+        shadowConfig.set(result);
+
         if ("AccessToken" in result) {
             const token = result["AccessToken"]
 
@@ -24,3 +28,4 @@
         }
     })
 </script>
+
