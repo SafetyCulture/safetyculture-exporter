@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/httpapi"
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/templates"
 
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/exporter"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/feed"
@@ -174,4 +175,9 @@ func (s *SafetyCultureExporter) RunPrintSchema() error {
 	}
 
 	return nil
+}
+
+func (s *SafetyCultureExporter) GetTemplateList() ([]templates.TemplateResponseItem, error) {
+	client := templates.NewTemplatesClient(s.apiClient)
+	return client.GetTemplateList(context.Background(), 1000)
 }
