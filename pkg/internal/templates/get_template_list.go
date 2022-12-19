@@ -97,9 +97,9 @@ type listTemplatesResponse struct {
 
 // TemplateResponseItem simple representation of a template date
 type TemplateResponseItem struct {
-	ID         string
-	Name       string
-	ModifiedAt time.Time
+	ID         string    `json:"id"`
+	Name       string    `json:"name"`
+	ModifiedAt time.Time `json:"modified_at"`
 }
 
 // templateSearchRequest contains parameters for calling api-templates template search
