@@ -184,7 +184,7 @@ func (s *SafetyCultureExporter) RunSQL() error {
 		return exporterApp.ExportSchemas(e)
 	}
 
-	if len(s.cfg.AccessToken) != 0 {
+	if len(s.cfg.AccessToken) != 0 || len(s.cfg.SheqsyUsername) != 0 {
 		err = exporterApp.ExportFeeds(e)
 		if err != nil {
 			return errors.Wrap(err, "exporting feeds")
@@ -219,7 +219,7 @@ func (s *SafetyCultureExporter) RunCSV() error {
 		return exporterApp.ExportSchemas(e)
 	}
 
-	if len(s.cfg.AccessToken) != 0 {
+	if len(s.cfg.AccessToken) != 0 || len(s.cfg.SheqsyUsername) != 0 {
 		err = exporterApp.ExportFeeds(e)
 		if err != nil {
 			return errors.Wrap(err, "exporting feeds")
