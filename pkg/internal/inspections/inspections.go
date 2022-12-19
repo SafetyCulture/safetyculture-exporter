@@ -3,9 +3,10 @@ package inspections
 import (
 	"context"
 	"fmt"
-	util2 "github.com/SafetyCulture/safetyculture-exporter/pkg/logger"
 	"sync"
 	"time"
+
+	util2 "github.com/SafetyCulture/safetyculture-exporter/pkg/logger"
 
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/httpapi"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/exporter"

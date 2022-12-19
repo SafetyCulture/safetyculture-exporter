@@ -112,7 +112,7 @@ func (mt mTime) MarshalYAML() (interface{}, error) {
 
 // ConfigurationManager wrapper for configuration and fileName
 type ConfigurationManager struct {
-	path 		  string
+	path          string
 	fileName      string
 	Configuration *ExporterConfiguration
 }
@@ -188,7 +188,7 @@ func BuildConfigurationWithDefaults() *ExporterConfiguration {
 // NewConfigurationManagerFromFile will create a ConfigurationManager with data from the specified file
 func NewConfigurationManagerFromFile(path string, fileName string) (*ConfigurationManager, error) {
 	cm := &ConfigurationManager{
-		path: path,
+		path:          path,
 		fileName:      fileName,
 		Configuration: &ExporterConfiguration{},
 	}
@@ -205,7 +205,7 @@ func NewConfigurationManagerFromFile(path string, fileName string) (*Configurati
 // NewConfigurationManager will create a ConfigurationManager with default data,
 func NewConfigurationManager(path string, fileName string) *ConfigurationManager {
 	cm := &ConfigurationManager{
-		path: path,
+		path:          path,
 		fileName:      fileName,
 		Configuration: BuildConfigurationWithDefaults(),
 	}
@@ -255,5 +255,18 @@ func (ec *ExporterConfiguration) ToInspectionConfig() *inspections.InspectionCli
 		Archived:      ec.Export.Inspection.Archived,
 		Completed:     ec.Export.Inspection.Completed,
 		Incremental:   ec.Export.Incremental,
+	}
+}
+
+func (ec *ExporterConfiguration) ToApiConfig() *HttpApiCfg {
+	return &HttpApiCfg{
+		tlsSkipVerify:  ec.API.TLSSkipVerify,
+		tlsCert:        ec.API.TLSCert,
+		proxyUrl:       ec.API.ProxyURL,
+		apiUrl:         ec.API.URL,
+		accessToken:    ec.AccessToken,
+		sheqsyApiUrl:   ec.API.SheqsyURL,
+		sheqsyUsername: ec.SheqsyUsername,
+		sheqsyPassword: ec.SheqsyPassword,
 	}
 }

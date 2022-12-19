@@ -1,0 +1,20 @@
+{
+  "next_page_token": "Mw==",
+  "items": [
+    {
+      "id": "template_8ddf395bfd484e978d31d3afbdae3863",
+      "name": "T7",
+      "modified_at": "2022-12-19T02:31:50.792Z"
+    },
+    {
+      "id": "template_6e6913538de2475fb7fdb8e22e87deba",
+      "name": "T6",
+      "modified_at": "2022-12-19T02:31:38.352Z"
+    },
+    {
+      "id": "template_b23a1b21478d41b2bc52a99a30ce63cd",
+      "name": "T5",
+      "modified_at": "2022-12-19T02:31:10.467Z"
+    }
+  ]
+}
