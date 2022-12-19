@@ -323,7 +323,7 @@ func (s *SafetyCultureExporter) RunCSV() error {
 		return exporterApp.ExportSchemas(e)
 	}
 
-	if len(s.cfg.ApiConfig.AccessToken) != 0 {
+	if len(s.cfg.ApiConfig.AccessToken) != 0 || len(s.cfg.SheqsyApiConfig.UserName) != 0 {
 		err = exporterApp.ExportFeeds(e)
 		if err != nil {
 			return errors.Wrap(err, "exporting feeds")
