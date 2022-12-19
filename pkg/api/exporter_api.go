@@ -2,12 +2,16 @@ package api
 
 import (
 	"context"
+	"encoding/base64"
 	"fmt"
+	"net/url"
 	"os"
 	"path/filepath"
 
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/httpapi"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/templates"
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/util"
+	"github.com/spf13/viper"
 
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/exporter"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/feed"
@@ -15,12 +19,84 @@ import (
 	"github.com/pkg/errors"
 )
 
+// NewSafetyCultureExporter build new SafetyCultureExporter
 func NewSafetyCultureExporter(cfg *ExporterConfiguration, apiClient *httpapi.Client, sheqsyApiClient *httpapi.Client) *SafetyCultureExporter {
 	return &SafetyCultureExporter{
 		apiClient:       apiClient,
 		sheqsyApiClient: sheqsyApiClient,
 		cfg:             cfg,
 	}
+}
+
+// NewSafetyCultureExporterInferredApiClient builds a SafetyCultureExporter with clients inferred from own configuration
+func NewSafetyCultureExporterInferredApiClient(cfg *ExporterConfiguration) (*SafetyCultureExporter, error) {
+	apiClient, err := getAPIClient(cfg.ToApiConfig())
+	if err != nil {
+		return nil, err
+	}
+
+	sheqsyApiClient, err := getSheqsyAPIClient(cfg.ToApiConfig())
+	if err != nil {
+		return nil, err
+	}
+
+	return NewSafetyCultureExporter(cfg, apiClient, sheqsyApiClient), nil
+}
+
+func getAPIClient(cfg *HttpApiCfg) (*httpapi.Client, error) {
+	var apiOpts []httpapi.Opt
+	if cfg.tlsSkipVerify {
+		apiOpts = append(apiOpts, httpapi.OptSetInsecureTLS(true))
+	}
+	if cfg.tlsCert != "" {
+		apiOpts = append(apiOpts, httpapi.OptAddTLSCert(viper.GetString("api.tls_cert")))
+	}
+	if cfg.proxyUrl != "" {
+		proxyURL, err := url.Parse(cfg.proxyUrl)
+		if err != nil {
+			return nil, fmt.Errorf("unable to parse proxy URL")
+		}
+		apiOpts = append(apiOpts, httpapi.OptSetProxy(proxyURL))
+	}
+
+	return httpapi.NewClient(
+		cfg.apiUrl,
+		fmt.Sprintf("Bearer %s", cfg.accessToken),
+		apiOpts...,
+	), nil
+}
+
+func getSheqsyAPIClient(cfg *HttpApiCfg) (*httpapi.Client, error) {
+	var apiOpts []httpapi.Opt
+	if cfg.tlsSkipVerify {
+		apiOpts = append(apiOpts, httpapi.OptSetInsecureTLS(true))
+	}
+	if cfg.tlsCert != "" {
+		apiOpts = append(apiOpts, httpapi.OptAddTLSCert(viper.GetString("api.tls_cert")))
+	}
+	if viper.GetString("api.proxy_url") != "" {
+		proxyURL, err := url.Parse(cfg.proxyUrl)
+		if err != nil {
+			return nil, fmt.Errorf("unable to parse proxy URL")
+		}
+		apiOpts = append(apiOpts, httpapi.OptSetProxy(proxyURL))
+	}
+
+	token := base64.StdEncoding.EncodeToString(
+		[]byte(
+			fmt.Sprintf(
+				"%s:%s",
+				cfg.sheqsyUsername,
+				cfg.sheqsyPassword,
+			),
+		),
+	)
+
+	return httpapi.NewClient(
+		cfg.sheqsyApiUrl,
+		fmt.Sprintf("Basic %s", token),
+		apiOpts...,
+	), nil
 }
 
 // NewReportExporter returns a new instance of ReportExporter
@@ -46,6 +122,17 @@ type ReportExporterCfg struct {
 	PreferenceID string
 	Filename     string
 	RetryTimeout int
+}
+
+type HttpApiCfg struct {
+	tlsSkipVerify  bool
+	tlsCert        string
+	proxyUrl       string
+	apiUrl         string
+	accessToken    string
+	sheqsyApiUrl   string
+	sheqsyUsername string
+	sheqsyPassword string
 }
 
 type SafetyCultureExporter struct {
@@ -177,7 +264,20 @@ func (s *SafetyCultureExporter) RunPrintSchema() error {
 	return nil
 }
 
-func (s *SafetyCultureExporter) GetTemplateList() ([]templates.TemplateResponseItem, error) {
+func (s *SafetyCultureExporter) GetTemplateList() ([]TemplateResponseItem, error) {
 	client := templates.NewTemplatesClient(s.apiClient)
-	return client.GetTemplateList(context.Background(), 1000)
+	res, err := client.GetTemplateList(context.Background(), 1000)
+	if err != nil {
+		return nil, err
+	}
+
+	transformer := func(data templates.TemplateResponseItem) TemplateResponseItem {
+		return TemplateResponseItem{
+			ID:         data.ID,
+			Name:       data.Name,
+			ModifiedAt: data.ModifiedAt,
+		}
+	}
+
+	return util.GenericCollectionMapper(res, transformer), nil
 }
