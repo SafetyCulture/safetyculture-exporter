@@ -136,24 +136,48 @@ func (c *ConfigurationManager) loadConfiguration() error {
 
 // ApplySafetyGuards will adjust certain values to acceptable maximum values
 func (c *ConfigurationManager) ApplySafetyGuards() {
+	defaultCfg := BuildConfigurationWithDefaults()
+
 	// caps action batch limit to 100
-	if c.Configuration.Export.Action.Limit > 100 {
-		c.Configuration.Export.Action.Limit = 100
+	if c.Configuration.Export.Action.Limit > 100 || c.Configuration.Export.Action.Limit == 0 {
+		c.Configuration.Export.Action.Limit = defaultCfg.Export.Action.Limit
 	}
 
 	// caps issue batch limit to 100
-	if c.Configuration.Export.Issue.Limit > 100 {
-		c.Configuration.Export.Issue.Limit = 100
+	if c.Configuration.Export.Issue.Limit > 100 || c.Configuration.Export.Issue.Limit == 0 {
+		c.Configuration.Export.Issue.Limit = defaultCfg.Export.Issue.Limit
 	}
 
-	// protection against corrupted configuration
-	defaultCfg := BuildConfigurationWithDefaults()
+	if c.Configuration.Export.Inspection.Limit == 0 {
+		c.Configuration.Export.Inspection.Limit = defaultCfg.Export.Inspection.Limit
+	}
+
+	if c.Configuration.Export.Asset.Limit == 0 {
+		c.Configuration.Export.Asset.Limit = defaultCfg.Export.Asset.Limit
+	}
+
 	if c.Configuration.API.URL == "" {
 		c.Configuration.API.URL = defaultCfg.API.URL
 	}
 
 	if c.Configuration.Csv.MaxRowsPerFile == 0 {
 		c.Configuration.Csv.MaxRowsPerFile = defaultCfg.Csv.MaxRowsPerFile
+	}
+
+	if c.Configuration.Export.Tables == nil {
+		c.Configuration.Export.Tables = defaultCfg.Export.Tables
+	}
+
+	if c.Configuration.Export.TemplateIds == nil {
+		c.Configuration.Export.TemplateIds = defaultCfg.Export.TemplateIds
+	}
+
+	if c.Configuration.Export.Inspection.SkipIds == nil {
+		c.Configuration.Export.Inspection.SkipIds = defaultCfg.Export.Inspection.SkipIds
+	}
+
+	if c.Configuration.Report.Format == nil {
+		c.Configuration.Report.Format = defaultCfg.Report.Format
 	}
 }
 
@@ -180,11 +204,15 @@ func BuildConfigurationWithDefaults() *ExporterConfiguration {
 	cfg.API.URL = "https://api.safetyculture.io"
 	cfg.Csv.MaxRowsPerFile = 1000000
 	cfg.Db.Dialect = "mysql"
+	cfg.Export.Tables = []string{}
+	cfg.Export.TemplateIds = []string{}
 	cfg.Export.Action.Limit = 100
+	cfg.Export.Asset.Limit = 100
 	cfg.Export.Incremental = true
 	cfg.Export.Inspection.Archived = "false"
 	cfg.Export.Inspection.Completed = "true"
 	cfg.Export.Inspection.Limit = 100
+	cfg.Export.Inspection.SkipIds = []string{}
 	cfg.Export.Inspection.WebReportLink = "private"
 	cfg.Export.Issue.Limit = 100
 	cfg.Export.MediaPath = "./export/media/"
