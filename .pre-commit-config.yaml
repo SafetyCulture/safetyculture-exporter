@@ -27,6 +27,7 @@ repos:
     hooks:
       - id: yamllint
         args: ['-s']
+        exclude: ^(pkg/api/fixtures/corrupted_configuration.yaml)
   - repo: https://github.com/golangci/golangci-lint
     rev: v1.21.0
     hooks:

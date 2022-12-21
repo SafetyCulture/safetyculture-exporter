@@ -140,9 +140,20 @@ func (c *ConfigurationManager) ApplySafetyGuards() {
 	if c.Configuration.Export.Action.Limit > 100 {
 		c.Configuration.Export.Action.Limit = 100
 	}
+
 	// caps issue batch limit to 100
 	if c.Configuration.Export.Issue.Limit > 100 {
 		c.Configuration.Export.Issue.Limit = 100
+	}
+
+	// protection against corrupted configuration
+	defaultCfg := BuildConfigurationWithDefaults()
+	if c.Configuration.API.URL == "" {
+		c.Configuration.API.URL = defaultCfg.API.URL
+	}
+
+	if c.Configuration.Csv.MaxRowsPerFile == 0 {
+		c.Configuration.Csv.MaxRowsPerFile = defaultCfg.Csv.MaxRowsPerFile
 	}
 }
 
