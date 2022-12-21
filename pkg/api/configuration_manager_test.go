@@ -179,3 +179,9 @@ func TestNewConfigurationManagerFromFile_WhenZeroLengthFile(t *testing.T) {
 	require.NotNil(t, cm.Configuration)
 	assert.EqualValues(t, "https://api.safetyculture.io", cm.Configuration.API.URL)
 }
+
+func TestNewConfigurationManagerFromFile_WhenFileIsCorrupt(t *testing.T) {
+	cm, err := api.NewConfigurationManagerFromFile("", "fixtures/corrupted_configuration.yaml")
+	require.NotNil(t, err)
+	require.Nil(t, cm)
+}
