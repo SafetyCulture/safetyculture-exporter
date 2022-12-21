@@ -171,3 +171,11 @@ func TestMapViperConfigToConfigurationOptions_ShouldEnforceLimit(t *testing.T) {
 	assert.EqualValues(t, 100, cm.Configuration.Export.Action.Limit)
 	assert.EqualValues(t, 100, cm.Configuration.Export.Issue.Limit)
 }
+
+func TestNewConfigurationManagerFromFile_WhenZeroLengthFile(t *testing.T) {
+	cm, err := api.NewConfigurationManagerFromFile("", "fixtures/empty_configuration.yaml")
+	require.Nil(t, err)
+	require.NotNil(t, cm)
+	require.NotNil(t, cm.Configuration)
+	assert.EqualValues(t, "https://api.safetyculture.io", cm.Configuration.API.URL)
+}
