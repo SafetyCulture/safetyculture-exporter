@@ -178,6 +178,14 @@ func TestNewConfigurationManagerFromFile_WhenZeroLengthFile(t *testing.T) {
 	require.NotNil(t, cm)
 	require.NotNil(t, cm.Configuration)
 	assert.EqualValues(t, "https://api.safetyculture.io", cm.Configuration.API.URL)
+	assert.NotNil(t, cm.Configuration.Export.Tables)
+	assert.NotNil(t, cm.Configuration.Export.TemplateIds)
+	assert.NotNil(t, cm.Configuration.Export.Inspection.SkipIds)
+	assert.NotNil(t, cm.Configuration.Report.Format)
+	assert.EqualValues(t, 100, cm.Configuration.Export.Action.Limit)
+	assert.EqualValues(t, 100, cm.Configuration.Export.Issue.Limit)
+	assert.EqualValues(t, 100, cm.Configuration.Export.Inspection.Limit)
+	assert.EqualValues(t, 100, cm.Configuration.Export.Asset.Limit)
 }
 
 func TestNewConfigurationManagerFromFile_WhenFileIsCorrupt(t *testing.T) {
