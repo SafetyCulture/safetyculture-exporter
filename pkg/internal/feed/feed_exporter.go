@@ -63,12 +63,12 @@ type ExporterFeedCfg struct {
 	ExportAssetLimit                      int
 }
 
-func NewExporterApp(scApiClient *httpapi.Client, sheqsyApiClient *httpapi.Client, cfg *ExporterFeedCfg) *ExporterFeedClient {
+func NewExporterApp(scApiClient *httpapi.Client, sheqsyApiClient *httpapi.Client, cfg *ExporterFeedCfg, feedStatus *ExportStatus) *ExporterFeedClient {
 	return &ExporterFeedClient{
 		configuration:   cfg,
 		apiClient:       scApiClient,
 		sheqsyApiClient: sheqsyApiClient,
-		feedStatus:      NewExportStatus(),
+		feedStatus:      feedStatus,
 	}
 }
 
@@ -107,6 +107,7 @@ func (e *ExporterFeedClient) ExportFeeds(exporter Exporter) error {
 
 	// Run export for SafetyCulture data
 	if len(e.configuration.AccessToken) != 0 {
+		e.feedStatus.started = true
 		atLeastOneRun = true
 		log.Info("exporting SafetyCulture data")
 
@@ -192,6 +193,7 @@ func (e *ExporterFeedClient) ExportFeeds(exporter Exporter) error {
 	}
 
 	log.Info("Export finished")
+	e.feedStatus.finished = true
 	if len(e.errs) != 0 {
 		log.Warn("There were errors during the export:")
 		for _, ee := range e.errs {

@@ -9,6 +9,12 @@ type TemplateResponseItem struct {
 	ModifiedAt time.Time `json:"modified_at"`
 }
 
+type ExportStatusResponse struct {
+	ExportStarted   bool                       `json:"export_started"`
+	ExportCompleted bool                       `json:"export_completed"`
+	Feeds           []ExportStatusResponseItem `json:"feeds"`
+}
+
 // ExportStatusResponseItem representation of Feed Export Status
 type ExportStatusResponseItem struct {
 	FeedName    string `json:"feed_name"`

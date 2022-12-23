@@ -32,7 +32,7 @@ func TestSchemaWriter_should_write_schema(t *testing.T) {
 	}
 
 	cfg := &exporterAPI.ExporterConfiguration{}
-	exporterApp := feed.NewExporterApp(nil, nil, cfg.ToExporterConfig())
+	exporterApp := feed.NewExporterApp(nil, nil, cfg.ToExporterConfig(), feed.NewExportStatus())
 
 	for _, f := range exporterApp.GetFeeds() {
 		fmt.Printf("TESTING FEED: %s\n", f.Name())
@@ -51,7 +51,7 @@ func TestSchemaWriter_should_write_all_schemas(t *testing.T) {
 	assert.NoError(t, err)
 
 	cfg := &exporterAPI.ExporterConfiguration{}
-	exporterApp := feed.NewExporterApp(nil, nil, cfg.ToExporterConfig())
+	exporterApp := feed.NewExporterApp(nil, nil, cfg.ToExporterConfig(), feed.NewExportStatus())
 
 	err = exporterApp.PrintSchemas(exporter)
 	assert.NoError(t, err)

@@ -9,8 +9,10 @@ func NewExportStatus() *ExportStatus {
 }
 
 type ExportStatus struct {
-	lock   sync.Mutex
-	status map[string]ExportStatusItem
+	lock     sync.Mutex
+	status   map[string]ExportStatusItem
+	finished bool
+	started  bool
 }
 
 type ExportStatusItem struct {
@@ -33,4 +35,12 @@ func (e *ExportStatus) ReadStatus() map[string]ExportStatusItem {
 	}
 	e.lock.Unlock()
 	return temp
+}
+
+func (e *ExportStatus) GetExportStarted() bool {
+	return e.started
+}
+
+func (e *ExportStatus) GetExportCompleted() bool {
+	return e.finished
 }

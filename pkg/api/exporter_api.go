@@ -25,6 +25,7 @@ func NewSafetyCultureExporter(cfg *ExporterConfiguration, apiClient *httpapi.Cli
 		apiClient:       apiClient,
 		sheqsyApiClient: sheqsyApiClient,
 		cfg:             cfg,
+		exportStatus:    feed.NewExportStatus(),
 	}
 }
 
@@ -139,7 +140,7 @@ type SafetyCultureExporter struct {
 	apiClient       *httpapi.Client
 	sheqsyApiClient *httpapi.Client
 	cfg             *ExporterConfiguration
-	exportStatus    []feed.ExportStatusItem
+	exportStatus    *feed.ExportStatus
 }
 
 func (s *SafetyCultureExporter) RunInspectionJSON() error {
@@ -180,7 +181,7 @@ func (s *SafetyCultureExporter) RunSQL() error {
 		return errors.Wrap(err, "create sql exporter")
 	}
 
-	exporterApp := feed.NewExporterApp(s.apiClient, s.sheqsyApiClient, s.cfg.ToExporterConfig())
+	exporterApp := feed.NewExporterApp(s.apiClient, s.sheqsyApiClient, s.cfg.ToExporterConfig(), s.exportStatus)
 	if s.cfg.Export.SchemaOnly {
 		return exporterApp.ExportSchemas(e)
 	}
@@ -215,7 +216,7 @@ func (s *SafetyCultureExporter) RunCSV() error {
 		return errors.Wrap(err, "unable to create csv exporter")
 	}
 
-	exporterApp := feed.NewExporterApp(s.apiClient, s.sheqsyApiClient, s.cfg.ToExporterConfig())
+	exporterApp := feed.NewExporterApp(s.apiClient, s.sheqsyApiClient, s.cfg.ToExporterConfig(), s.exportStatus)
 	if s.cfg.Export.SchemaOnly {
 		return exporterApp.ExportSchemas(e)
 	}
@@ -241,7 +242,7 @@ func (s *SafetyCultureExporter) RunInspectionReports() error {
 		return errors.Wrap(err, "unable to create report exporter")
 	}
 
-	exporterApp := feed.NewExporterApp(s.apiClient, s.sheqsyApiClient, s.cfg.ToExporterConfig())
+	exporterApp := feed.NewExporterApp(s.apiClient, s.sheqsyApiClient, s.cfg.ToExporterConfig(), s.exportStatus)
 	err = exporterApp.ExportInspectionReports(e)
 	if err != nil {
 		return errors.Wrap(err, "generate reports")
@@ -256,7 +257,7 @@ func (s *SafetyCultureExporter) RunPrintSchema() error {
 		return errors.Wrap(err, "unable to create exporter")
 	}
 
-	exporterApp := feed.NewExporterApp(s.apiClient, s.sheqsyApiClient, s.cfg.ToExporterConfig())
+	exporterApp := feed.NewExporterApp(s.apiClient, s.sheqsyApiClient, s.cfg.ToExporterConfig(), s.exportStatus)
 	err = exporterApp.PrintSchemas(e)
 	if err != nil {
 		return errors.Wrap(err, "error while printing schema")
@@ -283,32 +284,33 @@ func (s *SafetyCultureExporter) GetTemplateList() ([]TemplateResponseItem, error
 	return util.GenericCollectionMapper(res, transformer), nil
 }
 
-func (s *SafetyCultureExporter) GetExportStatus() []ExportStatusResponseItem {
+func (s *SafetyCultureExporter) GetExportStatus() *ExportStatusResponse {
 	// FAKE DATA:
-	s.exportStatus = append(s.exportStatus,
-		feed.ExportStatusItem{
-			Name:         "assets",
-			Started:      true,
-			EstRemaining: 10,
-		},
-		feed.ExportStatusItem{
-			Name:         "inspections",
-			Started:      true,
-			EstRemaining: 400,
-		},
-		feed.ExportStatusItem{
-			Name:         "inspections items",
-			Started:      false,
-			EstRemaining: 0,
-		},
-	)
+	s.exportStatus.UpdateStatus("assets", feed.ExportStatusItem{
+		Name:         "assets",
+		Started:      true,
+		EstRemaining: 10,
+	})
+	s.exportStatus.UpdateStatus("users", feed.ExportStatusItem{
+		Name:         "users",
+		Started:      true,
+		EstRemaining: 104,
+	})
 
-	transform := func(item feed.ExportStatusItem) ExportStatusResponseItem {
-		return ExportStatusResponseItem{
-			FeedName:    item.Name,
-			Started:     item.Started,
-			DebugString: fmt.Sprintf("remaining %d", item.EstRemaining),
-		}
+	data := s.exportStatus.ReadStatus()
+	var res []ExportStatusResponseItem
+
+	for _, v := range data {
+		res = append(res, ExportStatusResponseItem{
+			FeedName:    v.Name,
+			Started:     v.Started,
+			DebugString: fmt.Sprintf("remaining %d", v.EstRemaining),
+		})
 	}
-	return util.GenericCollectionMapper(s.exportStatus, transform)
+
+	return &ExportStatusResponse{
+		ExportStarted:   s.exportStatus.GetExportStarted(),
+		ExportCompleted: s.exportStatus.GetExportCompleted(),
+		Feeds:           res,
+	}
 }
