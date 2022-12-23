@@ -4,10 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/SafetyCulture/safetyculture-exporter/pkg/httpapi"
-	"github.com/SafetyCulture/safetyculture-exporter/pkg/logger"
 	"strings"
 	"time"
+
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/httpapi"
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/logger"
 
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/events"
 	"github.com/tidwall/gjson"
@@ -82,7 +83,7 @@ func (f *SheqsyEmployeeFeed) CreateSchema(exporter Exporter) error {
 }
 
 // Export exports the feed to the supplied exporter
-func (f *SheqsyEmployeeFeed) Export(ctx context.Context, apiClient *httpapi.Client, exporter Exporter, companyID string) error {
+func (f *SheqsyEmployeeFeed) Export(ctx context.Context, apiClient *httpapi.Client, exporter Exporter, companyID string, status *ExportStatus) error {
 	logger := logger.GetLogger().With("feed", f.Name(), "org_id", companyID)
 
 	if err := exporter.InitFeed(f, &InitFeedOptions{

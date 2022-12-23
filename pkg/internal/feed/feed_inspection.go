@@ -4,9 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/SafetyCulture/safetyculture-exporter/pkg/logger"
 	"strings"
 	"time"
+
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/logger"
 
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/httpapi"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/events"
@@ -160,7 +161,7 @@ func (f *InspectionFeed) CreateSchema(exporter Exporter) error {
 }
 
 // Export exports the feed to the supplied exporter
-func (f *InspectionFeed) Export(ctx context.Context, apiClient *httpapi.Client, exporter Exporter, orgID string) error {
+func (f *InspectionFeed) Export(ctx context.Context, apiClient *httpapi.Client, exporter Exporter, orgID string, status *ExportStatus) error {
 	if err := exporter.InitFeed(f, &InitFeedOptions{
 		// Delete data if incremental refresh is disabled so there is no duplicates
 		Truncate: !f.Incremental,

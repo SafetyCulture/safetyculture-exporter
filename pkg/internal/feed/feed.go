@@ -4,8 +4,9 @@ package feed
 
 import (
 	"context"
-	"github.com/SafetyCulture/safetyculture-exporter/pkg/httpapi"
 	"time"
+
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/httpapi"
 )
 
 // Feed is an interface to a data feed. It provides methods to export the data to an exporter
@@ -19,7 +20,7 @@ type Feed interface {
 	Order() string
 
 	CreateSchema(exporter Exporter) error
-	Export(ctx context.Context, apiClient *httpapi.Client, exporter Exporter, orgID string) error
+	Export(ctx context.Context, apiClient *httpapi.Client, exporter Exporter, orgID string, status *ExportStatus) error
 }
 
 // InitFeedOptions contains the options used when initialising a feed
