@@ -139,6 +139,7 @@ type SafetyCultureExporter struct {
 	apiClient       *httpapi.Client
 	sheqsyApiClient *httpapi.Client
 	cfg             *ExporterConfiguration
+	exportStatus    []feed.ExportStatusItem
 }
 
 func (s *SafetyCultureExporter) RunInspectionJSON() error {
@@ -280,4 +281,34 @@ func (s *SafetyCultureExporter) GetTemplateList() ([]TemplateResponseItem, error
 	}
 
 	return util.GenericCollectionMapper(res, transformer), nil
+}
+
+func (s *SafetyCultureExporter) GetExportStatus() []ExportStatusResponseItem {
+	// FAKE DATA:
+	s.exportStatus = append(s.exportStatus,
+		feed.ExportStatusItem{
+			Name:         "assets",
+			Started:      true,
+			EstRemaining: 10,
+		},
+		feed.ExportStatusItem{
+			Name:         "inspections",
+			Started:      true,
+			EstRemaining: 400,
+		},
+		feed.ExportStatusItem{
+			Name:         "inspections items",
+			Started:      false,
+			EstRemaining: 0,
+		},
+	)
+
+	transform := func(item feed.ExportStatusItem) ExportStatusResponseItem {
+		return ExportStatusResponseItem{
+			FeedName:    item.Name,
+			Started:     item.Started,
+			DebugString: fmt.Sprintf("remaining %d", item.EstRemaining),
+		}
+	}
+	return util.GenericCollectionMapper(s.exportStatus, transform)
 }
