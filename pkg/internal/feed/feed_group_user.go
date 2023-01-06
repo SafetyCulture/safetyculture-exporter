@@ -108,7 +108,7 @@ func (f *GroupUserFeed) Export(ctx context.Context, apiClient *httpapi.Client, e
 			}
 		}
 
-		status.UpdateStatus(f.Name(), ExportStatusItem{
+		status.UpdateStatus(f.Name(), &ExportStatusItem{
 			Name:         f.Name(),
 			Started:      true,
 			EstRemaining: resp.Metadata.RemainingRecords,

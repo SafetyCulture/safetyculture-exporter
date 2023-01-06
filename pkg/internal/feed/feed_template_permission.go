@@ -103,7 +103,7 @@ func (f *TemplatePermissionFeed) Export(ctx context.Context, apiClient *httpapi.
 			}
 		}
 
-		status.UpdateStatus(f.Name(), ExportStatusItem{
+		status.UpdateStatus(f.Name(), &ExportStatusItem{
 			Name:         f.Name(),
 			Started:      true,
 			EstRemaining: resp.Metadata.RemainingRecords,

@@ -44,6 +44,24 @@ func NewSafetyCultureExporterInferredApiClient(cfg *ExporterConfiguration) (*Saf
 	return NewSafetyCultureExporter(cfg, apiClient, sheqsyApiClient), nil
 }
 
+func RefreshConfiguration(cfg *ExporterConfiguration, exporter *SafetyCultureExporter) (*SafetyCultureExporter, error) {
+	apiClient, err := getAPIClient(cfg.ToApiConfig())
+	if err != nil {
+		return nil, err
+	}
+
+	sheqsyApiClient, err := getSheqsyAPIClient(cfg.ToApiConfig())
+	if err != nil {
+		return nil, err
+	}
+	return &SafetyCultureExporter{
+		apiClient:       apiClient,
+		sheqsyApiClient: sheqsyApiClient,
+		cfg:             cfg,
+		exportStatus:    exporter.exportStatus,
+	}, nil
+}
+
 func getAPIClient(cfg *HttpApiCfg) (*httpapi.Client, error) {
 	var apiOpts []httpapi.Opt
 	if cfg.tlsSkipVerify {
@@ -285,18 +303,6 @@ func (s *SafetyCultureExporter) GetTemplateList() ([]TemplateResponseItem, error
 }
 
 func (s *SafetyCultureExporter) GetExportStatus() *ExportStatusResponse {
-	// FAKE DATA:
-	s.exportStatus.UpdateStatus("assets", feed.ExportStatusItem{
-		Name:         "assets",
-		Started:      true,
-		EstRemaining: 10,
-	})
-	s.exportStatus.UpdateStatus("users", feed.ExportStatusItem{
-		Name:         "users",
-		Started:      true,
-		EstRemaining: 104,
-	})
-
 	data := s.exportStatus.ReadStatus()
 	var res []ExportStatusResponseItem
 
