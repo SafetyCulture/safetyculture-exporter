@@ -4,8 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/SafetyCulture/safetyculture-exporter/pkg/logger"
 	"time"
+
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/logger"
 
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/httpapi"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/events"
@@ -58,7 +59,7 @@ func (f *SiteMemberFeed) CreateSchema(exporter Exporter) error {
 }
 
 // Export exports the feed to the supplied exporter
-func (f *SiteMemberFeed) Export(ctx context.Context, apiClient *httpapi.Client, exporter Exporter, orgID string) error {
+func (f *SiteMemberFeed) Export(ctx context.Context, apiClient *httpapi.Client, exporter Exporter, orgID string, status *ExportStatus) error {
 	logger := logger.GetLogger().With("feed", f.Name(), "org_id", orgID)
 
 	if err := exporter.InitFeed(f, &InitFeedOptions{
@@ -91,6 +92,12 @@ func (f *SiteMemberFeed) Export(ctx context.Context, apiClient *httpapi.Client, 
 				}
 			}
 		}
+
+		status.UpdateStatus(f.Name(), &ExportStatusItem{
+			Name:         f.Name(),
+			Started:      true,
+			EstRemaining: resp.Metadata.RemainingRecords,
+		})
 
 		logger.With(
 			"estimated_remaining", resp.Metadata.RemainingRecords,

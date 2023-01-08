@@ -4,9 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/SafetyCulture/safetyculture-exporter/pkg/logger"
 	"sync"
 	"time"
+
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/logger"
 
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/httpapi"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/events"
@@ -37,6 +38,7 @@ type ExporterFeedClient struct {
 	sheqsyApiClient *httpapi.Client
 	errMu           sync.Mutex
 	errs            []error
+	feedStatus      *ExportStatus
 }
 
 type ExporterFeedCfg struct {
@@ -61,11 +63,12 @@ type ExporterFeedCfg struct {
 	ExportAssetLimit                      int
 }
 
-func NewExporterApp(scApiClient *httpapi.Client, sheqsyApiClient *httpapi.Client, cfg *ExporterFeedCfg) *ExporterFeedClient {
+func NewExporterApp(scApiClient *httpapi.Client, sheqsyApiClient *httpapi.Client, cfg *ExporterFeedCfg, feedStatus *ExportStatus) *ExporterFeedClient {
 	return &ExporterFeedClient{
 		configuration:   cfg,
 		apiClient:       scApiClient,
 		sheqsyApiClient: sheqsyApiClient,
+		feedStatus:      feedStatus,
 	}
 }
 
@@ -88,7 +91,7 @@ func (e *ExporterFeedClient) addError(err error) {
 
 // ExportFeeds fetches all the feeds data from server and stores them in the format provided
 func (e *ExporterFeedClient) ExportFeeds(exporter Exporter) error {
-	logger := logger.GetLogger()
+	log := logger.GetLogger()
 	ctx := context.Background()
 
 	tables := e.configuration.ExportTables
@@ -104,8 +107,9 @@ func (e *ExporterFeedClient) ExportFeeds(exporter Exporter) error {
 
 	// Run export for SafetyCulture data
 	if len(e.configuration.AccessToken) != 0 {
+		e.feedStatus.started = true
 		atLeastOneRun = true
-		logger.Info("exporting SafetyCulture data")
+		log.Info("exporting SafetyCulture data")
 
 		var feeds []Feed
 		for _, feed := range e.GetFeeds() {
@@ -119,7 +123,7 @@ func (e *ExporterFeedClient) ExportFeeds(exporter Exporter) error {
 			return fmt.Errorf("get details of the current user: %w", err)
 		}
 
-		logger.Infof("Exporting data by user: %s %s", resp.Firstname, resp.Lastname)
+		log.Infof("Exporting data by user: %s %s", resp.Firstname, resp.Lastname)
 
 		if len(feeds) == 0 {
 			return errors.New("no tables selected")
@@ -130,11 +134,11 @@ func (e *ExporterFeedClient) ExportFeeds(exporter Exporter) error {
 			wg.Add(1)
 
 			go func(f Feed) {
-				logger.Infof(" ... queueing %s\n", f.Name())
+				log.Infof(" ... queueing %s\n", f.Name())
 				defer wg.Done()
-				err := f.Export(ctx, e.apiClient, exporter, resp.OrganisationID)
+				err := f.Export(ctx, e.apiClient, exporter, resp.OrganisationID, e.feedStatus)
 				if err != nil {
-					logger.Errorf("exporting feeds: %v", err)
+					log.Errorf("exporting feeds: %v", err)
 					e.addError(err)
 				}
 				<-semaphore
@@ -146,7 +150,7 @@ func (e *ExporterFeedClient) ExportFeeds(exporter Exporter) error {
 	// Run export for SHEQSY data
 	if len(e.configuration.SheqsyUsername) != 0 {
 		atLeastOneRun = true
-		logger.Info("exporting SHEQSY data")
+		log.Info("exporting SHEQSY data")
 
 		var feeds []Feed
 		for _, feed := range e.GetSheqsyFeeds() {
@@ -160,7 +164,7 @@ func (e *ExporterFeedClient) ExportFeeds(exporter Exporter) error {
 			return fmt.Errorf("get details of the current user: %w", err)
 		}
 
-		logger.Infof("Exporting data for SHEQSY company: %s %s", resp.Name, resp.CompanyUID)
+		log.Infof("Exporting data for SHEQSY company: %s %s", resp.Name, resp.CompanyUID)
 
 		if len(feeds) == 0 {
 			return errors.New("no tables selected")
@@ -171,9 +175,9 @@ func (e *ExporterFeedClient) ExportFeeds(exporter Exporter) error {
 			wg.Add(1)
 
 			go func(f Feed) {
-				logger.Infof(" ... queueing %s\n", f.Name())
+				log.Infof(" ... queueing %s\n", f.Name())
 				defer wg.Done()
-				err := f.Export(ctx, e.sheqsyApiClient, exporter, resp.CompanyUID)
+				err := f.Export(ctx, e.sheqsyApiClient, exporter, resp.CompanyUID, e.feedStatus)
 				if err != nil {
 					e.addError(err)
 				}
@@ -188,15 +192,16 @@ func (e *ExporterFeedClient) ExportFeeds(exporter Exporter) error {
 		return errors.New("no API tokens provided")
 	}
 
-	logger.Info("Export finished")
+	log.Info("Export finished")
+	e.feedStatus.finished = true
 	if len(e.errs) != 0 {
-		logger.Warn("There were errors during the export:")
+		log.Warn("There were errors during the export:")
 		for _, ee := range e.errs {
 			switch theError := ee.(type) {
 			case *events.EventError:
-				theError.Log(logger)
+				theError.Log(log)
 			default:
-				logger.Infof(" > %s", theError.Error())
+				log.Infof(" > %s", theError.Error())
 			}
 
 		}
@@ -304,7 +309,7 @@ func (e *ExporterFeedClient) PrintSchemas(exporter *SchemaExporter) error {
 }
 
 func (e *ExporterFeedClient) ExportInspectionReports(exporter *ReportExporter) error {
-	logger := logger.GetLogger()
+	log := logger.GetLogger()
 	ctx := context.Background()
 
 	resp, err := e.apiClient.WhoAmI(ctx)
@@ -312,10 +317,10 @@ func (e *ExporterFeedClient) ExportInspectionReports(exporter *ReportExporter) e
 		return fmt.Errorf("get details of the current user: %w", err)
 	}
 
-	logger.Infof("Exporting inspection reports by user: %s %s", resp.Firstname, resp.Lastname)
+	log.Infof("Exporting inspection reports by user: %s %s", resp.Firstname, resp.Lastname)
 
 	feed := e.getInspectionFeed()
-	if err := feed.Export(ctx, e.apiClient, exporter, resp.OrganisationID); err != nil {
+	if err := feed.Export(ctx, e.apiClient, exporter, resp.OrganisationID, e.feedStatus); err != nil {
 		return fmt.Errorf("export inspection feed: %w", err)
 	}
 

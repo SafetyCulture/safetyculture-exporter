@@ -4,9 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/SafetyCulture/safetyculture-exporter/pkg/logger"
 	"strings"
 	"time"
+
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/logger"
 
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/httpapi"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/events"
@@ -160,7 +161,7 @@ func (f *InspectionFeed) CreateSchema(exporter Exporter) error {
 }
 
 // Export exports the feed to the supplied exporter
-func (f *InspectionFeed) Export(ctx context.Context, apiClient *httpapi.Client, exporter Exporter, orgID string) error {
+func (f *InspectionFeed) Export(ctx context.Context, apiClient *httpapi.Client, exporter Exporter, orgID string, status *ExportStatus) error {
 	if err := exporter.InitFeed(f, &InitFeedOptions{
 		// Delete data if incremental refresh is disabled so there is no duplicates
 		Truncate: !f.Incremental,
@@ -175,7 +176,7 @@ func (f *InspectionFeed) Export(ctx context.Context, apiClient *httpapi.Client, 
 	}
 
 	// Process Inspections
-	if err := f.processNewInspections(ctx, apiClient, exporter, orgID); err != nil {
+	if err := f.processNewInspections(ctx, apiClient, exporter, orgID, status); err != nil {
 		return events.WrapEventError(err, "export")
 	}
 
@@ -187,7 +188,7 @@ func (f *InspectionFeed) Export(ctx context.Context, apiClient *httpapi.Client, 
 	return exporter.FinaliseExport(f, &[]*Inspection{})
 }
 
-func (f *InspectionFeed) processNewInspections(ctx context.Context, apiClient *httpapi.Client, exporter Exporter, orgID string) error {
+func (f *InspectionFeed) processNewInspections(ctx context.Context, apiClient *httpapi.Client, exporter Exporter, orgID string, status *ExportStatus) error {
 	logger := logger.GetLogger().With("feed", f.Name(), "org_id", orgID)
 	req := GetFeedRequest{
 		InitialURL: "/feed/inspections",
@@ -213,6 +214,11 @@ func (f *InspectionFeed) processNewInspections(ctx context.Context, apiClient *h
 				return err
 			}
 		}
+		status.UpdateStatus(f.Name(), &ExportStatusItem{
+			Name:         f.Name(),
+			Started:      true,
+			EstRemaining: resp.Metadata.RemainingRecords,
+		})
 
 		logger.With(
 			"estimated_remaining", resp.Metadata.RemainingRecords,

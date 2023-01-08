@@ -4,8 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/SafetyCulture/safetyculture-exporter/pkg/logger"
 	"time"
+
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/logger"
 
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/httpapi"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/events"
@@ -72,7 +73,7 @@ type sheqsyEmployeeRaw struct {
 }
 
 // Export exports the feed to the supplied exporter
-func (f *SheqsyDepartmentEmployeeFeed) Export(ctx context.Context, apiClient *httpapi.Client, exporter Exporter, companyID string) error {
+func (f *SheqsyDepartmentEmployeeFeed) Export(ctx context.Context, apiClient *httpapi.Client, exporter Exporter, companyID string, status *ExportStatus) error {
 	logger := logger.GetLogger().With("feed", f.Name(), "org_id", companyID)
 
 	if err := exporter.InitFeed(f, &InitFeedOptions{

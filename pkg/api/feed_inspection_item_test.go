@@ -27,7 +27,8 @@ func TestInspectionItemFeedExport_should_export_rows_to_sql_db(t *testing.T) {
 		Incremental:   true,
 	}
 
-	err = inspectionItemFeed.Export(context.Background(), apiClient, exporter, "")
+	exportStatus := feed.NewExportStatus()
+	err = inspectionItemFeed.Export(context.Background(), apiClient, exporter, "", exportStatus)
 	assert.NoError(t, err)
 
 	var rows []feed.InspectionItem
@@ -65,6 +66,7 @@ func TestInspectionItemFeedExportWithMedia(t *testing.T) {
 		ExportMedia:   true,
 	}
 
-	err = inspectionItemFeed.Export(context.Background(), apiClient, exporter, "")
+	exportStatus := feed.NewExportStatus()
+	err = inspectionItemFeed.Export(context.Background(), apiClient, exporter, "", exportStatus)
 	assert.NoError(t, err)
 }

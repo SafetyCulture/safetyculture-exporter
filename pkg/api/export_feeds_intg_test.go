@@ -44,7 +44,7 @@ func TestIntegrationDbCreateSchema_should_create_all_schemas(t *testing.T) {
 		AccessToken: "token-123",
 	}
 
-	exporterApp := feed.NewExporterApp(nil, nil, cfg)
+	exporterApp := feed.NewExporterApp(nil, nil, cfg, feed.NewExportStatus())
 	err = exporterApp.ExportSchemas(exporter)
 	assert.NoError(t, err)
 
@@ -93,7 +93,7 @@ func TestIntegrationDbExportFeeds_should_export_all_feeds_to_file(t *testing.T) 
 		AccessToken: "token-123",
 	}
 
-	exporterApp := feed.NewExporterApp(apiClient, apiClient, cfg)
+	exporterApp := feed.NewExporterApp(apiClient, apiClient, cfg, feed.NewExportStatus())
 	err = exporterApp.ExportFeeds(exporter)
 	assert.NoError(t, err)
 
@@ -150,13 +150,13 @@ func TestIntegrationDbExportFeeds_should_perform_incremental_update_on_second_ru
 		ExportIncremental: true,
 	}
 
-	exporterApp := feed.NewExporterApp(apiClient, apiClient, cfg)
+	exporterApp := feed.NewExporterApp(apiClient, apiClient, cfg, feed.NewExportStatus())
 	err = exporterApp.ExportFeeds(exporter)
 	assert.NoError(t, err)
 
 	initMockFeedsSet2(apiClient.HTTPClient())
 
-	exporterApp = feed.NewExporterApp(apiClient, apiClient, cfg)
+	exporterApp = feed.NewExporterApp(apiClient, apiClient, cfg, feed.NewExportStatus())
 	err = exporterApp.ExportFeeds(exporter)
 	assert.NoError(t, err)
 
@@ -212,7 +212,7 @@ func TestIntegrationDbExportFeeds_should_handle_lots_of_rows_ok(t *testing.T) {
 		ExportIncremental: true,
 	}
 
-	exporterApp := feed.NewExporterApp(apiClient, apiClient, cfg)
+	exporterApp := feed.NewExporterApp(apiClient, apiClient, cfg, feed.NewExportStatus())
 	err = exporterApp.ExportFeeds(exporter)
 	assert.NoError(t, err)
 
@@ -263,7 +263,7 @@ func TestIntegrationDbExportFeeds_should_update_action_assignees_on_second_run(t
 		ExportIncremental: true,
 	}
 
-	exporterApp := feed.NewExporterApp(apiClient, apiClient, cfg)
+	exporterApp := feed.NewExporterApp(apiClient, apiClient, cfg, feed.NewExportStatus())
 	err = exporterApp.ExportFeeds(exporter)
 	assert.NoError(t, err)
 
@@ -271,7 +271,7 @@ func TestIntegrationDbExportFeeds_should_update_action_assignees_on_second_run(t
 
 	initMockFeedsSet2(apiClient.HTTPClient())
 
-	exporterApp = feed.NewExporterApp(apiClient, apiClient, cfg)
+	exporterApp = feed.NewExporterApp(apiClient, apiClient, cfg, feed.NewExportStatus())
 	err = exporterApp.ExportFeeds(exporter)
 	assert.NoError(t, err)
 	filesEqualish(t, "mocks/set_2/outputs/action_assignees.csv", filepath.Join(exporter.ExportPath, "action_assignees.csv"))
@@ -311,7 +311,7 @@ func TestGroupUserFeed_Export_should_filter_duplicates(t *testing.T) {
 		ExportTables:      []string{"group_users"},
 	}
 
-	exporterApp := feed.NewExporterApp(apiClient, apiClient, cfg)
+	exporterApp := feed.NewExporterApp(apiClient, apiClient, cfg, feed.NewExportStatus())
 	err = exporterApp.ExportFeeds(exporter)
 	assert.NoError(t, err)
 
