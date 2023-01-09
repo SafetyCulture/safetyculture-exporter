@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/httpapi"
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/util"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/logger"
 
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/events"
@@ -88,7 +89,7 @@ func (f *GroupUserFeed) Export(ctx context.Context, apiClient *httpapi.Client, e
 		}
 
 		// deduplicate rows (hotfix) because the feed Api GetUserGroups returns duplicates and this creates PK violations issues
-		deDupedRows := DeduplicateList(func(row *GroupUser) string {
+		deDupedRows := util.DeduplicateList(func(row *GroupUser) string {
 			return fmt.Sprintf("pk__%s_%s", row.UserID, row.GroupID)
 		}, rows)
 

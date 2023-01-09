@@ -3,7 +3,7 @@ package feed_test
 import (
 	"testing"
 
-	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/feed"
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/util"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -23,7 +23,7 @@ func TestDeduplicateList_when_not_empty(t *testing.T) {
 		{"ID4", "Alfonso"},
 	}
 
-	dedupedList := feed.DeduplicateList[student](
+	dedupedList := util.DeduplicateList[student](
 		func(s *student) string { return s.id },
 		originalList)
 
@@ -45,7 +45,7 @@ func TestDeduplicateList_when_nil(t *testing.T) {
 		name string
 	}
 
-	dedupedList := feed.DeduplicateList(
+	dedupedList := util.DeduplicateList(
 		func(s *student) string { return s.id },
 		nil)
 
@@ -58,7 +58,7 @@ func TestDeduplicateList_when_empty(t *testing.T) {
 		name string
 	}
 
-	dedupedList := feed.DeduplicateList(
+	dedupedList := util.DeduplicateList(
 		func(s *student) string { return s.id },
 		[]*student{})
 
