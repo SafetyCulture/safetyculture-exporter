@@ -203,6 +203,10 @@ func (c *ConfigurationManager) ApplySafetyGuards() {
 	if c.Configuration.Session.ExportType == "" {
 		c.Configuration.Session.ExportType = defaultCfg.Session.ExportType
 	}
+
+	if c.Configuration.Db.Dialect == "" {
+		c.Configuration.Db.Dialect = defaultCfg.Db.Dialect
+	}
 }
 
 // SaveConfiguration will save the configuration to the file
