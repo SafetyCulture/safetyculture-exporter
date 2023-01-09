@@ -51,6 +51,7 @@ type ExporterConfiguration struct {
 		Media         bool   `yaml:"media"`
 		MediaPath     string `yaml:"media_path"`
 		ModifiedAfter mTime  `yaml:"modified_after"`
+		TimeZone      string `yaml:"time_zone"`
 		Path          string `yaml:"path"`
 		SchemaOnly    bool   `yaml:"-"`
 		Site          struct {
@@ -69,6 +70,9 @@ type ExporterConfiguration struct {
 	SheqsyCompanyID string `yaml:"sheqsy_company_id"`
 	SheqsyPassword  string `yaml:"sheqsy_password"`
 	SheqsyUsername  string `yaml:"sheqsy_username"`
+	Session         struct {
+		ExportType string `yaml:"export_type"`
+	} `yaml:"session"`
 }
 
 // mTime wrapper around time.Time in order to have a custom YAML marshaller/un-marshaller
@@ -176,8 +180,28 @@ func (c *ConfigurationManager) ApplySafetyGuards() {
 		c.Configuration.Export.Inspection.SkipIds = defaultCfg.Export.Inspection.SkipIds
 	}
 
-	if c.Configuration.Report.Format == nil {
+	if c.Configuration.Report.Format == nil || len(c.Configuration.Report.Format) == 0 {
 		c.Configuration.Report.Format = defaultCfg.Report.Format
+	}
+
+	if c.Configuration.Report.FilenameConvention == "" {
+		c.Configuration.Report.FilenameConvention = defaultCfg.Report.FilenameConvention
+	}
+
+	if c.Configuration.Export.Inspection.Completed == "" {
+		c.Configuration.Export.Inspection.Completed = defaultCfg.Export.Inspection.Completed
+	}
+
+	if c.Configuration.Export.Inspection.Archived == "" {
+		c.Configuration.Export.Inspection.Archived = defaultCfg.Export.Inspection.Archived
+	}
+
+	if c.Configuration.Export.TimeZone == "" {
+		c.Configuration.Export.TimeZone = defaultCfg.Export.TimeZone
+	}
+
+	if c.Configuration.Session.ExportType == "" {
+		c.Configuration.Session.ExportType = defaultCfg.Session.ExportType
 	}
 }
 
@@ -217,9 +241,11 @@ func BuildConfigurationWithDefaults() *ExporterConfiguration {
 	cfg.Export.Issue.Limit = 100
 	cfg.Export.MediaPath = "./export/media/"
 	cfg.Export.Path = "./export/"
+	cfg.Export.TimeZone = "UTC"
 	cfg.Report.FilenameConvention = "INSPECTION_TITLE"
 	cfg.Report.Format = []string{"PDF"}
 	cfg.Report.RetryTimeout = 15
+	cfg.Session.ExportType = "CSV"
 
 	return cfg
 }

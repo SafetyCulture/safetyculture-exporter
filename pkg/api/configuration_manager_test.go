@@ -186,6 +186,11 @@ func TestNewConfigurationManagerFromFile_WhenZeroLengthFile(t *testing.T) {
 	assert.EqualValues(t, 100, cm.Configuration.Export.Issue.Limit)
 	assert.EqualValues(t, 100, cm.Configuration.Export.Inspection.Limit)
 	assert.EqualValues(t, 100, cm.Configuration.Export.Asset.Limit)
+	assert.EqualValues(t, "true", cm.Configuration.Export.Inspection.Completed)
+	assert.EqualValues(t, "false", cm.Configuration.Export.Inspection.Archived)
+	assert.EqualValues(t, "UTC", cm.Configuration.Export.TimeZone)
+	assert.EqualValues(t, []string{"PDF"}, cm.Configuration.Report.Format)
+	assert.EqualValues(t, "CSV", cm.Configuration.Session.ExportType)
 }
 
 func TestNewConfigurationManagerFromFile_WhenFileIsCorrupt(t *testing.T) {
