@@ -64,5 +64,5 @@ exclude_patterns:
   - "**/*mock/"
   - "**/*.pb.go"
   - "**/*.pb.*.go"
-  - "**/util/mapper.go"
-  - "**/util/list.go"
+  - "**/mapper.go"
+  - "**/list.go"
