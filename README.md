@@ -56,7 +56,7 @@ create folder structure ~/docker-volume/mssql then execute:
 
 To release a new version you need just need to push a new tag to GitHub and [goreleaser](https://goreleaser.com) will do most of the work.
 
-1. Execute `make release-dry-run` locally to make sure all things go well
+1. Execute `make release-dry-run` locally to make sure all things go well.
 2. Checkout the `main` branch and pull the latest changes. If you don't you'll tag the wrong commit for release!
 3. Create your tag, make sure it follows [Semantic Versioning](https://semver.org) and increments on the [latest release](https://github.com/SafetyCulture/safetyculture-exporter/releases)\
 `git tag -a v3.0.0 -m "Initial Public Release"`.\
