@@ -14,7 +14,14 @@ import (
 
 // GetTestClient creates a new test apiClient
 func GetTestClient(opts ...httpapi.Opt) *httpapi.Client {
-	apiClient := httpapi.NewClient("http://localhost:9999", "abc123", opts...)
+	cfg := httpapi.ClientCfg{
+		Addr:                "http://localhost:9999",
+		AuthorizationHeader: "abc123",
+		IntegrationID:       "test",
+		IntegrationVersion:  "dev",
+	}
+
+	apiClient := httpapi.NewClient(&cfg, opts...)
 	apiClient.RetryWaitMin = 10 * time.Millisecond
 	apiClient.RetryWaitMax = 10 * time.Millisecond
 	apiClient.CheckForRetry = httpapi.DefaultRetryPolicy
@@ -29,7 +36,14 @@ func TestApiOptSetTimeout_should_set_timeout(t *testing.T) {
 }
 
 func TestClient_OptSetTimeout(t *testing.T) {
-	client := httpapi.NewClient("fake_addr", "fake_token")
+	cfg := httpapi.ClientCfg{
+		Addr:                "fake_addr",
+		AuthorizationHeader: "fake_token",
+		IntegrationID:       "test",
+		IntegrationVersion:  "dev",
+	}
+
+	client := httpapi.NewClient(&cfg)
 	require.NotNil(t, client)
 
 	opt := httpapi.OptSetTimeout(time.Second * 10)
@@ -39,7 +53,14 @@ func TestClient_OptSetTimeout(t *testing.T) {
 }
 
 func TestClient_OptAddTLSCert_WhenEmptyPath(t *testing.T) {
-	client := httpapi.NewClient("fake_addr", "fake_token")
+	cfg := httpapi.ClientCfg{
+		Addr:                "fake_addr",
+		AuthorizationHeader: "fake_token",
+		IntegrationID:       "test",
+		IntegrationVersion:  "dev",
+	}
+
+	client := httpapi.NewClient(&cfg)
 	require.NotNil(t, client)
 
 	opt := httpapi.OptAddTLSCert("")
@@ -49,7 +70,14 @@ func TestClient_OptAddTLSCert_WhenEmptyPath(t *testing.T) {
 }
 
 func TestClient_OptSetProxy(t *testing.T) {
-	client := httpapi.NewClient("fake_addr", "fake_token")
+	cfg := httpapi.ClientCfg{
+		Addr:                "fake_addr",
+		AuthorizationHeader: "fake_token",
+		IntegrationID:       "test",
+		IntegrationVersion:  "dev",
+	}
+
+	client := httpapi.NewClient(&cfg)
 	require.NotNil(t, client)
 
 	u := url.URL{
@@ -63,7 +91,14 @@ func TestClient_OptSetProxy(t *testing.T) {
 }
 
 func TestClient_OptSetInsecureTLS_WhenTrue(t *testing.T) {
-	client := httpapi.NewClient("fake_addr", "fake_token")
+	cfg := httpapi.ClientCfg{
+		Addr:                "fake_addr",
+		AuthorizationHeader: "fake_token",
+		IntegrationID:       "test",
+		IntegrationVersion:  "dev",
+	}
+
+	client := httpapi.NewClient(&cfg)
 	require.NotNil(t, client)
 
 	opt := httpapi.OptSetInsecureTLS(true)

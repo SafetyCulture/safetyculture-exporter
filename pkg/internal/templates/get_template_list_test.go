@@ -92,7 +92,13 @@ func TestClient_GetTemplateList_WhenApiError(t *testing.T) {
 
 // getTestClient creates a new test apiClient
 func getTestClient(opts ...httpapi.Opt) *httpapi.Client {
-	apiClient := httpapi.NewClient("http://localhost:9999", "abc123", opts...)
+	cfg := httpapi.ClientCfg{
+		Addr:                "http://localhost:9999",
+		AuthorizationHeader: "abc123",
+		IntegrationID:       "test",
+		IntegrationVersion:  "dev",
+	}
+	apiClient := httpapi.NewClient(&cfg, opts...)
 	apiClient.RetryWaitMin = 10 * time.Millisecond
 	apiClient.RetryWaitMax = 10 * time.Millisecond
 	apiClient.CheckForRetry = httpapi.DefaultRetryPolicy

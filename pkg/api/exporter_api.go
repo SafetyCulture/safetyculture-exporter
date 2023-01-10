@@ -21,17 +21,15 @@ import (
 
 // NewSafetyCultureExporter builds a SafetyCultureExporter with clients inferred from own configuration
 func NewSafetyCultureExporter(cfg *ExporterConfiguration, version *AppVersion) (*SafetyCultureExporter, error) {
-	apiClient, err := getAPIClient(cfg.ToApiConfig())
+	apiClient, err := getAPIClient(cfg.ToApiConfig(), version)
 	if err != nil {
 		return nil, err
 	}
-	apiClient.SetVersion(version.IntegrationID, version.IntegrationVersion)
 
-	sheqsyApiClient, err := getSheqsyAPIClient(cfg.ToApiConfig())
+	sheqsyApiClient, err := getSheqsyAPIClient(cfg.ToApiConfig(), version)
 	if err != nil {
 		return nil, err
 	}
-	sheqsyApiClient.SetVersion(version.IntegrationID, version.IntegrationVersion)
 
 	return &SafetyCultureExporter{
 		apiClient:       apiClient,
@@ -41,7 +39,7 @@ func NewSafetyCultureExporter(cfg *ExporterConfiguration, version *AppVersion) (
 	}, nil
 }
 
-func getAPIClient(cfg *HttpApiCfg) (*httpapi.Client, error) {
+func getAPIClient(cfg *HttpApiCfg, version *AppVersion) (*httpapi.Client, error) {
 	var apiOpts []httpapi.Opt
 
 	if cfg.tlsSkipVerify {
@@ -58,14 +56,17 @@ func getAPIClient(cfg *HttpApiCfg) (*httpapi.Client, error) {
 		apiOpts = append(apiOpts, httpapi.OptSetProxy(proxyURL))
 	}
 
-	return httpapi.NewClient(
-		cfg.apiUrl,
-		fmt.Sprintf("Bearer %s", cfg.accessToken),
-		apiOpts...,
-	), nil
+	config := httpapi.ClientCfg{
+		Addr:                cfg.apiUrl,
+		AuthorizationHeader: fmt.Sprintf("Bearer %s", cfg.accessToken),
+		IntegrationID:       version.IntegrationID,
+		IntegrationVersion:  version.IntegrationVersion,
+	}
+
+	return httpapi.NewClient(&config, apiOpts...), nil
 }
 
-func getSheqsyAPIClient(cfg *HttpApiCfg) (*httpapi.Client, error) {
+func getSheqsyAPIClient(cfg *HttpApiCfg, version *AppVersion) (*httpapi.Client, error) {
 	var apiOpts []httpapi.Opt
 	if cfg.tlsSkipVerify {
 		apiOpts = append(apiOpts, httpapi.OptSetInsecureTLS(true))
@@ -91,11 +92,14 @@ func getSheqsyAPIClient(cfg *HttpApiCfg) (*httpapi.Client, error) {
 		),
 	)
 
-	return httpapi.NewClient(
-		cfg.sheqsyApiUrl,
-		fmt.Sprintf("Basic %s", token),
-		apiOpts...,
-	), nil
+	config := httpapi.ClientCfg{
+		Addr:                cfg.sheqsyApiUrl,
+		AuthorizationHeader: fmt.Sprintf("Basic %s", token),
+		IntegrationID:       version.IntegrationID,
+		IntegrationVersion:  version.IntegrationVersion,
+	}
+
+	return httpapi.NewClient(&config, apiOpts...), nil
 }
 
 // NewReportExporter returns a new instance of ReportExporter
