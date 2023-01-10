@@ -47,6 +47,17 @@ func TestNewConfigurationManagerFromFile_when_filename_exists_with_time(t *testi
 	assert.Equal(t, exp, cfg.Export.ModifiedAfter.Time)
 }
 
+func TestNewConfigurationManagerFromFile_when_filename_exists_with_time_iso8601(t *testing.T) {
+	cm, err := api.NewConfigurationManagerFromFile("", "fixtures/valid_with_time_long.yaml")
+	require.Nil(t, err)
+	require.NotNil(t, cm)
+	require.NotNil(t, cm.Configuration)
+
+	cfg := cm.Configuration
+	exp, _ := time.Parse("2006-01-02T15:04:05Z0700", "2023-01-10T00:25:35Z")
+	assert.Equal(t, exp, cfg.Export.ModifiedAfter.Time)
+}
+
 func TestNewConfigurationManagerFromFile_should_create_file(t *testing.T) {
 	_ = os.Remove("fake_file.yaml")
 	cm := api.NewConfigurationManager("", "fake_file.yaml")
