@@ -9,6 +9,7 @@ import (
 
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/feed"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/inspections"
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/util"
 	"gopkg.in/yaml.v3"
 )
 
@@ -94,27 +95,14 @@ func (mt *mTime) UnmarshalYAML(value *yaml.Node) error {
 	case "":
 		t = time.Time{}
 	default:
-		t, err = parseYYYYMMDD(timeString)
+		t, err = util.TimeFromString(timeString)
 		if err != nil {
-			t, err = parseISO8601(timeString)
-			if err != nil {
-				return fmt.Errorf("failed to parse '%s' to time.Time: %v", timeString, err)
-			}
+			return fmt.Errorf("failed to parse '%s' to time.Time: %v", timeString, err)
 		}
 	}
 
 	mt.Time = t
 	return nil
-}
-
-func parseYYYYMMDD(timeString string) (time.Time, error) {
-	layout := "2006-01-02"
-	return time.Parse(layout, timeString)
-}
-
-func parseISO8601(timeString string) (time.Time, error) {
-	layout := "2006-01-02T15:04:05Z0700"
-	return time.Parse(layout, timeString)
 }
 
 // MarshalYAML custom marshaller for time, when is ZERO, marshal as empty string
@@ -124,7 +112,7 @@ func (mt mTime) MarshalYAML() (interface{}, error) {
 		return "", nil
 	}
 
-	return mt.Time.Format("2006-01-02"), nil
+	return mt.Time.Format(time.RFC3339), nil
 }
 
 // ConfigurationManager wrapper for configuration and fileName

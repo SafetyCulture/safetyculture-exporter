@@ -47,7 +47,7 @@ func TestNewConfigurationManagerFromFile_when_filename_exists_with_time(t *testi
 	assert.Equal(t, exp, cfg.Export.ModifiedAfter.Time)
 }
 
-func TestNewConfigurationManagerFromFile_when_filename_exists_with_time_iso8601(t *testing.T) {
+func TestNewConfigurationManagerFromFile_when_filename_exists_with_time_rfc3339(t *testing.T) {
 	cm, err := api.NewConfigurationManagerFromFile("", "fixtures/valid_with_time_long.yaml")
 	require.Nil(t, err)
 	require.NotNil(t, cm)
