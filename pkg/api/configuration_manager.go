@@ -1,6 +1,7 @@
 package api
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"path"
@@ -94,14 +95,27 @@ func (mt *mTime) UnmarshalYAML(value *yaml.Node) error {
 	case "":
 		t = time.Time{}
 	default:
-		t, err = time.Parse("2006-01-02", timeString)
+		t, err = parseYYYYMMDD(timeString)
 		if err != nil {
-			return fmt.Errorf("failed to parse '%s' to time.Time: %v", timeString, err)
+			t, err = parseISO8601(timeString)
+			if err != nil {
+				return fmt.Errorf("failed to parse '%s' to time.Time: %v", timeString, err)
+			}
 		}
 	}
 
 	mt.Time = t
 	return nil
+}
+
+func parseYYYYMMDD(timeString string) (time.Time, error) {
+	layout := "2006-01-02"
+	return time.Parse(layout, timeString)
+}
+
+func parseISO8601(timeString string) (time.Time, error) {
+	layout := "2006-01-02T15:04:05Z0700"
+	return time.Parse(layout, timeString)
 }
 
 // MarshalYAML custom marshaller for time, when is ZERO, marshal as empty string
@@ -214,6 +228,9 @@ func (c *ConfigurationManager) SaveConfiguration() error {
 	if len(strings.TrimSpace(c.fileName)) == 0 || !strings.HasSuffix(c.fileName, ".yaml") {
 		return fmt.Errorf("invalid file name provided")
 	}
+
+	j, _ := json.Marshal(c.Configuration)
+	fmt.Printf("%s\n", j)
 
 	data, err := yaml.Marshal(c.Configuration)
 	if err != nil {
