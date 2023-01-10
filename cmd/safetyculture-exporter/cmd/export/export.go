@@ -1,13 +1,9 @@
 package export
 
 import (
-	"encoding/base64"
-	"fmt"
-	"net/url"
-
-	util "github.com/SafetyCulture/safetyculture-exporter/cmd/safetyculture-exporter/cmd/utils"
+	"github.com/SafetyCulture/safetyculture-exporter/cmd/safetyculture-exporter/cmd/utils"
+	"github.com/SafetyCulture/safetyculture-exporter/internal/app/version"
 	exporterAPI "github.com/SafetyCulture/safetyculture-exporter/pkg/api"
-	"github.com/SafetyCulture/safetyculture-exporter/pkg/httpapi"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -119,7 +115,13 @@ func NewSafetyCultureExporter(v *viper.Viper) *exporterAPI.SafetyCultureExporter
 	cm.ApplySafetyGuards()
 	util.Check(err, "while loading config file")
 
-	return exporterAPI.NewSafetyCultureExporter(cm.Configuration, getAPIClient(), getSheqsyAPIClient())
+	version := exporterAPI.AppVersion{
+		IntegrationID:      version.GetIntegrationID(),
+		IntegrationVersion: version.GetVersion(),
+	}
+	exporter, err := exporterAPI.NewSafetyCultureExporterInferredApiClient(cm.Configuration, &version)
+	util.Check(err, "failed to initialize the exporter")
+	return exporter
 }
 
 // MapViperConfigToExporterConfiguration maps Viper config to ExporterConfiguration structure
@@ -152,56 +154,4 @@ func MapViperConfigToExporterConfiguration(v *viper.Viper, cfg *exporterAPI.Expo
 	cfg.Report.PreferenceID = v.GetString("report.preference_id")
 	cfg.Report.FilenameConvention = v.GetString("report.filename_convention")
 	cfg.Report.RetryTimeout = v.GetInt("report.retry_timeout")
-}
-
-func getAPIClient() *httpapi.Client {
-	apiOpts := []httpapi.Opt{}
-	if viper.GetBool("api.tls_skip_verify") {
-		apiOpts = append(apiOpts, httpapi.OptSetInsecureTLS(true))
-	}
-	if viper.GetString("api.tls_cert") != "" {
-		apiOpts = append(apiOpts, httpapi.OptAddTLSCert(viper.GetString("api.tls_cert")))
-	}
-	if viper.GetString("api.proxy_url") != "" {
-		proxyURL, err := url.Parse(viper.GetString("api.proxy_url"))
-		util.Check(err, "Unable to parse proxy URL")
-		apiOpts = append(apiOpts, httpapi.OptSetProxy(proxyURL))
-	}
-
-	return httpapi.NewClient(
-		viper.GetString("api.url"),
-		fmt.Sprintf("Bearer %s", viper.GetString("access_token")),
-		apiOpts...,
-	)
-}
-
-func getSheqsyAPIClient() *httpapi.Client {
-	var apiOpts []httpapi.Opt
-	if viper.GetBool("api.tls_skip_verify") {
-		apiOpts = append(apiOpts, httpapi.OptSetInsecureTLS(true))
-	}
-	if viper.GetString("api.tls_cert") != "" {
-		apiOpts = append(apiOpts, httpapi.OptAddTLSCert(viper.GetString("api.tls_cert")))
-	}
-	if viper.GetString("api.proxy_url") != "" {
-		proxyURL, err := url.Parse(viper.GetString("api.proxy_url"))
-		util.Check(err, "Unable to parse proxy URL")
-		apiOpts = append(apiOpts, httpapi.OptSetProxy(proxyURL))
-	}
-
-	token := base64.StdEncoding.EncodeToString(
-		[]byte(
-			fmt.Sprintf(
-				"%s:%s",
-				viper.GetString("sheqsy_username"),
-				viper.GetString("sheqsy_password"),
-			),
-		),
-	)
-
-	return httpapi.NewClient(
-		viper.GetString("api.sheqsy_url"),
-		fmt.Sprintf("Basic %s", token),
-		apiOpts...,
-	)
 }

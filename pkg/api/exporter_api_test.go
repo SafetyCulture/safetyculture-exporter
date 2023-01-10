@@ -35,7 +35,7 @@ func TestSafetyCultureExporter_GetTemplateList(t *testing.T) {
 			}
 		`)
 
-	exporter := api.NewSafetyCultureExporter(&cfg, apiClient, apiClient)
+	exporter := api.NewSafetyCultureExporter(&cfg, apiClient, apiClient, &api.AppVersion{})
 	res, err := exporter.GetTemplateList()
 	require.Nil(t, err)
 	assert.EqualValues(t, 1, len(res))

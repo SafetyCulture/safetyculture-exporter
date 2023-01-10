@@ -7,7 +7,6 @@ import (
 
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/httpapi"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/util"
-	"github.com/SafetyCulture/safetyculture-exporter/pkg/version"
 	"github.com/pkg/errors"
 )
 
@@ -65,8 +64,8 @@ func (c *Client) getTemplateList(ctx context.Context, params *templateSearchRequ
 
 	sl := c.apiClient.Sling.New().Get("/templates/v1/templates/search").
 		Set(string(httpapi.Authorization), c.apiClient.AuthorizationHeader).
-		Set(string(httpapi.IntegrationID), "safetyculture-exporter").
-		Set(string(httpapi.IntegrationVersion), version.GetVersion()).
+		Set(string(httpapi.IntegrationID), c.apiClient.IntegrationID).
+		Set(string(httpapi.IntegrationVersion), c.apiClient.IntegrationVersion).
 		Set(string(httpapi.XRequestID), util.RequestIDFromContext(ctx))
 
 	sl.QueryStruct(params)

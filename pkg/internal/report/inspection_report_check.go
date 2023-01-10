@@ -7,7 +7,6 @@ import (
 
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/httpapi"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/util"
-	"github.com/SafetyCulture/safetyculture-exporter/pkg/version"
 	"github.com/pkg/errors"
 )
 
@@ -22,8 +21,8 @@ func CheckInspectionReportExportCompletion(ctx context.Context, apiClient *httpa
 
 	sl := apiClient.Sling.New().Get(url).
 		Set(string(httpapi.Authorization), apiClient.AuthorizationHeader).
-		Set(string(httpapi.IntegrationID), "safetyculture-exporter").
-		Set(string(httpapi.IntegrationVersion), version.GetVersion()).
+		Set(string(httpapi.IntegrationID), apiClient.IntegrationID).
+		Set(string(httpapi.IntegrationVersion), apiClient.IntegrationVersion).
 		Set(string(httpapi.XRequestID), util.RequestIDFromContext(ctx))
 
 	req, _ := sl.Request()
