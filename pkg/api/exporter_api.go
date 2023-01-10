@@ -41,29 +41,6 @@ func NewSafetyCultureExporter(cfg *ExporterConfiguration, version *AppVersion) (
 	}, nil
 }
 
-// RefreshConfiguration
-// NOTE: called by the UI
-func RefreshConfiguration(cfg *ExporterConfiguration, exporter *SafetyCultureExporter, version *AppVersion) (*SafetyCultureExporter, error) {
-	apiClient, err := getAPIClient(cfg.ToApiConfig())
-	if err != nil {
-		return nil, err
-	}
-	apiClient.SetVersion(version.IntegrationID, version.IntegrationVersion)
-
-	sheqsyApiClient, err := getSheqsyAPIClient(cfg.ToApiConfig())
-	if err != nil {
-		return nil, err
-	}
-	sheqsyApiClient.SetVersion(version.IntegrationID, version.IntegrationVersion)
-
-	return &SafetyCultureExporter{
-		apiClient:       apiClient,
-		sheqsyApiClient: sheqsyApiClient,
-		cfg:             cfg,
-		exportStatus:    exporter.exportStatus,
-	}, nil
-}
-
 func getAPIClient(cfg *HttpApiCfg) (*httpapi.Client, error) {
 	var apiOpts []httpapi.Opt
 
