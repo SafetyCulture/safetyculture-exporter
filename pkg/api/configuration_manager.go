@@ -1,7 +1,6 @@
 package api
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 	"path"
@@ -228,9 +227,6 @@ func (c *ConfigurationManager) SaveConfiguration() error {
 	if len(strings.TrimSpace(c.fileName)) == 0 || !strings.HasSuffix(c.fileName, ".yaml") {
 		return fmt.Errorf("invalid file name provided")
 	}
-
-	j, _ := json.Marshal(c.Configuration)
-	fmt.Printf("%s\n", j)
 
 	data, err := yaml.Marshal(c.Configuration)
 	if err != nil {
