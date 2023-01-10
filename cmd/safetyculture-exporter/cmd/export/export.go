@@ -119,7 +119,7 @@ func NewSafetyCultureExporter(v *viper.Viper) *exporterAPI.SafetyCultureExporter
 		IntegrationID:      version.GetIntegrationID(),
 		IntegrationVersion: version.GetVersion(),
 	}
-	exporter, err := exporterAPI.NewSafetyCultureExporterInferredApiClient(cm.Configuration, &version)
+	exporter, err := exporterAPI.NewSafetyCultureExporter(cm.Configuration, &version)
 	util.Check(err, "failed to initialize the exporter")
 	return exporter
 }

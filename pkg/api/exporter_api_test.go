@@ -35,7 +35,11 @@ func TestSafetyCultureExporter_GetTemplateList(t *testing.T) {
 			}
 		`)
 
-	exporter := api.NewSafetyCultureExporter(&cfg, apiClient, apiClient, &api.AppVersion{})
+	exporter, err := api.NewSafetyCultureExporter(&cfg, &api.AppVersion{})
+	require.Nil(t, err)
+	exporter.SetApiClient(apiClient)
+	exporter.SetSheqsyApiClient(apiClient)
+
 	res, err := exporter.GetTemplateList()
 	require.Nil(t, err)
 	assert.EqualValues(t, 1, len(res))

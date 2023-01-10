@@ -19,21 +19,8 @@ import (
 	"github.com/pkg/errors"
 )
 
-// NewSafetyCultureExporter build new SafetyCultureExporter
-func NewSafetyCultureExporter(cfg *ExporterConfiguration, apiClient *httpapi.Client, sheqsyApiClient *httpapi.Client,
-	version *AppVersion) *SafetyCultureExporter {
-
-	return &SafetyCultureExporter{
-		apiClient:       apiClient,
-		sheqsyApiClient: sheqsyApiClient,
-		cfg:             cfg,
-		exportStatus:    feed.NewExportStatus(),
-		version:         version,
-	}
-}
-
-// NewSafetyCultureExporterInferredApiClient builds a SafetyCultureExporter with clients inferred from own configuration
-func NewSafetyCultureExporterInferredApiClient(cfg *ExporterConfiguration, version *AppVersion) (*SafetyCultureExporter, error) {
+// NewSafetyCultureExporter builds a SafetyCultureExporter with clients inferred from own configuration
+func NewSafetyCultureExporter(cfg *ExporterConfiguration, version *AppVersion) (*SafetyCultureExporter, error) {
 	apiClient, err := getAPIClient(cfg.ToApiConfig())
 	if err != nil {
 		return nil, err
@@ -46,23 +33,28 @@ func NewSafetyCultureExporterInferredApiClient(cfg *ExporterConfiguration, versi
 	}
 	sheqsyApiClient.SetVersion(version.IntegrationID, version.IntegrationVersion)
 
-	return NewSafetyCultureExporter(cfg, apiClient, sheqsyApiClient, version), nil
+	return &SafetyCultureExporter{
+		apiClient:       apiClient,
+		sheqsyApiClient: sheqsyApiClient,
+		cfg:             cfg,
+		exportStatus:    feed.NewExportStatus(),
+	}, nil
 }
 
 // RefreshConfiguration
 // NOTE: called by the UI
-func RefreshConfiguration(cfg *ExporterConfiguration, exporter *SafetyCultureExporter) (*SafetyCultureExporter, error) {
+func RefreshConfiguration(cfg *ExporterConfiguration, exporter *SafetyCultureExporter, version *AppVersion) (*SafetyCultureExporter, error) {
 	apiClient, err := getAPIClient(cfg.ToApiConfig())
 	if err != nil {
 		return nil, err
 	}
-	apiClient.SetVersion(exporter.version.IntegrationID, exporter.version.IntegrationVersion)
+	apiClient.SetVersion(version.IntegrationID, version.IntegrationVersion)
 
 	sheqsyApiClient, err := getSheqsyAPIClient(cfg.ToApiConfig())
 	if err != nil {
 		return nil, err
 	}
-	sheqsyApiClient.SetVersion(exporter.version.IntegrationID, exporter.version.IntegrationVersion)
+	sheqsyApiClient.SetVersion(version.IntegrationID, version.IntegrationVersion)
 
 	return &SafetyCultureExporter{
 		apiClient:       apiClient,
@@ -170,7 +162,14 @@ type SafetyCultureExporter struct {
 	sheqsyApiClient *httpapi.Client
 	cfg             *ExporterConfiguration
 	exportStatus    *feed.ExportStatus
-	version         *AppVersion
+}
+
+func (s *SafetyCultureExporter) SetApiClient(apiClient *httpapi.Client) {
+	s.apiClient = apiClient
+}
+
+func (s *SafetyCultureExporter) SetSheqsyApiClient(apiClient *httpapi.Client) {
+	s.sheqsyApiClient = apiClient
 }
 
 func (s *SafetyCultureExporter) RunInspectionJSON() error {
