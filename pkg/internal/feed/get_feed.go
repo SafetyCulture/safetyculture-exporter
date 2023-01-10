@@ -7,7 +7,6 @@ import (
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/httpapi"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/events"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/util"
-	"github.com/SafetyCulture/safetyculture-exporter/pkg/version"
 )
 
 // GetFeed executes the feed request and
@@ -25,8 +24,8 @@ func GetFeed(ctx context.Context, apiClient *httpapi.Client, request *GetFeedReq
 	sl := apiClient.Sling.New().
 		Get(initialURL).
 		Set(string(httpapi.Authorization), apiClient.AuthorizationHeader).
-		Set(string(httpapi.IntegrationID), "safetyculture-exporter").
-		Set(string(httpapi.IntegrationVersion), version.GetVersion()).
+		Set(string(httpapi.IntegrationID), apiClient.IntegrationID).
+		Set(string(httpapi.IntegrationVersion), apiClient.IntegrationVersion).
 		Set(string(httpapi.XRequestID), util.RequestIDFromContext(ctx))
 
 	if request.URL == "" {

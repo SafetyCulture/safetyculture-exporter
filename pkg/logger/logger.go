@@ -8,7 +8,6 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/SafetyCulture/safetyculture-exporter/pkg/version"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -124,7 +123,7 @@ func GetLogger() *zap.SugaredLogger {
 	)
 
 	// From a zapcore.Core, it's easy to construct a Logger.
-	l := zap.New(core).Named(fmt.Sprintf("safetyculture-exporter@%s", version.GetVersion()))
+	l := zap.New(core).Named("safetyculture-exporter")
 	defer l.Sync()
 
 	// redirects output from the standard library's package-global logger to the supplied logger
@@ -163,7 +162,7 @@ func GetExporterLogger(path string) *ExporterLogger {
 	)
 
 	// From a zapcore.Core, it's easy to construct a Logger.
-	l := zap.New(core).Named(fmt.Sprintf("safetyculture-exporter@%s", version.GetVersion()))
+	l := zap.New(core).Named("safetyculture-exporter")
 	defer l.Sync()
 
 	// redirects output from the standard library's package-global logger to the supplied logger

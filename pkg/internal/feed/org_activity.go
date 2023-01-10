@@ -8,7 +8,6 @@ import (
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/httpapi"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/events"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/util"
-	"github.com/SafetyCulture/safetyculture-exporter/pkg/version"
 )
 
 const activityHistoryLogURL = "/accounts/history/v1/activity_log/list"
@@ -18,8 +17,8 @@ func ListOrganisationActivityLog(ctx context.Context, apiClient *httpapi.Client,
 	sl := apiClient.Sling.New().
 		Post(activityHistoryLogURL).
 		Set(string(httpapi.Authorization), apiClient.AuthorizationHeader).
-		Set(string(httpapi.IntegrationID), "safetyculture-exporter").
-		Set(string(httpapi.IntegrationVersion), version.GetVersion()).
+		Set(string(httpapi.IntegrationID), apiClient.IntegrationID).
+		Set(string(httpapi.IntegrationVersion), apiClient.IntegrationVersion).
 		Set(string(httpapi.XRequestID), util.RequestIDFromContext(ctx)).
 		BodyJSON(request)
 

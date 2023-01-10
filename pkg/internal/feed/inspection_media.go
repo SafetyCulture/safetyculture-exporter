@@ -9,12 +9,11 @@ import (
 
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/httpapi"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/util"
-	"github.com/SafetyCulture/safetyculture-exporter/pkg/version"
 )
 
 // GetMedia fetches the media object from SafetyCulture.
-func GetMedia(ctx context.Context, a *httpapi.Client, request *GetMediaRequest) (*GetMediaResponse, error) {
-	baseURL := strings.TrimPrefix(request.URL, a.BaseURL)
+func GetMedia(ctx context.Context, apiClient *httpapi.Client, request *GetMediaRequest) (*GetMediaResponse, error) {
+	baseURL := strings.TrimPrefix(request.URL, apiClient.BaseURL)
 
 	// The mediaURL will be in the following format:
 	// https://api.eu.safetyculture.com/audits/audit_xxx/media/4c83fcf2-180b-4d3e-958f-389f7ac49777
@@ -22,18 +21,18 @@ func GetMedia(ctx context.Context, a *httpapi.Client, request *GetMediaRequest) 
 	mediaIDURL := strings.Split(request.URL, "/")
 	mediaID := mediaIDURL[len(mediaIDURL)-1]
 
-	sl := a.Sling.New().Get(baseURL).
-		Set(string(httpapi.Authorization), a.AuthorizationHeader).
-		Set(string(httpapi.IntegrationID), "safetyculture-exporter").
-		Set(string(httpapi.IntegrationVersion), version.GetVersion()).
+	sl := apiClient.Sling.New().Get(baseURL).
+		Set(string(httpapi.Authorization), apiClient.AuthorizationHeader).
+		Set(string(httpapi.IntegrationID), apiClient.IntegrationID).
+		Set(string(httpapi.IntegrationVersion), apiClient.IntegrationVersion).
 		Set(string(httpapi.XRequestID), util.RequestIDFromContext(ctx))
 
 	req, _ := sl.Request()
 	req = req.WithContext(ctx)
 
-	result, err := a.Do(&util.DefaultHTTPDoer{
+	result, err := apiClient.Do(&util.DefaultHTTPDoer{
 		Req:        req,
-		HttpClient: a.HttpClient,
+		HttpClient: apiClient.HttpClient,
 	})
 	if err != nil {
 		// Ignore forbidden errors for media objects.

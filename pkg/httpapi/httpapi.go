@@ -15,7 +15,6 @@ import (
 
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/util"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/logger"
-	"github.com/SafetyCulture/safetyculture-exporter/pkg/version"
 	"github.com/dghubble/sling"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
@@ -44,10 +43,20 @@ type Client struct {
 	RetryMax      int
 	RetryWaitMin  time.Duration
 	RetryWaitMax  time.Duration
+
+	IntegrationID      string
+	IntegrationVersion string
+}
+
+type ClientCfg struct {
+	Addr                string
+	AuthorizationHeader string
+	IntegrationID       string
+	IntegrationVersion  string
 }
 
 // NewClient creates a new instance of the Client
-func NewClient(addr string, authorizationHeader string, opts ...Opt) *Client {
+func NewClient(cfg *ClientCfg, opts ...Opt) *Client {
 	httpTransport := &http.Transport{
 		DialContext: (&net.Dialer{
 			Timeout:   30 * time.Second,
@@ -69,16 +78,18 @@ func NewClient(addr string, authorizationHeader string, opts ...Opt) *Client {
 	a := &Client{
 		logger:              logger.GetLogger(),
 		HttpClient:          httpClient,
-		BaseURL:             addr,
+		BaseURL:             cfg.Addr,
 		httpTransport:       httpTransport,
-		Sling:               sling.New().Client(httpClient).Base(addr),
-		AuthorizationHeader: authorizationHeader,
+		Sling:               sling.New().Client(httpClient).Base(cfg.Addr),
+		AuthorizationHeader: cfg.AuthorizationHeader,
 		Duration:            0,
 		CheckForRetry:       DefaultRetryPolicy,
 		Backoff:             DefaultBackoff,
 		RetryMax:            defaultRetryMax,
 		RetryWaitMin:        defaultRetryWaitMin,
 		RetryWaitMax:        defaultRetryWaitMax,
+		IntegrationVersion:  cfg.IntegrationVersion,
+		IntegrationID:       cfg.IntegrationID,
 	}
 
 	for _, opt := range opts {
@@ -233,8 +244,8 @@ func (a *Client) Get(ctx context.Context, url string) (*json.RawMessage, error) 
 
 	sl := a.Sling.New().Get(url).
 		Set(string(Authorization), a.AuthorizationHeader).
-		Set(string(IntegrationID), "safetyculture-exporter").
-		Set(string(IntegrationVersion), version.GetVersion()).
+		Set(string(IntegrationID), a.IntegrationID).
+		Set(string(IntegrationVersion), a.IntegrationVersion).
 		Set(string(XRequestID), util.RequestIDFromContext(ctx))
 
 	req, _ := sl.Request()
@@ -262,8 +273,8 @@ func (a *Client) WhoAmI(ctx context.Context) (*WhoAmIResponse, error) {
 
 	sl := a.Sling.New().Get("accounts/user/v1/user:WhoAmI").
 		Set(string(Authorization), a.AuthorizationHeader).
-		Set(string(IntegrationID), "safetyculture-exporter").
-		Set(string(IntegrationVersion), version.GetVersion()).
+		Set(string(IntegrationID), a.IntegrationID).
+		Set(string(IntegrationVersion), a.IntegrationVersion).
 		Set(string(XRequestID), util.RequestIDFromContext(ctx))
 
 	req, _ := sl.Request()

@@ -76,6 +76,12 @@ type ExporterConfiguration struct {
 	} `yaml:"session"`
 }
 
+// AppVersion used to store the version and ID
+type AppVersion struct {
+	IntegrationID      string
+	IntegrationVersion string
+}
+
 // mTime wrapper around time.Time in order to have a custom YAML marshaller/un-marshaller
 type mTime struct {
 	time.Time

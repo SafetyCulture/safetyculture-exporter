@@ -19,51 +19,29 @@ import (
 	"github.com/pkg/errors"
 )
 
-// NewSafetyCultureExporter build new SafetyCultureExporter
-func NewSafetyCultureExporter(cfg *ExporterConfiguration, apiClient *httpapi.Client, sheqsyApiClient *httpapi.Client) *SafetyCultureExporter {
+// NewSafetyCultureExporter builds a SafetyCultureExporter with clients inferred from own configuration
+func NewSafetyCultureExporter(cfg *ExporterConfiguration, version *AppVersion) (*SafetyCultureExporter, error) {
+	apiClient, err := getAPIClient(cfg.ToApiConfig(), version)
+	if err != nil {
+		return nil, err
+	}
+
+	sheqsyApiClient, err := getSheqsyAPIClient(cfg.ToApiConfig(), version)
+	if err != nil {
+		return nil, err
+	}
+
 	return &SafetyCultureExporter{
 		apiClient:       apiClient,
 		sheqsyApiClient: sheqsyApiClient,
 		cfg:             cfg,
 		exportStatus:    feed.NewExportStatus(),
-	}
-}
-
-// NewSafetyCultureExporterInferredApiClient builds a SafetyCultureExporter with clients inferred from own configuration
-func NewSafetyCultureExporterInferredApiClient(cfg *ExporterConfiguration) (*SafetyCultureExporter, error) {
-	apiClient, err := getAPIClient(cfg.ToApiConfig())
-	if err != nil {
-		return nil, err
-	}
-
-	sheqsyApiClient, err := getSheqsyAPIClient(cfg.ToApiConfig())
-	if err != nil {
-		return nil, err
-	}
-
-	return NewSafetyCultureExporter(cfg, apiClient, sheqsyApiClient), nil
-}
-
-func RefreshConfiguration(cfg *ExporterConfiguration, exporter *SafetyCultureExporter) (*SafetyCultureExporter, error) {
-	apiClient, err := getAPIClient(cfg.ToApiConfig())
-	if err != nil {
-		return nil, err
-	}
-
-	sheqsyApiClient, err := getSheqsyAPIClient(cfg.ToApiConfig())
-	if err != nil {
-		return nil, err
-	}
-	return &SafetyCultureExporter{
-		apiClient:       apiClient,
-		sheqsyApiClient: sheqsyApiClient,
-		cfg:             cfg,
-		exportStatus:    exporter.exportStatus,
 	}, nil
 }
 
-func getAPIClient(cfg *HttpApiCfg) (*httpapi.Client, error) {
+func getAPIClient(cfg *HttpApiCfg, version *AppVersion) (*httpapi.Client, error) {
 	var apiOpts []httpapi.Opt
+
 	if cfg.tlsSkipVerify {
 		apiOpts = append(apiOpts, httpapi.OptSetInsecureTLS(true))
 	}
@@ -78,14 +56,17 @@ func getAPIClient(cfg *HttpApiCfg) (*httpapi.Client, error) {
 		apiOpts = append(apiOpts, httpapi.OptSetProxy(proxyURL))
 	}
 
-	return httpapi.NewClient(
-		cfg.apiUrl,
-		fmt.Sprintf("Bearer %s", cfg.accessToken),
-		apiOpts...,
-	), nil
+	config := httpapi.ClientCfg{
+		Addr:                cfg.apiUrl,
+		AuthorizationHeader: fmt.Sprintf("Bearer %s", cfg.accessToken),
+		IntegrationID:       version.IntegrationID,
+		IntegrationVersion:  version.IntegrationVersion,
+	}
+
+	return httpapi.NewClient(&config, apiOpts...), nil
 }
 
-func getSheqsyAPIClient(cfg *HttpApiCfg) (*httpapi.Client, error) {
+func getSheqsyAPIClient(cfg *HttpApiCfg, version *AppVersion) (*httpapi.Client, error) {
 	var apiOpts []httpapi.Opt
 	if cfg.tlsSkipVerify {
 		apiOpts = append(apiOpts, httpapi.OptSetInsecureTLS(true))
@@ -111,11 +92,14 @@ func getSheqsyAPIClient(cfg *HttpApiCfg) (*httpapi.Client, error) {
 		),
 	)
 
-	return httpapi.NewClient(
-		cfg.sheqsyApiUrl,
-		fmt.Sprintf("Basic %s", token),
-		apiOpts...,
-	), nil
+	config := httpapi.ClientCfg{
+		Addr:                cfg.sheqsyApiUrl,
+		AuthorizationHeader: fmt.Sprintf("Basic %s", token),
+		IntegrationID:       version.IntegrationID,
+		IntegrationVersion:  version.IntegrationVersion,
+	}
+
+	return httpapi.NewClient(&config, apiOpts...), nil
 }
 
 // NewReportExporter returns a new instance of ReportExporter
@@ -159,6 +143,14 @@ type SafetyCultureExporter struct {
 	sheqsyApiClient *httpapi.Client
 	cfg             *ExporterConfiguration
 	exportStatus    *feed.ExportStatus
+}
+
+func (s *SafetyCultureExporter) SetApiClient(apiClient *httpapi.Client) {
+	s.apiClient = apiClient
+}
+
+func (s *SafetyCultureExporter) SetSheqsyApiClient(apiClient *httpapi.Client) {
+	s.sheqsyApiClient = apiClient
 }
 
 func (s *SafetyCultureExporter) RunInspectionJSON() error {
