@@ -104,7 +104,7 @@ func (f *SheqsyShiftFeed) Export(ctx context.Context, apiClient *httpapi.Client,
 
 	version := 1
 	for version != 0 {
-		resp, err := apiClient.Get(ctx, fmt.Sprintf("/SheqsyIntegrationApi/api/v3/companies/%s/shifts/history?ver=%d", companyID, version))
+		resp, err := httpapi.ExecuteGet[json.RawMessage](ctx, apiClient, fmt.Sprintf("/SheqsyIntegrationApi/api/v3/companies/%s/shifts/history?ver=%d", companyID, version), nil)
 		if err != nil {
 			return fmt.Errorf("fetch data: %w", err)
 		}

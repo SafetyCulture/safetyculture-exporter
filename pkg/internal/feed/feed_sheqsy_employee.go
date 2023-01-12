@@ -96,7 +96,7 @@ func (f *SheqsyEmployeeFeed) Export(ctx context.Context, apiClient *httpapi.Clie
 
 	var rows []*SheqsyEmployee
 
-	resp, err := apiClient.Get(ctx, fmt.Sprintf("/SheqsyIntegrationApi/api/v3/companies/%s/employees", companyID))
+	resp, err := httpapi.ExecuteGet[json.RawMessage](ctx, apiClient, fmt.Sprintf("/SheqsyIntegrationApi/api/v3/companies/%s/employees", companyID), nil)
 	if err != nil {
 		return fmt.Errorf("fetch data: %w", err)
 	}

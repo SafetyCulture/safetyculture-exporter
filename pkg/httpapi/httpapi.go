@@ -4,7 +4,6 @@ import (
 	"context"
 	"crypto/tls"
 	"crypto/x509"
-	"encoding/json"
 	"fmt"
 	"log"
 	"net"
@@ -13,7 +12,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/util"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/logger"
 	"github.com/dghubble/sling"
 	"github.com/pkg/errors"
@@ -235,60 +233,7 @@ func (a *Client) Do(doer HTTPDoer) (*http.Response, error) {
 	return nil, fmt.Errorf("%s giving up after %d attempt(s)", url, a.RetryMax+1)
 }
 
-// Get makes a get request
-func (a *Client) Get(ctx context.Context, url string) (*json.RawMessage, error) {
-	var (
-		result *json.RawMessage
-		errMsg json.RawMessage
-	)
-
-	sl := a.Sling.New().Get(url).
-		Set(string(Authorization), a.AuthorizationHeader).
-		Set(string(IntegrationID), a.IntegrationID).
-		Set(string(IntegrationVersion), a.IntegrationVersion).
-		Set(string(XRequestID), util.RequestIDFromContext(ctx))
-
-	req, _ := sl.Request()
-	req = req.WithContext(ctx)
-
-	_, err := a.Do(&util.SlingHTTPDoer{
-		Sl:       sl,
-		Req:      req,
-		SuccessV: &result,
-		FailureV: &errMsg,
-	})
-	if err != nil {
-		return nil, errors.Wrap(err, "api request")
-	}
-
-	return result, nil
-}
-
 // WhoAmI returns the details for the user who is making the request
-func (a *Client) WhoAmI(ctx context.Context) (*WhoAmIResponse, error) {
-	var (
-		result *WhoAmIResponse
-		errMsg json.RawMessage
-	)
-
-	sl := a.Sling.New().Get("accounts/user/v1/user:WhoAmI").
-		Set(string(Authorization), a.AuthorizationHeader).
-		Set(string(IntegrationID), a.IntegrationID).
-		Set(string(IntegrationVersion), a.IntegrationVersion).
-		Set(string(XRequestID), util.RequestIDFromContext(ctx))
-
-	req, _ := sl.Request()
-	req = req.WithContext(ctx)
-
-	_, err := a.Do(&util.SlingHTTPDoer{
-		Sl:       sl,
-		Req:      req,
-		SuccessV: &result,
-		FailureV: &errMsg,
-	})
-	if err != nil {
-		return nil, errors.Wrap(err, "api request")
-	}
-
-	return result, nil
+func WhoAmI(ctx context.Context, apiClient *Client) (*WhoAmIResponse, error) {
+	return ExecuteGet[WhoAmIResponse](ctx, apiClient, "accounts/user/v1/user:WhoAmI", nil)
 }

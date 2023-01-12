@@ -118,7 +118,7 @@ func TestClient_WhoAmI_WhenOK(t *testing.T) {
 	apiClient := GetTestClient()
 	gock.InterceptClient(apiClient.HTTPClient())
 
-	r, err := apiClient.WhoAmI(context.Background())
+	r, err := httpapi.WhoAmI(context.Background(), apiClient)
 	require.Nil(t, err)
 	require.NotNil(t, r)
 }
@@ -134,7 +134,7 @@ func TestClient_WhoAmI_WhenNotOK(t *testing.T) {
 	apiClient := GetTestClient()
 	gock.InterceptClient(apiClient.HTTPClient())
 
-	r, err := apiClient.WhoAmI(context.Background())
+	r, err := httpapi.WhoAmI(context.Background(), apiClient)
 	require.NotNil(t, err)
 	require.Nil(t, r)
 	assert.EqualValues(t, "api request: http://localhost:9999/accounts/user/v1/user:WhoAmI giving up after 2 attempt(s)", err.Error())
