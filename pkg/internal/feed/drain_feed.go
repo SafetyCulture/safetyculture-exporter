@@ -16,8 +16,16 @@ func DrainFeed(ctx context.Context, apiClient *httpapi.Client, request *GetFeedR
 	first := true
 	for nextURL != "" || first {
 		first = false
-		request.URL = nextURL
-		resp, httpErr := GetFeed(ctx, apiClient, request)
+		execURL := request.InitialURL
+		execParams := &request.Params
+
+		if nextURL != "" {
+			execURL = nextURL
+			execParams = nil
+		}
+
+		//resp, httpErr := GetFeed(ctx, apiClient, request)
+		resp, httpErr := httpapi.ExecuteGet[GetFeedResponse](ctx, apiClient, execURL, execParams)
 		if httpErr != nil {
 			return events.NewEventError(httpErr, events.ErrorSeverityError, events.ErrorSubSystemAPI, false)
 		}
