@@ -7,3 +7,10 @@ type WhoAmIResponse struct {
 	Firstname      string `json:"firstname"`
 	Lastname       string `json:"lastname"`
 }
+
+type GetSheqsyCompanyResponse struct {
+	CompanyID   int         `json:"companyId"`
+	CompanyName string      `json:"companyName"`
+	Name        interface{} `json:"name"`
+	CompanyUID  string      `json:"companyUId"`
+}

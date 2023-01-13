@@ -87,7 +87,7 @@ func (client *Client) Export(ctx context.Context) error {
 	guard := make(chan struct{}, maxGoRoutines)
 
 	operation := func(row Inspection) {
-		inspection, err := GetInspection(ctx, client.apiClient, row.ID)
+		inspection, err := httpapi.GetRawInspection(ctx, client.apiClient, row.ID)
 		util.Check(err, fmt.Sprintf("Failed to get inspection with id: %s", row.ID))
 
 		client.exporter.WriteRow(row.ID, inspection)

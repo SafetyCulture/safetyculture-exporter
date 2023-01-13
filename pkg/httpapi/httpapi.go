@@ -1,7 +1,6 @@
 package httpapi
 
 import (
-	"context"
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
@@ -231,9 +230,4 @@ func (a *Client) Do(doer HTTPDoer) (*http.Response, error) {
 	}
 
 	return nil, fmt.Errorf("%s giving up after %d attempt(s)", url, a.RetryMax+1)
-}
-
-// WhoAmI returns the details for the user who is making the request
-func WhoAmI(ctx context.Context, apiClient *Client) (*WhoAmIResponse, error) {
-	return ExecuteGet[WhoAmIResponse](ctx, apiClient, "accounts/user/v1/user:WhoAmI", nil)
 }

@@ -27,7 +27,7 @@ func TestAPIClientGetInspection(t *testing.T) {
 	apiClient := GetTestClient()
 	gock.InterceptClient(apiClient.HTTPClient())
 
-	resp, err := inspections.GetInspection(context.Background(), apiClient, auditID)
+	resp, err := httpapi.GetRawInspection(context.Background(), apiClient, auditID)
 	assert.NoError(t, err)
 
 	rows := map[string]string{}
@@ -50,7 +50,7 @@ func TestAPIClientGetInspectionWithError(t *testing.T) {
 	apiClient := GetTestClient()
 	gock.InterceptClient(apiClient.HTTPClient())
 
-	_, err := inspections.GetInspection(context.Background(), apiClient, auditID)
+	_, err := httpapi.GetRawInspection(context.Background(), apiClient, auditID)
 	assert.NotNil(t, err)
 }
 
@@ -94,7 +94,7 @@ func TestAPIClientBackoff429TooManyRequest(t *testing.T) {
 			gock.InterceptClient(apiClient.HTTPClient())
 			apiClient.RetryMax = 1
 
-			_, err := inspections.GetInspection(context.Background(), apiClient, "1234")
+			_, err := httpapi.GetRawInspection(context.Background(), apiClient, "1234")
 			if err == nil || !strings.HasSuffix(err.Error(), tt.err) {
 				t.Fatalf("expected giving up error, got: %#v", err)
 			}

@@ -160,7 +160,7 @@ func (e *ExporterFeedClient) ExportFeeds(exporter Exporter) error {
 			}
 		}
 
-		resp, err := GetSheqsyCompany(ctx, e.sheqsyApiClient, e.configuration.SheqsyCompanyID)
+		resp, err := httpapi.GetSheqsyCompany(ctx, e.sheqsyApiClient, e.configuration.SheqsyCompanyID)
 		if err != nil {
 			return fmt.Errorf("get details of the current user: %w", err)
 		}
