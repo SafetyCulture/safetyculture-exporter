@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/httpapi"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/inspections"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/h2non/gock.v1"
@@ -36,8 +37,8 @@ func TestAPIClientDrainInspections_should_return_for_as_long_next_page_set(t *te
 	err := inspections.DrainInspections(
 		context.Background(),
 		apiClient,
-		&inspections.ListInspectionsParams{},
-		func(data *inspections.ListInspectionsResponse) error {
+		&httpapi.ListInspectionsParams{},
+		func(data *httpapi.ListInspectionsResponse) error {
 			for _, inspection := range data.Inspections {
 				auditIDs = append(auditIDs, inspection.ID)
 			}
@@ -64,8 +65,8 @@ func TestDrainInspectionsWithAPIError(t *testing.T) {
 	err := inspections.DrainInspections(
 		context.Background(),
 		apiClient,
-		&inspections.ListInspectionsParams{},
-		func(data *inspections.ListInspectionsResponse) error {
+		&httpapi.ListInspectionsParams{},
+		func(data *httpapi.ListInspectionsResponse) error {
 			return nil
 		})
 	assert.NotNil(t, err)
@@ -96,8 +97,8 @@ func TestDrainInspectionsWithCallbackError(t *testing.T) {
 	err := inspections.DrainInspections(
 		context.Background(),
 		apiClient,
-		&inspections.ListInspectionsParams{},
-		func(data *inspections.ListInspectionsResponse) error {
+		&httpapi.ListInspectionsParams{},
+		func(data *httpapi.ListInspectionsResponse) error {
 			return fmt.Errorf("test error")
 		})
 	assert.NotNil(t, err)

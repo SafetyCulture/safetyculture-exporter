@@ -20,3 +20,8 @@ func GetSheqsyCompany(ctx context.Context, apiClient *Client, companyID string) 
 func GetRawInspection(ctx context.Context, apiClient *Client, id string) (*json.RawMessage, error) {
 	return ExecuteGet[json.RawMessage](ctx, apiClient, fmt.Sprintf("/audits/%s", id), nil)
 }
+
+// ListInspections retrieves the list of inspections from SafetyCulture
+func ListInspections(ctx context.Context, apiClient *Client, params *ListInspectionsParams) (*ListInspectionsResponse, error) {
+	return ExecuteGet[ListInspectionsResponse](ctx, apiClient, "/audits/search", params)
+}

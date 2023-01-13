@@ -8,7 +8,6 @@ import (
 	"testing"
 
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/httpapi"
-	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/inspections"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/h2non/gock.v1"
 )
@@ -64,7 +63,7 @@ func TestAPIClientListInspectionWithError(t *testing.T) {
 	apiClient := GetTestClient()
 	gock.InterceptClient(apiClient.HTTPClient())
 
-	_, err := inspections.ListInspections(context.Background(), apiClient, nil)
+	_, err := httpapi.ListInspections(context.Background(), apiClient, nil)
 	assert.NotNil(t, err)
 }
 
