@@ -584,7 +584,7 @@ func TestAPIClientCheckInspectionReportExportCompletion_should_return_status(t *
 	apiClient := GetTestClient()
 	gock.InterceptClient(apiClient.HTTPClient())
 
-	res, err := report.CheckInspectionReportExportCompletion(context.Background(), apiClient, "audit_123", "abc")
+	res, err := httpapi.CheckInspectionReportExportCompletion(context.Background(), apiClient, "audit_123", "abc")
 
 	assert.NoError(t, err)
 	assert.Equal(t, res.Status, "SUCCESS")
@@ -616,7 +616,7 @@ func TestAPIClientCheckInspectionReportExportCompletion_should_return_error_on_f
 			apiClient := GetTestClient()
 			gock.InterceptClient(apiClient.HTTPClient())
 
-			_, err := report.CheckInspectionReportExportCompletion(context.Background(), apiClient, "audit_123", "abc")
+			_, err := httpapi.CheckInspectionReportExportCompletion(context.Background(), apiClient, "audit_123", "abc")
 			if err == nil || !strings.HasSuffix(err.Error(), tt.err) {
 				t.Fatalf("expected giving up error, got: %#v", err)
 			}

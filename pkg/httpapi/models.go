@@ -38,3 +38,9 @@ type ListInspectionsParams struct {
 	Completed     string    `url:"completed,omitempty"`
 	Limit         int       `url:"limit,omitempty"`
 }
+
+// InspectionReportExportCompletionResponse represents the response of report export completion status
+type InspectionReportExportCompletionResponse struct {
+	Status string `json:"status"`
+	URL    string `json:"url,omitempty"`
+}

@@ -25,3 +25,7 @@ func GetRawInspection(ctx context.Context, apiClient *Client, id string) (*json.
 func ListInspections(ctx context.Context, apiClient *Client, params *ListInspectionsParams) (*ListInspectionsResponse, error) {
 	return ExecuteGet[ListInspectionsResponse](ctx, apiClient, "/audits/search", params)
 }
+
+func CheckInspectionReportExportCompletion(ctx context.Context, apiClient *Client, auditID string, messageID string) (*InspectionReportExportCompletionResponse, error) {
+	return ExecuteGet[InspectionReportExportCompletionResponse](ctx, apiClient, fmt.Sprintf("audits/%s/report/%s", auditID, messageID), nil)
+}

@@ -230,7 +230,7 @@ func (e *ReportExporter) exportInspection(ctx context.Context, apiClient *httpap
 		// wait for stipulated time before checking for report completion
 		time.Sleep(GetWaitTime(e.RetryTimeout) * time.Second)
 
-		rec, cErr := report.CheckInspectionReportExportCompletion(ctx, apiClient, inspection.ID, messageID)
+		rec, cErr := httpapi.CheckInspectionReportExportCompletion(ctx, apiClient, inspection.ID, messageID)
 		if cErr != nil {
 			err = cErr
 			break
