@@ -53,6 +53,8 @@ func (e *ExportStatus) UpdateStatus(feedName string, remaining int64, err error)
 }
 
 func (e *ExportStatus) ReadStatus() map[string]*ExportStatusItem {
+	e.lock.Lock()
+	defer e.lock.Unlock()
 	return e.status
 }
 
