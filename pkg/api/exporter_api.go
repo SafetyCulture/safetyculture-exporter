@@ -321,5 +321,5 @@ func (s *SafetyCultureExporter) SetConfiguration(cfg *ExporterConfiguration) {
 
 // CleanExportStatus will clean the status items. Used by the UI
 func (s *SafetyCultureExporter) CleanExportStatus() {
-	s.exportStatus.ResetStatus()
+	s.exportStatus = feed.NewExportStatus()
 }

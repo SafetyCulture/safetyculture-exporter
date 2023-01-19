@@ -63,9 +63,3 @@ func (e *ExportStatus) GetExportStarted() bool {
 func (e *ExportStatus) GetExportCompleted() bool {
 	return e.finished
 }
-
-func (e *ExportStatus) ResetStatus() {
-	e.lock.Lock()
-	e.status = map[string]*ExportStatusItem{}
-	e.lock.Unlock()
-}
