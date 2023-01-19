@@ -318,3 +318,8 @@ func (s *SafetyCultureExporter) GetExportStatus() *ExportStatusResponse {
 func (s *SafetyCultureExporter) SetConfiguration(cfg *ExporterConfiguration) {
 	s.cfg = cfg
 }
+
+// CleanExportStatus will clean the status items. Used by the UI
+func (s *SafetyCultureExporter) CleanExportStatus() {
+	s.exportStatus.ResetStatus()
+}
