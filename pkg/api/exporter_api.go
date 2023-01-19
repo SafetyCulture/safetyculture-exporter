@@ -300,9 +300,10 @@ func (s *SafetyCultureExporter) GetExportStatus() *ExportStatusResponse {
 
 	for _, v := range data {
 		res = append(res, ExportStatusResponseItem{
-			FeedName:    v.Name,
-			Started:     v.Started,
-			DebugString: fmt.Sprintf("remaining %d", v.EstRemaining),
+			FeedName:      v.Name,
+			Status:        v.Status,
+			Remaining:     v.EstRemaining,
+			StatusMessage: v.StatusMessage,
 		})
 	}
 
