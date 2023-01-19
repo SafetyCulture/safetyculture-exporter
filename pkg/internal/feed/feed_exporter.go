@@ -139,6 +139,7 @@ func (e *ExporterFeedClient) ExportFeeds(exporter Exporter) error {
 				err := f.Export(ctx, e.apiClient, exporter, resp.OrganisationID, e.feedStatus)
 				if err != nil {
 					log.Errorf("exporting feeds: %v", err)
+					e.feedStatus.UpdateStatus(f.Name(), 0, err)
 					e.addError(err)
 				}
 				<-semaphore

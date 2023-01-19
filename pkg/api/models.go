@@ -1,6 +1,8 @@
 package api
 
-import "time"
+import (
+	"time"
+)
 
 // TemplateResponseItem simple representation of a template date
 type TemplateResponseItem struct {
@@ -17,7 +19,8 @@ type ExportStatusResponse struct {
 
 // ExportStatusResponseItem representation of Feed Export Status
 type ExportStatusResponseItem struct {
-	FeedName    string `json:"feed_name"`
-	Started     bool   `json:"has_started"`
-	DebugString string `json:"debug_string"` // TODO: THIS MUST BE DECOMPOSED
+	FeedName      string `json:"feed_name"`
+	Status        string `json:"status"`
+	Remaining     int64  `json:"remaining"`
+	StatusMessage string `json:"status_message"`
 }

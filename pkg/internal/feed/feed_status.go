@@ -15,26 +15,44 @@ type ExportStatus struct {
 	started  bool
 }
 
+const (
+	InProgress string = "In Progress"
+	Failed     string = "Failed"
+	Completed  string = "Complete"
+)
+
 type ExportStatusItem struct {
-	Name         string
-	Started      bool
-	EstRemaining int64
+	Name          string
+	Status        string
+	EstRemaining  int64
+	StatusMessage string
 }
 
-func (e *ExportStatus) UpdateStatus(feedName string, statusItem *ExportStatusItem) {
+func (e *ExportStatus) UpdateStatus(feedName string, remaining int64, err error) {
 	e.lock.Lock()
-	e.status[feedName] = statusItem
+	if err != nil {
+		e.status[feedName] = &ExportStatusItem{
+			Name:          feedName,
+			Status:        Failed,
+			StatusMessage: err.Error(),
+		}
+	} else if remaining == 0 {
+		e.status[feedName] = &ExportStatusItem{
+			Name:         feedName,
+			Status:       Completed,
+			EstRemaining: remaining,
+		}
+	} else {
+		e.status[feedName] = &ExportStatusItem{
+			Name:         feedName,
+			Status:       InProgress,
+			EstRemaining: remaining,
+		}
+	}
 	e.lock.Unlock()
 }
 
 func (e *ExportStatus) ReadStatus() map[string]*ExportStatusItem {
-	// e.lock.Lock()
-	// temp := make(map[string]*ExportStatusItem, len(e.status))
-	// for k, v := range e.status {
-	// 	temp[k] = v
-	// }
-	// e.lock.Unlock()
-	// return temp
 	return e.status
 }
 

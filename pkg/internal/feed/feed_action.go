@@ -136,11 +136,7 @@ func (f *ActionFeed) Export(ctx context.Context, apiClient *httpapi.Client, expo
 			}
 		}
 
-		status.UpdateStatus(f.Name(), &ExportStatusItem{
-			Name:         f.Name(),
-			Started:      true,
-			EstRemaining: resp.Metadata.RemainingRecords,
-		})
+		status.UpdateStatus(f.Name(), resp.Metadata.RemainingRecords, nil)
 
 		logger.With(
 			"estimated_remaining", resp.Metadata.RemainingRecords,
