@@ -313,3 +313,8 @@ func (s *SafetyCultureExporter) GetExportStatus() *ExportStatusResponse {
 		Feeds:           res,
 	}
 }
+
+// SetConfiguration will replace the configuration. Used by the UI to pass in the newly saved configuration
+func (s *SafetyCultureExporter) SetConfiguration(cfg *ExporterConfiguration) {
+	s.cfg = cfg
+}
