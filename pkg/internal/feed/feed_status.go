@@ -61,6 +61,18 @@ func (e *ExportStatus) ReadStatus() map[string]*ExportStatusItem {
 	return e.status
 }
 
+func (e *ExportStatus) PurgeFinished() {
+	e.lock.Lock()
+	filter := map[string]*ExportStatusItem{}
+	for key, item := range e.status {
+		if !(item.Started && item.Finished) {
+			filter[key] = item
+		}
+	}
+	e.status = filter
+	e.lock.Unlock()
+}
+
 func (e *ExportStatus) GetExportStarted() bool {
 	return e.started
 }

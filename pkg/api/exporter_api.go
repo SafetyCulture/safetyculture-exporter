@@ -297,6 +297,7 @@ func (s *SafetyCultureExporter) GetTemplateList() ([]TemplateResponseItem, error
 // GetExportStatus called by UI
 func (s *SafetyCultureExporter) GetExportStatus() *ExportStatusResponse {
 	data := s.exportStatus.ReadStatus()
+	s.exportStatus.PurgeFinished()
 	var res []ExportStatusResponseItem
 
 	for _, v := range data {
