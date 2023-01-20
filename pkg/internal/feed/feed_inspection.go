@@ -189,7 +189,7 @@ func (f *InspectionFeed) Export(ctx context.Context, apiClient *httpapi.Client, 
 }
 
 func (f *InspectionFeed) processNewInspections(ctx context.Context, apiClient *httpapi.Client, exporter Exporter, orgID string, status *ExportStatus) error {
-	logger := logger.GetLogger().With("feed", f.Name(), "org_id", orgID)
+	l := logger.GetLogger().With("feed", f.Name(), "org_id", orgID)
 	req := GetFeedRequest{
 		InitialURL: "/feed/inspections",
 		Params: GetFeedParams{
@@ -215,9 +215,9 @@ func (f *InspectionFeed) processNewInspections(ctx context.Context, apiClient *h
 			}
 		}
 
-		status.UpdateStatus(f.Name(), resp.Metadata.RemainingRecords, nil)
+		status.UpdateStatus(f.Name(), resp.Metadata.RemainingRecords, exporter.GetDuration().Milliseconds())
 
-		logger.With(
+		l.With(
 			"estimated_remaining", resp.Metadata.RemainingRecords,
 			"duration_ms", apiClient.Duration.Milliseconds(),
 			"export_duration_ms", exporter.GetDuration().Milliseconds(),

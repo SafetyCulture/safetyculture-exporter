@@ -294,6 +294,7 @@ func (s *SafetyCultureExporter) GetTemplateList() ([]TemplateResponseItem, error
 	return util.GenericCollectionMapper(res, transformer), nil
 }
 
+// GetExportStatus called by UI
 func (s *SafetyCultureExporter) GetExportStatus() *ExportStatusResponse {
 	data := s.exportStatus.ReadStatus()
 	var res []ExportStatusResponseItem
@@ -301,7 +302,10 @@ func (s *SafetyCultureExporter) GetExportStatus() *ExportStatusResponse {
 	for _, v := range data {
 		res = append(res, ExportStatusResponseItem{
 			FeedName:      v.Name,
-			Status:        v.Status,
+			Started:       v.Started,
+			Finished:      v.Finished,
+			HasError:      v.HasError,
+			DurationMs:    v.DurationMs,
 			Remaining:     v.EstRemaining,
 			StatusMessage: v.StatusMessage,
 		})
