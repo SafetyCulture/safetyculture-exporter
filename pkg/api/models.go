@@ -20,7 +20,10 @@ type ExportStatusResponse struct {
 // ExportStatusResponseItem representation of Feed Export Status
 type ExportStatusResponseItem struct {
 	FeedName      string `json:"feed_name"`
-	Status        string `json:"status"`
 	Remaining     int64  `json:"remaining"`
 	StatusMessage string `json:"status_message"`
+	Started       bool   `json:"started"`
+	Finished      bool   `json:"finished"`
+	HasError      bool   `json:"has_error"`
+	DurationMs    int64  `json:"duration_ms"`
 }

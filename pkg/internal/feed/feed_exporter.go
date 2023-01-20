@@ -134,14 +134,16 @@ func (e *ExporterFeedClient) ExportFeeds(exporter Exporter) error {
 			wg.Add(1)
 
 			go func(f Feed) {
-				log.Infof(" ... queueing %s\n", f.Name())
 				defer wg.Done()
+				log.Infof(" ... queueing %s\n", f.Name())
+				e.feedStatus.StartFeedExport(f.Name())
 				err := f.Export(ctx, e.apiClient, exporter, resp.OrganisationID, e.feedStatus)
 				if err != nil {
 					log.Errorf("exporting feeds: %v", err)
-					e.feedStatus.UpdateStatus(f.Name(), 0, err)
+					e.feedStatus.FinishFeedExport(f.Name(), err)
 					e.addError(err)
 				}
+				e.feedStatus.FinishFeedExport(f.Name(), nil)
 				<-semaphore
 			}(feed)
 		}
