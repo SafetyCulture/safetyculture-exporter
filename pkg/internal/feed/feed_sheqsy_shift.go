@@ -82,7 +82,7 @@ func (f *SheqsyShiftFeed) CreateSchema(exporter Exporter) error {
 }
 
 // Export exports the feed to the supplied exporter
-func (f *SheqsyShiftFeed) Export(ctx context.Context, apiClient *httpapi.Client, exporter Exporter, companyID string, status *ExportStatus) error {
+func (f *SheqsyShiftFeed) Export(ctx context.Context, apiClient *httpapi.Client, exporter Exporter, companyID string) error {
 	logger := logger.GetLogger().With("feed", f.Name(), "org_id", companyID)
 
 	if err := exporter.InitFeed(f, &InitFeedOptions{
@@ -185,5 +185,5 @@ func (f *SheqsyShiftFeed) Export(ctx context.Context, apiClient *httpapi.Client,
 		).Info("export batch complete")
 	}
 
-	return exporter.FinaliseExport(f, &[]*SheqsyShift{}, status)
+	return exporter.FinaliseExport(f, &[]*SheqsyShift{})
 }

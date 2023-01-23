@@ -83,7 +83,7 @@ func (f *SheqsyEmployeeFeed) CreateSchema(exporter Exporter) error {
 }
 
 // Export exports the feed to the supplied exporter
-func (f *SheqsyEmployeeFeed) Export(ctx context.Context, apiClient *httpapi.Client, exporter Exporter, companyID string, status *ExportStatus) error {
+func (f *SheqsyEmployeeFeed) Export(ctx context.Context, apiClient *httpapi.Client, exporter Exporter, companyID string) error {
 	logger := logger.GetLogger().With("feed", f.Name(), "org_id", companyID)
 
 	if err := exporter.InitFeed(f, &InitFeedOptions{
@@ -162,5 +162,5 @@ func (f *SheqsyEmployeeFeed) Export(ctx context.Context, apiClient *httpapi.Clie
 		"export_duration_ms", exporter.GetDuration().Milliseconds(),
 	).Info("export batch complete")
 
-	return exporter.FinaliseExport(f, &[]*SheqsyEmployee{}, status)
+	return exporter.FinaliseExport(f, &[]*SheqsyEmployee{})
 }

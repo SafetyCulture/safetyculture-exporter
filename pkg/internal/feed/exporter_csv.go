@@ -48,9 +48,10 @@ func (e *CSVExporter) CreateSchema(feed Feed, rows interface{}) error {
 }
 
 // FinaliseExport closes out an export
-func (e *CSVExporter) FinaliseExport(feed Feed, rows interface{}, status *ExportStatus) error {
+func (e *CSVExporter) FinaliseExport(feed Feed, rows interface{}) error {
 	logger := e.Logger.With("feed", feed.Name())
 	logger.Info("writing out CSV file")
+	status := GetExporterStatus()
 	status.UpdateStage(feed.Name(), StageCsv)
 
 	err := e.cleanOldFiles(feed.Name())

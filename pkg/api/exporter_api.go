@@ -191,7 +191,7 @@ func (s *SafetyCultureExporter) RunSQL() error {
 		return errors.Wrap(err, "create sql exporter")
 	}
 
-	exporterApp := feed.NewExporterApp(s.apiClient, s.sheqsyApiClient, s.cfg.ToExporterConfig(), s.exportStatus)
+	exporterApp := feed.NewExporterApp(s.apiClient, s.sheqsyApiClient, s.cfg.ToExporterConfig())
 	if s.cfg.Export.SchemaOnly {
 		return exporterApp.ExportSchemas(e)
 	}
@@ -226,7 +226,7 @@ func (s *SafetyCultureExporter) RunCSV() error {
 		return errors.Wrap(err, "unable to create csv exporter")
 	}
 
-	exporterApp := feed.NewExporterApp(s.apiClient, s.sheqsyApiClient, s.cfg.ToExporterConfig(), s.exportStatus)
+	exporterApp := feed.NewExporterApp(s.apiClient, s.sheqsyApiClient, s.cfg.ToExporterConfig())
 	if s.cfg.Export.SchemaOnly {
 		return exporterApp.ExportSchemas(e)
 	}
@@ -252,7 +252,7 @@ func (s *SafetyCultureExporter) RunInspectionReports() error {
 		return errors.Wrap(err, "unable to create report exporter")
 	}
 
-	exporterApp := feed.NewExporterApp(s.apiClient, s.sheqsyApiClient, s.cfg.ToExporterConfig(), s.exportStatus)
+	exporterApp := feed.NewExporterApp(s.apiClient, s.sheqsyApiClient, s.cfg.ToExporterConfig())
 	err = exporterApp.ExportInspectionReports(e)
 	if err != nil {
 		return errors.Wrap(err, "generate reports")
@@ -267,7 +267,7 @@ func (s *SafetyCultureExporter) RunPrintSchema() error {
 		return errors.Wrap(err, "unable to create exporter")
 	}
 
-	exporterApp := feed.NewExporterApp(s.apiClient, s.sheqsyApiClient, s.cfg.ToExporterConfig(), s.exportStatus)
+	exporterApp := feed.NewExporterApp(s.apiClient, s.sheqsyApiClient, s.cfg.ToExporterConfig())
 	err = exporterApp.PrintSchemas(e)
 	if err != nil {
 		return errors.Wrap(err, "error while printing schema")
@@ -297,7 +297,6 @@ func (s *SafetyCultureExporter) GetTemplateList() ([]TemplateResponseItem, error
 // GetExportStatus called by UI
 func (s *SafetyCultureExporter) GetExportStatus() *ExportStatusResponse {
 	data := s.exportStatus.ReadStatus()
-	fmt.Printf("%#v", data)
 	s.exportStatus.PurgeFinished()
 	var res []ExportStatusResponseItem
 

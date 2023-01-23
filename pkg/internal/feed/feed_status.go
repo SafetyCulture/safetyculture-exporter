@@ -1,7 +1,6 @@
 package feed
 
 import (
-	"fmt"
 	"sync"
 )
 
@@ -10,15 +9,12 @@ var statusInstance *ExportStatus
 
 // GetExporterStatus will return a singleton instance of the ExporterStatus
 func GetExporterStatus() *ExportStatus {
+	lock.Lock()
+	defer lock.Unlock()
 	if statusInstance == nil {
-		lock.Lock()
 		statusInstance = &ExportStatus{
 			status: map[string]*ExportStatusItem{},
 		}
-		fmt.Println("creating new ExportStatus instance")
-		lock.Unlock()
-	} else {
-		fmt.Println("already have a ExportStatus instance")
 	}
 	return statusInstance
 }
@@ -46,12 +42,21 @@ type ExportStatusItem struct {
 	DurationMs    int64
 }
 
+func (e *ExportStatus) Reset() {
+	e.lock.Lock()
+	e.started = false
+	e.finished = false
+	e.status = map[string]*ExportStatusItem{}
+	e.lock.Unlock()
+}
+
 func (e *ExportStatus) StartFeedExport(feedName string) {
 	e.lock.Lock()
 	e.status[feedName] = &ExportStatusItem{
-		Name:    feedName,
-		Started: true,
-		Stage:   StageApi,
+		Name:     feedName,
+		Stage:    StageApi,
+		Started:  true,
+		Finished: false,
 	}
 	e.lock.Unlock()
 }

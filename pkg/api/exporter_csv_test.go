@@ -391,8 +391,7 @@ func TestCSVExporter_should_do_rollover_files(t *testing.T) {
 	err = exporter.WriteRows(userFeed, users)
 	assert.NoError(t, err)
 
-	status := feed.GetExporterStatus()
-	err = exporter.FinaliseExport(userFeed, &[]feed.User{}, status)
+	err = exporter.FinaliseExport(userFeed, &[]feed.User{})
 	assert.NoError(t, err)
 
 	content, err := os.ReadFile(filepath.Join(exporter.ExportPath, "users.csv"))
@@ -463,8 +462,7 @@ func TestCSVExporterFinaliseExport_should_write_rows_out_to_file(t *testing.T) {
 	err = exporter.WriteRows(userFeed, users)
 	assert.NoError(t, err)
 
-	status := feed.GetExporterStatus()
-	err = exporter.FinaliseExport(userFeed, &[]feed.User{}, status)
+	err = exporter.FinaliseExport(userFeed, &[]feed.User{})
 	assert.NoError(t, err)
 
 	content, err := os.ReadFile(filepath.Join(exporter.ExportPath, "users.csv"))
@@ -517,8 +515,7 @@ func TestCSVExporterFinaliseExport_should_write_rows_to_multiple_file(t *testing
 	err = exporter.WriteRows(userFeed, users)
 	assert.NoError(t, err)
 
-	status := feed.GetExporterStatus()
-	err = exporter.FinaliseExport(userFeed, &[]feed.User{}, status)
+	err = exporter.FinaliseExport(userFeed, &[]feed.User{})
 	assert.NoError(t, err)
 
 	files, err := filepath.Glob(filepath.Join(exporter.ExportPath, "users*.csv"))

@@ -171,7 +171,7 @@ func (e *SQLExporter) LastModifiedAt(feed Feed, modifiedAfter time.Time, orgID s
 }
 
 // FinaliseExport closes out an export
-func (e *SQLExporter) FinaliseExport(Feed, interface{}, *ExportStatus) error {
+func (e *SQLExporter) FinaliseExport(Feed, interface{}) error {
 	return nil
 }
 
