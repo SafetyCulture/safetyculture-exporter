@@ -2,11 +2,12 @@ package feed
 
 import (
 	"fmt"
-	"github.com/SafetyCulture/safetyculture-exporter/pkg/logger"
 	"os"
 	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/logger"
 
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/events"
 	"github.com/pkg/errors"
@@ -170,7 +171,7 @@ func (e *SQLExporter) LastModifiedAt(feed Feed, modifiedAfter time.Time, orgID s
 }
 
 // FinaliseExport closes out an export
-func (e *SQLExporter) FinaliseExport(Feed, interface{}) error {
+func (e *SQLExporter) FinaliseExport(Feed, interface{}, *ExportStatus) error {
 	return nil
 }
 

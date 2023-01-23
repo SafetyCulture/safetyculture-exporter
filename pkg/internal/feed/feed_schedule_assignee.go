@@ -124,5 +124,5 @@ func (f *ScheduleAssigneeFeed) Export(ctx context.Context, apiClient *httpapi.Cl
 	if err := DrainFeed(ctx, apiClient, req, drainFn); err != nil {
 		return events.WrapEventError(err, fmt.Sprintf("feed %q", f.Name()))
 	}
-	return exporter.FinaliseExport(f, &[]*ScheduleAssignee{})
+	return exporter.FinaliseExport(f, &[]*ScheduleAssignee{}, status)
 }

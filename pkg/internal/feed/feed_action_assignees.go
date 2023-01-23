@@ -150,5 +150,5 @@ func (f *ActionAssigneeFeed) Export(ctx context.Context, apiClient *httpapi.Clie
 	if err := DrainFeed(ctx, apiClient, req, drainFn); err != nil {
 		return events.WrapEventError(err, fmt.Sprintf("feed %q", f.Name()))
 	}
-	return exporter.FinaliseExport(f, &[]*ActionAssignee{})
+	return exporter.FinaliseExport(f, &[]*ActionAssignee{}, status)
 }

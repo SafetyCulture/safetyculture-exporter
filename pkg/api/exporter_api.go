@@ -297,6 +297,7 @@ func (s *SafetyCultureExporter) GetTemplateList() ([]TemplateResponseItem, error
 // GetExportStatus called by UI
 func (s *SafetyCultureExporter) GetExportStatus() *ExportStatusResponse {
 	data := s.exportStatus.ReadStatus()
+	fmt.Printf("%#v", data)
 	s.exportStatus.PurgeFinished()
 	var res []ExportStatusResponseItem
 
@@ -309,6 +310,7 @@ func (s *SafetyCultureExporter) GetExportStatus() *ExportStatusResponse {
 			DurationMs:    v.DurationMs,
 			Remaining:     v.EstRemaining,
 			StatusMessage: v.StatusMessage,
+			Stage:         string(v.Stage),
 		})
 	}
 

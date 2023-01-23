@@ -208,5 +208,5 @@ func (f *SheqsyActivityFeed) Export(ctx context.Context, apiClient *httpapi.Clie
 		).Info("export batch complete")
 	}
 
-	return exporter.FinaliseExport(f, &[]*SheqsyActivity{})
+	return exporter.FinaliseExport(f, &[]*SheqsyActivity{}, status)
 }

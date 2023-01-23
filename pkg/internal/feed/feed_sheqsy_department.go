@@ -113,5 +113,5 @@ func (f *SheqsyDepartmentFeed) Export(ctx context.Context, apiClient *httpapi.Cl
 		"export_duration_ms", exporter.GetDuration().Milliseconds(),
 	).Info("export batch complete")
 
-	return exporter.FinaliseExport(f, &[]*SheqsyDepartment{})
+	return exporter.FinaliseExport(f, &[]*SheqsyDepartment{}, status)
 }

@@ -157,5 +157,5 @@ func (f *ActionFeed) Export(ctx context.Context, apiClient *httpapi.Client, expo
 	if err := DrainFeed(ctx, apiClient, req, drainFn); err != nil {
 		return events.WrapEventError(err, fmt.Sprintf("feed %q", f.Name()))
 	}
-	return exporter.FinaliseExport(f, &[]*Action{})
+	return exporter.FinaliseExport(f, &[]*Action{}, status)
 }

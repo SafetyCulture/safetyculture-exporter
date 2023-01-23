@@ -107,5 +107,5 @@ func (f *SiteMemberFeed) Export(ctx context.Context, apiClient *httpapi.Client, 
 	if err := DrainFeed(ctx, apiClient, req, drainFn); err != nil {
 		return events.WrapEventError(err, fmt.Sprintf("feed %q", f.Name()))
 	}
-	return exporter.FinaliseExport(f, &[]*SiteMember{})
+	return exporter.FinaliseExport(f, &[]*SiteMember{}, status)
 }

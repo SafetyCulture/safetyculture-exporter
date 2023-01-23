@@ -137,5 +137,5 @@ func (f *ScheduleOccurrenceFeed) Export(ctx context.Context, apiClient *httpapi.
 	if err := DrainFeed(ctx, apiClient, req, drainFn); err != nil {
 		return events.WrapEventError(err, fmt.Sprintf("feed %q", f.Name()))
 	}
-	return exporter.FinaliseExport(f, &[]*ScheduleOccurrence{})
+	return exporter.FinaliseExport(f, &[]*ScheduleOccurrence{}, status)
 }

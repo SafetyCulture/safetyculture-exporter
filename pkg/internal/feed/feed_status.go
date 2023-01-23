@@ -1,6 +1,8 @@
 package feed
 
-import "sync"
+import (
+	"sync"
+)
 
 func NewExportStatus() *ExportStatus {
 	return &ExportStatus{
@@ -15,8 +17,14 @@ type ExportStatus struct {
 	started  bool
 }
 
+type ExportStatusItemStage string
+
+const StageApi ExportStatusItemStage = "API_DOWNLOAD"
+const StageCsv ExportStatusItemStage = "CSV_EXPORT"
+
 type ExportStatusItem struct {
 	Name          string
+	Stage         ExportStatusItemStage
 	Started       bool
 	Finished      bool
 	HasError      bool
@@ -30,6 +38,7 @@ func (e *ExportStatus) StartFeedExport(feedName string) {
 	e.status[feedName] = &ExportStatusItem{
 		Name:    feedName,
 		Started: true,
+		Stage:   StageApi,
 	}
 	e.lock.Unlock()
 }
@@ -39,6 +48,14 @@ func (e *ExportStatus) UpdateStatus(feedName string, remaining int64, durationMs
 	if _, ok := e.status[feedName]; ok {
 		e.status[feedName].EstRemaining = remaining
 		e.status[feedName].DurationMs = durationMs
+	}
+	e.lock.Unlock()
+}
+
+func (e *ExportStatus) UpdateStage(feedName string, stage ExportStatusItemStage) {
+	e.lock.Lock()
+	if _, ok := e.status[feedName]; ok {
+		e.status[feedName].Stage = stage
 	}
 	e.lock.Unlock()
 }

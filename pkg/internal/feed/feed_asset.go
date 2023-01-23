@@ -128,5 +128,5 @@ func (f *AssetFeed) Export(ctx context.Context, apiClient *httpapi.Client, expor
 	if err := DrainFeed(ctx, apiClient, req, drainFn); err != nil {
 		return fmt.Errorf("assets feed %q: %w", f.Name(), err)
 	}
-	return exporter.FinaliseExport(f, &[]*Asset{})
+	return exporter.FinaliseExport(f, &[]*Asset{}, status)
 }

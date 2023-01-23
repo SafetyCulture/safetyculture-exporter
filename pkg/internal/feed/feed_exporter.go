@@ -206,7 +206,6 @@ func (e *ExporterFeedClient) ExportFeeds(exporter Exporter) error {
 			default:
 				log.Infof(" > %s", theError.Error())
 			}
-
 		}
 		// this is temporary code until we finish a follow-up ticket that will use structured errors
 		return e.errs[0]

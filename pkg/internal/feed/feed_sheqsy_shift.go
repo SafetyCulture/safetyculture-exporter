@@ -185,5 +185,5 @@ func (f *SheqsyShiftFeed) Export(ctx context.Context, apiClient *httpapi.Client,
 		).Info("export batch complete")
 	}
 
-	return exporter.FinaliseExport(f, &[]*SheqsyShift{})
+	return exporter.FinaliseExport(f, &[]*SheqsyShift{}, status)
 }

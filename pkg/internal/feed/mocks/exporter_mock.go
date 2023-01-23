@@ -45,13 +45,13 @@ func (_m *Exporter) DeleteRowsIfExist(_a0 feed.Feed, query string, args ...inter
 	return r0
 }
 
-// FinaliseExport provides a mock function with given fields: _a0, rows
-func (_m *Exporter) FinaliseExport(_a0 feed.Feed, rows interface{}) error {
-	ret := _m.Called(_a0, rows)
+// FinaliseExport provides a mock function with given fields: _a0, rows, status
+func (_m *Exporter) FinaliseExport(_a0 feed.Feed, rows interface{}, status *feed.ExportStatus) error {
+	ret := _m.Called(_a0, rows, status)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(feed.Feed, interface{}) error); ok {
-		r0 = rf(_a0, rows)
+	if rf, ok := ret.Get(0).(func(feed.Feed, interface{}, *feed.ExportStatus) error); ok {
+		r0 = rf(_a0, rows, status)
 	} else {
 		r0 = ret.Error(0)
 	}

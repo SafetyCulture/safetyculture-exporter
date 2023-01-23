@@ -115,5 +115,5 @@ func (f *GroupFeed) Export(ctx context.Context, apiClient *httpapi.Client, expor
 	if err := DrainFeed(ctx, apiClient, req, drainFn); err != nil {
 		return events.WrapEventError(err, fmt.Sprintf("feed %q", f.Name()))
 	}
-	return exporter.FinaliseExport(f, &[]*Group{})
+	return exporter.FinaliseExport(f, &[]*Group{}, status)
 }

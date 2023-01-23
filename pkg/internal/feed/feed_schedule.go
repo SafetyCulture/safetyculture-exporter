@@ -147,5 +147,5 @@ func (f *ScheduleFeed) Export(ctx context.Context, apiClient *httpapi.Client, ex
 	if err := DrainFeed(ctx, apiClient, req, drainFn); err != nil {
 		return events.WrapEventError(err, fmt.Sprintf("feed %q", f.Name()))
 	}
-	return exporter.FinaliseExport(f, &[]*Schedule{})
+	return exporter.FinaliseExport(f, &[]*Schedule{}, status)
 }
