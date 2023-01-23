@@ -35,7 +35,7 @@ func NewSafetyCultureExporter(cfg *ExporterConfiguration, version *AppVersion) (
 		apiClient:       apiClient,
 		sheqsyApiClient: sheqsyApiClient,
 		cfg:             cfg,
-		exportStatus:    feed.NewExportStatus(),
+		exportStatus:    feed.GetExporterStatus(),
 	}, nil
 }
 
@@ -191,7 +191,7 @@ func (s *SafetyCultureExporter) RunSQL() error {
 		return errors.Wrap(err, "create sql exporter")
 	}
 
-	exporterApp := feed.NewExporterApp(s.apiClient, s.sheqsyApiClient, s.cfg.ToExporterConfig(), s.exportStatus)
+	exporterApp := feed.NewExporterApp(s.apiClient, s.sheqsyApiClient, s.cfg.ToExporterConfig())
 	if s.cfg.Export.SchemaOnly {
 		return exporterApp.ExportSchemas(e)
 	}
@@ -226,7 +226,7 @@ func (s *SafetyCultureExporter) RunCSV() error {
 		return errors.Wrap(err, "unable to create csv exporter")
 	}
 
-	exporterApp := feed.NewExporterApp(s.apiClient, s.sheqsyApiClient, s.cfg.ToExporterConfig(), s.exportStatus)
+	exporterApp := feed.NewExporterApp(s.apiClient, s.sheqsyApiClient, s.cfg.ToExporterConfig())
 	if s.cfg.Export.SchemaOnly {
 		return exporterApp.ExportSchemas(e)
 	}
@@ -252,7 +252,7 @@ func (s *SafetyCultureExporter) RunInspectionReports() error {
 		return errors.Wrap(err, "unable to create report exporter")
 	}
 
-	exporterApp := feed.NewExporterApp(s.apiClient, s.sheqsyApiClient, s.cfg.ToExporterConfig(), s.exportStatus)
+	exporterApp := feed.NewExporterApp(s.apiClient, s.sheqsyApiClient, s.cfg.ToExporterConfig())
 	err = exporterApp.ExportInspectionReports(e)
 	if err != nil {
 		return errors.Wrap(err, "generate reports")
@@ -267,7 +267,7 @@ func (s *SafetyCultureExporter) RunPrintSchema() error {
 		return errors.Wrap(err, "unable to create exporter")
 	}
 
-	exporterApp := feed.NewExporterApp(s.apiClient, s.sheqsyApiClient, s.cfg.ToExporterConfig(), s.exportStatus)
+	exporterApp := feed.NewExporterApp(s.apiClient, s.sheqsyApiClient, s.cfg.ToExporterConfig())
 	err = exporterApp.PrintSchemas(e)
 	if err != nil {
 		return errors.Wrap(err, "error while printing schema")
@@ -294,15 +294,22 @@ func (s *SafetyCultureExporter) GetTemplateList() ([]TemplateResponseItem, error
 	return util.GenericCollectionMapper(res, transformer), nil
 }
 
+// GetExportStatus called by UI
 func (s *SafetyCultureExporter) GetExportStatus() *ExportStatusResponse {
 	data := s.exportStatus.ReadStatus()
+	s.exportStatus.PurgeFinished()
 	var res []ExportStatusResponseItem
 
 	for _, v := range data {
 		res = append(res, ExportStatusResponseItem{
-			FeedName:    v.Name,
-			Started:     v.Started,
-			DebugString: fmt.Sprintf("remaining %d", v.EstRemaining),
+			FeedName:      v.Name,
+			Started:       v.Started,
+			Finished:      v.Finished,
+			HasError:      v.HasError,
+			DurationMs:    v.DurationMs,
+			Remaining:     v.EstRemaining,
+			StatusMessage: v.StatusMessage,
+			Stage:         string(v.Stage),
 		})
 	}
 
@@ -311,4 +318,14 @@ func (s *SafetyCultureExporter) GetExportStatus() *ExportStatusResponse {
 		ExportCompleted: s.exportStatus.GetExportCompleted(),
 		Feeds:           res,
 	}
+}
+
+// SetConfiguration will replace the configuration. Used by the UI to pass in the newly saved configuration
+func (s *SafetyCultureExporter) SetConfiguration(cfg *ExporterConfiguration) {
+	s.cfg = cfg
+}
+
+// CleanExportStatus will clean the status items. Used by the UI
+func (s *SafetyCultureExporter) CleanExportStatus() {
+	s.exportStatus = feed.GetExporterStatus()
 }

@@ -82,8 +82,9 @@ func (f *TemplateFeed) CreateSchema(exporter Exporter) error {
 }
 
 // Export exports the feed to the supplied exporter
-func (f *TemplateFeed) Export(ctx context.Context, apiClient *httpapi.Client, exporter Exporter, orgID string, status *ExportStatus) error {
-	logger := logger.GetLogger().With("feed", f.Name(), "org_id", orgID)
+func (f *TemplateFeed) Export(ctx context.Context, apiClient *httpapi.Client, exporter Exporter, orgID string) error {
+	l := logger.GetLogger().With("feed", f.Name(), "org_id", orgID)
+	status := GetExporterStatus()
 
 	if err := exporter.InitFeed(f, &InitFeedOptions{
 		// Delete data if incremental refresh is disabled so there is no duplicates
@@ -115,13 +116,9 @@ func (f *TemplateFeed) Export(ctx context.Context, apiClient *httpapi.Client, ex
 			}
 		}
 
-		status.UpdateStatus(f.Name(), &ExportStatusItem{
-			Name:         f.Name(),
-			Started:      true,
-			EstRemaining: resp.Metadata.RemainingRecords,
-		})
+		status.UpdateStatus(f.Name(), resp.Metadata.RemainingRecords, exporter.GetDuration().Milliseconds())
 
-		logger.With(
+		l.With(
 			"estimated_remaining", resp.Metadata.RemainingRecords,
 			"duration_ms", apiClient.Duration.Milliseconds(),
 			"export_duration_ms", exporter.GetDuration().Milliseconds(),
@@ -135,7 +132,7 @@ func (f *TemplateFeed) Export(ctx context.Context, apiClient *httpapi.Client, ex
 		return events.NewEventErrorWithMessage(err, events.ErrorSeverityError, events.ErrorSubSystemDB, false, "unable to load modified after")
 	}
 
-	logger.With(
+	l.With(
 		"modified_after", f.ModifiedAfter,
 	).Info("exporting")
 

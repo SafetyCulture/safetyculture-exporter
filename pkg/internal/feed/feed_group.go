@@ -63,10 +63,9 @@ func (f *GroupFeed) CreateSchema(exporter Exporter) error {
 }
 
 // Export exports the feed to the supplied exporter
-func (f *GroupFeed) Export(ctx context.Context, apiClient *httpapi.Client, exporter Exporter, orgID string, status *ExportStatus) error {
-	logger := logger.GetLogger().With("feed", f.Name(), "org_id", orgID)
-
-	logger.Info("exporting")
+func (f *GroupFeed) Export(ctx context.Context, apiClient *httpapi.Client, exporter Exporter, orgID string) error {
+	l := logger.GetLogger().With("feed", f.Name(), "org_id", orgID)
+	status := GetExporterStatus()
 
 	if err := exporter.InitFeed(f, &InitFeedOptions{
 		// Truncate files if upserts aren't supported.
@@ -99,13 +98,9 @@ func (f *GroupFeed) Export(ctx context.Context, apiClient *httpapi.Client, expor
 			}
 		}
 
-		status.UpdateStatus(f.Name(), &ExportStatusItem{
-			Name:         f.Name(),
-			Started:      true,
-			EstRemaining: resp.Metadata.RemainingRecords,
-		})
+		status.UpdateStatus(f.Name(), resp.Metadata.RemainingRecords, apiClient.Duration.Milliseconds())
 
-		logger.With(
+		l.With(
 			"estimated_remaining", resp.Metadata.RemainingRecords,
 			"duration_ms", apiClient.Duration.Milliseconds(),
 			"export_duration_ms", exporter.GetDuration().Milliseconds(),

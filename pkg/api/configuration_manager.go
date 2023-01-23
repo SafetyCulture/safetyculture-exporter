@@ -256,7 +256,7 @@ func BuildConfigurationWithDefaults() *ExporterConfiguration {
 	cfg.Report.FilenameConvention = "INSPECTION_TITLE"
 	cfg.Report.Format = []string{"PDF"}
 	cfg.Report.RetryTimeout = 15
-	cfg.Session.ExportType = "CSV"
+	cfg.Session.ExportType = "csv"
 
 	return cfg
 }

@@ -20,7 +20,7 @@ type Feed interface {
 	Order() string
 
 	CreateSchema(exporter Exporter) error
-	Export(ctx context.Context, apiClient *httpapi.Client, exporter Exporter, orgID string, status *ExportStatus) error
+	Export(ctx context.Context, apiClient *httpapi.Client, exporter Exporter, orgID string) error
 }
 
 // InitFeedOptions contains the options used when initialising a feed

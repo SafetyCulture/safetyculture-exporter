@@ -21,7 +21,7 @@ func TestExporterFeedClient_ExportFeeds_should_create_all_schemas_to_file(t *tes
 	assert.NoError(t, err)
 
 	cfg := &feed.ExporterFeedCfg{AccessToken: "token-123", ExportSiteIncludeDeleted: true}
-	exporterApp := feed.NewExporterApp(nil, nil, cfg, feed.NewExportStatus())
+	exporterApp := feed.NewExporterApp(nil, nil, cfg)
 	err = exporterApp.ExportSchemas(exporter)
 	assert.NoError(t, err)
 
@@ -90,7 +90,7 @@ func TestExporterFeedClient_ExportFeeds_should_export_all_feeds_to_file(t *testi
 		SheqsyUsername:           "token-123",
 		SheqsyCompanyID:          "ada3042f-16a4-4249-915d-dc088adef92a",
 	}
-	exporterApp := feed.NewExporterApp(apiClient, apiClient, cfg, feed.NewExportStatus())
+	exporterApp := feed.NewExporterApp(apiClient, apiClient, cfg)
 	err = exporterApp.ExportFeeds(exporter)
 	assert.NoError(t, err)
 
@@ -143,7 +143,7 @@ func TestExporterFeedClient_ExportFeeds_should_err_when_not_auth(t *testing.T) {
 	cfg := &feed.ExporterFeedCfg{
 		AccessToken: "token-123",
 	}
-	exporterApp := feed.NewExporterApp(apiClient, nil, cfg, feed.NewExportStatus())
+	exporterApp := feed.NewExporterApp(apiClient, nil, cfg)
 	err = exporterApp.ExportFeeds(exporter)
 	assert.EqualError(t, err, "get details of the current user: api request: request error status: 401")
 }
@@ -176,7 +176,7 @@ func TestExporterFeedClient_ExportFeeds_should_err_when_InitFeed_errors(t *testi
 		ExportTables: []string{"users"},
 	}
 
-	exporterApp := feed.NewExporterApp(apiClient, apiClient, cfg, feed.NewExportStatus())
+	exporterApp := feed.NewExporterApp(apiClient, apiClient, cfg)
 	err := exporterApp.ExportFeeds(exporter)
 	ee, ok := err.(*events.EventError)
 	require.True(t, ok)
@@ -231,7 +231,7 @@ func TestExporterFeedClient_ExportFeeds_should_err_when_cannot_unmarshal(t *test
 		AccessToken:  "token-123",
 		ExportTables: []string{"inspections", "users"},
 	}
-	exporterApp := feed.NewExporterApp(apiClient, apiClient, cfg, feed.NewExportStatus())
+	exporterApp := feed.NewExporterApp(apiClient, apiClient, cfg)
 	err = exporterApp.ExportFeeds(exporter)
 	assert.EqualError(t, err, `feed "users": map data: unexpected end of JSON input`)
 }
@@ -263,7 +263,7 @@ func TestExporterFeedClient_ExportFeeds_should_err_when_cannot_write_rows(t *tes
 		AccessToken:  "token-123",
 		ExportTables: []string{"users"},
 	}
-	exporterApp := feed.NewExporterApp(apiClient, apiClient, cfg, feed.NewExportStatus())
+	exporterApp := feed.NewExporterApp(apiClient, apiClient, cfg)
 
 	exporter := getMockedExporter()
 	exporter.On("InitFeed", mock.Anything, mock.Anything).Return(nil)
@@ -313,12 +313,12 @@ func TestExporterFeedClient_ExportFeeds_should_perform_incremental_update_on_sec
 
 	apiClient := GetTestClient()
 	initMockFeedsSet1(apiClient.HTTPClient())
-	exporterApp := feed.NewExporterApp(apiClient, nil, cfg, feed.NewExportStatus())
+	exporterApp := feed.NewExporterApp(apiClient, nil, cfg)
 	err = exporterApp.ExportFeeds(exporter)
 	assert.NoError(t, err)
 
 	initMockFeedsSet2(apiClient.HTTPClient())
-	exporterApp = feed.NewExporterApp(apiClient, nil, cfg, feed.NewExportStatus())
+	exporterApp = feed.NewExporterApp(apiClient, nil, cfg)
 	err = exporterApp.ExportFeeds(exporter)
 	assert.NoError(t, err)
 
@@ -374,7 +374,7 @@ func TestExporterFeedClient_ExportFeeds_should_handle_lots_of_rows_ok(t *testing
 		ExportSiteIncludeDeleted: true,
 	}
 
-	exporterApp := feed.NewExporterApp(apiClient, apiClient, cfg, feed.NewExportStatus())
+	exporterApp := feed.NewExporterApp(apiClient, apiClient, cfg)
 	err = exporterApp.ExportFeeds(exporter)
 	assert.NoError(t, err)
 

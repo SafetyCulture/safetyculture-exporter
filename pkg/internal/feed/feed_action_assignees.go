@@ -73,7 +73,7 @@ func (f *ActionAssigneeFeed) CreateSchema(exporter Exporter) error {
 	return exporter.CreateSchema(f, &[]*ActionAssignee{})
 }
 
-func (f *ActionAssigneeFeed) writeRows(ctx context.Context, exporter Exporter, rows []*ActionAssignee) error {
+func (f *ActionAssigneeFeed) writeRows(exporter Exporter, rows []*ActionAssignee) error {
 	// Calculate the size of the batch we can insert into the DB at once. Column count + buffer to account for primary keys
 	batchSize := exporter.ParameterLimit() / (len(f.Columns()) + 4)
 
@@ -101,8 +101,9 @@ func (f *ActionAssigneeFeed) writeRows(ctx context.Context, exporter Exporter, r
 }
 
 // Export exports the feed to the supplied exporter
-func (f *ActionAssigneeFeed) Export(ctx context.Context, apiClient *httpapi.Client, exporter Exporter, orgID string, status *ExportStatus) error {
-	logger := logger.GetLogger().With("feed", f.Name(), "org_id", orgID)
+func (f *ActionAssigneeFeed) Export(ctx context.Context, apiClient *httpapi.Client, exporter Exporter, orgID string) error {
+	l := logger.GetLogger().With("feed", f.Name(), "org_id", orgID)
+	status := GetExporterStatus()
 
 	if err := exporter.InitFeed(f, &InitFeedOptions{
 		// Delete data if incremental refresh is disabled so there is no duplicates
@@ -125,18 +126,14 @@ func (f *ActionAssigneeFeed) Export(ctx context.Context, apiClient *httpapi.Clie
 		}
 
 		if len(rows) != 0 {
-			if err := f.writeRows(ctx, exporter, rows); err != nil {
+			if err := f.writeRows(exporter, rows); err != nil {
 				return err
 			}
 		}
 
-		status.UpdateStatus(f.Name(), &ExportStatusItem{
-			Name:         f.Name(),
-			Started:      true,
-			EstRemaining: resp.Metadata.RemainingRecords,
-		})
+		status.UpdateStatus(f.Name(), resp.Metadata.RemainingRecords, exporter.GetDuration().Milliseconds())
 
-		logger.With(
+		l.With(
 			"estimated_remaining", resp.Metadata.RemainingRecords,
 			"duration_ms", apiClient.Duration.Milliseconds(),
 			"export_duration_ms", exporter.GetDuration().Milliseconds(),

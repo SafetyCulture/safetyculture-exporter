@@ -2,11 +2,12 @@ package feed
 
 import (
 	"fmt"
-	"github.com/SafetyCulture/safetyculture-exporter/pkg/logger"
 	"os"
 	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/logger"
 
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/events"
 	"github.com/pkg/errors"

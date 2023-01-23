@@ -161,7 +161,9 @@ func (f *InspectionFeed) CreateSchema(exporter Exporter) error {
 }
 
 // Export exports the feed to the supplied exporter
-func (f *InspectionFeed) Export(ctx context.Context, apiClient *httpapi.Client, exporter Exporter, orgID string, status *ExportStatus) error {
+func (f *InspectionFeed) Export(ctx context.Context, apiClient *httpapi.Client, exporter Exporter, orgID string) error {
+	status := GetExporterStatus()
+
 	if err := exporter.InitFeed(f, &InitFeedOptions{
 		// Delete data if incremental refresh is disabled so there is no duplicates
 		Truncate: !f.Incremental,
@@ -189,7 +191,7 @@ func (f *InspectionFeed) Export(ctx context.Context, apiClient *httpapi.Client, 
 }
 
 func (f *InspectionFeed) processNewInspections(ctx context.Context, apiClient *httpapi.Client, exporter Exporter, orgID string, status *ExportStatus) error {
-	logger := logger.GetLogger().With("feed", f.Name(), "org_id", orgID)
+	l := logger.GetLogger().With("feed", f.Name(), "org_id", orgID)
 	req := GetFeedRequest{
 		InitialURL: "/feed/inspections",
 		Params: GetFeedParams{
@@ -214,13 +216,10 @@ func (f *InspectionFeed) processNewInspections(ctx context.Context, apiClient *h
 				return err
 			}
 		}
-		status.UpdateStatus(f.Name(), &ExportStatusItem{
-			Name:         f.Name(),
-			Started:      true,
-			EstRemaining: resp.Metadata.RemainingRecords,
-		})
 
-		logger.With(
+		status.UpdateStatus(f.Name(), resp.Metadata.RemainingRecords, exporter.GetDuration().Milliseconds())
+
+		l.With(
 			"estimated_remaining", resp.Metadata.RemainingRecords,
 			"duration_ms", apiClient.Duration.Milliseconds(),
 			"export_duration_ms", exporter.GetDuration().Milliseconds(),

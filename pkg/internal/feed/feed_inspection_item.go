@@ -153,7 +153,7 @@ func fetchAndWriteMedia(ctx context.Context, apiClient *httpapi.Client, exporter
 }
 
 func (f *InspectionItemFeed) writeRows(ctx context.Context, exporter Exporter, rows []*InspectionItem, apiClient *httpapi.Client) error {
-	logger := logger.GetLogger()
+	l := logger.GetLogger()
 	skipIDs := map[string]bool{}
 	for _, id := range f.SkipIDs {
 		skipIDs[id] = true
@@ -190,7 +190,7 @@ func (f *InspectionItemFeed) writeRows(ctx context.Context, exporter Exporter, r
 
 			mediaURLList := strings.Split(row.MediaHypertextReference, "\n")
 			if len(mediaURLList) > 0 {
-				logger.Infof(" downloading media for inspection item %s", row.ItemID)
+				l.Infof(" downloading media for inspection item %s", row.ItemID)
 			}
 
 			for _, mediaURL := range mediaURLList {
@@ -226,8 +226,9 @@ func (f *InspectionItemFeed) CreateSchema(exporter Exporter) error {
 }
 
 // Export exports the feed to the supplied exporter
-func (f *InspectionItemFeed) Export(ctx context.Context, apiClient *httpapi.Client, exporter Exporter, orgID string, status *ExportStatus) error {
-	logger := logger.GetLogger().With("feed", f.Name(), "org_id", orgID)
+func (f *InspectionItemFeed) Export(ctx context.Context, apiClient *httpapi.Client, exporter Exporter, orgID string) error {
+	l := logger.GetLogger().With("feed", f.Name(), "org_id", orgID)
+	status := GetExporterStatus()
 
 	exporter.InitFeed(f, &InitFeedOptions{
 		// Delete data if incremental refresh is disabled so there is no duplicates
@@ -253,13 +254,9 @@ func (f *InspectionItemFeed) Export(ctx context.Context, apiClient *httpapi.Clie
 			}
 		}
 
-		status.UpdateStatus(f.Name(), &ExportStatusItem{
-			Name:         f.Name(),
-			Started:      true,
-			EstRemaining: resp.Metadata.RemainingRecords,
-		})
+		status.UpdateStatus(f.Name(), resp.Metadata.RemainingRecords, exporter.GetDuration().Milliseconds())
 
-		logger.With(
+		l.With(
 			"estimated_remaining", resp.Metadata.RemainingRecords,
 			"duration_ms", apiClient.Duration.Milliseconds(),
 			"export_duration_ms", exporter.GetDuration().Milliseconds(),

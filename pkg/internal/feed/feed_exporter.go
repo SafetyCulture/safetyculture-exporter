@@ -38,7 +38,6 @@ type ExporterFeedClient struct {
 	sheqsyApiClient *httpapi.Client
 	errMu           sync.Mutex
 	errs            []error
-	feedStatus      *ExportStatus
 }
 
 type ExporterFeedCfg struct {
@@ -63,12 +62,11 @@ type ExporterFeedCfg struct {
 	ExportAssetLimit                      int
 }
 
-func NewExporterApp(scApiClient *httpapi.Client, sheqsyApiClient *httpapi.Client, cfg *ExporterFeedCfg, feedStatus *ExportStatus) *ExporterFeedClient {
+func NewExporterApp(scApiClient *httpapi.Client, sheqsyApiClient *httpapi.Client, cfg *ExporterFeedCfg) *ExporterFeedClient {
 	return &ExporterFeedClient{
 		configuration:   cfg,
 		apiClient:       scApiClient,
 		sheqsyApiClient: sheqsyApiClient,
-		feedStatus:      feedStatus,
 	}
 }
 
@@ -93,6 +91,8 @@ func (e *ExporterFeedClient) addError(err error) {
 func (e *ExporterFeedClient) ExportFeeds(exporter Exporter) error {
 	log := logger.GetLogger()
 	ctx := context.Background()
+	status := GetExporterStatus()
+	status.Reset()
 
 	tables := e.configuration.ExportTables
 	tablesMap := map[string]bool{}
@@ -107,7 +107,7 @@ func (e *ExporterFeedClient) ExportFeeds(exporter Exporter) error {
 
 	// Run export for SafetyCulture data
 	if len(e.configuration.AccessToken) != 0 {
-		e.feedStatus.started = true
+		status.started = true
 		atLeastOneRun = true
 		log.Info("using exporter version: ", e.apiClient.IntegrationVersion)
 		log.Info("exporting SafetyCulture data")
@@ -135,13 +135,16 @@ func (e *ExporterFeedClient) ExportFeeds(exporter Exporter) error {
 			wg.Add(1)
 
 			go func(f Feed) {
-				log.Infof(" ... queueing %s\n", f.Name())
 				defer wg.Done()
-				err := f.Export(ctx, e.apiClient, exporter, resp.OrganisationID, e.feedStatus)
+				log.Infof(" ... queueing %s\n", f.Name())
+				status.StartFeedExport(f.Name())
+				err := f.Export(ctx, e.apiClient, exporter, resp.OrganisationID)
 				if err != nil {
 					log.Errorf("exporting feeds: %v", err)
+					status.FinishFeedExport(f.Name(), err)
 					e.addError(err)
 				}
+				status.FinishFeedExport(f.Name(), nil)
 				<-semaphore
 			}(feed)
 		}
@@ -178,7 +181,7 @@ func (e *ExporterFeedClient) ExportFeeds(exporter Exporter) error {
 			go func(f Feed) {
 				log.Infof(" ... queueing %s\n", f.Name())
 				defer wg.Done()
-				err := f.Export(ctx, e.sheqsyApiClient, exporter, resp.CompanyUID, e.feedStatus)
+				err := f.Export(ctx, e.sheqsyApiClient, exporter, resp.CompanyUID)
 				if err != nil {
 					e.addError(err)
 				}
@@ -194,7 +197,7 @@ func (e *ExporterFeedClient) ExportFeeds(exporter Exporter) error {
 	}
 
 	log.Info("Export finished")
-	e.feedStatus.finished = true
+	status.finished = true
 	if len(e.errs) != 0 {
 		log.Warn("There were errors during the export:")
 		for _, ee := range e.errs {
@@ -204,7 +207,6 @@ func (e *ExporterFeedClient) ExportFeeds(exporter Exporter) error {
 			default:
 				log.Infof(" > %s", theError.Error())
 			}
-
 		}
 		// this is temporary code until we finish a follow-up ticket that will use structured errors
 		return e.errs[0]
@@ -321,7 +323,7 @@ func (e *ExporterFeedClient) ExportInspectionReports(exporter *ReportExporter) e
 	log.Infof("Exporting inspection reports by user: %s %s", resp.Firstname, resp.Lastname)
 
 	feed := e.getInspectionFeed()
-	if err := feed.Export(ctx, e.apiClient, exporter, resp.OrganisationID, e.feedStatus); err != nil {
+	if err := feed.Export(ctx, e.apiClient, exporter, resp.OrganisationID); err != nil {
 		return fmt.Errorf("export inspection feed: %w", err)
 	}
 

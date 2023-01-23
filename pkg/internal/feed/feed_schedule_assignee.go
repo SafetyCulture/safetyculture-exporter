@@ -71,8 +71,9 @@ func (f *ScheduleAssigneeFeed) CreateSchema(exporter Exporter) error {
 }
 
 // Export exports the feed to the supplied exporter
-func (f *ScheduleAssigneeFeed) Export(ctx context.Context, apiClient *httpapi.Client, exporter Exporter, orgID string, status *ExportStatus) error {
-	logger := logger.GetLogger().With("feed", f.Name(), "org_id", orgID)
+func (f *ScheduleAssigneeFeed) Export(ctx context.Context, apiClient *httpapi.Client, exporter Exporter, orgID string) error {
+	l := logger.GetLogger().With("feed", f.Name(), "org_id", orgID)
+	status := GetExporterStatus()
 
 	if err := exporter.InitFeed(f, &InitFeedOptions{
 		// Always truncate. This data must be refreshed in order to be accurate
@@ -104,13 +105,9 @@ func (f *ScheduleAssigneeFeed) Export(ctx context.Context, apiClient *httpapi.Cl
 			}
 		}
 
-		status.UpdateStatus(f.Name(), &ExportStatusItem{
-			Name:         f.Name(),
-			Started:      true,
-			EstRemaining: resp.Metadata.RemainingRecords,
-		})
+		status.UpdateStatus(f.Name(), resp.Metadata.RemainingRecords, exporter.GetDuration().Milliseconds())
 
-		logger.With(
+		l.With(
 			"estimated_remaining", resp.Metadata.RemainingRecords,
 			"duration_ms", apiClient.Duration.Milliseconds(),
 			"export_duration_ms", exporter.GetDuration().Milliseconds(),

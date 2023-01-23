@@ -24,7 +24,7 @@ func TestIntegrationDbSoakExportFeeds_should_successfully_export_with_significan
 		AccessToken: "token-123",
 	}
 
-	exporterApp := feed.NewExporterApp(apiClient, nil, cfg, feed.NewExportStatus())
+	exporterApp := feed.NewExporterApp(apiClient, nil, cfg)
 	err = exporterApp.ExportFeeds(exporter)
 	assert.NoError(t, err)
 }
