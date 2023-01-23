@@ -35,7 +35,7 @@ func NewSafetyCultureExporter(cfg *ExporterConfiguration, version *AppVersion) (
 		apiClient:       apiClient,
 		sheqsyApiClient: sheqsyApiClient,
 		cfg:             cfg,
-		exportStatus:    feed.NewExportStatus(),
+		exportStatus:    feed.GetExporterStatus(),
 	}, nil
 }
 
@@ -191,7 +191,7 @@ func (s *SafetyCultureExporter) RunSQL() error {
 		return errors.Wrap(err, "create sql exporter")
 	}
 
-	exporterApp := feed.NewExporterApp(s.apiClient, s.sheqsyApiClient, s.cfg.ToExporterConfig(), s.exportStatus)
+	exporterApp := feed.NewExporterApp(s.apiClient, s.sheqsyApiClient, s.cfg.ToExporterConfig())
 	if s.cfg.Export.SchemaOnly {
 		return exporterApp.ExportSchemas(e)
 	}
@@ -226,7 +226,7 @@ func (s *SafetyCultureExporter) RunCSV() error {
 		return errors.Wrap(err, "unable to create csv exporter")
 	}
 
-	exporterApp := feed.NewExporterApp(s.apiClient, s.sheqsyApiClient, s.cfg.ToExporterConfig(), s.exportStatus)
+	exporterApp := feed.NewExporterApp(s.apiClient, s.sheqsyApiClient, s.cfg.ToExporterConfig())
 	if s.cfg.Export.SchemaOnly {
 		return exporterApp.ExportSchemas(e)
 	}
@@ -252,7 +252,7 @@ func (s *SafetyCultureExporter) RunInspectionReports() error {
 		return errors.Wrap(err, "unable to create report exporter")
 	}
 
-	exporterApp := feed.NewExporterApp(s.apiClient, s.sheqsyApiClient, s.cfg.ToExporterConfig(), s.exportStatus)
+	exporterApp := feed.NewExporterApp(s.apiClient, s.sheqsyApiClient, s.cfg.ToExporterConfig())
 	err = exporterApp.ExportInspectionReports(e)
 	if err != nil {
 		return errors.Wrap(err, "generate reports")
@@ -267,7 +267,7 @@ func (s *SafetyCultureExporter) RunPrintSchema() error {
 		return errors.Wrap(err, "unable to create exporter")
 	}
 
-	exporterApp := feed.NewExporterApp(s.apiClient, s.sheqsyApiClient, s.cfg.ToExporterConfig(), s.exportStatus)
+	exporterApp := feed.NewExporterApp(s.apiClient, s.sheqsyApiClient, s.cfg.ToExporterConfig())
 	err = exporterApp.PrintSchemas(e)
 	if err != nil {
 		return errors.Wrap(err, "error while printing schema")
@@ -309,6 +309,7 @@ func (s *SafetyCultureExporter) GetExportStatus() *ExportStatusResponse {
 			DurationMs:    v.DurationMs,
 			Remaining:     v.EstRemaining,
 			StatusMessage: v.StatusMessage,
+			Stage:         string(v.Stage),
 		})
 	}
 
@@ -326,5 +327,5 @@ func (s *SafetyCultureExporter) SetConfiguration(cfg *ExporterConfiguration) {
 
 // CleanExportStatus will clean the status items. Used by the UI
 func (s *SafetyCultureExporter) CleanExportStatus() {
-	s.exportStatus = feed.NewExportStatus()
+	s.exportStatus = feed.GetExporterStatus()
 }

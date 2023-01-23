@@ -21,8 +21,7 @@ func TestIssueFeed_Export_ShouldExportRows(t *testing.T) {
 		Limit: 100,
 	}
 
-	exportStatus := feed.NewExportStatus()
-	err = actionsFeed.Export(context.Background(), apiClient, exporter, "", exportStatus)
+	err = actionsFeed.Export(context.Background(), apiClient, exporter, "")
 	assert.NoError(t, err)
 
 	var rows []feed.Issue

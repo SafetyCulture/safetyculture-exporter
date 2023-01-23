@@ -24,6 +24,7 @@ type ExportStatusResponseItem struct {
 	StatusMessage string `json:"status_message"`
 	Started       bool   `json:"started"`
 	Finished      bool   `json:"finished"`
+	Stage         string `json:"stage"`
 	HasError      bool   `json:"has_error"`
 	DurationMs    int64  `json:"duration_ms"`
 }

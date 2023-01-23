@@ -201,7 +201,7 @@ func TestNewConfigurationManagerFromFile_WhenZeroLengthFile(t *testing.T) {
 	assert.EqualValues(t, "false", cm.Configuration.Export.Inspection.Archived)
 	assert.EqualValues(t, "UTC", cm.Configuration.Export.TimeZone)
 	assert.EqualValues(t, []string{"PDF"}, cm.Configuration.Report.Format)
-	assert.EqualValues(t, "CSV", cm.Configuration.Session.ExportType)
+	assert.EqualValues(t, "csv", cm.Configuration.Session.ExportType)
 	assert.EqualValues(t, "mysql", cm.Configuration.Db.Dialect)
 }
 

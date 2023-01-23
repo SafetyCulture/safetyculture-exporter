@@ -51,6 +51,8 @@ func (e *CSVExporter) CreateSchema(feed Feed, rows interface{}) error {
 func (e *CSVExporter) FinaliseExport(feed Feed, rows interface{}) error {
 	logger := e.Logger.With("feed", feed.Name())
 	logger.Info("writing out CSV file")
+	status := GetExporterStatus()
+	status.UpdateStage(feed.Name(), StageCsv)
 
 	err := e.cleanOldFiles(feed.Name())
 	if err != nil {
@@ -110,6 +112,8 @@ func (e *CSVExporter) FinaliseExport(feed Feed, rows interface{}) error {
 
 		offset = offset + limit
 		rowsAdded += int(resp.RowsAffected)
+
+		status.UpdateStatus(feed.Name(), resp.RowsAffected, postWriteTime.Sub(preTime).Milliseconds())
 
 		logger.With(
 			"rows_added", resp.RowsAffected,

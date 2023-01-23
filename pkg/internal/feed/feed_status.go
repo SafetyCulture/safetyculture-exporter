@@ -1,11 +1,22 @@
 package feed
 
-import "sync"
+import (
+	"sync"
+)
 
-func NewExportStatus() *ExportStatus {
-	return &ExportStatus{
-		status: map[string]*ExportStatusItem{},
+var lock = &sync.Mutex{}
+var statusInstance *ExportStatus
+
+// GetExporterStatus will return a singleton instance of the ExporterStatus
+func GetExporterStatus() *ExportStatus {
+	lock.Lock()
+	defer lock.Unlock()
+	if statusInstance == nil {
+		statusInstance = &ExportStatus{
+			status: map[string]*ExportStatusItem{},
+		}
 	}
+	return statusInstance
 }
 
 type ExportStatus struct {
@@ -15,8 +26,14 @@ type ExportStatus struct {
 	started  bool
 }
 
+type ExportStatusItemStage string
+
+const StageApi ExportStatusItemStage = "API_DOWNLOAD"
+const StageCsv ExportStatusItemStage = "CSV_EXPORT"
+
 type ExportStatusItem struct {
 	Name          string
+	Stage         ExportStatusItemStage
 	Started       bool
 	Finished      bool
 	HasError      bool
@@ -25,11 +42,21 @@ type ExportStatusItem struct {
 	DurationMs    int64
 }
 
+func (e *ExportStatus) Reset() {
+	e.lock.Lock()
+	e.started = false
+	e.finished = false
+	e.status = map[string]*ExportStatusItem{}
+	e.lock.Unlock()
+}
+
 func (e *ExportStatus) StartFeedExport(feedName string) {
 	e.lock.Lock()
 	e.status[feedName] = &ExportStatusItem{
-		Name:    feedName,
-		Started: true,
+		Name:     feedName,
+		Stage:    StageApi,
+		Started:  true,
+		Finished: false,
 	}
 	e.lock.Unlock()
 }
@@ -39,6 +66,14 @@ func (e *ExportStatus) UpdateStatus(feedName string, remaining int64, durationMs
 	if _, ok := e.status[feedName]; ok {
 		e.status[feedName].EstRemaining = remaining
 		e.status[feedName].DurationMs = durationMs
+	}
+	e.lock.Unlock()
+}
+
+func (e *ExportStatus) UpdateStage(feedName string, stage ExportStatusItemStage) {
+	e.lock.Lock()
+	if _, ok := e.status[feedName]; ok {
+		e.status[feedName].Stage = stage
 	}
 	e.lock.Unlock()
 }

@@ -73,7 +73,7 @@ type sheqsyEmployeeRaw struct {
 }
 
 // Export exports the feed to the supplied exporter
-func (f *SheqsyDepartmentEmployeeFeed) Export(ctx context.Context, apiClient *httpapi.Client, exporter Exporter, companyID string, status *ExportStatus) error {
+func (f *SheqsyDepartmentEmployeeFeed) Export(ctx context.Context, apiClient *httpapi.Client, exporter Exporter, companyID string) error {
 	logger := logger.GetLogger().With("feed", f.Name(), "org_id", companyID)
 
 	if err := exporter.InitFeed(f, &InitFeedOptions{
