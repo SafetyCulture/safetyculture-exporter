@@ -35,7 +35,7 @@ func NewSafetyCultureExporter(cfg *ExporterConfiguration, version *AppVersion) (
 		apiClient:       apiClient,
 		sheqsyApiClient: sheqsyApiClient,
 		cfg:             cfg,
-		exportStatus:    feed.NewExportStatus(),
+		exportStatus:    feed.GetExporterStatus(),
 	}, nil
 }
 
@@ -328,5 +328,5 @@ func (s *SafetyCultureExporter) SetConfiguration(cfg *ExporterConfiguration) {
 
 // CleanExportStatus will clean the status items. Used by the UI
 func (s *SafetyCultureExporter) CleanExportStatus() {
-	s.exportStatus = feed.NewExportStatus()
+	s.exportStatus = feed.GetExporterStatus()
 }

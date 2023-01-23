@@ -71,7 +71,7 @@ func TestExportReports_should_export_all_reports(t *testing.T) {
 		Body(bytes.NewBuffer([]byte(`file content`)))
 
 	cfg := &exporterAPI.ExporterConfiguration{}
-	exporterApp := feed.NewExporterApp(apiClient, nil, cfg.ToExporterConfig(), feed.NewExportStatus())
+	exporterApp := feed.NewExporterApp(apiClient, nil, cfg.ToExporterConfig(), feed.GetExporterStatus())
 	err = exporterApp.ExportInspectionReports(exporter)
 	assert.NoError(t, err)
 
@@ -125,7 +125,7 @@ func TestExportReports_should_export_all_reports_with_ID_filename(t *testing.T) 
 		Body(bytes.NewBuffer([]byte(`file content`)))
 
 	cfg := &exporterAPI.ExporterConfiguration{}
-	exporterApp := feed.NewExporterApp(apiClient, nil, cfg.ToExporterConfig(), feed.NewExportStatus())
+	exporterApp := feed.NewExporterApp(apiClient, nil, cfg.ToExporterConfig(), feed.GetExporterStatus())
 	err = exporterApp.ExportInspectionReports(exporter)
 	assert.NoError(t, err)
 
@@ -189,7 +189,7 @@ func TestExportReports_should_not_run_if_all_exported(t *testing.T) {
 	cfg := &exporterAPI.ExporterConfiguration{}
 	cfg.Export.Incremental = true
 
-	exporterApp := feed.NewExporterApp(apiClient, nil, cfg.ToExporterConfig(), feed.NewExportStatus())
+	exporterApp := feed.NewExporterApp(apiClient, nil, cfg.ToExporterConfig(), feed.GetExporterStatus())
 	err = exporterApp.ExportInspectionReports(exporter)
 	assert.NoError(t, err)
 
@@ -199,7 +199,7 @@ func TestExportReports_should_not_run_if_all_exported(t *testing.T) {
 
 	// run the export process again
 	initMockFeedsSet1(apiClient.HTTPClient())
-	exporterApp = feed.NewExporterApp(apiClient, nil, cfg.ToExporterConfig(), feed.NewExportStatus())
+	exporterApp = feed.NewExporterApp(apiClient, nil, cfg.ToExporterConfig(), feed.GetExporterStatus())
 	err = exporterApp.ExportInspectionReports(exporter)
 	assert.NoError(t, err)
 
@@ -265,7 +265,7 @@ func TestExportReports_should_take_care_of_invalid_file_names(t *testing.T) {
 	cfg := &exporterAPI.ExporterConfiguration{}
 	cfg.Export.Incremental = true
 
-	exporterApp := feed.NewExporterApp(apiClient, nil, cfg.ToExporterConfig(), feed.NewExportStatus())
+	exporterApp := feed.NewExporterApp(apiClient, nil, cfg.ToExporterConfig(), feed.GetExporterStatus())
 	err = exporterApp.ExportInspectionReports(exporter)
 	assert.NoError(t, err)
 
@@ -314,7 +314,7 @@ func TestExportReports_should_fail_after_retries(t *testing.T) {
 		JSON(getReportExportCompletionMessage("IN_PROGRESS"))
 
 	cfg := &exporterAPI.ExporterConfiguration{}
-	exporterApp := feed.NewExporterApp(apiClient, nil, cfg.ToExporterConfig(), feed.NewExportStatus())
+	exporterApp := feed.NewExporterApp(apiClient, nil, cfg.ToExporterConfig(), feed.GetExporterStatus())
 	err = exporterApp.ExportInspectionReports(exporter)
 	assert.NotNil(t, err)
 	assert.Contains(t, err.Error(), "Failed to generate 3 PDF reports and 0 WORD reports")
@@ -354,7 +354,7 @@ func TestExportReports_should_fail_if_report_status_fails(t *testing.T) {
 		JSON(getReportExportCompletionMessage("FAILED"))
 
 	cfg := &exporterAPI.ExporterConfiguration{}
-	exporterApp := feed.NewExporterApp(apiClient, nil, cfg.ToExporterConfig(), feed.NewExportStatus())
+	exporterApp := feed.NewExporterApp(apiClient, nil, cfg.ToExporterConfig(), feed.GetExporterStatus())
 	err = exporterApp.ExportInspectionReports(exporter)
 	assert.NotNil(t, err)
 	assert.Contains(t, err.Error(), "Failed to generate 0 PDF reports and 3 WORD reports")
@@ -387,7 +387,7 @@ func TestExportReports_should_fail_if_init_report_reply_is_not_success(t *testin
 		JSON(`{"error": "something went wrong"}`)
 
 	cfg := &exporterAPI.ExporterConfiguration{}
-	exporterApp := feed.NewExporterApp(apiClient, nil, cfg.ToExporterConfig(), feed.NewExportStatus())
+	exporterApp := feed.NewExporterApp(apiClient, nil, cfg.ToExporterConfig(), feed.GetExporterStatus())
 	err = exporterApp.ExportInspectionReports(exporter)
 	assert.NotNil(t, err)
 	assert.Contains(t, err.Error(), "Failed to generate 0 PDF reports and 3 WORD reports")
@@ -427,7 +427,7 @@ func TestExportReports_should_fail_if_report_completion_reply_is_not_success(t *
 		JSON(`{"error": "something went wrong"}`)
 
 	cfg := &exporterAPI.ExporterConfiguration{}
-	exporterApp := feed.NewExporterApp(apiClient, nil, cfg.ToExporterConfig(), feed.NewExportStatus())
+	exporterApp := feed.NewExporterApp(apiClient, nil, cfg.ToExporterConfig(), feed.GetExporterStatus())
 	err = exporterApp.ExportInspectionReports(exporter)
 	assert.NotNil(t, err)
 	assert.Contains(t, err.Error(), "Failed to generate 0 PDF reports and 3 WORD reports")
@@ -473,7 +473,7 @@ func TestExportReports_should_fail_if_download_report_reply_is_not_success(t *te
 		JSON(`{"error": "something went wrong"}`)
 
 	cfg := &exporterAPI.ExporterConfiguration{}
-	exporterApp := feed.NewExporterApp(apiClient, nil, cfg.ToExporterConfig(), feed.NewExportStatus())
+	exporterApp := feed.NewExporterApp(apiClient, nil, cfg.ToExporterConfig(), feed.GetExporterStatus())
 	err = exporterApp.ExportInspectionReports(exporter)
 	assert.NotNil(t, err)
 	assert.Contains(t, err.Error(), "Failed to generate 3 PDF reports and 0 WORD reports")
@@ -499,7 +499,7 @@ func TestExportReports_should_return_error_for_unsupported_format(t *testing.T) 
 		`)
 
 	cfg := &exporterAPI.ExporterConfiguration{}
-	exporterApp := feed.NewExporterApp(apiClient, nil, cfg.ToExporterConfig(), feed.NewExportStatus())
+	exporterApp := feed.NewExporterApp(apiClient, nil, cfg.ToExporterConfig(), feed.GetExporterStatus())
 	err = exporterApp.ExportInspectionReports(exporter)
 	assert.EqualError(t, err, "save reports: no valid export format specified")
 }

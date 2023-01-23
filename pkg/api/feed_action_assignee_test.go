@@ -21,7 +21,7 @@ func TestActionAssigneeFeedExport_should_export_rows_to_sql_db(t *testing.T) {
 		Incremental:   true,
 	}
 
-	exportStatus := feed.NewExportStatus()
+	exportStatus := feed.GetExporterStatus()
 	err = actionAssigneeFeed.Export(context.Background(), apiClient, exporter, "", exportStatus)
 	assert.NoError(t, err)
 

@@ -1,13 +1,26 @@
 package feed
 
 import (
+	"fmt"
 	"sync"
 )
 
-func NewExportStatus() *ExportStatus {
-	return &ExportStatus{
-		status: map[string]*ExportStatusItem{},
+var lock = &sync.Mutex{}
+var statusInstance *ExportStatus
+
+// GetExporterStatus will return a singleton instance of the ExporterStatus
+func GetExporterStatus() *ExportStatus {
+	if statusInstance == nil {
+		lock.Lock()
+		statusInstance = &ExportStatus{
+			status: map[string]*ExportStatusItem{},
+		}
+		fmt.Println("creating new ExportStatus instance")
+		lock.Unlock()
+	} else {
+		fmt.Println("already have a ExportStatus instance")
 	}
+	return statusInstance
 }
 
 type ExportStatus struct {

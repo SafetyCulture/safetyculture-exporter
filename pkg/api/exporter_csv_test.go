@@ -391,7 +391,7 @@ func TestCSVExporter_should_do_rollover_files(t *testing.T) {
 	err = exporter.WriteRows(userFeed, users)
 	assert.NoError(t, err)
 
-	status := feed.NewExportStatus()
+	status := feed.GetExporterStatus()
 	err = exporter.FinaliseExport(userFeed, &[]feed.User{}, status)
 	assert.NoError(t, err)
 
@@ -463,7 +463,7 @@ func TestCSVExporterFinaliseExport_should_write_rows_out_to_file(t *testing.T) {
 	err = exporter.WriteRows(userFeed, users)
 	assert.NoError(t, err)
 
-	status := feed.NewExportStatus()
+	status := feed.GetExporterStatus()
 	err = exporter.FinaliseExport(userFeed, &[]feed.User{}, status)
 	assert.NoError(t, err)
 
@@ -517,7 +517,7 @@ func TestCSVExporterFinaliseExport_should_write_rows_to_multiple_file(t *testing
 	err = exporter.WriteRows(userFeed, users)
 	assert.NoError(t, err)
 
-	status := feed.NewExportStatus()
+	status := feed.GetExporterStatus()
 	err = exporter.FinaliseExport(userFeed, &[]feed.User{}, status)
 	assert.NoError(t, err)
 

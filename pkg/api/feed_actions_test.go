@@ -20,7 +20,7 @@ func TestActionFeedExport_should_export_rows_to_sql_db(t *testing.T) {
 		Limit: 100,
 	}
 
-	exportStatus := feed.NewExportStatus()
+	exportStatus := feed.GetExporterStatus()
 	err = actionsFeed.Export(context.Background(), apiClient, exporter, "", exportStatus)
 	assert.NoError(t, err)
 
@@ -46,7 +46,7 @@ func TestActionFeed_Export_ShouldNotFailWhen403(t *testing.T) {
 		Limit: 100,
 	}
 
-	exportStatus := feed.NewExportStatus()
+	exportStatus := feed.GetExporterStatus()
 	err = actionsFeed.Export(context.Background(), apiClient, exporter, "", exportStatus)
 	assert.NoError(t, err)
 }
