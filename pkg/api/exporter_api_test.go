@@ -40,8 +40,7 @@ func TestSafetyCultureExporter_GetTemplateList(t *testing.T) {
 	exporter.SetApiClient(apiClient)
 	exporter.SetSheqsyApiClient(apiClient)
 
-	res, err := exporter.GetTemplateList()
-	require.Nil(t, err)
+	res := exporter.GetTemplateList()
 	assert.EqualValues(t, 1, len(res))
 	assert.EqualValues(t, "template_8ddf395bfd484e978d31d3afbdae3863", res[0].ID)
 	assert.EqualValues(t, "T7", res[0].Name)

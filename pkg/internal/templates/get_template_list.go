@@ -7,6 +7,7 @@ import (
 
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/httpapi"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/util"
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/logger"
 	"github.com/pkg/errors"
 )
 
@@ -21,17 +22,20 @@ func NewTemplatesClient(apiClient *httpapi.Client) *Client {
 	}
 }
 
-func (c *Client) GetTemplateList(ctx context.Context, pageSize int) ([]TemplateResponseItem, error) {
-
+// GetTemplateList will gracefully return template list. On Error will return empty or what was temporarly downloaded
+func (c *Client) GetTemplateList(ctx context.Context, pageSize int) []TemplateResponseItem {
+	l := logger.GetLogger()
 	var items []TemplateResponseItem
 	callback := func(resp *listTemplatesResponse) {
 		items = append(items, resp.Templates...)
 	}
 
+	// gracefully return what was downloaded
 	if err := c.drainTemplates(ctx, pageSize, callback); err != nil {
-		return nil, err
+		l.Error(err)
+		return items
 	}
-	return items, nil
+	return items
 }
 
 // DrainTemplates will process a paginated response and collect all responses before returning the response
