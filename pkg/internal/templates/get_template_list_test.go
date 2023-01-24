@@ -14,7 +14,7 @@ import (
 
 func TestClient_GetTemplateList_ShouldNotPaginate(t *testing.T) {
 	defer gock.Off()
-	gock.Observe(gock.DumpRequest)
+	//gock.Observe(gock.DumpRequest)
 
 	apiClient := getTestClient()
 	gock.InterceptClient(apiClient.HTTPClient())
@@ -32,7 +32,7 @@ func TestClient_GetTemplateList_ShouldNotPaginate(t *testing.T) {
 
 func TestClient_GetTemplateList_ShouldPaginate(t *testing.T) {
 	defer gock.Off()
-	gock.Observe(gock.DumpRequest)
+	//gock.Observe(gock.DumpRequest)
 
 	apiClient := getTestClient()
 	gock.InterceptClient(apiClient.HTTPClient())
@@ -64,7 +64,7 @@ func TestClient_GetTemplateList_ShouldPaginate(t *testing.T) {
 
 func TestClient_GetTemplateList_WhenApiError(t *testing.T) {
 	defer gock.Off()
-	gock.Observe(gock.DumpRequest)
+	//gock.Observe(gock.DumpRequest)
 
 	apiClient := getTestClient()
 	gock.InterceptClient(apiClient.HTTPClient())
