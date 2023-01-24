@@ -15,7 +15,7 @@ func TestSafetyCultureExporter_GetTemplateList(t *testing.T) {
 
 	apiClient := GetTestClient()
 	defer gock.Off()
-	gock.Observe(gock.DumpRequest)
+	//gock.Observe(gock.DumpRequest)
 	gock.InterceptClient(apiClient.HTTPClient())
 
 	gock.New("http://localhost:9999").

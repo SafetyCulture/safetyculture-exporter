@@ -393,7 +393,7 @@ func TestAPIClientDrainFeed_should_bubble_up_errors_from_callback(t *testing.T) 
 
 func TestClient_DrainFeed_WhenApiReturns403Error(t *testing.T) {
 	defer gock.Off()
-	gock.Observe(gock.DumpRequest)
+	//gock.Observe(gock.DumpRequest)
 
 	gock.New("http://localhost:9999").
 		Get("/feed/inspections").
