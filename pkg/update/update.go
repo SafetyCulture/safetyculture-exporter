@@ -5,6 +5,7 @@ package update
 import (
 	"context"
 	"net/http"
+	"strings"
 
 	"github.com/google/go-github/github"
 	"github.com/hashicorp/go-version"
@@ -12,10 +13,16 @@ import (
 
 const RepoExporter string = "safetyculture-exporter"
 
+const archDarwinAmd64 string = "darwin-amd64"
+const archDarwinArm64 string = "darwin-arm64"
+const archLinuxAmd64 string = "linux-amd64"
+const archWindowsAmd64 string = "windows-amd64"
+
 // ReleaseInfo is the details of an available release.
 type ReleaseInfo struct {
 	Version      string
 	ChangelogURL string
+	DownloadURLs map[string]string
 }
 
 // Check returns release info of a new version of this tool if available.
@@ -35,6 +42,7 @@ func Check(currentVersion string, repoName string) *ReleaseInfo {
 	return &ReleaseInfo{
 		Version:      v,
 		ChangelogURL: res.GetHTMLURL(),
+		DownloadURLs: MapAssets(res.Assets),
 	}
 }
 
@@ -44,4 +52,26 @@ func VersionGreaterThanOrEqual(v, w string) bool {
 	vw, we := version.NewVersion(w)
 
 	return ve == nil && we == nil && vv.GreaterThanOrEqual(vw)
+}
+
+// MapAssets Maps name to browser_download_url
+func MapAssets(assets []github.ReleaseAsset) map[string]string {
+	if assets == nil {
+		return map[string]string{}
+	}
+
+	var result = make(map[string]string, 4)
+	for _, asset := range assets {
+		switch {
+		case strings.Contains(*asset.Name, archDarwinAmd64):
+			result[archDarwinAmd64] = *asset.BrowserDownloadURL
+		case strings.Contains(*asset.Name, archDarwinArm64):
+			result[archDarwinArm64] = *asset.BrowserDownloadURL
+		case strings.Contains(*asset.Name, archLinuxAmd64):
+			result[archLinuxAmd64] = *asset.BrowserDownloadURL
+		case strings.Contains(*asset.Name, archWindowsAmd64):
+			result[archWindowsAmd64] = *asset.BrowserDownloadURL
+		}
+	}
+	return result
 }
