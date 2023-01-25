@@ -11,7 +11,6 @@ import (
 )
 
 const RepoExporter string = "safetyculture-exporter"
-const RepoExporterUI string = "safetyculture-exporter-ui"
 
 // ReleaseInfo is the details of an available release.
 type ReleaseInfo struct {
