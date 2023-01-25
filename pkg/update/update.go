@@ -4,7 +4,9 @@ package update
 
 import (
 	"context"
+	"fmt"
 	"net/http"
+	"runtime"
 	"strings"
 
 	"github.com/google/go-github/github"
@@ -22,7 +24,7 @@ const archWindowsAmd64 string = "windows-amd64"
 type ReleaseInfo struct {
 	Version      string
 	ChangelogURL string
-	DownloadURLs map[string]string
+	DownloadURL  string
 }
 
 // Check returns release info of a new version of this tool if available.
@@ -39,10 +41,16 @@ func Check(currentVersion string, repoName string) *ReleaseInfo {
 		return nil
 	}
 
+	filteredAssets := MapAssets(res.Assets)
+	dURL, ok := filteredAssets[fmt.Sprintf("%s-%s", runtime.GOOS, runtime.GOARCH)]
+	if !ok {
+		dURL = ""
+	}
+
 	return &ReleaseInfo{
 		Version:      v,
 		ChangelogURL: res.GetHTMLURL(),
-		DownloadURLs: MapAssets(res.Assets),
+		DownloadURL:  dURL,
 	}
 }
 
