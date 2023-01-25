@@ -10,6 +10,9 @@ import (
 	"github.com/hashicorp/go-version"
 )
 
+const RepoExporter string = "safetyculture-exporter"
+const RepoExporterUI string = "safetyculture-exporter-ui"
+
 // ReleaseInfo is the details of an available release.
 type ReleaseInfo struct {
 	Version      string
@@ -17,10 +20,10 @@ type ReleaseInfo struct {
 }
 
 // Check returns release info of a new version of this tool if available.
-func Check(currentVersion string) *ReleaseInfo {
+func Check(currentVersion string, repoName string) *ReleaseInfo {
 	ctx := context.Background()
 	g := github.NewClient(&http.Client{})
-	res, _, err := g.Repositories.GetLatestRelease(ctx, "SafetyCulture", "safetyculture-exporter")
+	res, _, err := g.Repositories.GetLatestRelease(ctx, "SafetyCulture", repoName)
 	if err != nil {
 		return nil
 	}

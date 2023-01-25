@@ -36,7 +36,7 @@ func Execute() {
 	updateMsgChan := make(chan *update.ReleaseInfo)
 
 	go func() {
-		res := update.Check(version.GetVersion())
+		res := update.Check(version.GetVersion(), update.RepoExporter)
 		updateMsgChan <- res
 	}()
 
