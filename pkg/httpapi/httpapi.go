@@ -36,7 +36,7 @@ type Client struct {
 
 	Duration      time.Duration
 	CheckForRetry CheckForRetry
-	Backoff       Backoff
+	backoff       Backoff
 	RetryMax      int
 	RetryWaitMin  time.Duration
 	RetryWaitMax  time.Duration
@@ -86,7 +86,7 @@ func NewClient(cfg *ClientCfg, opts ...Opt) *Client {
 		Sling:         s,
 		Duration:      0,
 		CheckForRetry: DefaultRetryPolicy,
-		Backoff:       DefaultBackoff,
+		backoff:       DefaultBackoff,
 		RetryMax:      defaultRetryMax,
 		RetryWaitMin:  defaultRetryWaitMin,
 		RetryWaitMax:  defaultRetryWaitMax,
@@ -226,7 +226,7 @@ func (a *Client) Do(doer HTTPDoer) (*http.Response, error) {
 			break
 		}
 
-		wait := a.Backoff(a.RetryWaitMin, a.RetryWaitMax, iter, resp)
+		wait := a.backoff(a.RetryWaitMin, a.RetryWaitMax, iter, resp)
 		a.logger.Infof("retrying URL %s after %v", u, wait)
 
 		time.Sleep(wait)
