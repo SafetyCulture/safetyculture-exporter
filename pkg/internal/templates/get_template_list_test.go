@@ -9,13 +9,12 @@ import (
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/httpapi"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/templates"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"gopkg.in/h2non/gock.v1"
 )
 
 func TestClient_GetTemplateList_ShouldNotPaginate(t *testing.T) {
 	defer gock.Off()
-	gock.Observe(gock.DumpRequest)
+	//gock.Observe(gock.DumpRequest)
 
 	apiClient := getTestClient()
 	gock.InterceptClient(apiClient.HTTPClient())
@@ -27,14 +26,13 @@ func TestClient_GetTemplateList_ShouldNotPaginate(t *testing.T) {
 		File("fixtures/single_page_success.json")
 
 	templatesClient := templates.NewTemplatesClient(apiClient)
-	res, err := templatesClient.GetTemplateList(context.Background(), 1000)
-	require.Nil(t, err)
+	res := templatesClient.GetTemplateList(context.Background(), 1000)
 	assert.EqualValues(t, 7, len(res))
 }
 
 func TestClient_GetTemplateList_ShouldPaginate(t *testing.T) {
 	defer gock.Off()
-	gock.Observe(gock.DumpRequest)
+	//gock.Observe(gock.DumpRequest)
 
 	apiClient := getTestClient()
 	gock.InterceptClient(apiClient.HTTPClient())
@@ -60,14 +58,13 @@ func TestClient_GetTemplateList_ShouldPaginate(t *testing.T) {
 		File("fixtures/page_3_of_3.json")
 
 	templatesClient := templates.NewTemplatesClient(apiClient)
-	res, err := templatesClient.GetTemplateList(context.Background(), 3)
-	require.Nil(t, err)
+	res := templatesClient.GetTemplateList(context.Background(), 3)
 	assert.EqualValues(t, 7, len(res))
 }
 
 func TestClient_GetTemplateList_WhenApiError(t *testing.T) {
 	defer gock.Off()
-	gock.Observe(gock.DumpRequest)
+	//gock.Observe(gock.DumpRequest)
 
 	apiClient := getTestClient()
 	gock.InterceptClient(apiClient.HTTPClient())
@@ -85,9 +82,8 @@ func TestClient_GetTemplateList_WhenApiError(t *testing.T) {
 		ReplyError(fmt.Errorf("test error"))
 
 	templatesClient := templates.NewTemplatesClient(apiClient)
-	res, err := templatesClient.GetTemplateList(context.Background(), 3)
-	require.Nil(t, res)
-	assert.Error(t, err)
+	res := templatesClient.GetTemplateList(context.Background(), 3)
+	assert.EqualValues(t, 3, len(res))
 }
 
 // getTestClient creates a new test apiClient

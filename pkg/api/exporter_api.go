@@ -9,13 +9,11 @@ import (
 	"path/filepath"
 
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/httpapi"
-	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/templates"
-	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/util"
-	"github.com/spf13/viper"
-
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/exporter"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/feed"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/inspections"
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/templates"
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/util"
 	"github.com/pkg/errors"
 )
 
@@ -46,7 +44,7 @@ func getAPIClient(cfg *HttpApiCfg, version *AppVersion) (*httpapi.Client, error)
 		apiOpts = append(apiOpts, httpapi.OptSetInsecureTLS(true))
 	}
 	if cfg.tlsCert != "" {
-		apiOpts = append(apiOpts, httpapi.OptAddTLSCert(viper.GetString("api.tls_cert")))
+		apiOpts = append(apiOpts, httpapi.OptAddTLSCert(cfg.tlsCert))
 	}
 	if cfg.proxyUrl != "" {
 		proxyURL, err := url.Parse(cfg.proxyUrl)
@@ -72,9 +70,9 @@ func getSheqsyAPIClient(cfg *HttpApiCfg, version *AppVersion) (*httpapi.Client, 
 		apiOpts = append(apiOpts, httpapi.OptSetInsecureTLS(true))
 	}
 	if cfg.tlsCert != "" {
-		apiOpts = append(apiOpts, httpapi.OptAddTLSCert(viper.GetString("api.tls_cert")))
+		apiOpts = append(apiOpts, httpapi.OptAddTLSCert(cfg.tlsCert))
 	}
-	if viper.GetString("api.proxy_url") != "" {
+	if cfg.proxyUrl != "" {
 		proxyURL, err := url.Parse(cfg.proxyUrl)
 		if err != nil {
 			return nil, fmt.Errorf("unable to parse proxy URL")
@@ -276,12 +274,9 @@ func (s *SafetyCultureExporter) RunPrintSchema() error {
 	return nil
 }
 
-func (s *SafetyCultureExporter) GetTemplateList() ([]TemplateResponseItem, error) {
+func (s *SafetyCultureExporter) GetTemplateList() []TemplateResponseItem {
 	client := templates.NewTemplatesClient(s.apiClient)
-	res, err := client.GetTemplateList(context.Background(), 1000)
-	if err != nil {
-		return nil, err
-	}
+	res := client.GetTemplateList(context.Background(), 1000)
 
 	transformer := func(data templates.TemplateResponseItem) TemplateResponseItem {
 		return TemplateResponseItem{
@@ -291,7 +286,7 @@ func (s *SafetyCultureExporter) GetTemplateList() ([]TemplateResponseItem, error
 		}
 	}
 
-	return util.GenericCollectionMapper(res, transformer), nil
+	return util.GenericCollectionMapper(res, transformer)
 }
 
 // GetExportStatus called by UI
