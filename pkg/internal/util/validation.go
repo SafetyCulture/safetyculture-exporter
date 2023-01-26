@@ -1,8 +1,9 @@
 package util
 
 import (
-	"github.com/SafetyCulture/safetyculture-exporter/pkg/logger"
 	"net/http"
+
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/logger"
 
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
