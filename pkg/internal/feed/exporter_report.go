@@ -61,14 +61,14 @@ func (e *ReportExporter) SaveReports(ctx context.Context, apiClient *httpapi.Cli
 		return fmt.Errorf("no valid export format specified")
 	}
 
-	report := &reportExport{}
+	r := &reportExport{}
 	err = e.DB.AutoMigrate(&reportExport{})
 	if err != nil {
 		return err
 	}
 
 	if !feed.Incremental {
-		result := e.DB.Session(&gorm.Session{AllowGlobalUpdate: true}).Unscoped().Delete(report)
+		result := e.DB.Session(&gorm.Session{AllowGlobalUpdate: true}).Unscoped().Delete(r)
 		if result.Error != nil {
 			return errors.Wrap(result.Error, "Unable to truncate table")
 		}
@@ -133,7 +133,7 @@ func (e *ReportExporter) SaveReports(ctx context.Context, apiClient *httpapi.Cli
 	}
 
 	if res.PDFErrors > 0 || res.WORDErrors > 0 {
-		err = fmt.Errorf("Failed to generate %d PDF reports and %d WORD reports", res.PDFErrors, res.WORDErrors)
+		err = fmt.Errorf("failed to generate %d PDF reports and %d WORD reports", res.PDFErrors, res.WORDErrors)
 	}
 
 	return err
@@ -153,7 +153,7 @@ func (e *ReportExporter) getFormats() (*reportExportFormat, error) {
 	}
 
 	if !format.PDF && !format.WORD {
-		return nil, fmt.Errorf("No valid export format specified")
+		return nil, fmt.Errorf("no valid export format specified")
 	}
 
 	return format, nil
@@ -162,19 +162,19 @@ func (e *ReportExporter) getFormats() (*reportExportFormat, error) {
 func (e *ReportExporter) saveReport(ctx context.Context, apiClient *httpapi.Client, inspection *Inspection, format *reportExportFormat) *reportExport {
 	exportPDF, exportWORD := format.PDF, format.WORD
 
-	report := &reportExport{}
-	err := e.DB.First(&report, "audit_id = ?", inspection.ID).Error
+	r := &reportExport{}
+	err := e.DB.First(&r, "audit_id = ?", inspection.ID).Error
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		e.Logger.Errorf("Error during loading report from reports db: %s", err)
-		return report
+		return r
 	}
 
-	if report.AuditModifiedAt != inspection.ModifiedAt {
-		report.AuditID = inspection.ID
-		report.AuditModifiedAt = inspection.ModifiedAt
+	if r.AuditModifiedAt != inspection.ModifiedAt {
+		r.AuditID = inspection.ID
+		r.AuditModifiedAt = inspection.ModifiedAt
 	} else {
-		exportPDF = exportPDF && report.PDF != 1
-		exportWORD = exportWORD && report.WORD != 1
+		exportPDF = exportPDF && r.PDF != 1
+		exportWORD = exportWORD && r.WORD != 1
 		if !exportPDF && !exportWORD {
 			return nil
 		}
@@ -184,9 +184,9 @@ func (e *ReportExporter) saveReport(ctx context.Context, apiClient *httpapi.Clie
 		err = e.exportInspection(ctx, apiClient, inspection, "PDF")
 		if err != nil {
 			e.Logger.Errorf("PDF export failed for '%s'. Error: %s", inspection.ID, err)
-			report.PDF = -1
+			r.PDF = -1
 		} else {
-			report.PDF = 1
+			r.PDF = 1
 		}
 	}
 
@@ -194,22 +194,22 @@ func (e *ReportExporter) saveReport(ctx context.Context, apiClient *httpapi.Clie
 		err = e.exportInspection(ctx, apiClient, inspection, "WORD")
 		if err != nil {
 			e.Logger.Errorf("WORD export failed for '%s'. Error: %s", inspection.ID, err)
-			report.WORD = -1
+			r.WORD = -1
 		} else {
-			report.WORD = 1
+			r.WORD = 1
 		}
 	}
 
 	result := e.DB.Clauses(clause.OnConflict{
 		Columns:   []clause.Column{{Name: "audit_id"}},
 		DoUpdates: clause.AssignmentColumns([]string{"modified_at", "pdf", "word"}),
-	}).Create(&report)
+	}).Create(&r)
 
 	if result.Error != nil {
 		e.Logger.Errorf("Failed to update save report status to local db for %s", inspection.ID)
 	}
 
-	return report
+	return r
 }
 
 // GetDuration will return the duration for exporting a batch

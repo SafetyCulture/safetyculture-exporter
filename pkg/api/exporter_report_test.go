@@ -317,7 +317,7 @@ func TestExportReports_should_fail_after_retries(t *testing.T) {
 	exporterApp := feed.NewExporterApp(apiClient, nil, cfg.ToExporterConfig())
 	err = exporterApp.ExportInspectionReports(exporter)
 	assert.NotNil(t, err)
-	assert.Contains(t, err.Error(), "Failed to generate 3 PDF reports and 0 WORD reports")
+	assert.Contains(t, err.Error(), "failed to generate 3 PDF reports and 0 WORD reports")
 }
 
 func TestExportReports_should_fail_if_report_status_fails(t *testing.T) {
@@ -357,7 +357,7 @@ func TestExportReports_should_fail_if_report_status_fails(t *testing.T) {
 	exporterApp := feed.NewExporterApp(apiClient, nil, cfg.ToExporterConfig())
 	err = exporterApp.ExportInspectionReports(exporter)
 	assert.NotNil(t, err)
-	assert.Contains(t, err.Error(), "Failed to generate 0 PDF reports and 3 WORD reports")
+	assert.Contains(t, err.Error(), "failed to generate 0 PDF reports and 3 WORD reports")
 }
 
 func TestExportReports_should_fail_if_init_report_reply_is_not_success(t *testing.T) {
@@ -390,7 +390,7 @@ func TestExportReports_should_fail_if_init_report_reply_is_not_success(t *testin
 	exporterApp := feed.NewExporterApp(apiClient, nil, cfg.ToExporterConfig())
 	err = exporterApp.ExportInspectionReports(exporter)
 	assert.NotNil(t, err)
-	assert.Contains(t, err.Error(), "Failed to generate 0 PDF reports and 3 WORD reports")
+	assert.Contains(t, err.Error(), "failed to generate 0 PDF reports and 3 WORD reports")
 }
 
 func TestExportReports_should_fail_if_report_completion_reply_is_not_success(t *testing.T) {
@@ -430,7 +430,7 @@ func TestExportReports_should_fail_if_report_completion_reply_is_not_success(t *
 	exporterApp := feed.NewExporterApp(apiClient, nil, cfg.ToExporterConfig())
 	err = exporterApp.ExportInspectionReports(exporter)
 	assert.NotNil(t, err)
-	assert.Contains(t, err.Error(), "Failed to generate 0 PDF reports and 3 WORD reports")
+	assert.Contains(t, err.Error(), "failed to generate 0 PDF reports and 3 WORD reports")
 }
 
 func TestExportReports_should_fail_if_download_report_reply_is_not_success(t *testing.T) {
@@ -476,7 +476,7 @@ func TestExportReports_should_fail_if_download_report_reply_is_not_success(t *te
 	exporterApp := feed.NewExporterApp(apiClient, nil, cfg.ToExporterConfig())
 	err = exporterApp.ExportInspectionReports(exporter)
 	assert.NotNil(t, err)
-	assert.Contains(t, err.Error(), "Failed to generate 3 PDF reports and 0 WORD reports")
+	assert.Contains(t, err.Error(), "failed to generate 3 PDF reports and 0 WORD reports")
 }
 
 func TestExportReports_should_return_error_for_unsupported_format(t *testing.T) {

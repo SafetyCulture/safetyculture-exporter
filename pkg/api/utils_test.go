@@ -154,7 +154,7 @@ func getTestingSQLExporter() (*feed.SQLExporter, error) {
 	case "sqlite":
 		return exporter, nil
 	default:
-		return nil, fmt.Errorf("Invalid DB dialect %s", dialect)
+		return nil, fmt.Errorf("invalid DB dialect %s", dialect)
 	}
 	if err != nil {
 		return nil, err

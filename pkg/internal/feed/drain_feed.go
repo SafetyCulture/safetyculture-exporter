@@ -49,13 +49,13 @@ type GetFeedRequest struct {
 
 // GetFeedResponse is a representation of the data returned when fetching a feed
 type GetFeedResponse struct {
-	Metadata FeedMetadata `json:"metadata"`
+	Metadata PageFeedMetadata `json:"metadata"`
 
 	Data json.RawMessage `json:"data"`
 }
 
-// FeedMetadata is a representation of the metadata returned when fetching a feed
-type FeedMetadata struct {
+// PageFeedMetadata is a representation of the metadata returned when fetching a feed
+type PageFeedMetadata struct {
 	NextPage         string `json:"next_page"`
 	RemainingRecords int64  `json:"remaining_records"`
 }

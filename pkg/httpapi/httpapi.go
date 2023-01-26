@@ -172,10 +172,10 @@ func OptAddTLSCert(certPath string) Opt {
 }
 
 func (a *Client) Do(doer HTTPDoer) (*http.Response, error) {
-	url := doer.URL()
+	u := doer.URL()
 
 	for iter := 0; ; iter++ {
-		a.logger.Debugw("http request", "url", url)
+		a.logger.Debugw("http request", "url", u)
 
 		start := time.Now()
 		resp, err := doer.Do()
@@ -187,10 +187,10 @@ func (a *Client) Do(doer HTTPDoer) (*http.Response, error) {
 		}
 
 		if err != nil {
-			a.logger.Errorw("http request error", "url", url, "status", status, "err", err)
+			a.logger.Errorw("http request error", "url", u, "status", status, "err", err)
 		}
 
-		a.logger.Debugw("http response", "url", url, "status", status)
+		a.logger.Debugw("http response", "url", u, "status", status)
 
 		// Check if we should continue with the retries
 		shouldRetry, _ := a.CheckForRetry(resp, err)
@@ -202,18 +202,18 @@ func (a *Client) Do(doer HTTPDoer) (*http.Response, error) {
 
 				case status == http.StatusNotFound:
 					a.logger.Errorw("http request error status",
-						"url", url,
+						"url", u,
 						"status", status,
 					)
 					return resp, nil
 
 				case status == http.StatusForbidden:
-					a.logger.Errorw("no access to this resource", "url", url, "status", status)
+					a.logger.Errorw("no access to this resource", "url", u, "status", status)
 					return resp, nil
 
 				default:
 					a.logger.Errorw("http request error status",
-						"url", url,
+						"url", u,
 						"status", status,
 						"err", doer.Error(),
 					)
@@ -229,10 +229,10 @@ func (a *Client) Do(doer HTTPDoer) (*http.Response, error) {
 		}
 
 		wait := a.Backoff(a.RetryWaitMin, a.RetryWaitMax, iter, resp)
-		a.logger.Infof("retrying URL %s after %v", url, wait)
+		a.logger.Infof("retrying URL %s after %v", u, wait)
 
 		time.Sleep(wait)
 	}
 
-	return nil, fmt.Errorf("%s giving up after %d attempt(s)", url, a.RetryMax+1)
+	return nil, fmt.Errorf("%s giving up after %d attempt(s)", u, a.RetryMax+1)
 }

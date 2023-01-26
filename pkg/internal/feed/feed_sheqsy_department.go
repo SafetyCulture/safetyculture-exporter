@@ -70,7 +70,7 @@ func (f *SheqsyDepartmentFeed) CreateSchema(exporter Exporter) error {
 
 // Export exports the feed to the supplied exporter
 func (f *SheqsyDepartmentFeed) Export(ctx context.Context, apiClient *httpapi.Client, exporter Exporter, companyID string) error {
-	logger := logger.GetLogger().With("feed", f.Name(), "org_id", companyID)
+	log := logger.GetLogger().With("feed", f.Name(), "org_id", companyID)
 
 	if err := exporter.InitFeed(f, &InitFeedOptions{
 		// Truncate files if upserts aren't supported.
@@ -107,7 +107,7 @@ func (f *SheqsyDepartmentFeed) Export(ctx context.Context, apiClient *httpapi.Cl
 		}
 	}
 
-	logger.With(
+	log.With(
 		"estimated_remaining", 0,
 		"duration_ms", apiClient.Duration.Milliseconds(),
 		"export_duration_ms", exporter.GetDuration().Milliseconds(),
