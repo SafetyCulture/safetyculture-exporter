@@ -1,6 +1,7 @@
 package httpapi
 
 import (
+	"context"
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
@@ -54,12 +55,16 @@ type ClientCfg struct {
 
 // NewClient creates a new instance of the Client
 func NewClient(cfg *ClientCfg, opts ...Opt) *Client {
+
+	dialFn := func(dialer *net.Dialer) func(context.Context, string, string) (net.Conn, error) {
+		return dialer.DialContext
+	}
+
 	httpTransport := &http.Transport{
-		DialContext: (&net.Dialer{
+		DialContext: dialFn(&net.Dialer{
 			Timeout:   30 * time.Second,
 			KeepAlive: 30 * time.Second,
-			DualStack: true,
-		}).DialContext,
+		}),
 		ForceAttemptHTTP2:     true,
 		MaxIdleConns:          100,
 		IdleConnTimeout:       90 * time.Second,
