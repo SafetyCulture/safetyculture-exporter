@@ -10,9 +10,6 @@ import (
 
 func ExecuteGet[T any](ctx context.Context, apiClient *Client, url string, params any) (*T, error) {
 	sl := apiClient.Sling.New().Get(url).
-		Set(string(Authorization), apiClient.AuthorizationHeader).
-		Set(string(IntegrationID), apiClient.IntegrationID).
-		Set(string(IntegrationVersion), apiClient.IntegrationVersion).
 		Set(string(XRequestID), util.RequestIDFromContext(ctx))
 
 	if params != nil {

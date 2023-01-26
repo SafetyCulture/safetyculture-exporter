@@ -24,9 +24,6 @@ func InitiateInspectionReportExport(ctx context.Context, apiClient *httpapi.Clie
 	}
 
 	sl := apiClient.Sling.New().Post(url).
-		Set(string(httpapi.Authorization), apiClient.AuthorizationHeader).
-		Set(string(httpapi.IntegrationID), apiClient.IntegrationID).
-		Set(string(httpapi.IntegrationVersion), apiClient.IntegrationVersion).
 		Set(string(httpapi.XRequestID), util.RequestIDFromContext(ctx)).
 		BodyJSON(body)
 

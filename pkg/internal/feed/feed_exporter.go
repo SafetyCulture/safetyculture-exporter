@@ -109,7 +109,6 @@ func (e *ExporterFeedClient) ExportFeeds(exporter Exporter) error {
 	if len(e.configuration.AccessToken) != 0 {
 		status.started = true
 		atLeastOneRun = true
-		log.Info("using exporter version: ", e.apiClient.IntegrationVersion)
 		log.Info("exporting SafetyCulture data")
 
 		var feeds []Feed

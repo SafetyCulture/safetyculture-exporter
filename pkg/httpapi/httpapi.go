@@ -28,12 +28,11 @@ var (
 )
 
 type Client struct {
-	logger              *zap.SugaredLogger
-	AuthorizationHeader string
-	BaseURL             string
-	Sling               *sling.Sling
-	HttpClient          *http.Client
-	httpTransport       *http.Transport
+	logger        *zap.SugaredLogger
+	BaseURL       string
+	Sling         *sling.Sling
+	HttpClient    *http.Client
+	httpTransport *http.Transport
 
 	Duration      time.Duration
 	CheckForRetry CheckForRetry
@@ -41,9 +40,6 @@ type Client struct {
 	RetryMax      int
 	RetryWaitMin  time.Duration
 	RetryWaitMax  time.Duration
-
-	IntegrationID      string
-	IntegrationVersion string
 }
 
 type ClientCfg struct {
@@ -77,21 +73,23 @@ func NewClient(cfg *ClientCfg, opts ...Opt) *Client {
 		Transport: httpTransport,
 	}
 
+	s := sling.New().Client(httpClient).Base(cfg.Addr).
+		Set(string(Authorization), cfg.AuthorizationHeader).
+		Set(string(IntegrationID), cfg.IntegrationID).
+		Set(string(IntegrationVersion), cfg.IntegrationVersion)
+
 	a := &Client{
-		logger:              logger.GetLogger(),
-		HttpClient:          httpClient,
-		BaseURL:             cfg.Addr,
-		httpTransport:       httpTransport,
-		Sling:               sling.New().Client(httpClient).Base(cfg.Addr),
-		AuthorizationHeader: cfg.AuthorizationHeader,
-		Duration:            0,
-		CheckForRetry:       DefaultRetryPolicy,
-		Backoff:             DefaultBackoff,
-		RetryMax:            defaultRetryMax,
-		RetryWaitMin:        defaultRetryWaitMin,
-		RetryWaitMax:        defaultRetryWaitMax,
-		IntegrationVersion:  cfg.IntegrationVersion,
-		IntegrationID:       cfg.IntegrationID,
+		logger:        logger.GetLogger(),
+		HttpClient:    httpClient,
+		BaseURL:       cfg.Addr,
+		httpTransport: httpTransport,
+		Sling:         s,
+		Duration:      0,
+		CheckForRetry: DefaultRetryPolicy,
+		Backoff:       DefaultBackoff,
+		RetryMax:      defaultRetryMax,
+		RetryWaitMin:  defaultRetryWaitMin,
+		RetryWaitMax:  defaultRetryWaitMax,
 	}
 
 	for _, opt := range opts {

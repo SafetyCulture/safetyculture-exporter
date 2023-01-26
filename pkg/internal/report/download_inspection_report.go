@@ -14,9 +14,6 @@ func DownloadInspectionReportFile(ctx context.Context, apiClient *httpapi.Client
 	var res *http.Response
 
 	sl := apiClient.Sling.New().Get(url).
-		Set(string(httpapi.Authorization), apiClient.AuthorizationHeader).
-		Set(string(httpapi.IntegrationID), apiClient.IntegrationID).
-		Set(string(httpapi.IntegrationVersion), apiClient.IntegrationVersion).
 		Set(string(httpapi.XRequestID), util.RequestIDFromContext(ctx))
 
 	req, _ := sl.Request()

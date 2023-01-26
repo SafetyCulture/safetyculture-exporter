@@ -16,9 +16,6 @@ const activityHistoryLogURL = "/accounts/history/v1/activity_log/list"
 func ListOrganisationActivityLog(ctx context.Context, apiClient *httpapi.Client, request *GetAccountsActivityLogRequestParams) (*GetAccountsActivityLogResponse, error) {
 	sl := apiClient.Sling.New().
 		Post(activityHistoryLogURL).
-		Set(string(httpapi.Authorization), apiClient.AuthorizationHeader).
-		Set(string(httpapi.IntegrationID), apiClient.IntegrationID).
-		Set(string(httpapi.IntegrationVersion), apiClient.IntegrationVersion).
 		Set(string(httpapi.XRequestID), util.RequestIDFromContext(ctx)).
 		BodyJSON(request)
 
