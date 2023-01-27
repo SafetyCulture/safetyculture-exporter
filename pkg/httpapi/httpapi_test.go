@@ -17,7 +17,7 @@ func GetTestClient(opts ...httpapi.Opt) *httpapi.Client {
 	cfg := httpapi.ClientCfg{
 		Addr:                "http://localhost:9999",
 		AuthorizationHeader: "abc123",
-		IntegrationID:       "test",
+		IntegrationID:       "safetyculture-exporter",
 		IntegrationVersion:  "dev",
 	}
 
@@ -138,4 +138,23 @@ func TestClient_WhoAmI_WhenNotOK(t *testing.T) {
 	require.NotNil(t, err)
 	require.Nil(t, r)
 	assert.EqualValues(t, "api request: http://localhost:9999/accounts/user/v1/user:WhoAmI giving up after 2 attempt(s)", err.Error())
+}
+
+func TestClient_HeadersShouldMatch(t *testing.T) {
+	defer gock.Off()
+	gock.Observe(gock.DumpRequest)
+
+	gock.New("http://localhost:9999").
+		Get("accounts/user/v1/user:WhoAmI").
+		MatchHeader("sc-integration-id", "safetyculture-exporter").
+		MatchHeader("sc-integration-version", "dev").
+		Reply(200).
+		BodyString(`{}`)
+
+	apiClient := GetTestClient()
+	gock.InterceptClient(apiClient.HTTPClient())
+
+	r, err := httpapi.WhoAmI(context.Background(), apiClient)
+	require.Nil(t, err)
+	require.NotNil(t, r)
 }
