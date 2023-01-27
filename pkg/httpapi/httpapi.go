@@ -30,8 +30,8 @@ var (
 type Client struct {
 	logger        *zap.SugaredLogger
 	BaseURL       string
-	Sling         *sling.Sling
-	HttpClient    *http.Client
+	sling         *sling.Sling
+	httpClient    *http.Client
 	httpTransport *http.Transport
 
 	Duration      time.Duration
@@ -80,10 +80,10 @@ func NewClient(cfg *ClientCfg, opts ...Opt) *Client {
 
 	a := &Client{
 		logger:        logger.GetLogger(),
-		HttpClient:    httpClient,
+		httpClient:    httpClient,
 		BaseURL:       cfg.Addr,
 		httpTransport: httpTransport,
-		Sling:         s,
+		sling:         s,
 		Duration:      0,
 		CheckForRetry: DefaultRetryPolicy,
 		backoff:       DefaultBackoff,
@@ -104,7 +104,7 @@ type Opt func(*Client)
 
 // HTTPClient returns the http Client used by APIClient
 func (a *Client) HTTPClient() *http.Client {
-	return a.HttpClient
+	return a.httpClient
 }
 
 // HTTPTransport returns the http Transport used by APIClient
@@ -112,10 +112,14 @@ func (a *Client) HTTPTransport() *http.Transport {
 	return a.httpTransport
 }
 
+func (a *Client) NewSling() *sling.Sling {
+	return a.sling.New()
+}
+
 // OptSetTimeout sets the timeout for the request
 func OptSetTimeout(t time.Duration) Opt {
 	return func(a *Client) {
-		a.HttpClient.Timeout = t
+		a.httpClient.Timeout = t
 	}
 }
 

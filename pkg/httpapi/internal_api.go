@@ -29,3 +29,7 @@ func ListInspections(ctx context.Context, apiClient *Client, params *ListInspect
 func CheckInspectionReportExportCompletion(ctx context.Context, apiClient *Client, auditID string, messageID string) (*InspectionReportExportCompletionResponse, error) {
 	return ExecuteGet[InspectionReportExportCompletionResponse](ctx, apiClient, fmt.Sprintf("audits/%s/report/%s", auditID, messageID), nil)
 }
+
+func ListOrganisationActivityLog(ctx context.Context, apiClient *Client, request *GetAccountsActivityLogRequestParams) (*GetAccountsActivityLogResponse, error) {
+	return ExecutePost[GetAccountsActivityLogResponse](ctx, apiClient, "/accounts/history/v1/activity_log/list", request)
+}

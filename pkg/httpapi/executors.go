@@ -10,7 +10,7 @@ import (
 )
 
 func ExecuteGet[T any](ctx context.Context, apiClient *Client, url string, params any) (*T, error) {
-	sl := apiClient.Sling.New().Get(url).
+	sl := apiClient.NewSling().Get(url).
 		Set(string(XRequestID), util.RequestIDFromContext(ctx))
 
 	if params != nil {
@@ -46,7 +46,7 @@ func ExecuteGet[T any](ctx context.Context, apiClient *Client, url string, param
 }
 
 func ExecutePost[T any](ctx context.Context, apiClient *Client, url string, body any) (*T, error) {
-	sl := apiClient.Sling.New().Post(url).
+	sl := apiClient.NewSling().Post(url).
 		Set(string(XRequestID), util.RequestIDFromContext(ctx)).
 		BodyJSON(body)
 
@@ -79,7 +79,7 @@ func ExecutePost[T any](ctx context.Context, apiClient *Client, url string, body
 }
 
 func ExecuteRawGet(ctx context.Context, apiClient *Client, url string) (*http.Response, error) {
-	sl := apiClient.Sling.New().Get(url).
+	sl := apiClient.NewSling().Get(url).
 		Set(string(XRequestID), util.RequestIDFromContext(ctx))
 
 	req, _ := sl.Request()
@@ -87,7 +87,7 @@ func ExecuteRawGet(ctx context.Context, apiClient *Client, url string) (*http.Re
 
 	httpRes, err := apiClient.Do(&util.DefaultHTTPDoer{
 		Req:        req,
-		HttpClient: apiClient.HttpClient,
+		HttpClient: apiClient.httpClient,
 	})
 	if err != nil {
 		return nil, err

@@ -216,11 +216,11 @@ func TestClient_DrainDeletedInspections(t *testing.T) {
 
 	fakeTime, err := time.Parse(time.RFC3339, "2022-06-30T10:43:17Z")
 	require.Nil(t, err)
-	req := feed.NewGetAccountsActivityLogRequest(4, fakeTime)
+	req := httpapi.NewGetAccountsActivityLogRequest(4, fakeTime)
 
 	calls := 0
 	var deletedIds = make([]string, 0, 15)
-	fn := func(res *feed.GetAccountsActivityLogResponse) error {
+	fn := func(res *httpapi.GetAccountsActivityLogResponse) error {
 		calls++
 		for _, a := range res.Activities {
 			deletedIds = append(deletedIds, a.Metadata["inspection_id"])
@@ -262,8 +262,8 @@ func TestClient_DrainDeletedInspections_WhenApiReturnsError(t *testing.T) {
 
 	fakeTime, err := time.Parse(time.RFC3339, "2022-06-30T10:43:17Z")
 	require.Nil(t, err)
-	req := feed.NewGetAccountsActivityLogRequest(14, fakeTime)
-	fn := func(res *feed.GetAccountsActivityLogResponse) error {
+	req := httpapi.NewGetAccountsActivityLogRequest(14, fakeTime)
+	fn := func(res *httpapi.GetAccountsActivityLogResponse) error {
 		return nil
 	}
 	err = feed.DrainAccountActivityHistoryLog(context.TODO(), apiClient, req, fn)
@@ -285,9 +285,9 @@ func TestClient_DrainDeletedInspections_WhenFeedFnReturnsError(t *testing.T) {
 
 	fakeTime, err := time.Parse(time.RFC3339, "2022-06-30T10:43:17Z")
 	require.Nil(t, err)
-	req := feed.NewGetAccountsActivityLogRequest(4, fakeTime)
+	req := httpapi.NewGetAccountsActivityLogRequest(4, fakeTime)
 
-	fn := func(res *feed.GetAccountsActivityLogResponse) error {
+	fn := func(res *httpapi.GetAccountsActivityLogResponse) error {
 		return fmt.Errorf("ERROR_GetAccountsActivityLogResponse")
 	}
 	err = feed.DrainAccountActivityHistoryLog(context.TODO(), apiClient, req, fn)
