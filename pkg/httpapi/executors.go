@@ -3,6 +3,7 @@ package httpapi
 import (
 	"context"
 	"encoding/json"
+	"net/http"
 
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/events"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/util"
@@ -75,4 +76,22 @@ func ExecutePost[T any](ctx context.Context, apiClient *Client, url string, body
 	}
 
 	return res, nil
+}
+
+func ExecuteRawGet(ctx context.Context, apiClient *Client, url string) (*http.Response, error) {
+	sl := apiClient.Sling.New().Get(url).
+		Set(string(XRequestID), util.RequestIDFromContext(ctx))
+
+	req, _ := sl.Request()
+	req = req.WithContext(ctx)
+
+	httpRes, err := apiClient.Do(&util.DefaultHTTPDoer{
+		Req:        req,
+		HttpClient: apiClient.HttpClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return httpRes, nil
 }

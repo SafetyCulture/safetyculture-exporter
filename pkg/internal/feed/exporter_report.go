@@ -235,7 +235,7 @@ func (e *ReportExporter) exportInspection(ctx context.Context, apiClient *httpap
 			err = cErr
 			break
 		} else if rec.Status == "SUCCESS" {
-			resp, dErr := report.DownloadInspectionReportFile(ctx, apiClient, rec.URL)
+			resp, dErr := httpapi.ExecuteRawGet(ctx, apiClient, rec.URL)
 			if dErr != nil {
 				err = dErr
 				break
@@ -244,7 +244,7 @@ func (e *ReportExporter) exportInspection(ctx context.Context, apiClient *httpap
 			// only allow one process to access disk at the same time
 			// this way we won't allow process to overwrite reports with the same name
 			e.Mu.Lock()
-			err = e.saveReportResponse(resp, inspection, format)
+			err = e.saveReportResponse(resp.Body, inspection, format)
 			e.Mu.Unlock()
 			break
 		} else if rec.Status == "FAILED" {

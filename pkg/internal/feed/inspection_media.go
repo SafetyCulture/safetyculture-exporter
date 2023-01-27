@@ -4,11 +4,9 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"net/http"
 	"strings"
 
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/httpapi"
-	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/util"
 )
 
 // GetMedia fetches the media object from SafetyCulture.
@@ -21,23 +19,11 @@ func GetMedia(ctx context.Context, apiClient *httpapi.Client, request *GetMediaR
 	mediaIDURL := strings.Split(request.URL, "/")
 	mediaID := mediaIDURL[len(mediaIDURL)-1]
 
-	sl := apiClient.Sling.New().Get(baseURL).
-		Set(string(httpapi.XRequestID), util.RequestIDFromContext(ctx))
-
-	req, _ := sl.Request()
-	req = req.WithContext(ctx)
-
-	httpRes, err := apiClient.Do(&util.DefaultHTTPDoer{
-		Req:        req,
-		HttpClient: apiClient.HttpClient,
-	})
+	httpRes, err := httpapi.ExecuteRawGet(ctx, apiClient, baseURL)
 	if err != nil {
-		// Ignore forbidden errors for media objects.
-		if httpRes != nil && httpRes.StatusCode == http.StatusForbidden {
-			return nil, nil
-		}
 		return nil, err
 	}
+
 	defer httpRes.Body.Close()
 
 	if httpRes.StatusCode == 204 {

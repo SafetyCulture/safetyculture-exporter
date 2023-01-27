@@ -635,12 +635,12 @@ func TestAPIClientDownloadInspectionReportFile_should_return_status(t *testing.T
 	apiClient := GetTestClient()
 	gock.InterceptClient(apiClient.HTTPClient())
 
-	res, err := report.DownloadInspectionReportFile(context.Background(), apiClient, "http://localhost:9999/report-exports/abc")
+	res, err := httpapi.ExecuteRawGet(context.Background(), apiClient, "http://localhost:9999/report-exports/abc")
 
 	assert.NoError(t, err)
 
 	buf := new(bytes.Buffer)
-	buf.ReadFrom(res)
+	buf.ReadFrom(res.Body)
 	assert.Equal(t, buf.String(), "file content")
 }
 
@@ -669,7 +669,7 @@ func TestAPIClientDownloadInspectionReportFile_should_return_error_on_failure(t 
 			apiClient := GetTestClient()
 			gock.InterceptClient(apiClient.HTTPClient())
 
-			_, err := report.DownloadInspectionReportFile(context.Background(), apiClient, "http://localhost:9999/report-exports/abc")
+			_, err := httpapi.ExecuteRawGet(context.Background(), apiClient, "http://localhost:9999/report-exports/abc")
 			if err == nil || !strings.HasSuffix(err.Error(), tt.err) {
 				t.Fatalf("expected giving up error, got: %#v", err)
 			}
