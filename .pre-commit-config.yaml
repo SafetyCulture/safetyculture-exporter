@@ -12,19 +12,22 @@ repos:
     rev: v2.4.0
     hooks:
       - id: check-json
+        exclude: ^(ui/frontend/)
       - id: end-of-file-fixer
+        exclude: ^(ui/frontend/)
       - id: trailing-whitespace
+        exclude: ^(ui/frontend/)
   - repo: https://github.com/jumanjihouse/pre-commit-hooks
     rev: 1.11.2
     hooks:
       - id: forbid-binary
-        exclude: docs/assets/.*
-      - id: git-check
+        exclude: ^(docs/assets/|ui/frontend/)
   - repo: https://github.com/adrienverge/yamllint
     rev: v1.20.0
     hooks:
       - id: yamllint
         args: ['-s']
+        exclude: ^(pkg/api/fixtures/corrupted_configuration.yaml)
   - repo: https://github.com/golangci/golangci-lint
     rev: v1.21.0
     hooks:

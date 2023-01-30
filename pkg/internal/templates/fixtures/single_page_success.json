@@ -1,0 +1,40 @@
+{
+  "next_page_token": "",
+  "items": [
+    {
+      "id": "template_8ddf395bfd484e978d31d3afbdae3863",
+      "name": "T7",
+      "modified_at": "2022-12-19T02:31:50.792Z"
+    },
+    {
+      "id": "template_6e6913538de2475fb7fdb8e22e87deba",
+      "name": "T6",
+      "modified_at": "2022-12-19T02:31:38.352Z"
+    },
+    {
+      "id": "template_b23a1b21478d41b2bc52a99a30ce63cd",
+      "name": "T5",
+      "modified_at": "2022-12-19T02:31:10.467Z"
+    },
+    {
+      "id": "template_f452c95b3369462f807040c356b768e8",
+      "name": "T4",
+      "modified_at": "2022-12-19T02:31:00.040Z"
+    },
+    {
+      "id": "template_9ebc57fb49684bcb9005d2e4468a5f77",
+      "name": "T3",
+      "modified_at": "2022-12-19T02:30:45.239Z"
+    },
+    {
+      "id": "template_6bb4f918c07640b2ba4219f12ab48932",
+      "name": "T2",
+      "modified_at": "2022-12-19T02:30:23.056Z"
+    },
+    {
+      "id": "template_2bb027a5692a4220874f069b3aaecd72",
+      "name": "T1",
+      "modified_at": "2022-12-18T21:50:07.336Z"
+    }
+  ]
+}

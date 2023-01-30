@@ -1,0 +1,11 @@
++----------------+----------+-------------+
+|      NAME      |   TYPE   | PRIMARY KEY |
++----------------+----------+-------------+
+| department_uid | TEXT     | true        |
+| department_id  | INTEGER  |             |
+| name           | TEXT     |             |
+| external_name  | TEXT     |             |
+| number         | TEXT     |             |
+| manager        | TEXT     |             |
+| exported_at    | datetime |             |
++----------------+----------+-------------+

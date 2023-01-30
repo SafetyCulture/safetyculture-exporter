@@ -1,0 +1,29 @@
+package feed
+
+import (
+	"context"
+
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/httpapi"
+)
+
+// DrainAccountActivityHistoryLog cycle through GetAccountsActivityLogResponse and adapts the filter while there is a next page
+func DrainAccountActivityHistoryLog(ctx context.Context, apiClient *httpapi.Client, req *httpapi.GetAccountsActivityLogRequestParams, feedFn func(*httpapi.GetAccountsActivityLogResponse) error) error {
+	for {
+		res, err := httpapi.ListOrganisationActivityLog(ctx, apiClient, req)
+		if err != nil {
+			return err
+		}
+
+		err = feedFn(res)
+		if err != nil {
+			return err
+		}
+
+		if res.NextPageToken != "" {
+			req.PageToken = res.NextPageToken
+		} else {
+			break
+		}
+	}
+	return nil
+}

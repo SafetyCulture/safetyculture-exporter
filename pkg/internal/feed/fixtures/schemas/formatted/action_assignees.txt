@@ -1,0 +1,12 @@
++-----------------+----------+-------------+
+|      NAME       |   TYPE   | PRIMARY KEY |
++-----------------+----------+-------------+
+| id              | TEXT     | true        |
+| action_id       | TEXT     |             |
+| assignee_id     | TEXT     |             |
+| type            | TEXT     |             |
+| name            | TEXT     |             |
+| organisation_id | TEXT     |             |
+| modified_at     | datetime |             |
+| exported_at     | datetime |             |
++-----------------+----------+-------------+

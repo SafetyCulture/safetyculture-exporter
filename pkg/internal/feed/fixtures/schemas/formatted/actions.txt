@@ -1,0 +1,23 @@
++-------------------+----------+-------------+
+|       NAME        |   TYPE   | PRIMARY KEY |
++-------------------+----------+-------------+
+| action_id         | TEXT     | true        |
+| title             | TEXT     |             |
+| description       | TEXT     |             |
+| site_id           | TEXT     |             |
+| priority          | TEXT     |             |
+| status            | TEXT     |             |
+| due_date          | datetime |             |
+| created_at        | datetime |             |
+| modified_at       | datetime |             |
+| exported_at       | datetime |             |
+| creator_user_id   | TEXT     |             |
+| creator_user_name | TEXT     |             |
+| template_id       | TEXT     |             |
+| audit_id          | TEXT     |             |
+| audit_title       | TEXT     |             |
+| audit_item_id     | TEXT     |             |
+| audit_item_label  | TEXT     |             |
+| organisation_id   | TEXT     |             |
+| completed_at      | datetime |             |
++-------------------+----------+-------------+
