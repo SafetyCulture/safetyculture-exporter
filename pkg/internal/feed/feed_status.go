@@ -20,10 +20,11 @@ func GetExporterStatus() *ExportStatus {
 }
 
 type ExportStatus struct {
-	lock     sync.Mutex
-	status   map[string]*ExportStatusItem
-	finished bool
-	started  bool
+	lock      sync.Mutex
+	status    map[string]*ExportStatusItem
+	finished  bool
+	started   bool
+	cancelled bool
 }
 
 type ExportStatusItemStage string
@@ -78,6 +79,12 @@ func (e *ExportStatus) UpdateStage(feedName string, stage ExportStatusItemStage)
 	e.lock.Unlock()
 }
 
+func (e *ExportStatus) CancelFeedExport() {
+	e.lock.Lock()
+	e.cancelled = true
+	e.lock.Unlock()
+}
+
 func (e *ExportStatus) FinishFeedExport(feedName string, err error) {
 	e.lock.Lock()
 	if _, ok := e.status[feedName]; ok {
@@ -114,4 +121,8 @@ func (e *ExportStatus) GetExportStarted() bool {
 
 func (e *ExportStatus) GetExportCompleted() bool {
 	return e.finished
+}
+
+func (e *ExportStatus) GetExportCancelled() bool {
+	return e.cancelled
 }

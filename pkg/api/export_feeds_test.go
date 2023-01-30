@@ -1,6 +1,7 @@
 package api_test
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"path"
@@ -91,7 +92,8 @@ func TestExporterFeedClient_ExportFeeds_should_export_all_feeds_to_file(t *testi
 		SheqsyCompanyID:          "ada3042f-16a4-4249-915d-dc088adef92a",
 	}
 	exporterApp := feed.NewExporterApp(apiClient, apiClient, cfg)
-	err = exporterApp.ExportFeeds(exporter)
+	ctx, _ := context.WithCancel(context.Background())
+	err = exporterApp.ExportFeeds(exporter, ctx)
 	assert.NoError(t, err)
 
 	filesEqualish(t, "mocks/set_1/outputs/inspections.csv", filepath.Join(exporter.ExportPath, "inspections.csv"))
@@ -144,7 +146,7 @@ func TestExporterFeedClient_ExportFeeds_should_err_when_not_auth(t *testing.T) {
 		AccessToken: "token-123",
 	}
 	exporterApp := feed.NewExporterApp(apiClient, nil, cfg)
-	err = exporterApp.ExportFeeds(exporter)
+	err = exporterApp.ExportFeeds(exporter, context.Background())
 	assert.EqualError(t, err, "get details of the current user: api request: request error status: 401")
 }
 
@@ -177,7 +179,7 @@ func TestExporterFeedClient_ExportFeeds_should_err_when_InitFeed_errors(t *testi
 	}
 
 	exporterApp := feed.NewExporterApp(apiClient, apiClient, cfg)
-	err := exporterApp.ExportFeeds(exporter)
+	err := exporterApp.ExportFeeds(exporter, context.Background())
 	ee, ok := err.(*events.EventError)
 	require.True(t, ok)
 	assert.True(t, ee.IsError())
@@ -232,7 +234,7 @@ func TestExporterFeedClient_ExportFeeds_should_err_when_cannot_unmarshal(t *test
 		ExportTables: []string{"inspections", "users"},
 	}
 	exporterApp := feed.NewExporterApp(apiClient, apiClient, cfg)
-	err = exporterApp.ExportFeeds(exporter)
+	err = exporterApp.ExportFeeds(exporter, context.Background())
 	assert.EqualError(t, err, `feed "users": map data: unexpected end of JSON input`)
 }
 
@@ -269,7 +271,7 @@ func TestExporterFeedClient_ExportFeeds_should_err_when_cannot_write_rows(t *tes
 	exporter.On("InitFeed", mock.Anything, mock.Anything).Return(nil)
 	exporter.On("WriteRows", mock.Anything, mock.Anything).Return(fmt.Errorf("cannot write rows"))
 
-	err := exporterApp.ExportFeeds(exporter)
+	err := exporterApp.ExportFeeds(exporter, context.Background())
 	assert.EqualError(t, err, `feed "users": write rows: cannot write rows`)
 }
 
@@ -314,12 +316,12 @@ func TestExporterFeedClient_ExportFeeds_should_perform_incremental_update_on_sec
 	apiClient := GetTestClient()
 	initMockFeedsSet1(apiClient.HTTPClient())
 	exporterApp := feed.NewExporterApp(apiClient, nil, cfg)
-	err = exporterApp.ExportFeeds(exporter)
+	err = exporterApp.ExportFeeds(exporter, context.Background())
 	assert.NoError(t, err)
 
 	initMockFeedsSet2(apiClient.HTTPClient())
 	exporterApp = feed.NewExporterApp(apiClient, nil, cfg)
-	err = exporterApp.ExportFeeds(exporter)
+	err = exporterApp.ExportFeeds(exporter, context.Background())
 	assert.NoError(t, err)
 
 	filesEqualish(t, "mocks/set_2/outputs/inspections.csv", filepath.Join(exporter.ExportPath, "inspections.csv"))
@@ -375,7 +377,7 @@ func TestExporterFeedClient_ExportFeeds_should_handle_lots_of_rows_ok(t *testing
 	}
 
 	exporterApp := feed.NewExporterApp(apiClient, apiClient, cfg)
-	err = exporterApp.ExportFeeds(exporter)
+	err = exporterApp.ExportFeeds(exporter, context.Background())
 	assert.NoError(t, err)
 
 	inspectionsLines, err := countFileLines(filepath.Join(exporter.ExportPath, "inspections.csv"))

@@ -17,6 +17,9 @@ import (
 	"github.com/pkg/errors"
 )
 
+var ctx context.Context
+var cancel context.CancelFunc
+
 // NewSafetyCultureExporter builds a SafetyCultureExporter with clients inferred from own configuration
 func NewSafetyCultureExporter(cfg *ExporterConfiguration, version *AppVersion) (*SafetyCultureExporter, error) {
 	apiClient, err := getAPIClient(cfg.ToApiConfig(), version)
@@ -177,6 +180,8 @@ func (s *SafetyCultureExporter) RunInspectionJSON() error {
 }
 
 func (s *SafetyCultureExporter) RunSQL() error {
+	ctx, cancel = context.WithCancel(context.Background())
+
 	if s.cfg.Export.Media {
 		err := os.MkdirAll(s.cfg.Export.MediaPath, os.ModePerm)
 		if err != nil {
@@ -195,7 +200,7 @@ func (s *SafetyCultureExporter) RunSQL() error {
 	}
 
 	if len(s.cfg.AccessToken) != 0 || len(s.cfg.SheqsyUsername) != 0 {
-		err = exporterApp.ExportFeeds(e)
+		err = exporterApp.ExportFeeds(e, ctx)
 		if err != nil {
 			return errors.Wrap(err, "exporting feeds")
 		}
@@ -205,6 +210,8 @@ func (s *SafetyCultureExporter) RunSQL() error {
 }
 
 func (s *SafetyCultureExporter) RunCSV() error {
+	ctx, cancel = context.WithCancel(context.Background())
+
 	exportPath := s.cfg.Export.Path
 
 	err := os.MkdirAll(exportPath, os.ModePerm)
@@ -230,7 +237,7 @@ func (s *SafetyCultureExporter) RunCSV() error {
 	}
 
 	if len(s.cfg.AccessToken) != 0 || len(s.cfg.SheqsyUsername) != 0 {
-		err = exporterApp.ExportFeeds(e)
+		err = exporterApp.ExportFeeds(e, ctx)
 		if err != nil {
 			return errors.Wrap(err, "exporting feeds")
 		}
@@ -320,7 +327,12 @@ func (s *SafetyCultureExporter) SetConfiguration(cfg *ExporterConfiguration) {
 	s.cfg = cfg
 }
 
-// CleanExportStatus will clean the status items. Used by the UI
+// CleanExportStatus will clean the status items. Used by the exporter UI
 func (s *SafetyCultureExporter) CleanExportStatus() {
 	s.exportStatus = feed.GetExporterStatus()
+}
+
+// StopExport will stop the export. Used by the exporter UI
+func (s *SafetyCultureExporter) StopExport() {
+	cancel()
 }

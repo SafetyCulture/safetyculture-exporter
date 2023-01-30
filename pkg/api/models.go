@@ -14,6 +14,7 @@ type TemplateResponseItem struct {
 type ExportStatusResponse struct {
 	ExportStarted   bool                       `json:"export_started"`
 	ExportCompleted bool                       `json:"export_completed"`
+	ExportCancelled bool                       `json:"export_cancelled"`
 	Feeds           []ExportStatusResponseItem `json:"feeds"`
 }
 

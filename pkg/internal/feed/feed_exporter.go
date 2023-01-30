@@ -88,9 +88,8 @@ func (e *ExporterFeedClient) addError(err error) {
 }
 
 // ExportFeeds fetches all the feeds data from server and stores them in the format provided
-func (e *ExporterFeedClient) ExportFeeds(exporter Exporter) error {
+func (e *ExporterFeedClient) ExportFeeds(exporter Exporter, ctx context.Context) error {
 	log := logger.GetLogger()
-	ctx := context.Background()
 	status := GetExporterStatus()
 	status.Reset()
 
@@ -134,17 +133,26 @@ func (e *ExporterFeedClient) ExportFeeds(exporter Exporter) error {
 			wg.Add(1)
 
 			go func(f Feed) {
-				defer wg.Done()
-				log.Infof(" ... queueing %s\n", f.Name())
-				status.StartFeedExport(f.Name())
-				err := f.Export(ctx, e.apiClient, exporter, resp.OrganisationID)
-				if err != nil {
-					log.Errorf("exporting feeds: %v", err)
-					status.FinishFeedExport(f.Name(), err)
-					e.addError(err)
+				for {
+					select {
+					case <-ctx.Done():
+						log.Infof(" ... cancelling %s", f.Name())
+						status.CancelFeedExport()
+						return
+					default:
+						log.Infof(" ... queueing %s", f.Name())
+						status.StartFeedExport(f.Name())
+						err := f.Export(ctx, e.apiClient, exporter, resp.OrganisationID)
+						if err != nil {
+							log.Errorf("exporting feeds: %v", err)
+							status.FinishFeedExport(f.Name(), err)
+							e.addError(err)
+							break
+						}
+						status.FinishFeedExport(f.Name(), nil)
+						<-semaphore
+					}
 				}
-				status.FinishFeedExport(f.Name(), nil)
-				<-semaphore
 			}(feed)
 		}
 
