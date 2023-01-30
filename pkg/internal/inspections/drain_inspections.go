@@ -6,16 +6,15 @@ import (
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/httpapi"
 )
 
-// DrainInspections fetches the inspections in batches and triggers the callback
-// for each batch.
-func DrainInspections(ctx context.Context, apiClient *httpapi.Client, params *ListInspectionsParams, callback func(*ListInspectionsResponse) error) error {
+// DrainInspections fetches the inspections in batches and triggers the callback for each batch.
+func DrainInspections(ctx context.Context, apiClient *httpapi.Client, params *httpapi.ListInspectionsParams, callback func(*httpapi.ListInspectionsResponse) error) error {
 	modifiedAfter := params.ModifiedAfter
 
 	for {
-		resp, err := ListInspections(
+		resp, err := httpapi.ListInspections(
 			ctx,
 			apiClient,
-			&ListInspectionsParams{
+			&httpapi.ListInspectionsParams{
 				ModifiedAfter: modifiedAfter,
 				TemplateIDs:   params.TemplateIDs,
 				Archived:      params.Archived,

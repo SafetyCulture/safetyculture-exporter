@@ -2,13 +2,10 @@ package templates
 
 import (
 	"context"
-	"encoding/json"
 	"time"
 
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/httpapi"
-	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/util"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/logger"
-	"github.com/pkg/errors"
 )
 
 // Client to be used with inspections
@@ -43,10 +40,11 @@ func (c *Client) drainTemplates(ctx context.Context, pageSize int, callbackFn fu
 	nextToken := ""
 
 	for {
-		resp, err := c.getTemplateList(ctx, &templateSearchRequest{
+		params := &templateSearchRequest{
 			PageSize: pageSize,
 			Token:    nextToken,
-		})
+		}
+		resp, err := httpapi.ExecuteGet[listTemplatesResponse](ctx, c.apiClient, "/templates/v1/templates/search", params)
 
 		if err != nil {
 			return err
@@ -55,41 +53,12 @@ func (c *Client) drainTemplates(ctx context.Context, pageSize int, callbackFn fu
 		callbackFn(resp)
 
 		if resp.NextPageToken == "" {
-			// there is no another page
+			// no more pages left
 			break
 		}
 		nextToken = resp.NextPageToken
 	}
 	return nil
-}
-
-// getTemplateList will return a simplified list of customer's templates
-func (c *Client) getTemplateList(ctx context.Context, params *templateSearchRequest) (*listTemplatesResponse, error) {
-
-	sl := c.apiClient.Sling.New().Get("/templates/v1/templates/search").
-		Set(string(httpapi.Authorization), c.apiClient.AuthorizationHeader).
-		Set(string(httpapi.IntegrationID), c.apiClient.IntegrationID).
-		Set(string(httpapi.IntegrationVersion), c.apiClient.IntegrationVersion).
-		Set(string(httpapi.XRequestID), util.RequestIDFromContext(ctx))
-
-	sl.QueryStruct(params)
-	req, _ := sl.Request()
-	req = req.WithContext(ctx)
-
-	var result *listTemplatesResponse
-	var errMsg json.RawMessage
-
-	_, err := c.apiClient.Do(&util.SlingHTTPDoer{
-		Sl:       sl,
-		Req:      req,
-		SuccessV: &result,
-		FailureV: &errMsg,
-	})
-	if err != nil {
-		return nil, errors.Wrap(err, "api request")
-	}
-
-	return result, nil
 }
 
 // listTemplatesResponse list of templates

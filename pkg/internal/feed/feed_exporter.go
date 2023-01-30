@@ -118,12 +118,12 @@ func (e *ExporterFeedClient) ExportFeeds(exporter Exporter) error {
 			}
 		}
 
-		resp, err := e.apiClient.WhoAmI(ctx)
+		resp, err := httpapi.WhoAmI(ctx, e.apiClient)
 		if err != nil {
 			return fmt.Errorf("get details of the current user: %w", err)
 		}
 
-		log.Infof("Exporting data by user: %s %s", resp.Firstname, resp.Lastname)
+		log.Infof("exporting data by user: %s %s", resp.Firstname, resp.Lastname)
 
 		if len(feeds) == 0 {
 			return errors.New("no tables selected")
@@ -162,7 +162,7 @@ func (e *ExporterFeedClient) ExportFeeds(exporter Exporter) error {
 			}
 		}
 
-		resp, err := GetSheqsyCompany(ctx, e.sheqsyApiClient, e.configuration.SheqsyCompanyID)
+		resp, err := httpapi.GetSheqsyCompany(ctx, e.sheqsyApiClient, e.configuration.SheqsyCompanyID)
 		if err != nil {
 			return fmt.Errorf("get details of the current user: %w", err)
 		}
@@ -314,7 +314,7 @@ func (e *ExporterFeedClient) ExportInspectionReports(exporter *ReportExporter) e
 	log := logger.GetLogger()
 	ctx := context.Background()
 
-	resp, err := e.apiClient.WhoAmI(ctx)
+	resp, err := httpapi.WhoAmI(ctx, e.apiClient)
 	if err != nil {
 		return fmt.Errorf("get details of the current user: %w", err)
 	}

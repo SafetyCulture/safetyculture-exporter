@@ -74,7 +74,7 @@ type sheqsyEmployeeRaw struct {
 
 // Export exports the feed to the supplied exporter
 func (f *SheqsyDepartmentEmployeeFeed) Export(ctx context.Context, apiClient *httpapi.Client, exporter Exporter, companyID string) error {
-	logger := logger.GetLogger().With("feed", f.Name(), "org_id", companyID)
+	log := logger.GetLogger().With("feed", f.Name(), "org_id", companyID)
 
 	if err := exporter.InitFeed(f, &InitFeedOptions{
 		// Truncate files if upserts aren't supported.
@@ -86,7 +86,7 @@ func (f *SheqsyDepartmentEmployeeFeed) Export(ctx context.Context, apiClient *ht
 
 	var rows []*SheqsyDepartmentEmployee
 
-	resp, err := apiClient.Get(ctx, fmt.Sprintf("/SheqsyIntegrationApi/api/v3/companies/%s/employees", companyID))
+	resp, err := httpapi.ExecuteGet[json.RawMessage](ctx, apiClient, fmt.Sprintf("/SheqsyIntegrationApi/api/v3/companies/%s/employees", companyID), nil)
 	if err != nil {
 		return fmt.Errorf("fetch data: %w", err)
 	}
@@ -123,7 +123,7 @@ func (f *SheqsyDepartmentEmployeeFeed) Export(ctx context.Context, apiClient *ht
 		}
 	}
 
-	logger.With(
+	log.With(
 		"estimated_remaining", 0,
 		"duration_ms", apiClient.Duration.Milliseconds(),
 		"export_duration_ms", exporter.GetDuration().Milliseconds(),

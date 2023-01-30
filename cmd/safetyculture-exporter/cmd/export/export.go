@@ -115,11 +115,11 @@ func NewSafetyCultureExporter(v *viper.Viper) *exporterAPI.SafetyCultureExporter
 	cm.ApplySafetyGuards()
 	util.Check(err, "while loading config file")
 
-	version := exporterAPI.AppVersion{
+	ver := exporterAPI.AppVersion{
 		IntegrationID:      version.GetIntegrationID(),
 		IntegrationVersion: version.GetVersion(),
 	}
-	exporter, err := exporterAPI.NewSafetyCultureExporter(cm.Configuration, &version)
+	exporter, err := exporterAPI.NewSafetyCultureExporter(cm.Configuration, &ver)
 	util.Check(err, "failed to initialize the exporter")
 	return exporter
 }

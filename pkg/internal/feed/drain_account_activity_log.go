@@ -7,9 +7,9 @@ import (
 )
 
 // DrainAccountActivityHistoryLog cycle through GetAccountsActivityLogResponse and adapts the filter while there is a next page
-func DrainAccountActivityHistoryLog(ctx context.Context, apiClient *httpapi.Client, req *GetAccountsActivityLogRequestParams, feedFn func(*GetAccountsActivityLogResponse) error) error {
+func DrainAccountActivityHistoryLog(ctx context.Context, apiClient *httpapi.Client, req *httpapi.GetAccountsActivityLogRequestParams, feedFn func(*httpapi.GetAccountsActivityLogResponse) error) error {
 	for {
-		res, err := ListOrganisationActivityLog(ctx, apiClient, req)
+		res, err := httpapi.ListOrganisationActivityLog(ctx, apiClient, req)
 		if err != nil {
 			return err
 		}

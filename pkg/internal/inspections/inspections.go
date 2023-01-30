@@ -65,7 +65,7 @@ func (client *Client) Name() string {
 }
 
 // throttleFunc throttles the given function
-func throttleFunc(tfunc func(Inspection), inspection Inspection, guard chan struct{}) {
+func throttleFunc(tfunc func(httpapi.Inspection), inspection httpapi.Inspection, guard chan struct{}) {
 	// If the channel is full then this go-routine will be in waiting state.
 	// Multiple go routines can access this channel without any lock as the
 	// the channel internally maintains the lock for send and receive operations
@@ -86,14 +86,14 @@ func (client *Client) Export(ctx context.Context) error {
 	// Create a buffered channel of length maxGoroutines
 	guard := make(chan struct{}, maxGoRoutines)
 
-	operation := func(row Inspection) {
-		inspection, err := GetInspection(ctx, client.apiClient, row.ID)
+	operation := func(row httpapi.Inspection) {
+		inspection, err := httpapi.GetRawInspection(ctx, client.apiClient, row.ID)
 		util.Check(err, fmt.Sprintf("Failed to get inspection with id: %s", row.ID))
 
 		client.exporter.WriteRow(row.ID, inspection)
 	}
 
-	callback := func(resp *ListInspectionsResponse) error {
+	callback := func(resp *httpapi.ListInspectionsResponse) error {
 		n := len(resp.Inspections)
 		for _, row := range resp.Inspections {
 			skip := skipIDs[row.ID]
@@ -102,7 +102,7 @@ func (client *Client) Export(ctx context.Context) error {
 			}
 
 			wg.Add(1)
-			go func(row Inspection) {
+			go func(row httpapi.Inspection) {
 				defer wg.Done()
 				throttleFunc(operation, row, guard)
 			}(row)
@@ -115,7 +115,7 @@ func (client *Client) Export(ctx context.Context) error {
 		return nil
 	}
 
-	params := &ListInspectionsParams{
+	params := &httpapi.ListInspectionsParams{
 		TemplateIDs: client.TemplateIDs,
 		Archived:    client.Archived,
 		Completed:   client.Completed,
@@ -133,10 +133,4 @@ func (client *Client) Export(ctx context.Context) error {
 	client.Info("Export finished")
 
 	return nil
-}
-
-// Inspection represents some properties present in an inspection
-type Inspection struct {
-	ID         string    `json:"audit_id"`
-	ModifiedAt time.Time `json:"modified_at"`
 }

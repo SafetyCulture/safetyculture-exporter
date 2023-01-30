@@ -2,45 +2,22 @@ package report
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/httpapi"
-	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/util"
-	"github.com/pkg/errors"
 )
 
 // InitiateInspectionReportExport export the report of the given auditID.
 func InitiateInspectionReportExport(ctx context.Context, apiClient *httpapi.Client, auditID string, format string, preferenceID string) (string, error) {
-	var (
-		result *initiateInspectionReportExportResponse
-		errMsg json.RawMessage
-	)
-
 	url := fmt.Sprintf("audits/%s/report", auditID)
 	body := &initiateInspectionReportExportRequest{
 		Format:       format,
 		PreferenceID: preferenceID,
 	}
 
-	sl := apiClient.Sling.New().Post(url).
-		Set(string(httpapi.Authorization), apiClient.AuthorizationHeader).
-		Set(string(httpapi.IntegrationID), apiClient.IntegrationID).
-		Set(string(httpapi.IntegrationVersion), apiClient.IntegrationVersion).
-		Set(string(httpapi.XRequestID), util.RequestIDFromContext(ctx)).
-		BodyJSON(body)
-
-	req, _ := sl.Request()
-	req = req.WithContext(ctx)
-
-	_, err := apiClient.Do(&util.SlingHTTPDoer{
-		Sl:       sl,
-		Req:      req,
-		SuccessV: &result,
-		FailureV: &errMsg,
-	})
+	result, err := httpapi.ExecutePost[initiateInspectionReportExportResponse](ctx, apiClient, url, body)
 	if err != nil {
-		return "", errors.Wrap(err, "api request")
+		return "", err
 	}
 
 	return result.MessageID, nil

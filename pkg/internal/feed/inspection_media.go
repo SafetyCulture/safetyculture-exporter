@@ -4,11 +4,9 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"net/http"
 	"strings"
 
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/httpapi"
-	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/util"
 )
 
 // GetMedia fetches the media object from SafetyCulture.
@@ -21,39 +19,24 @@ func GetMedia(ctx context.Context, apiClient *httpapi.Client, request *GetMediaR
 	mediaIDURL := strings.Split(request.URL, "/")
 	mediaID := mediaIDURL[len(mediaIDURL)-1]
 
-	sl := apiClient.Sling.New().Get(baseURL).
-		Set(string(httpapi.Authorization), apiClient.AuthorizationHeader).
-		Set(string(httpapi.IntegrationID), apiClient.IntegrationID).
-		Set(string(httpapi.IntegrationVersion), apiClient.IntegrationVersion).
-		Set(string(httpapi.XRequestID), util.RequestIDFromContext(ctx))
-
-	req, _ := sl.Request()
-	req = req.WithContext(ctx)
-
-	result, err := apiClient.Do(&util.DefaultHTTPDoer{
-		Req:        req,
-		HttpClient: apiClient.HttpClient,
-	})
+	httpRes, err := httpapi.ExecuteRawGet(ctx, apiClient, baseURL)
 	if err != nil {
-		// Ignore forbidden errors for media objects.
-		if result != nil && result.StatusCode == http.StatusForbidden {
-			return nil, nil
-		}
 		return nil, err
 	}
-	defer result.Body.Close()
 
-	if result.StatusCode == 204 {
+	defer httpRes.Body.Close()
+
+	if httpRes.StatusCode == 204 {
 		return nil, nil
 	}
 
-	contentType := result.Header.Get("Content-Type")
+	contentType := httpRes.Header.Get("Content-Type")
 	if contentType == "" {
 		return nil, fmt.Errorf("failed to get content-type of media")
 	}
 
 	buf := new(bytes.Buffer)
-	buf.ReadFrom(result.Body)
+	buf.ReadFrom(httpRes.Body)
 
 	resp := &GetMediaResponse{
 		ContentType: contentType,

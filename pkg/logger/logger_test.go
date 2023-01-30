@@ -1,8 +1,9 @@
 package logger_test
 
 import (
-	"github.com/SafetyCulture/safetyculture-exporter/pkg/logger"
 	"testing"
+
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/logger"
 
 	"github.com/stretchr/testify/assert"
 )

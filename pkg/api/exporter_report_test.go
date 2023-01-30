@@ -317,7 +317,7 @@ func TestExportReports_should_fail_after_retries(t *testing.T) {
 	exporterApp := feed.NewExporterApp(apiClient, nil, cfg.ToExporterConfig())
 	err = exporterApp.ExportInspectionReports(exporter)
 	assert.NotNil(t, err)
-	assert.Contains(t, err.Error(), "Failed to generate 3 PDF reports and 0 WORD reports")
+	assert.Contains(t, err.Error(), "failed to generate 3 PDF reports and 0 WORD reports")
 }
 
 func TestExportReports_should_fail_if_report_status_fails(t *testing.T) {
@@ -357,7 +357,7 @@ func TestExportReports_should_fail_if_report_status_fails(t *testing.T) {
 	exporterApp := feed.NewExporterApp(apiClient, nil, cfg.ToExporterConfig())
 	err = exporterApp.ExportInspectionReports(exporter)
 	assert.NotNil(t, err)
-	assert.Contains(t, err.Error(), "Failed to generate 0 PDF reports and 3 WORD reports")
+	assert.Contains(t, err.Error(), "failed to generate 0 PDF reports and 3 WORD reports")
 }
 
 func TestExportReports_should_fail_if_init_report_reply_is_not_success(t *testing.T) {
@@ -390,7 +390,7 @@ func TestExportReports_should_fail_if_init_report_reply_is_not_success(t *testin
 	exporterApp := feed.NewExporterApp(apiClient, nil, cfg.ToExporterConfig())
 	err = exporterApp.ExportInspectionReports(exporter)
 	assert.NotNil(t, err)
-	assert.Contains(t, err.Error(), "Failed to generate 0 PDF reports and 3 WORD reports")
+	assert.Contains(t, err.Error(), "failed to generate 0 PDF reports and 3 WORD reports")
 }
 
 func TestExportReports_should_fail_if_report_completion_reply_is_not_success(t *testing.T) {
@@ -430,7 +430,7 @@ func TestExportReports_should_fail_if_report_completion_reply_is_not_success(t *
 	exporterApp := feed.NewExporterApp(apiClient, nil, cfg.ToExporterConfig())
 	err = exporterApp.ExportInspectionReports(exporter)
 	assert.NotNil(t, err)
-	assert.Contains(t, err.Error(), "Failed to generate 0 PDF reports and 3 WORD reports")
+	assert.Contains(t, err.Error(), "failed to generate 0 PDF reports and 3 WORD reports")
 }
 
 func TestExportReports_should_fail_if_download_report_reply_is_not_success(t *testing.T) {
@@ -476,7 +476,7 @@ func TestExportReports_should_fail_if_download_report_reply_is_not_success(t *te
 	exporterApp := feed.NewExporterApp(apiClient, nil, cfg.ToExporterConfig())
 	err = exporterApp.ExportInspectionReports(exporter)
 	assert.NotNil(t, err)
-	assert.Contains(t, err.Error(), "Failed to generate 3 PDF reports and 0 WORD reports")
+	assert.Contains(t, err.Error(), "failed to generate 3 PDF reports and 0 WORD reports")
 }
 
 func TestExportReports_should_return_error_for_unsupported_format(t *testing.T) {
@@ -584,7 +584,7 @@ func TestAPIClientCheckInspectionReportExportCompletion_should_return_status(t *
 	apiClient := GetTestClient()
 	gock.InterceptClient(apiClient.HTTPClient())
 
-	res, err := report.CheckInspectionReportExportCompletion(context.Background(), apiClient, "audit_123", "abc")
+	res, err := httpapi.CheckInspectionReportExportCompletion(context.Background(), apiClient, "audit_123", "abc")
 
 	assert.NoError(t, err)
 	assert.Equal(t, res.Status, "SUCCESS")
@@ -616,7 +616,7 @@ func TestAPIClientCheckInspectionReportExportCompletion_should_return_error_on_f
 			apiClient := GetTestClient()
 			gock.InterceptClient(apiClient.HTTPClient())
 
-			_, err := report.CheckInspectionReportExportCompletion(context.Background(), apiClient, "audit_123", "abc")
+			_, err := httpapi.CheckInspectionReportExportCompletion(context.Background(), apiClient, "audit_123", "abc")
 			if err == nil || !strings.HasSuffix(err.Error(), tt.err) {
 				t.Fatalf("expected giving up error, got: %#v", err)
 			}
@@ -635,12 +635,12 @@ func TestAPIClientDownloadInspectionReportFile_should_return_status(t *testing.T
 	apiClient := GetTestClient()
 	gock.InterceptClient(apiClient.HTTPClient())
 
-	res, err := report.DownloadInspectionReportFile(context.Background(), apiClient, "http://localhost:9999/report-exports/abc")
+	res, err := httpapi.ExecuteRawGet(context.Background(), apiClient, "http://localhost:9999/report-exports/abc")
 
 	assert.NoError(t, err)
 
 	buf := new(bytes.Buffer)
-	buf.ReadFrom(res)
+	buf.ReadFrom(res.Body)
 	assert.Equal(t, buf.String(), "file content")
 }
 
@@ -669,7 +669,7 @@ func TestAPIClientDownloadInspectionReportFile_should_return_error_on_failure(t 
 			apiClient := GetTestClient()
 			gock.InterceptClient(apiClient.HTTPClient())
 
-			_, err := report.DownloadInspectionReportFile(context.Background(), apiClient, "http://localhost:9999/report-exports/abc")
+			_, err := httpapi.ExecuteRawGet(context.Background(), apiClient, "http://localhost:9999/report-exports/abc")
 			if err == nil || !strings.HasSuffix(err.Error(), tt.err) {
 				t.Fatalf("expected giving up error, got: %#v", err)
 			}

@@ -133,7 +133,7 @@ func GetLogger() *zap.SugaredLogger {
 	return slg
 }
 
-// GetExporterLogger returns a configured instance of the logger
+// GetExporterLogger returns a configured instance of the logger (used by the UI)
 func GetExporterLogger(path string) *ExporterLogger {
 	if slg != nil {
 		return &ExporterLogger{

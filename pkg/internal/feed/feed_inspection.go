@@ -233,8 +233,8 @@ func (f *InspectionFeed) processNewInspections(ctx context.Context, apiClient *h
 
 func (f *InspectionFeed) processDeletedInspections(ctx context.Context, apiClient *httpapi.Client, exporter Exporter) error {
 	lg := logger.GetLogger()
-	dreq := NewGetAccountsActivityLogRequest(f.Limit, f.ModifiedAfter)
-	delFn := func(resp *GetAccountsActivityLogResponse) error {
+	dreq := httpapi.NewGetAccountsActivityLogRequest(f.Limit, f.ModifiedAfter)
+	delFn := func(resp *httpapi.GetAccountsActivityLogResponse) error {
 		var pkeys = make([]string, 0, len(resp.Activities))
 		for _, a := range resp.Activities {
 			uid := getPrefixID(a.Metadata["inspection_id"])

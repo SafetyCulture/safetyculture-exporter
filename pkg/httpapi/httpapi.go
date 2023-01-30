@@ -4,7 +4,6 @@ import (
 	"context"
 	"crypto/tls"
 	"crypto/x509"
-	"encoding/json"
 	"fmt"
 	"log"
 	"net"
@@ -13,7 +12,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/util"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/logger"
 	"github.com/dghubble/sling"
 	"github.com/pkg/errors"
@@ -30,22 +28,18 @@ var (
 )
 
 type Client struct {
-	logger              *zap.SugaredLogger
-	AuthorizationHeader string
-	BaseURL             string
-	Sling               *sling.Sling
-	HttpClient          *http.Client
-	httpTransport       *http.Transport
+	logger        *zap.SugaredLogger
+	BaseURL       string
+	sling         *sling.Sling
+	httpClient    *http.Client
+	httpTransport *http.Transport
 
 	Duration      time.Duration
 	CheckForRetry CheckForRetry
-	Backoff       Backoff
+	backoff       Backoff
 	RetryMax      int
 	RetryWaitMin  time.Duration
 	RetryWaitMax  time.Duration
-
-	IntegrationID      string
-	IntegrationVersion string
 }
 
 type ClientCfg struct {
@@ -57,12 +51,16 @@ type ClientCfg struct {
 
 // NewClient creates a new instance of the Client
 func NewClient(cfg *ClientCfg, opts ...Opt) *Client {
+
+	dialFn := func(dialer *net.Dialer) func(context.Context, string, string) (net.Conn, error) {
+		return dialer.DialContext
+	}
+
 	httpTransport := &http.Transport{
-		DialContext: (&net.Dialer{
+		DialContext: dialFn(&net.Dialer{
 			Timeout:   30 * time.Second,
 			KeepAlive: 30 * time.Second,
-			DualStack: true,
-		}).DialContext,
+		}),
 		ForceAttemptHTTP2:     true,
 		MaxIdleConns:          100,
 		IdleConnTimeout:       90 * time.Second,
@@ -75,21 +73,23 @@ func NewClient(cfg *ClientCfg, opts ...Opt) *Client {
 		Transport: httpTransport,
 	}
 
+	s := sling.New().Client(httpClient).Base(cfg.Addr).
+		Set(string(Authorization), cfg.AuthorizationHeader).
+		Set(string(IntegrationID), cfg.IntegrationID).
+		Set(string(IntegrationVersion), cfg.IntegrationVersion)
+
 	a := &Client{
-		logger:              logger.GetLogger(),
-		HttpClient:          httpClient,
-		BaseURL:             cfg.Addr,
-		httpTransport:       httpTransport,
-		Sling:               sling.New().Client(httpClient).Base(cfg.Addr),
-		AuthorizationHeader: cfg.AuthorizationHeader,
-		Duration:            0,
-		CheckForRetry:       DefaultRetryPolicy,
-		Backoff:             DefaultBackoff,
-		RetryMax:            defaultRetryMax,
-		RetryWaitMin:        defaultRetryWaitMin,
-		RetryWaitMax:        defaultRetryWaitMax,
-		IntegrationVersion:  cfg.IntegrationVersion,
-		IntegrationID:       cfg.IntegrationID,
+		logger:        logger.GetLogger(),
+		httpClient:    httpClient,
+		BaseURL:       cfg.Addr,
+		httpTransport: httpTransport,
+		sling:         s,
+		Duration:      0,
+		CheckForRetry: DefaultRetryPolicy,
+		backoff:       DefaultBackoff,
+		RetryMax:      defaultRetryMax,
+		RetryWaitMin:  defaultRetryWaitMin,
+		RetryWaitMax:  defaultRetryWaitMax,
 	}
 
 	for _, opt := range opts {
@@ -104,7 +104,7 @@ type Opt func(*Client)
 
 // HTTPClient returns the http Client used by APIClient
 func (a *Client) HTTPClient() *http.Client {
-	return a.HttpClient
+	return a.httpClient
 }
 
 // HTTPTransport returns the http Transport used by APIClient
@@ -112,10 +112,14 @@ func (a *Client) HTTPTransport() *http.Transport {
 	return a.httpTransport
 }
 
+func (a *Client) NewSling() *sling.Sling {
+	return a.sling.New()
+}
+
 // OptSetTimeout sets the timeout for the request
 func OptSetTimeout(t time.Duration) Opt {
 	return func(a *Client) {
-		a.HttpClient.Timeout = t
+		a.httpClient.Timeout = t
 	}
 }
 
@@ -170,10 +174,10 @@ func OptAddTLSCert(certPath string) Opt {
 }
 
 func (a *Client) Do(doer HTTPDoer) (*http.Response, error) {
-	url := doer.URL()
+	u := doer.URL()
 
 	for iter := 0; ; iter++ {
-		a.logger.Debugw("http request", "url", url)
+		a.logger.Debugw("http request", "url", u)
 
 		start := time.Now()
 		resp, err := doer.Do()
@@ -185,10 +189,10 @@ func (a *Client) Do(doer HTTPDoer) (*http.Response, error) {
 		}
 
 		if err != nil {
-			a.logger.Errorw("http request error", "url", url, "status", status, "err", err)
+			a.logger.Errorw("http request error", "url", u, "status", status, "err", err)
 		}
 
-		a.logger.Debugw("http response", "url", url, "status", status)
+		a.logger.Debugw("http response", "url", u, "status", status)
 
 		// Check if we should continue with the retries
 		shouldRetry, _ := a.CheckForRetry(resp, err)
@@ -200,18 +204,18 @@ func (a *Client) Do(doer HTTPDoer) (*http.Response, error) {
 
 				case status == http.StatusNotFound:
 					a.logger.Errorw("http request error status",
-						"url", url,
+						"url", u,
 						"status", status,
 					)
 					return resp, nil
 
 				case status == http.StatusForbidden:
-					a.logger.Errorw("no access to this resource", "url", url, "status", status)
+					a.logger.Errorw("no access to this resource", "url", u, "status", status)
 					return resp, nil
 
 				default:
 					a.logger.Errorw("http request error status",
-						"url", url,
+						"url", u,
 						"status", status,
 						"err", doer.Error(),
 					)
@@ -226,69 +230,11 @@ func (a *Client) Do(doer HTTPDoer) (*http.Response, error) {
 			break
 		}
 
-		wait := a.Backoff(a.RetryWaitMin, a.RetryWaitMax, iter, resp)
-		a.logger.Infof("retrying URL %s after %v", url, wait)
+		wait := a.backoff(a.RetryWaitMin, a.RetryWaitMax, iter, resp)
+		a.logger.Infof("retrying URL %s after %v", u, wait)
 
 		time.Sleep(wait)
 	}
 
-	return nil, fmt.Errorf("%s giving up after %d attempt(s)", url, a.RetryMax+1)
-}
-
-// Get makes a get request
-func (a *Client) Get(ctx context.Context, url string) (*json.RawMessage, error) {
-	var (
-		result *json.RawMessage
-		errMsg json.RawMessage
-	)
-
-	sl := a.Sling.New().Get(url).
-		Set(string(Authorization), a.AuthorizationHeader).
-		Set(string(IntegrationID), a.IntegrationID).
-		Set(string(IntegrationVersion), a.IntegrationVersion).
-		Set(string(XRequestID), util.RequestIDFromContext(ctx))
-
-	req, _ := sl.Request()
-	req = req.WithContext(ctx)
-
-	_, err := a.Do(&util.SlingHTTPDoer{
-		Sl:       sl,
-		Req:      req,
-		SuccessV: &result,
-		FailureV: &errMsg,
-	})
-	if err != nil {
-		return nil, errors.Wrap(err, "api request")
-	}
-
-	return result, nil
-}
-
-// WhoAmI returns the details for the user who is making the request
-func (a *Client) WhoAmI(ctx context.Context) (*WhoAmIResponse, error) {
-	var (
-		result *WhoAmIResponse
-		errMsg json.RawMessage
-	)
-
-	sl := a.Sling.New().Get("accounts/user/v1/user:WhoAmI").
-		Set(string(Authorization), a.AuthorizationHeader).
-		Set(string(IntegrationID), a.IntegrationID).
-		Set(string(IntegrationVersion), a.IntegrationVersion).
-		Set(string(XRequestID), util.RequestIDFromContext(ctx))
-
-	req, _ := sl.Request()
-	req = req.WithContext(ctx)
-
-	_, err := a.Do(&util.SlingHTTPDoer{
-		Sl:       sl,
-		Req:      req,
-		SuccessV: &result,
-		FailureV: &errMsg,
-	})
-	if err != nil {
-		return nil, errors.Wrap(err, "api request")
-	}
-
-	return result, nil
+	return nil, fmt.Errorf("%s giving up after %d attempt(s)", u, a.RetryMax+1)
 }

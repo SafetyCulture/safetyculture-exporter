@@ -83,7 +83,7 @@ func (f *SheqsyShiftFeed) CreateSchema(exporter Exporter) error {
 
 // Export exports the feed to the supplied exporter
 func (f *SheqsyShiftFeed) Export(ctx context.Context, apiClient *httpapi.Client, exporter Exporter, companyID string) error {
-	logger := logger.GetLogger().With("feed", f.Name(), "org_id", companyID)
+	log := logger.GetLogger().With("feed", f.Name(), "org_id", companyID)
 
 	if err := exporter.InitFeed(f, &InitFeedOptions{
 		// Truncate files if upserts aren't supported.
@@ -104,7 +104,7 @@ func (f *SheqsyShiftFeed) Export(ctx context.Context, apiClient *httpapi.Client,
 
 	version := 1
 	for version != 0 {
-		resp, err := apiClient.Get(ctx, fmt.Sprintf("/SheqsyIntegrationApi/api/v3/companies/%s/shifts/history?ver=%d", companyID, version))
+		resp, err := httpapi.ExecuteGet[json.RawMessage](ctx, apiClient, fmt.Sprintf("/SheqsyIntegrationApi/api/v3/companies/%s/shifts/history?ver=%d", companyID, version), nil)
 		if err != nil {
 			return fmt.Errorf("fetch data: %w", err)
 		}
@@ -120,7 +120,7 @@ func (f *SheqsyShiftFeed) Export(ctx context.Context, apiClient *httpapi.Client,
 				value.Get("startDateTimeUTC").String()+"Z",
 			)
 			if err != nil {
-				logger.Errorf("failed to fix timestamp: %v", err)
+				log.Errorf("failed to fix timestamp: %v", err)
 				return false
 			}
 
@@ -130,7 +130,7 @@ func (f *SheqsyShiftFeed) Export(ctx context.Context, apiClient *httpapi.Client,
 				value.Get("finishDateTimeUTC").String()+"Z",
 			)
 			if err != nil {
-				logger.Errorf("failed to fix timestamp: %v", err)
+				log.Errorf("failed to fix timestamp: %v", err)
 				return false
 			}
 
@@ -147,7 +147,7 @@ func (f *SheqsyShiftFeed) Export(ctx context.Context, apiClient *httpapi.Client,
 				strings.Join(departments, ","),
 			)
 			if err != nil {
-				logger.Errorf("failed to join departments: %v", err)
+				log.Errorf("failed to join departments: %v", err)
 				return false
 			}
 			return true
@@ -178,7 +178,7 @@ func (f *SheqsyShiftFeed) Export(ctx context.Context, apiClient *httpapi.Client,
 			version = 0
 		}
 
-		logger.With(
+		log.With(
 			"estimated_remaining", 0,
 			"duration_ms", apiClient.Duration.Milliseconds(),
 			"export_duration_ms", exporter.GetDuration().Milliseconds(),
