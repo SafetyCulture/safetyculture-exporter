@@ -98,13 +98,19 @@ func (e *ExportStatus) ReadStatus() map[string]*ExportStatusItem {
 
 func (e *ExportStatus) PurgeFinished() {
 	e.lock.Lock()
-	filter := map[string]*ExportStatusItem{}
+	incompleteFeeds := map[string]*ExportStatusItem{}
 	for key, item := range e.status {
 		if !(item.Started && item.Finished) {
-			filter[key] = item
+			incompleteFeeds[key] = item
 		}
 	}
-	e.status = filter
+	e.status = incompleteFeeds
+	e.lock.Unlock()
+}
+
+func (e *ExportStatus) MarkExportCompleted() {
+	e.lock.Lock()
+	e.finished = true
 	e.lock.Unlock()
 }
 

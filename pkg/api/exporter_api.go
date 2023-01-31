@@ -17,6 +17,9 @@ import (
 	"github.com/pkg/errors"
 )
 
+var ctx context.Context
+var cancelFunc context.CancelFunc
+
 // NewSafetyCultureExporter builds a SafetyCultureExporter with clients inferred from own configuration
 func NewSafetyCultureExporter(cfg *ExporterConfiguration, version *AppVersion) (*SafetyCultureExporter, error) {
 	apiClient, err := getAPIClient(cfg.ToApiConfig(), version)
@@ -177,6 +180,7 @@ func (s *SafetyCultureExporter) RunInspectionJSON() error {
 }
 
 func (s *SafetyCultureExporter) RunSQL() error {
+	ctx, cancelFunc = context.WithCancel(context.Background())
 	if s.cfg.Export.Media {
 		err := os.MkdirAll(s.cfg.Export.MediaPath, os.ModePerm)
 		if err != nil {
@@ -195,7 +199,7 @@ func (s *SafetyCultureExporter) RunSQL() error {
 	}
 
 	if len(s.cfg.AccessToken) != 0 || len(s.cfg.SheqsyUsername) != 0 {
-		err = exporterApp.ExportFeeds(e)
+		err = exporterApp.ExportFeeds(e, ctx)
 		if err != nil {
 			return errors.Wrap(err, "exporting feeds")
 		}
@@ -205,6 +209,7 @@ func (s *SafetyCultureExporter) RunSQL() error {
 }
 
 func (s *SafetyCultureExporter) RunCSV() error {
+	ctx, cancelFunc = context.WithCancel(context.Background())
 	exportPath := s.cfg.Export.Path
 
 	err := os.MkdirAll(exportPath, os.ModePerm)
@@ -230,7 +235,7 @@ func (s *SafetyCultureExporter) RunCSV() error {
 	}
 
 	if len(s.cfg.AccessToken) != 0 || len(s.cfg.SheqsyUsername) != 0 {
-		err = exporterApp.ExportFeeds(e)
+		err = exporterApp.ExportFeeds(e, ctx)
 		if err != nil {
 			return errors.Wrap(err, "exporting feeds")
 		}
@@ -240,6 +245,7 @@ func (s *SafetyCultureExporter) RunCSV() error {
 }
 
 func (s *SafetyCultureExporter) RunInspectionReports() error {
+	ctx, cancelFunc = context.WithCancel(context.Background())
 	err := os.MkdirAll(s.cfg.Export.Path, os.ModePerm)
 	if err != nil {
 		return errors.Wrapf(err, "Failed to create directory %s", s.cfg.Export.Path)
@@ -251,7 +257,7 @@ func (s *SafetyCultureExporter) RunInspectionReports() error {
 	}
 
 	exporterApp := feed.NewExporterApp(s.apiClient, s.sheqsyApiClient, s.cfg.ToExporterConfig())
-	err = exporterApp.ExportInspectionReports(e)
+	err = exporterApp.ExportInspectionReports(e, ctx)
 	if err != nil {
 		return errors.Wrap(err, "generate reports")
 	}
@@ -322,5 +328,10 @@ func (s *SafetyCultureExporter) SetConfiguration(cfg *ExporterConfiguration) {
 
 // CleanExportStatus will clean the status items. Used by the UI
 func (s *SafetyCultureExporter) CleanExportStatus() {
-	s.exportStatus = feed.GetExporterStatus()
+	s.exportStatus.Reset()
+}
+
+func (s *SafetyCultureExporter) CancelExport() {
+	cancelFunc()
+	s.exportStatus.MarkExportCompleted()
 }
