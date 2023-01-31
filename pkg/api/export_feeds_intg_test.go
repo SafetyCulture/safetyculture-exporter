@@ -4,6 +4,7 @@
 package api_test
 
 import (
+	"context"
 	"net/http"
 	"path"
 	"path/filepath"
