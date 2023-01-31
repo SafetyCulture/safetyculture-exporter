@@ -133,16 +133,16 @@ func (e *ExporterFeedClient) ExportFeeds(exporter Exporter, ctx context.Context)
 			semaphore <- 1
 			wg.Add(1)
 
-			go func(f Feed) {
+			go func(f Feed, c context.Context) {
 				defer wg.Done()
 				select {
-				case <-ctx.Done():
+				case <-c.Done():
 					log.Infof(" ... canceling export")
 					return
 				default:
 					log.Infof(" ... queueing %s\n", f.Name())
 					status.StartFeedExport(f.Name())
-					err := f.Export(ctx, e.apiClient, exporter, resp.OrganisationID)
+					err := f.Export(c, e.apiClient, exporter, resp.OrganisationID)
 					if err != nil {
 						log.Errorf("exporting feeds: %v", err)
 						status.FinishFeedExport(f.Name(), err)
@@ -151,8 +151,7 @@ func (e *ExporterFeedClient) ExportFeeds(exporter Exporter, ctx context.Context)
 					status.FinishFeedExport(f.Name(), nil)
 					<-semaphore
 				}
-
-			}(feed)
+			}(feed, ctx)
 		}
 
 	}

@@ -110,15 +110,21 @@ func (e *ReportExporter) SaveReports(ctx context.Context, apiClient *httpapi.Cli
 		for _, r := range *rows {
 			wg.Add(1)
 
-			go func(inspection *Inspection, remaining int64) {
+			go func(inspection *Inspection, remaining int64, c context.Context) {
 				defer wg.Done()
-				buffers <- true
+				select {
+				case <-c.Done():
+					e.Logger.Infof(" ... canceling save reports ")
+					return
+				default:
+					buffers <- true
 
-				rep := e.saveReport(ctx, apiClient, inspection, format)
-				e.updateReportResult(rep, res, inspection, remaining)
+					rep := e.saveReport(c, apiClient, inspection, format)
+					e.updateReportResult(rep, res, inspection, remaining)
 
-				<-buffers
-			}(r, totalInspections-int64(offset))
+					<-buffers
+				}
+			}(r, totalInspections-int64(offset), ctx)
 		}
 	}
 
