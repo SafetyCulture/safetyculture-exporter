@@ -23,7 +23,7 @@ func ExecuteGet[T any](ctx context.Context, apiClient *Client, url string, param
 	var res = new(T)
 	var errMsg json.RawMessage
 
-	httpRes, err := apiClient.Do(&util.SlingHTTPDoer{
+	httpRes, err := apiClient.Do(ctx, &util.SlingHTTPDoer{
 		Sl:       sl,
 		Req:      req,
 		SuccessV: &res,
@@ -56,7 +56,7 @@ func ExecutePost[T any](ctx context.Context, apiClient *Client, url string, body
 	var res = new(T)
 	var errMsg json.RawMessage
 
-	httpRes, err := apiClient.Do(&util.SlingHTTPDoer{
+	httpRes, err := apiClient.Do(ctx, &util.SlingHTTPDoer{
 		Sl:       sl,
 		Req:      req,
 		SuccessV: &res,
@@ -85,7 +85,7 @@ func ExecuteRawGet(ctx context.Context, apiClient *Client, url string) (*http.Re
 	req, _ := sl.Request()
 	req = req.WithContext(ctx)
 
-	httpRes, err := apiClient.Do(&util.DefaultHTTPDoer{
+	httpRes, err := apiClient.Do(ctx, &util.DefaultHTTPDoer{
 		Req:        req,
 		HttpClient: apiClient.httpClient,
 	})

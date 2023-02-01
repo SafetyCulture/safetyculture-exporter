@@ -173,10 +173,15 @@ func OptAddTLSCert(certPath string) Opt {
 	}
 }
 
-func (a *Client) Do(doer HTTPDoer) (*http.Response, error) {
+func (a *Client) Do(ctx context.Context, doer HTTPDoer) (*http.Response, error) {
 	u := doer.URL()
+	iter := 0
+	for {
+		if ctx.Err() != nil && ctx.Err().Error() == "context canceled" {
+			return nil, ctx.Err()
+		}
 
-	for iter := 0; ; iter++ {
+		iter++
 		a.logger.Debugw("http request", "url", u)
 
 		start := time.Now()
@@ -236,5 +241,5 @@ func (a *Client) Do(doer HTTPDoer) (*http.Response, error) {
 		time.Sleep(wait)
 	}
 
-	return nil, fmt.Errorf("%s giving up after %d attempt(s)", u, a.RetryMax+1)
+	return nil, fmt.Errorf("%s giving up after %d attempt(s)", u, iter+1)
 }
