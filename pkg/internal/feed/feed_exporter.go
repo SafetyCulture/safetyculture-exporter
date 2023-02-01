@@ -136,7 +136,7 @@ func (e *ExporterFeedClient) ExportFeeds(exporter Exporter) error {
 			go func(f Feed) {
 				defer wg.Done()
 				log.Infof(" ... queueing %s\n", f.Name())
-				status.StartFeedExport(f.Name())
+				status.StartFeedExport(f.Name(), true)
 				err := f.Export(ctx, e.apiClient, exporter, resp.OrganisationID)
 				if err != nil {
 					log.Errorf("exporting feeds: %v", err)
