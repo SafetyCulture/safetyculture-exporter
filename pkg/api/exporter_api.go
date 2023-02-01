@@ -179,6 +179,14 @@ func (s *SafetyCultureExporter) RunInspectionJSON() error {
 	return nil
 }
 
+func (s *SafetyCultureExporter) CheckDBConnection() error {
+	_, _, err := feed.GetDatabase(s.cfg.Db.Dialect, s.cfg.Db.ConnectionString)
+	if err != nil {
+		return errors.Wrap(err, "create sql exporter")
+	}
+	return nil
+}
+
 func (s *SafetyCultureExporter) RunSQL() error {
 	ctx, cancelFunc = context.WithCancel(context.Background())
 	if s.cfg.Export.Media {
