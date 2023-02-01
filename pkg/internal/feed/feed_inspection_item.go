@@ -277,6 +277,7 @@ func (f *InspectionItemFeed) Export(ctx context.Context, apiClient *httpapi.Clie
 			Limit:           f.Limit,
 		},
 	}
+
 	if f.ExportMedia {
 		status.StartFeedExport("media", false)
 	}
