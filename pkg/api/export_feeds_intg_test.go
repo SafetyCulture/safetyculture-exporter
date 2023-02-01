@@ -4,6 +4,7 @@
 package api_test
 
 import (
+	"context"
 	"net/http"
 	"path"
 	"path/filepath"
@@ -94,7 +95,7 @@ func TestIntegrationDbExportFeeds_should_export_all_feeds_to_file(t *testing.T) 
 	}
 
 	exporterApp := feed.NewExporterApp(apiClient, apiClient, cfg)
-	err = exporterApp.ExportFeeds(exporter)
+	err = exporterApp.ExportFeeds(exporter, context.Background())
 	assert.NoError(t, err)
 
 	filesEqualish(t, "mocks/set_1/outputs/inspections.csv", filepath.Join(exporter.ExportPath, "inspections.csv"))
@@ -151,13 +152,13 @@ func TestIntegrationDbExportFeeds_should_perform_incremental_update_on_second_ru
 	}
 
 	exporterApp := feed.NewExporterApp(apiClient, apiClient, cfg)
-	err = exporterApp.ExportFeeds(exporter)
+	err = exporterApp.ExportFeeds(exporter, context.Background())
 	assert.NoError(t, err)
 
 	initMockFeedsSet2(apiClient.HTTPClient())
 
 	exporterApp = feed.NewExporterApp(apiClient, apiClient, cfg)
-	err = exporterApp.ExportFeeds(exporter)
+	err = exporterApp.ExportFeeds(exporter, context.Background())
 	assert.NoError(t, err)
 
 	filesEqualish(t, "mocks/set_2/outputs/inspections.csv", filepath.Join(exporter.ExportPath, "inspections.csv"))
@@ -213,7 +214,7 @@ func TestIntegrationDbExportFeeds_should_handle_lots_of_rows_ok(t *testing.T) {
 	}
 
 	exporterApp := feed.NewExporterApp(apiClient, apiClient, cfg)
-	err = exporterApp.ExportFeeds(exporter)
+	err = exporterApp.ExportFeeds(exporter, context.Background())
 	assert.NoError(t, err)
 
 	inspectionsLines, err := countFileLines(filepath.Join(exporter.ExportPath, "inspections.csv"))
@@ -264,7 +265,7 @@ func TestIntegrationDbExportFeeds_should_update_action_assignees_on_second_run(t
 	}
 
 	exporterApp := feed.NewExporterApp(apiClient, apiClient, cfg)
-	err = exporterApp.ExportFeeds(exporter)
+	err = exporterApp.ExportFeeds(exporter, context.Background())
 	assert.NoError(t, err)
 
 	filesEqualish(t, "mocks/set_1/outputs/action_assignees.csv", filepath.Join(exporter.ExportPath, "action_assignees.csv"))
@@ -272,7 +273,7 @@ func TestIntegrationDbExportFeeds_should_update_action_assignees_on_second_run(t
 	initMockFeedsSet2(apiClient.HTTPClient())
 
 	exporterApp = feed.NewExporterApp(apiClient, apiClient, cfg)
-	err = exporterApp.ExportFeeds(exporter)
+	err = exporterApp.ExportFeeds(exporter, context.Background())
 	assert.NoError(t, err)
 	filesEqualish(t, "mocks/set_2/outputs/action_assignees.csv", filepath.Join(exporter.ExportPath, "action_assignees.csv"))
 }
@@ -312,7 +313,7 @@ func TestGroupUserFeed_Export_should_filter_duplicates(t *testing.T) {
 	}
 
 	exporterApp := feed.NewExporterApp(apiClient, apiClient, cfg)
-	err = exporterApp.ExportFeeds(exporter)
+	err = exporterApp.ExportFeeds(exporter, context.Background())
 	assert.NoError(t, err)
 
 	lines, err := countFileLines(filepath.Join(exporter.ExportPath, "group_users.csv"))

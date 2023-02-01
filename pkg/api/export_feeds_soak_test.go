@@ -25,6 +25,6 @@ func TestIntegrationDbSoakExportFeeds_should_successfully_export_with_significan
 	}
 
 	exporterApp := feed.NewExporterApp(apiClient, nil, cfg)
-	err = exporterApp.ExportFeeds(exporter)
+	err = exporterApp.ExportFeeds(exporter, context.Background())
 	assert.NoError(t, err)
 }

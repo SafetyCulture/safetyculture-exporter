@@ -125,19 +125,44 @@ func TestClient_WhoAmI_WhenOK(t *testing.T) {
 
 func TestClient_WhoAmI_WhenNotOK(t *testing.T) {
 	defer gock.Off()
+	gock.Observe(gock.DumpRequest)
 
 	gock.New("http://localhost:9999").
+		Persist().
 		Get("accounts/user/v1/user:WhoAmI").
 		Reply(500).
 		BodyString(`{}`)
 
 	apiClient := GetTestClient()
+	apiClient.RetryMax = 3
 	gock.InterceptClient(apiClient.HTTPClient())
 
 	r, err := httpapi.WhoAmI(context.Background(), apiClient)
 	require.NotNil(t, err)
 	require.Nil(t, r)
-	assert.EqualValues(t, "api request: http://localhost:9999/accounts/user/v1/user:WhoAmI giving up after 2 attempt(s)", err.Error())
+	assert.EqualValues(t, "api request: http://localhost:9999/accounts/user/v1/user:WhoAmI giving up after 4 attempt(s)", err.Error())
+}
+
+func TestClient_WhoAmI_WhenNotOK_ContextCancelled(t *testing.T) {
+	defer gock.Off()
+	gock.Observe(gock.DumpRequest)
+
+	gock.New("http://localhost:9999").
+		Persist().
+		Get("accounts/user/v1/user:WhoAmI").
+		Reply(200).
+		BodyString(`{}`)
+
+	apiClient := GetTestClient()
+	apiClient.RetryMax = 3
+	gock.InterceptClient(apiClient.HTTPClient())
+
+	ctx, cancelFunc := context.WithCancel(context.Background())
+	cancelFunc()
+	r, err := httpapi.WhoAmI(ctx, apiClient)
+	require.NotNil(t, err)
+	require.Nil(t, r)
+	assert.EqualValues(t, "api request: context canceled", err.Error())
 }
 
 func TestClient_HeadersShouldMatch(t *testing.T) {

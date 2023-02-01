@@ -81,11 +81,11 @@ func (e *ExportStatus) UpdateStage(feedName string, stage ExportStatusItemStage)
 func (e *ExportStatus) FinishFeedExport(feedName string, err error) {
 	e.lock.Lock()
 	if _, ok := e.status[feedName]; ok {
-		e.status[feedName].Finished = true
 		if err != nil {
 			e.status[feedName].HasError = true
 			e.status[feedName].StatusMessage = err.Error()
 		}
+		e.status[feedName].Finished = true
 	}
 	e.lock.Unlock()
 }
@@ -98,13 +98,19 @@ func (e *ExportStatus) ReadStatus() map[string]*ExportStatusItem {
 
 func (e *ExportStatus) PurgeFinished() {
 	e.lock.Lock()
-	filter := map[string]*ExportStatusItem{}
+	pendingFeeds := map[string]*ExportStatusItem{}
 	for key, item := range e.status {
 		if !(item.Started && item.Finished) {
-			filter[key] = item
+			pendingFeeds[key] = item
 		}
 	}
-	e.status = filter
+	e.status = pendingFeeds
+	e.lock.Unlock()
+}
+
+func (e *ExportStatus) MarkExportCompleted() {
+	e.lock.Lock()
+	e.finished = true
 	e.lock.Unlock()
 }
 

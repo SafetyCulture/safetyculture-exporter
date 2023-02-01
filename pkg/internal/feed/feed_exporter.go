@@ -88,9 +88,9 @@ func (e *ExporterFeedClient) addError(err error) {
 }
 
 // ExportFeeds fetches all the feeds data from server and stores them in the format provided
-func (e *ExporterFeedClient) ExportFeeds(exporter Exporter) error {
+func (e *ExporterFeedClient) ExportFeeds(exporter Exporter, ctx context.Context) error {
 	log := logger.GetLogger()
-	ctx := context.Background()
+
 	status := GetExporterStatus()
 	status.Reset()
 
@@ -133,19 +133,24 @@ func (e *ExporterFeedClient) ExportFeeds(exporter Exporter) error {
 			semaphore <- 1
 			wg.Add(1)
 
-			go func(f Feed) {
+			go func(f Feed, c context.Context) {
 				defer wg.Done()
-				log.Infof(" ... queueing %s\n", f.Name())
-				status.StartFeedExport(f.Name())
-				err := f.Export(ctx, e.apiClient, exporter, resp.OrganisationID)
-				if err != nil {
-					log.Errorf("exporting feeds: %v", err)
-					status.FinishFeedExport(f.Name(), err)
-					e.addError(err)
+				select {
+				case <-c.Done():
+					log.Infof(" ... canceling export")
+					return
+				default:
+					log.Infof(" ... queueing %s\n", f.Name())
+					status.StartFeedExport(f.Name())
+					exportErr := f.Export(c, e.apiClient, exporter, resp.OrganisationID)
+					if exportErr != nil {
+						log.Errorf("exporting feeds: %v", exportErr)
+						e.addError(exportErr)
+					}
+					status.FinishFeedExport(f.Name(), exportErr)
+					<-semaphore
 				}
-				status.FinishFeedExport(f.Name(), nil)
-				<-semaphore
-			}(feed)
+			}(feed, ctx)
 		}
 
 	}
@@ -196,7 +201,8 @@ func (e *ExporterFeedClient) ExportFeeds(exporter Exporter) error {
 	}
 
 	log.Info("Export finished")
-	status.finished = true
+	status.MarkExportCompleted()
+
 	if len(e.errs) != 0 {
 		log.Warn("There were errors during the export:")
 		for _, ee := range e.errs {
@@ -207,6 +213,7 @@ func (e *ExporterFeedClient) ExportFeeds(exporter Exporter) error {
 				log.Infof(" > %s", theError.Error())
 			}
 		}
+
 		// this is temporary code until we finish a follow-up ticket that will use structured errors
 		return e.errs[0]
 	}
@@ -310,9 +317,8 @@ func (e *ExporterFeedClient) PrintSchemas(exporter *SchemaExporter) error {
 	return nil
 }
 
-func (e *ExporterFeedClient) ExportInspectionReports(exporter *ReportExporter) error {
+func (e *ExporterFeedClient) ExportInspectionReports(exporter *ReportExporter, ctx context.Context) error {
 	log := logger.GetLogger()
-	ctx := context.Background()
 
 	resp, err := httpapi.WhoAmI(ctx, e.apiClient)
 	if err != nil {
