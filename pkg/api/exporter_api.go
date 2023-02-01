@@ -298,7 +298,6 @@ func (s *SafetyCultureExporter) GetTemplateList() []TemplateResponseItem {
 // GetExportStatus called by UI
 func (s *SafetyCultureExporter) GetExportStatus() *ExportStatusResponse {
 	data := s.exportStatus.ReadStatus()
-	s.exportStatus.PurgeFinished()
 	var res []ExportStatusResponseItem
 
 	for _, v := range data {
@@ -313,6 +312,8 @@ func (s *SafetyCultureExporter) GetExportStatus() *ExportStatusResponse {
 			Stage:         string(v.Stage),
 		})
 	}
+
+	s.exportStatus.PurgeFinished()
 
 	return &ExportStatusResponse{
 		ExportStarted:   s.exportStatus.GetExportStarted(),
@@ -333,5 +334,4 @@ func (s *SafetyCultureExporter) CleanExportStatus() {
 
 func (s *SafetyCultureExporter) CancelExport() {
 	cancelFunc()
-	s.exportStatus.MarkExportCompleted()
 }

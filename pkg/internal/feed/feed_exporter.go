@@ -142,13 +142,12 @@ func (e *ExporterFeedClient) ExportFeeds(exporter Exporter, ctx context.Context)
 				default:
 					log.Infof(" ... queueing %s\n", f.Name())
 					status.StartFeedExport(f.Name())
-					err := f.Export(c, e.apiClient, exporter, resp.OrganisationID)
-					if err != nil {
-						log.Errorf("exporting feeds: %v", err)
-						status.FinishFeedExport(f.Name(), err)
-						e.addError(err)
+					exportErr := f.Export(c, e.apiClient, exporter, resp.OrganisationID)
+					if exportErr != nil {
+						log.Errorf("exporting feeds: %v", exportErr)
+						e.addError(exportErr)
 					}
-					status.FinishFeedExport(f.Name(), nil)
+					status.FinishFeedExport(f.Name(), exportErr)
 					<-semaphore
 				}
 			}(feed, ctx)
@@ -202,7 +201,8 @@ func (e *ExporterFeedClient) ExportFeeds(exporter Exporter, ctx context.Context)
 	}
 
 	log.Info("Export finished")
-	status.finished = true
+	status.MarkExportCompleted()
+
 	if len(e.errs) != 0 {
 		log.Warn("There were errors during the export:")
 		for _, ee := range e.errs {
@@ -213,6 +213,7 @@ func (e *ExporterFeedClient) ExportFeeds(exporter Exporter, ctx context.Context)
 				log.Infof(" > %s", theError.Error())
 			}
 		}
+
 		// this is temporary code until we finish a follow-up ticket that will use structured errors
 		return e.errs[0]
 	}
