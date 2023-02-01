@@ -72,7 +72,7 @@ func TestExportReports_should_export_all_reports(t *testing.T) {
 
 	cfg := &exporterAPI.ExporterConfiguration{}
 	exporterApp := feed.NewExporterApp(apiClient, nil, cfg.ToExporterConfig())
-	err = exporterApp.ExportInspectionReports(exporter)
+	err = exporterApp.ExportInspectionReports(exporter, context.Background())
 	assert.NoError(t, err)
 
 	fileExists(t, filepath.Join(exporter.ExportPath, "My-Audit.pdf"))
@@ -126,7 +126,7 @@ func TestExportReports_should_export_all_reports_with_ID_filename(t *testing.T) 
 
 	cfg := &exporterAPI.ExporterConfiguration{}
 	exporterApp := feed.NewExporterApp(apiClient, nil, cfg.ToExporterConfig())
-	err = exporterApp.ExportInspectionReports(exporter)
+	err = exporterApp.ExportInspectionReports(exporter, context.Background())
 	assert.NoError(t, err)
 
 	fileExists(t, filepath.Join(exporter.ExportPath, "audit_47ac0dce16f94d73b5178372368af162.pdf"))
@@ -190,7 +190,7 @@ func TestExportReports_should_not_run_if_all_exported(t *testing.T) {
 	cfg.Export.Incremental = true
 
 	exporterApp := feed.NewExporterApp(apiClient, nil, cfg.ToExporterConfig())
-	err = exporterApp.ExportInspectionReports(exporter)
+	err = exporterApp.ExportInspectionReports(exporter, context.Background())
 	assert.NoError(t, err)
 
 	file1ModTime1, _ := getFileModTime(filepath.Join(exporter.ExportPath, "My-Audit.pdf"))
@@ -200,7 +200,7 @@ func TestExportReports_should_not_run_if_all_exported(t *testing.T) {
 	// run the export process again
 	initMockFeedsSet1(apiClient.HTTPClient())
 	exporterApp = feed.NewExporterApp(apiClient, nil, cfg.ToExporterConfig())
-	err = exporterApp.ExportInspectionReports(exporter)
+	err = exporterApp.ExportInspectionReports(exporter, context.Background())
 	assert.NoError(t, err)
 
 	file1ModTime2, _ := getFileModTime(filepath.Join(exporter.ExportPath, "My-Audit.pdf"))
@@ -266,7 +266,7 @@ func TestExportReports_should_take_care_of_invalid_file_names(t *testing.T) {
 	cfg.Export.Incremental = true
 
 	exporterApp := feed.NewExporterApp(apiClient, nil, cfg.ToExporterConfig())
-	err = exporterApp.ExportInspectionReports(exporter)
+	err = exporterApp.ExportInspectionReports(exporter, context.Background())
 	assert.NoError(t, err)
 
 	fileExists(t, filepath.Join(exporter.ExportPath, "My-Audit-1.pdf"))
@@ -315,7 +315,7 @@ func TestExportReports_should_fail_after_retries(t *testing.T) {
 
 	cfg := &exporterAPI.ExporterConfiguration{}
 	exporterApp := feed.NewExporterApp(apiClient, nil, cfg.ToExporterConfig())
-	err = exporterApp.ExportInspectionReports(exporter)
+	err = exporterApp.ExportInspectionReports(exporter, context.Background())
 	assert.NotNil(t, err)
 	assert.Contains(t, err.Error(), "failed to generate 3 PDF reports and 0 WORD reports")
 }
@@ -355,7 +355,7 @@ func TestExportReports_should_fail_if_report_status_fails(t *testing.T) {
 
 	cfg := &exporterAPI.ExporterConfiguration{}
 	exporterApp := feed.NewExporterApp(apiClient, nil, cfg.ToExporterConfig())
-	err = exporterApp.ExportInspectionReports(exporter)
+	err = exporterApp.ExportInspectionReports(exporter, context.Background())
 	assert.NotNil(t, err)
 	assert.Contains(t, err.Error(), "failed to generate 0 PDF reports and 3 WORD reports")
 }
@@ -388,7 +388,7 @@ func TestExportReports_should_fail_if_init_report_reply_is_not_success(t *testin
 
 	cfg := &exporterAPI.ExporterConfiguration{}
 	exporterApp := feed.NewExporterApp(apiClient, nil, cfg.ToExporterConfig())
-	err = exporterApp.ExportInspectionReports(exporter)
+	err = exporterApp.ExportInspectionReports(exporter, context.Background())
 	assert.NotNil(t, err)
 	assert.Contains(t, err.Error(), "failed to generate 0 PDF reports and 3 WORD reports")
 }
@@ -428,7 +428,7 @@ func TestExportReports_should_fail_if_report_completion_reply_is_not_success(t *
 
 	cfg := &exporterAPI.ExporterConfiguration{}
 	exporterApp := feed.NewExporterApp(apiClient, nil, cfg.ToExporterConfig())
-	err = exporterApp.ExportInspectionReports(exporter)
+	err = exporterApp.ExportInspectionReports(exporter, context.Background())
 	assert.NotNil(t, err)
 	assert.Contains(t, err.Error(), "failed to generate 0 PDF reports and 3 WORD reports")
 }
@@ -474,7 +474,7 @@ func TestExportReports_should_fail_if_download_report_reply_is_not_success(t *te
 
 	cfg := &exporterAPI.ExporterConfiguration{}
 	exporterApp := feed.NewExporterApp(apiClient, nil, cfg.ToExporterConfig())
-	err = exporterApp.ExportInspectionReports(exporter)
+	err = exporterApp.ExportInspectionReports(exporter, context.Background())
 	assert.NotNil(t, err)
 	assert.Contains(t, err.Error(), "failed to generate 3 PDF reports and 0 WORD reports")
 }
@@ -500,7 +500,7 @@ func TestExportReports_should_return_error_for_unsupported_format(t *testing.T) 
 
 	cfg := &exporterAPI.ExporterConfiguration{}
 	exporterApp := feed.NewExporterApp(apiClient, nil, cfg.ToExporterConfig())
-	err = exporterApp.ExportInspectionReports(exporter)
+	err = exporterApp.ExportInspectionReports(exporter, context.Background())
 	assert.EqualError(t, err, "save reports: no valid export format specified")
 }
 
