@@ -169,8 +169,8 @@ func TestConfigurationManager_SaveConfiguration(t *testing.T) {
 	assert.EqualValues(t, "false", newCm.Configuration.Export.Inspection.Archived)
 	assert.EqualValues(t, "true", newCm.Configuration.Export.Inspection.Completed)
 	assert.EqualValues(t, "private", newCm.Configuration.Export.Inspection.WebReportLink)
-	assert.EqualValues(t, "./export/media/", newCm.Configuration.Export.MediaPath)
-	assert.EqualValues(t, "./export/", newCm.Configuration.Export.Path)
+	assert.EqualValues(t, "export/media", newCm.Configuration.Export.MediaPath)
+	assert.EqualValues(t, "export", newCm.Configuration.Export.Path)
 	assert.EqualValues(t, "INSPECTION_TITLE", newCm.Configuration.Report.FilenameConvention)
 	assert.EqualValues(t, []string{"PDF"}, newCm.Configuration.Report.Format)
 	assert.EqualValues(t, 15, newCm.Configuration.Report.RetryTimeout)
@@ -214,6 +214,8 @@ func TestNewConfigurationManagerFromFile_WhenZeroLengthFile(t *testing.T) {
 	assert.EqualValues(t, []string{"PDF"}, cm.Configuration.Report.Format)
 	assert.EqualValues(t, "csv", cm.Configuration.Session.ExportType)
 	assert.EqualValues(t, "mysql", cm.Configuration.Db.Dialect)
+	assert.EqualValues(t, "export", cm.Configuration.Export.Path)
+	assert.EqualValues(t, "export/media", cm.Configuration.Export.MediaPath)
 
 	today := time.Now().
 		UTC().
