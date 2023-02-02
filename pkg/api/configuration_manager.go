@@ -218,6 +218,14 @@ func (c *ConfigurationManager) ApplySafetyGuards() {
 	if c.Configuration.Export.ModifiedAfter.IsZero() {
 		c.Configuration.Export.ModifiedAfter = defaultCfg.Export.ModifiedAfter
 	}
+
+	if c.Configuration.Export.Path == "" {
+		c.Configuration.Export.Path = defaultCfg.Export.Path
+	}
+
+	if c.Configuration.Export.MediaPath == "" {
+		c.Configuration.Export.MediaPath = defaultCfg.Export.MediaPath
+	}
 }
 
 // SaveConfiguration will save the configuration to the file
@@ -254,8 +262,8 @@ func BuildConfigurationWithDefaults() *ExporterConfiguration {
 	cfg.Export.Inspection.SkipIds = []string{}
 	cfg.Export.Inspection.WebReportLink = "private"
 	cfg.Export.Issue.Limit = 100
-	cfg.Export.MediaPath = "./export/media/"
-	cfg.Export.Path = "./export/"
+	cfg.Export.Path = path.Join("export")
+	cfg.Export.MediaPath = path.Join("export", "media")
 	cfg.Export.TimeZone = "UTC"
 	cfg.Export.ModifiedAfter = mTime{time.Now().UTC().AddDate(-1, 0, 0)}
 	cfg.Report.FilenameConvention = "INSPECTION_TITLE"
