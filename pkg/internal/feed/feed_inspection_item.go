@@ -127,6 +127,7 @@ func (f *InspectionItemFeed) Order() string {
 }
 
 func fetchAndWriteMedia(ctx context.Context, apiClient *httpapi.Client, exporter Exporter, auditID, mediaURL string) error {
+	status := GetExporterStatus()
 	resp, err := GetMedia(
 		ctx,
 		apiClient,
@@ -149,6 +150,7 @@ func fetchAndWriteMedia(ctx context.Context, apiClient *httpapi.Client, exporter
 		return err
 	}
 
+	status.IncrementStatus("media", 1, 0)
 	return nil
 }
 
@@ -276,8 +278,17 @@ func (f *InspectionItemFeed) Export(ctx context.Context, apiClient *httpapi.Clie
 		},
 	}
 
+	if f.ExportMedia {
+		status.StartFeedExport("media", false)
+	}
 	if err := DrainFeed(ctx, apiClient, req, drainFn); err != nil {
+		if f.ExportMedia {
+			status.FinishFeedExport("media", err)
+		}
 		return events.WrapEventError(err, fmt.Sprintf("feed %q", f.Name()))
+	}
+	if f.ExportMedia {
+		status.FinishFeedExport("media", nil)
 	}
 	return exporter.FinaliseExport(f, &[]*InspectionItem{})
 }

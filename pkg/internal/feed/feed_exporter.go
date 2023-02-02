@@ -141,7 +141,7 @@ func (e *ExporterFeedClient) ExportFeeds(exporter Exporter, ctx context.Context)
 					return
 				default:
 					log.Infof(" ... queueing %s\n", f.Name())
-					status.StartFeedExport(f.Name())
+					status.StartFeedExport(f.Name(), true)
 					exportErr := f.Export(c, e.apiClient, exporter, resp.OrganisationID)
 					if exportErr != nil {
 						log.Errorf("exporting feeds: %v", exportErr)

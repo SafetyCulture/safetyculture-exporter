@@ -201,21 +201,21 @@ func (e *SQLExporter) WriteMedia(auditID, mediaID, contentType string, body []by
 
 // NewSQLExporter creates a new instance of the SQLExporter
 func NewSQLExporter(dialect, connectionString string, autoMigrate bool, exportMediaPath string) (*SQLExporter, error) {
-	l, db, err := GetDatabase(dialect, connectionString)
+	db, err := GetDatabase(dialect, connectionString)
 	if err != nil {
 		return nil, errors.Wrap(err, "connect to DB")
 	}
 
 	return &SQLExporter{
 		DB:              db,
-		Logger:          l,
+		Logger:          logger.GetLogger(),
 		AutoMigrate:     autoMigrate,
 		ExportMediaPath: exportMediaPath,
 		duration:        0,
 	}, nil
 }
 
-func GetDatabase(dialect string, connectionString string) (*zap.SugaredLogger, *gorm.DB, error) {
+func GetDatabase(dialect string, connectionString string) (*gorm.DB, error) {
 	var dialector gorm.Dialector
 	switch dialect {
 	case "mysql":
@@ -227,7 +227,7 @@ func GetDatabase(dialect string, connectionString string) (*zap.SugaredLogger, *
 	case "sqlite":
 		dialector = sqlite.Open(connectionString)
 	default:
-		return nil, nil, fmt.Errorf("invalid database dialect %s", dialect)
+		return nil, fmt.Errorf("invalid database dialect %s", dialect)
 	}
 
 	l := logger.GetLogger()
@@ -242,8 +242,8 @@ func GetDatabase(dialect string, connectionString string) (*zap.SugaredLogger, *
 
 	db, err := gorm.Open(dialector, &gormConfig)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
-	return l, db, nil
+	return db, nil
 }

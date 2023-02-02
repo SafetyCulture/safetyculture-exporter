@@ -180,7 +180,7 @@ func (s *SafetyCultureExporter) RunInspectionJSON() error {
 }
 
 func (s *SafetyCultureExporter) CheckDBConnection() error {
-	_, _, err := feed.GetDatabase(s.cfg.Db.Dialect, s.cfg.Db.ConnectionString)
+	_, err := feed.GetDatabase(s.cfg.Db.Dialect, s.cfg.Db.ConnectionString)
 	if err != nil {
 		return errors.Wrap(err, "create sql exporter")
 	}
@@ -310,14 +310,15 @@ func (s *SafetyCultureExporter) GetExportStatus() *ExportStatusResponse {
 
 	for _, v := range data {
 		res = append(res, ExportStatusResponseItem{
-			FeedName:      v.Name,
-			Started:       v.Started,
-			Finished:      v.Finished,
-			HasError:      v.HasError,
-			DurationMs:    v.DurationMs,
-			Remaining:     v.EstRemaining,
-			StatusMessage: v.StatusMessage,
-			Stage:         string(v.Stage),
+			FeedName:           v.Name,
+			Started:            v.Started,
+			Finished:           v.Finished,
+			HasError:           v.HasError,
+			DurationMs:         v.DurationMs,
+			Counter:            v.Counter,
+			CounterDecremental: v.CounterDecremental,
+			StatusMessage:      v.StatusMessage,
+			Stage:              string(v.Stage),
 		})
 	}
 
