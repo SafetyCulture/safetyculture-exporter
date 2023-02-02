@@ -302,14 +302,15 @@ func (s *SafetyCultureExporter) GetExportStatus() *ExportStatusResponse {
 
 	for _, v := range data {
 		res = append(res, ExportStatusResponseItem{
-			FeedName:      v.Name,
-			Started:       v.Started,
-			Finished:      v.Finished,
-			HasError:      v.HasError,
-			DurationMs:    v.DurationMs,
-			Remaining:     v.EstRemaining,
-			StatusMessage: v.StatusMessage,
-			Stage:         string(v.Stage),
+			FeedName:           v.Name,
+			Started:            v.Started,
+			Finished:           v.Finished,
+			HasError:           v.HasError,
+			DurationMs:         v.DurationMs,
+			Counter:            v.Counter,
+			CounterDecremental: v.CounterDecremental,
+			StatusMessage:      v.StatusMessage,
+			Stage:              string(v.Stage),
 		})
 	}
 

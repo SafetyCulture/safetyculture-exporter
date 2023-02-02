@@ -32,14 +32,15 @@ const StageApi ExportStatusItemStage = "API_DOWNLOAD"
 const StageCsv ExportStatusItemStage = "CSV_EXPORT"
 
 type ExportStatusItem struct {
-	Name          string
-	Stage         ExportStatusItemStage
-	Started       bool
-	Finished      bool
-	HasError      bool
-	EstRemaining  int64
-	StatusMessage string
-	DurationMs    int64
+	Name               string
+	Stage              ExportStatusItemStage
+	Started            bool
+	Finished           bool
+	HasError           bool
+	Counter            int64
+	CounterDecremental bool
+	StatusMessage      string
+	DurationMs         int64
 }
 
 func (e *ExportStatus) Reset() {
@@ -50,21 +51,31 @@ func (e *ExportStatus) Reset() {
 	e.lock.Unlock()
 }
 
-func (e *ExportStatus) StartFeedExport(feedName string) {
+func (e *ExportStatus) StartFeedExport(feedName string, decremental bool) {
 	e.lock.Lock()
 	e.status[feedName] = &ExportStatusItem{
-		Name:     feedName,
-		Stage:    StageApi,
-		Started:  true,
-		Finished: false,
+		Name:               feedName,
+		Stage:              StageApi,
+		Started:            true,
+		Finished:           false,
+		CounterDecremental: decremental,
 	}
 	e.lock.Unlock()
 }
 
-func (e *ExportStatus) UpdateStatus(feedName string, remaining int64, durationMs int64) {
+func (e *ExportStatus) UpdateStatus(feedName string, counter int64, durationMs int64) {
 	e.lock.Lock()
 	if _, ok := e.status[feedName]; ok {
-		e.status[feedName].EstRemaining = remaining
+		e.status[feedName].Counter = counter
+		e.status[feedName].DurationMs = durationMs
+	}
+	e.lock.Unlock()
+}
+
+func (e *ExportStatus) IncrementStatus(feedName string, counter int64, durationMs int64) {
+	e.lock.Lock()
+	if _, ok := e.status[feedName]; ok {
+		e.status[feedName].Counter += counter
 		e.status[feedName].DurationMs = durationMs
 	}
 	e.lock.Unlock()
