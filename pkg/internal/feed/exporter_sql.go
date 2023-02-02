@@ -215,6 +215,7 @@ func NewSQLExporter(dialect, connectionString string, autoMigrate bool, exportMe
 	}, nil
 }
 
+// GetDatabase validates the db credentials and return a DB connection
 func GetDatabase(dialect string, connectionString string) (*gorm.DB, error) {
 	var dialector gorm.Dialector
 	switch dialect {
