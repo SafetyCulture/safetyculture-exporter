@@ -29,6 +29,12 @@ type SQLExporter struct {
 	duration        time.Duration
 }
 
+// DBConnection db connection
+type DBConnection struct {
+	db  *gorm.DB
+	err error
+}
+
 // SupportsUpsert returns a bool if the exporter supports upserts
 func (e *SQLExporter) SupportsUpsert() bool {
 	return true
@@ -241,10 +247,25 @@ func GetDatabase(dialect string, connectionString string) (*gorm.DB, error) {
 		Logger: gormLogger, // use logger.Default.LogMode(logger.Info) for checking the statements (gorm.io/logger)
 	}
 
-	db, err := gorm.Open(dialector, &gormConfig)
-	if err != nil {
-		return nil, err
-	}
+	conn := make(chan DBConnection)
+	go connectToDB(dialector, &gormConfig, conn)
 
-	return db, nil
+	select {
+	case dbResult := <-conn:
+		if dbResult.err != nil {
+			return nil, dbResult.err
+		} else {
+			return dbResult.db, nil
+		}
+	case <-time.After(5 * time.Second):
+		return nil, errors.New("connection timed out")
+	}
+}
+
+func connectToDB(d gorm.Dialector, g *gorm.Config, result chan<- DBConnection) {
+	db, err := gorm.Open(d, g)
+	result <- DBConnection{
+		db:  db,
+		err: err,
+	}
 }
