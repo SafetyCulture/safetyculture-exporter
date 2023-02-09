@@ -3,7 +3,7 @@ package api
 import (
 	"fmt"
 	"os"
-	"path"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -134,7 +134,7 @@ func (c *ConfigurationManager) loadConfiguration() error {
 		return fmt.Errorf("invalid file name provided")
 	}
 
-	yamlContents, err := os.ReadFile(path.Join(c.path, c.fileName))
+	yamlContents, err := os.ReadFile(filepath.Join(c.path, c.fileName))
 	if err != nil {
 		return fmt.Errorf("read file: %w", err)
 	}
@@ -238,7 +238,7 @@ func (c *ConfigurationManager) SaveConfiguration() error {
 	if err != nil {
 		return fmt.Errorf("marshal: %w", err)
 	}
-	if err := os.WriteFile(path.Join(c.path, c.fileName), data, 0666); err != nil {
+	if err := os.WriteFile(filepath.Join(c.path, c.fileName), data, 0666); err != nil {
 		return fmt.Errorf("writing file %s: %w", c.fileName, err)
 	}
 	return nil
@@ -246,6 +246,8 @@ func (c *ConfigurationManager) SaveConfiguration() error {
 
 // BuildConfigurationWithDefaults will set up an initial configuration with default values
 func BuildConfigurationWithDefaults() *ExporterConfiguration {
+	wd, _ := os.Getwd()
+
 	cfg := &ExporterConfiguration{}
 	cfg.API.SheqsyURL = "https://app.sheqsy.com"
 	cfg.API.URL = "https://api.safetyculture.io"
@@ -262,14 +264,20 @@ func BuildConfigurationWithDefaults() *ExporterConfiguration {
 	cfg.Export.Inspection.SkipIds = []string{}
 	cfg.Export.Inspection.WebReportLink = "private"
 	cfg.Export.Issue.Limit = 100
-	cfg.Export.Path = path.Join("export")
-	cfg.Export.MediaPath = path.Join("export", "media")
+	cfg.Export.Path = filepath.Join(wd, "export")
+	cfg.Export.MediaPath = filepath.Join(wd, "export", "media")
 	cfg.Export.TimeZone = "UTC"
 	cfg.Export.ModifiedAfter = mTime{time.Now().UTC().AddDate(-1, 0, 0)}
 	cfg.Report.FilenameConvention = "INSPECTION_TITLE"
 	cfg.Report.Format = []string{"PDF"}
 	cfg.Report.RetryTimeout = 15
 	cfg.Session.ExportType = "csv"
+
+	err := os.MkdirAll(cfg.Export.Path, os.ModePerm)
+	if err != nil {
+		cfg.Export.Path = filepath.Join("export")
+		cfg.Export.MediaPath = filepath.Join("export", "media")
+	}
 
 	return cfg
 }

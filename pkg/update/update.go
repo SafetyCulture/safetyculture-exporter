@@ -18,7 +18,7 @@ const RepoExporter string = "safetyculture-exporter"
 const archDarwinAmd64 string = "darwin-amd64"
 const archDarwinArm64 string = "darwin-arm64"
 const archLinuxAmd64 string = "linux-amd64"
-const archWindowsAmd64 string = "windows-amd64"
+const archWindowsAmd64 string = "windows-x86_64"
 
 // ReleaseInfo is the details of an available release.
 type ReleaseInfo struct {
