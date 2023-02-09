@@ -59,8 +59,8 @@ func TestMapAssets_WhenAllArePresent(t *testing.T) {
 			BrowserDownloadURL: pString("https://github.com/SafetyCulture/safetyculture-exporter-ui/releases/download/v.0.10.2-alpha.5/exporter-linux-amd64.tar.gz"),
 		},
 		{
-			Name:               pString("exporter-windows-amd64.tar.gz"),
-			BrowserDownloadURL: pString("https://github.com/SafetyCulture/safetyculture-exporter-ui/releases/download/v.0.10.2-alpha.5/exporter-windows-amd64.tar.gz"),
+			Name:               pString("exporter-windows-x86_64.tar.gz"),
+			BrowserDownloadURL: pString("https://github.com/SafetyCulture/safetyculture-exporter-ui/releases/download/v.0.10.2-alpha.5/exporter-windows-x86_64.tar.gz"),
 		},
 	}
 
@@ -69,20 +69,20 @@ func TestMapAssets_WhenAllArePresent(t *testing.T) {
 	assert.EqualValues(t, r["darwin-amd64"], "https://github.com/SafetyCulture/safetyculture-exporter-ui/releases/download/v.0.10.2-alpha.5/exporter-darwin-amd64.zip")
 	assert.EqualValues(t, r["darwin-arm64"], "https://github.com/SafetyCulture/safetyculture-exporter-ui/releases/download/v.0.10.2-alpha.5/exporter-darwin-arm64.zip")
 	assert.EqualValues(t, r["linux-amd64"], "https://github.com/SafetyCulture/safetyculture-exporter-ui/releases/download/v.0.10.2-alpha.5/exporter-linux-amd64.tar.gz")
-	assert.EqualValues(t, r["windows-amd64"], "https://github.com/SafetyCulture/safetyculture-exporter-ui/releases/download/v.0.10.2-alpha.5/exporter-windows-amd64.tar.gz")
+	assert.EqualValues(t, r["windows-x86_64"], "https://github.com/SafetyCulture/safetyculture-exporter-ui/releases/download/v.0.10.2-alpha.5/exporter-windows-x86_64.tar.gz")
 }
 
 func TestMapAssets_WhenOnlyOneIsPresent(t *testing.T) {
 	inputData := []github.ReleaseAsset{
 		{
-			Name:               pString("exporter-windows-amd64.tar.gz"),
-			BrowserDownloadURL: pString("https://github.com/SafetyCulture/safetyculture-exporter-ui/releases/download/v.0.10.2-alpha.5/exporter-windows-amd64.tar.gz"),
+			Name:               pString("exporter-windows-x86_64.tar.gz"),
+			BrowserDownloadURL: pString("https://github.com/SafetyCulture/safetyculture-exporter-ui/releases/download/v.0.10.2-alpha.5/exporter-windows-x86_64.tar.gz"),
 		},
 	}
 
 	r := update.MapAssets(inputData)
 	require.EqualValues(t, 1, len(inputData))
-	assert.EqualValues(t, r["windows-amd64"], "https://github.com/SafetyCulture/safetyculture-exporter-ui/releases/download/v.0.10.2-alpha.5/exporter-windows-amd64.tar.gz")
+	assert.EqualValues(t, r["windows-x86_64"], "https://github.com/SafetyCulture/safetyculture-exporter-ui/releases/download/v.0.10.2-alpha.5/exporter-windows-x86_64.tar.gz")
 }
 
 func pString(s string) *string {
