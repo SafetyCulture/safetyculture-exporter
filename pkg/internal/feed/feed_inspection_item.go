@@ -198,17 +198,24 @@ func (f *InspectionItemFeed) writeRows(ctx context.Context, exporter Exporter, r
 			for _, mediaURL := range mediaURLList {
 				wg.Add(1)
 
-				go func(mediaURL string) error {
+				go func(mediaURL string, c context.Context) error {
 					defer wg.Done()
-					buffers <- true
+					select {
+					case <-c.Done():
+						l.Infof(" ... canceling media downloads ")
+						return nil
+					default:
+						buffers <- true
 
-					if err := fetchAndWriteMedia(ctx, apiClient, exporter, row.AuditID, mediaURL); err != nil {
-						return events.WrapEventError(err, "write media")
+						if err := fetchAndWriteMedia(c, apiClient, exporter, row.AuditID, mediaURL); err != nil {
+							return events.WrapEventError(err, "write media")
+						}
+
+						<-buffers
+						return nil
 					}
 
-					<-buffers
-					return nil
-				}(mediaURL)
+				}(mediaURL, ctx)
 			}
 			wg.Wait()
 		}
