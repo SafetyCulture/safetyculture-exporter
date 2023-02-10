@@ -79,6 +79,10 @@ func ExecutePost[T any](ctx context.Context, apiClient *Client, url string, body
 }
 
 func ExecuteRawGet(ctx context.Context, apiClient *Client, url string) (*http.Response, error) {
+	if ctx.Err() != nil && ctx.Err().Error() == "context canceled" {
+		return nil, ctx.Err()
+	}
+
 	sl := apiClient.NewSling().Get(url).
 		Set(string(XRequestID), util.RequestIDFromContext(ctx))
 
