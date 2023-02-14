@@ -9,43 +9,41 @@ import (
 )
 
 func TestBuildEventError_INFO(t *testing.T) {
-	infoNonFatal := events.BuildNewEventError(
+	infoNonFatal := events.NewEventError(
+		fmt.Errorf("some error"),
 		events.ErrorSeverityInfo,
 		events.ErrorSubSystemDB,
-		false,
-		fmt.Errorf("some error"),
-	)
-	assert.True(t, infoNonFatal.IsErrorType())
-	assert.False(t, infoNonFatal.IsFeedInfoType())
-	assert.True(t, infoNonFatal.Error.IsInfo())
-	assert.False(t, infoNonFatal.Error.IsFatal())
-	assert.EqualValues(t, "some error", infoNonFatal.Error.Error())
+		false).(*events.EventError)
+
+	assert.True(t, infoNonFatal.IsInfo())
+	assert.False(t, infoNonFatal.IsWarn())
+	assert.False(t, infoNonFatal.IsError())
+	assert.False(t, infoNonFatal.IsFatal())
+	assert.EqualValues(t, "some error", infoNonFatal.Error())
 }
 
 func TestBuildEventError_WARNING(t *testing.T) {
-	infoNonFatal := events.BuildNewEventError(
+	warnNonFatal := events.NewEventError(
+		fmt.Errorf("some error"),
 		events.ErrorSeverityWarning,
 		events.ErrorSubSystemDB,
-		false,
-		fmt.Errorf("some error"),
-	)
-	assert.True(t, infoNonFatal.IsErrorType())
-	assert.False(t, infoNonFatal.IsFeedInfoType())
-	assert.True(t, infoNonFatal.Error.IsWarn())
-	assert.False(t, infoNonFatal.Error.IsFatal())
-	assert.EqualValues(t, "some error", infoNonFatal.Error.Error())
+		false).(*events.EventError)
+
+	assert.True(t, warnNonFatal.IsWarn())
+	assert.False(t, warnNonFatal.IsInfo())
+	assert.False(t, warnNonFatal.IsFatal())
+	assert.EqualValues(t, "some error", warnNonFatal.Error())
 }
 
 func TestBuildEventError_ERROR(t *testing.T) {
-	infoNonFatal := events.BuildNewEventError(
+	errorFatal := events.NewEventError(
+		fmt.Errorf("some error"),
 		events.ErrorSeverityError,
 		events.ErrorSubSystemDB,
-		true,
-		fmt.Errorf("some error"),
-	)
-	assert.True(t, infoNonFatal.IsErrorType())
-	assert.False(t, infoNonFatal.IsFeedInfoType())
-	assert.True(t, infoNonFatal.Error.IsError())
-	assert.True(t, infoNonFatal.Error.IsFatal())
-	assert.EqualValues(t, "some error", infoNonFatal.Error.Error())
+		true).(*events.EventError)
+	assert.True(t, errorFatal.IsError())
+	assert.True(t, errorFatal.IsFatal())
+	assert.False(t, errorFatal.IsInfo())
+	assert.False(t, errorFatal.IsWarn())
+	assert.EqualValues(t, "some error", errorFatal.Error())
 }

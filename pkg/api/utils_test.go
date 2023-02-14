@@ -268,7 +268,7 @@ func TestClient_DrainDeletedInspections_WhenApiReturnsError(t *testing.T) {
 	}
 	err = feed.DrainAccountActivityHistoryLog(context.TODO(), apiClient, req, fn)
 	require.NotNil(t, err)
-	assert.EqualValues(t, "api request: http://localhost:9999/accounts/history/v1/activity_log/list giving up after 2 attempt(s)", err.Error())
+	assert.EqualValues(t, "unable to access Accounts Activity Logs: api request: http://localhost:9999/accounts/history/v1/activity_log/list giving up after 2 attempt(s)", err.Error())
 }
 
 func TestClient_DrainDeletedInspections_WhenFeedFnReturnsError(t *testing.T) {

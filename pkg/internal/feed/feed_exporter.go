@@ -203,19 +203,20 @@ func (e *ExporterFeedClient) ExportFeeds(exporter Exporter, ctx context.Context)
 	log.Info("Export finished")
 	status.MarkExportCompleted()
 
+	var lastError error = nil
 	if len(e.errs) != 0 {
-		log.Warn("There were errors during the export:")
+		log.Warn("These were errors during the export:")
 		for _, ee := range e.errs {
 			switch theError := ee.(type) {
 			case *events.EventError:
 				theError.Log(log)
 			default:
+				lastError = theError
 				log.Infof(" > %s", theError.Error())
 			}
 		}
 
-		// this is temporary code until we finish a follow-up ticket that will use structured errors
-		return e.errs[0]
+		return lastError
 	}
 
 	return nil
