@@ -90,7 +90,8 @@ func WrapEventError(err error, message string) error {
 	}
 }
 
-// IsBlockingError will return true for all errors and for the EventError only if is error or fatal
+// IsBlockingError will return true for all errors
+// for the EventError only if is error or fatal
 func IsBlockingError(err error) bool {
 	if err == nil {
 		return false
