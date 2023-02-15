@@ -89,3 +89,13 @@ func WrapEventError(err error, message string) error {
 		return newErr
 	}
 }
+
+// IsBlockingError will return true for all errors and for the EventError only if is error or fatal
+func IsBlockingError(err error) bool {
+	switch theError := err.(type) {
+	case *EventError:
+		return theError.IsError() || theError.isFatal
+	default:
+		return true
+	}
+}

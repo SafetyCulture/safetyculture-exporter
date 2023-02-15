@@ -7,10 +7,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/SafetyCulture/safetyculture-exporter/pkg/logger"
-
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/httpapi"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/events"
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/logger"
 )
 
 /*
@@ -143,11 +142,15 @@ func (e *ExporterFeedClient) ExportFeeds(exporter Exporter, ctx context.Context)
 					log.Infof(" ... queueing %s\n", f.Name())
 					status.StartFeedExport(f.Name(), true)
 					exportErr := f.Export(c, e.apiClient, exporter, resp.OrganisationID)
+					var curatedErr error
 					if exportErr != nil {
-						log.Errorf("exporting feeds: %v", exportErr)
 						e.addError(exportErr)
+						if events.IsBlockingError(exportErr) {
+							log.Errorf("exporting feeds: %v", exportErr)
+							curatedErr = exportErr
+						}
 					}
-					status.FinishFeedExport(f.Name(), exportErr)
+					status.FinishFeedExport(f.Name(), curatedErr)
 					<-semaphore
 				}
 			}(feed, ctx)

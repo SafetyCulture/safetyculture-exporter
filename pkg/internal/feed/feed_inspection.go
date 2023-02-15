@@ -183,7 +183,8 @@ func (f *InspectionFeed) Export(ctx context.Context, apiClient *httpapi.Client, 
 	}
 
 	// Process Deleted Inspections
-	if err := f.processDeletedInspections(ctx, apiClient, exporter); err != nil {
+	err = f.processDeletedInspections(ctx, apiClient, exporter)
+	if events.IsBlockingError(err) {
 		return events.WrapEventError(err, "process deleted inspections")
 	}
 
