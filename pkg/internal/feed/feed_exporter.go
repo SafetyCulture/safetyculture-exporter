@@ -206,7 +206,6 @@ func (e *ExporterFeedClient) ExportFeeds(exporter Exporter, ctx context.Context)
 	log.Info("Export finished")
 	status.MarkExportCompleted()
 
-	var lastError error = nil
 	if len(e.errs) != 0 {
 		log.Warn("These were errors during the export:")
 		for _, ee := range e.errs {
@@ -214,12 +213,11 @@ func (e *ExporterFeedClient) ExportFeeds(exporter Exporter, ctx context.Context)
 			case *events.EventError:
 				theError.Log(log)
 			default:
-				lastError = theError
 				log.Infof(" > %s", theError.Error())
 			}
 		}
 
-		return lastError
+		return e.errs[0]
 	}
 
 	return nil

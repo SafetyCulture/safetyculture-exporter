@@ -170,7 +170,7 @@ func TestExporterFeedClient_ExportFeeds_should_err_when_InitFeed_errors(t *testi
 	exporter := getMockedExporter()
 	exporter.
 		On("InitFeed", mock.Anything, mock.Anything).
-		Return(events.NewEventError(fmt.Errorf("unable to truncate table"), events.ErrorSeverityError, events.ErrorSubSystemDB, false))
+		Return(events.NewEventError(fmt.Errorf("unable to truncate table"), events.ErrorSeverityError, events.ErrorSubSystemDB, true))
 
 	cfg := &feed.ExporterFeedCfg{
 		AccessToken:  "token-123",
@@ -182,7 +182,7 @@ func TestExporterFeedClient_ExportFeeds_should_err_when_InitFeed_errors(t *testi
 	ee, ok := err.(*events.EventError)
 	require.True(t, ok)
 	assert.True(t, ee.IsError())
-	assert.False(t, ee.IsFatal())
+	assert.True(t, ee.IsFatal())
 	assert.EqualValues(t, "init feed: unable to truncate table", ee.Error())
 }
 

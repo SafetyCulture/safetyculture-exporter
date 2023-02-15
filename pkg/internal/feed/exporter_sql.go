@@ -66,7 +66,7 @@ func (e *SQLExporter) InitFeed(feed Feed, opts *InitFeedOptions) error {
 	if e.AutoMigrate {
 		err := e.DB.AutoMigrate(model)
 		if err != nil {
-			return events.NewEventError(err, events.ErrorSeverityError, events.ErrorSubSystemDB, false)
+			return events.NewEventError(err, events.ErrorSeverityError, events.ErrorSubSystemDB, true)
 		}
 	}
 
@@ -76,7 +76,7 @@ func (e *SQLExporter) InitFeed(feed Feed, opts *InitFeedOptions) error {
 		).Info("truncating")
 		result := e.DB.Session(&gorm.Session{AllowGlobalUpdate: true}).Unscoped().Delete(model)
 		if result.Error != nil {
-			return events.NewEventError(result.Error, events.ErrorSeverityError, events.ErrorSubSystemDB, false)
+			return events.NewEventError(result.Error, events.ErrorSeverityError, events.ErrorSubSystemDB, true)
 		}
 	}
 

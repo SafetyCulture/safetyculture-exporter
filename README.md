@@ -40,6 +40,8 @@ To develop the `safetyculture-exporter`, you'll need the [latest version of Gola
 When adding new columns in methods that implement `Columns() []string`, we need to make sure they are added at the end.
 This way we can preserve the CSV columns in the export files.
 
+#### NOTE: Consider that every change in PKG directory can affect the Exporter-UI project as well
+
 ### Testing
 
 Locally you can run `go test ./...`, this will run all of the Unit tests and Integration tests that can be run without an external DB.
