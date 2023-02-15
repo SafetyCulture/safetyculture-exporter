@@ -56,19 +56,6 @@ func (ee *EventError) Log(log *zap.SugaredLogger) {
 	}
 }
 
-func BuildNewEventError(severity errorSeverity, subsystem errorSubSystem, fatal bool, err error) *Event {
-	return &Event{
-		EventType: EventTypeError,
-		Error: &EventError{
-			error:     err,
-			severity:  severity,
-			subsystem: subsystem,
-			isFatal:   fatal,
-		},
-		FeedInfo: nil,
-	}
-}
-
 // NewEventError creates a new EventError
 func NewEventError(err error, severity errorSeverity, subsystem errorSubSystem, fatal bool) error {
 	return &EventError{
@@ -100,5 +87,19 @@ func WrapEventError(err error, message string) error {
 
 	default:
 		return newErr
+	}
+}
+
+// IsBlockingError will return true for all errors
+// for the EventError only if is error or fatal
+func IsBlockingError(err error) bool {
+	if err == nil {
+		return false
+	}
+	switch theError := err.(type) {
+	case *EventError:
+		return theError.IsError() || theError.isFatal
+	default:
+		return true
 	}
 }

@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/httpapi"
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/events"
 )
 
 // DrainAccountActivityHistoryLog cycle through GetAccountsActivityLogResponse and adapts the filter while there is a next page
@@ -11,7 +12,9 @@ func DrainAccountActivityHistoryLog(ctx context.Context, apiClient *httpapi.Clie
 	for {
 		res, err := httpapi.ListOrganisationActivityLog(ctx, apiClient, req)
 		if err != nil {
-			return err
+			return events.NewEventErrorWithMessage(err,
+				events.ErrorSeverityWarning, events.ErrorSubSystemAPI, false,
+				"unable to access Accounts Activity Logs")
 		}
 
 		err = feedFn(res)

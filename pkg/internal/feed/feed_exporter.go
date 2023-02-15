@@ -7,10 +7,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/SafetyCulture/safetyculture-exporter/pkg/logger"
-
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/httpapi"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/events"
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/logger"
 )
 
 /*
@@ -143,11 +142,15 @@ func (e *ExporterFeedClient) ExportFeeds(exporter Exporter, ctx context.Context)
 					log.Infof(" ... queueing %s\n", f.Name())
 					status.StartFeedExport(f.Name(), true)
 					exportErr := f.Export(c, e.apiClient, exporter, resp.OrganisationID)
+					var curatedErr error
 					if exportErr != nil {
-						log.Errorf("exporting feeds: %v", exportErr)
 						e.addError(exportErr)
+						if events.IsBlockingError(exportErr) {
+							log.Errorf("exporting feeds: %v", exportErr)
+							curatedErr = exportErr
+						}
 					}
-					status.FinishFeedExport(f.Name(), exportErr)
+					status.FinishFeedExport(f.Name(), curatedErr)
 					<-semaphore
 				}
 			}(feed, ctx)
@@ -204,7 +207,7 @@ func (e *ExporterFeedClient) ExportFeeds(exporter Exporter, ctx context.Context)
 	status.MarkExportCompleted()
 
 	if len(e.errs) != 0 {
-		log.Warn("There were errors during the export:")
+		log.Warn("These were errors during the export:")
 		for _, ee := range e.errs {
 			switch theError := ee.(type) {
 			case *events.EventError:
@@ -214,7 +217,6 @@ func (e *ExporterFeedClient) ExportFeeds(exporter Exporter, ctx context.Context)
 			}
 		}
 
-		// this is temporary code until we finish a follow-up ticket that will use structured errors
 		return e.errs[0]
 	}
 

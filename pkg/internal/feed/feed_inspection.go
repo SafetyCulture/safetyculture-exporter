@@ -183,7 +183,8 @@ func (f *InspectionFeed) Export(ctx context.Context, apiClient *httpapi.Client, 
 	}
 
 	// Process Deleted Inspections
-	if err := f.processDeletedInspections(ctx, apiClient, exporter); err != nil {
+	err = f.processDeletedInspections(ctx, apiClient, exporter)
+	if err != nil && events.IsBlockingError(err) {
 		return events.WrapEventError(err, "process deleted inspections")
 	}
 
@@ -245,7 +246,9 @@ func (f *InspectionFeed) processDeletedInspections(ctx context.Context, apiClien
 		if len(pkeys) > 0 {
 			rowsUpdated, err := exporter.UpdateRows(f, pkeys, map[string]interface{}{"deleted": true})
 			if err != nil {
-				return err
+				return events.NewEventErrorWithMessage(err,
+					events.ErrorSeverityWarning, events.ErrorSubSystemDB, false,
+					"unable to database records")
 			}
 			lg.Infof("there were %d rows marked as deleted", rowsUpdated)
 		}
