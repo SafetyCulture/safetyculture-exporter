@@ -20,6 +20,8 @@ import (
 	"gorm.io/gorm/clause"
 )
 
+const feedReports = "Reports"
+
 // ReportExporter is an interface to export data feeds to CSV files
 type ReportExporter struct {
 	*SQLExporter
@@ -56,6 +58,9 @@ type reportExportResult struct {
 func (e *ReportExporter) SaveReports(ctx context.Context, apiClient *httpapi.Client, feed *InspectionFeed) error {
 	e.Logger.Info("Generating inspection reports")
 
+	status := GetExporterStatus()
+	status.Reset()
+
 	format, err := e.getFormats()
 	if err != nil {
 		return fmt.Errorf("no valid export format specified")
@@ -85,6 +90,9 @@ func (e *ReportExporter) SaveReports(ctx context.Context, apiClient *httpapi.Cli
 	if cntRsp.Error != nil {
 		return cntRsp.Error
 	}
+
+	status.started = true
+	status.StartFeedExport(feedReports, false)
 
 	limit := 1
 	offset := 0
@@ -120,6 +128,7 @@ func (e *ReportExporter) SaveReports(ctx context.Context, apiClient *httpapi.Cli
 					buffers <- true
 
 					rep := e.saveReport(c, apiClient, inspection, format)
+					status.IncrementStatus(feedReports, 1, 0)
 					e.updateReportResult(rep, res, inspection, remaining)
 
 					<-buffers
@@ -141,6 +150,9 @@ func (e *ReportExporter) SaveReports(ctx context.Context, apiClient *httpapi.Cli
 	if res.PDFErrors > 0 || res.WORDErrors > 0 {
 		err = fmt.Errorf("failed to generate %d PDF reports and %d WORD reports", res.PDFErrors, res.WORDErrors)
 	}
+
+	status.FinishFeedExport("Reports", err)
+	status.MarkExportCompleted()
 
 	return err
 }
