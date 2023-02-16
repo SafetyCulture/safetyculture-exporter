@@ -136,10 +136,10 @@ func (c *ConfigurationManager) loadConfiguration() error {
 
 	yamlContents, err := os.ReadFile(filepath.Join(c.path, c.fileName))
 	if err != nil {
-		return fmt.Errorf("read file: %w", err)
+		return fmt.Errorf("cannot read the configuration file: %w", err)
 	}
 	if err := yaml.Unmarshal(yamlContents, c.Configuration); err != nil {
-		return fmt.Errorf("unmarshal file: %w", err)
+		return fmt.Errorf("configuration file is corrupt: %w", err)
 	}
 
 	return nil

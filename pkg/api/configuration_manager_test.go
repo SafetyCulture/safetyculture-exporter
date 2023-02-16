@@ -27,7 +27,7 @@ func TestNewConfigurationManagerFromFile_when_empty_filename(t *testing.T) {
 func TestNewConfigurationManagerFromFile_when_file_is_missing(t *testing.T) {
 	cm, err := api.NewConfigurationManagerFromFile("", "abc.yaml")
 	require.Nil(t, cm)
-	assert.Equal(t, "read file: open abc.yaml: no such file or directory", err.Error())
+	assert.Equal(t, "cannot read the configuration file: open abc.yaml: no such file or directory", err.Error())
 }
 
 func TestNewConfigurationManager_should_use_last_year_time(t *testing.T) {
