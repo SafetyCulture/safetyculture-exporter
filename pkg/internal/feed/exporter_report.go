@@ -61,7 +61,7 @@ func (e *ReportExporter) SaveReports(ctx context.Context, apiClient *httpapi.Cli
 	status := GetExporterStatus()
 	status.Reset()
 
-	format, count, err := e.getFormats()
+	format, err := e.getFormats()
 	if err != nil {
 		return fmt.Errorf("no valid export format specified")
 	}
@@ -92,7 +92,7 @@ func (e *ReportExporter) SaveReports(ctx context.Context, apiClient *httpapi.Cli
 	}
 
 	status.started = true
-	status.StartFeedExport(feedReports, false)
+	status.StartFeedExport(feedReports, true)
 
 	limit := 1
 	offset := 0
@@ -128,7 +128,7 @@ func (e *ReportExporter) SaveReports(ctx context.Context, apiClient *httpapi.Cli
 					buffers <- true
 
 					rep := e.saveReport(c, apiClient, inspection, format)
-					status.IncrementStatus(feedReports, int64(count), 0)
+					status.UpdateStatus(feedReports, remaining, 0)
 					e.updateReportResult(rep, res, inspection, remaining)
 
 					<-buffers
@@ -157,27 +157,24 @@ func (e *ReportExporter) SaveReports(ctx context.Context, apiClient *httpapi.Cli
 	return err
 }
 
-func (e *ReportExporter) getFormats() (*reportExportFormat, int, error) {
+func (e *ReportExporter) getFormats() (*reportExportFormat, error) {
 	format := &reportExportFormat{}
-	count := 0
 	for _, f := range e.Format {
 		switch f {
 		case "PDF":
 			format.PDF = true
-			count++
 		case "WORD":
 			format.WORD = true
-			count++
 		default:
 			e.Logger.Infof("%s is not a valid report format", f)
 		}
 	}
 
 	if !format.PDF && !format.WORD {
-		return nil, 0, fmt.Errorf("no valid export format specified")
+		return nil, fmt.Errorf("no valid export format specified")
 	}
 
-	return format, count, nil
+	return format, nil
 }
 
 func (e *ReportExporter) saveReport(ctx context.Context, apiClient *httpapi.Client, inspection *Inspection, format *reportExportFormat) *reportExport {
