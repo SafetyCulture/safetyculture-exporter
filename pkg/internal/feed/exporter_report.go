@@ -20,7 +20,7 @@ import (
 	"gorm.io/gorm/clause"
 )
 
-const feedReports = "Reports"
+const feedReports = "reports"
 
 // ReportExporter is an interface to export data feeds to CSV files
 type ReportExporter struct {
@@ -61,7 +61,7 @@ func (e *ReportExporter) SaveReports(ctx context.Context, apiClient *httpapi.Cli
 	status := GetExporterStatus()
 	status.Reset()
 
-	format, err := e.getFormats()
+	format, count, err := e.getFormats()
 	if err != nil {
 		return fmt.Errorf("no valid export format specified")
 	}
@@ -128,7 +128,7 @@ func (e *ReportExporter) SaveReports(ctx context.Context, apiClient *httpapi.Cli
 					buffers <- true
 
 					rep := e.saveReport(c, apiClient, inspection, format)
-					status.IncrementStatus(feedReports, 1, 0)
+					status.IncrementStatus(feedReports, int64(count), 0)
 					e.updateReportResult(rep, res, inspection, remaining)
 
 					<-buffers
@@ -151,30 +151,33 @@ func (e *ReportExporter) SaveReports(ctx context.Context, apiClient *httpapi.Cli
 		err = fmt.Errorf("failed to generate %d PDF reports and %d WORD reports", res.PDFErrors, res.WORDErrors)
 	}
 
-	status.FinishFeedExport("Reports", err)
+	status.FinishFeedExport(feedReports, err)
 	status.MarkExportCompleted()
 
 	return err
 }
 
-func (e *ReportExporter) getFormats() (*reportExportFormat, error) {
+func (e *ReportExporter) getFormats() (*reportExportFormat, int, error) {
 	format := &reportExportFormat{}
+	count := 0
 	for _, f := range e.Format {
 		switch f {
 		case "PDF":
 			format.PDF = true
+			count++
 		case "WORD":
 			format.WORD = true
+			count++
 		default:
 			e.Logger.Infof("%s is not a valid report format", f)
 		}
 	}
 
 	if !format.PDF && !format.WORD {
-		return nil, fmt.Errorf("no valid export format specified")
+		return nil, 0, fmt.Errorf("no valid export format specified")
 	}
 
-	return format, nil
+	return format, count, nil
 }
 
 func (e *ReportExporter) saveReport(ctx context.Context, apiClient *httpapi.Client, inspection *Inspection, format *reportExportFormat) *reportExport {
