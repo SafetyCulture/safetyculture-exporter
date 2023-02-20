@@ -22,7 +22,8 @@
             "audit_item_id": null,
             "audit_item_label": null,
             "organisation_id": "role_123",
-            "competed_at": "2020-11-05T12:28:42.000Z"
+            "completed_at": "2020-11-05T12:28:42.000Z",
+            "action_label": "{\"label_id\":\"fb209100-7351-43a9-a667-2478faa621ae\"|\"label_name\":\"label\"}"
         },
         {
             "id": "456",
@@ -42,7 +43,8 @@
             "audit_item_id": "872",
             "audit_item_label": "Item title",
             "organisation_id": "role_123",
-            "completed_at": "2020-11-18T02:07:50.702Z"
+            "completed_at": "2020-11-18T02:07:50.702Z",
+            "action_label": "{\"label_id\":\"fb209100-7351-43a9-a667-2478faa621ae\"|\"label_name\":\"label\"}"
         }
     ]
 }
