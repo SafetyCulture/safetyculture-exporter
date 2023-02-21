@@ -1,5 +1,5 @@
 PACKAGE_NAME        	:= "github.com/safetyculture/safetyculture-exporter"
-GOLANG_CROSS_VERSION  := v1.18.1
+GOLANG_CROSS_VERSION  := v1.20.0
 
 .PHONY: help
 help:
@@ -27,7 +27,7 @@ release-snapshot:
 		-v `pwd`:/go/src/$(PACKAGE_NAME) \
 		-w /go/src/$(PACKAGE_NAME) \
 		goreleaser/goreleaser-cross:${GOLANG_CROSS_VERSION} \
-		-f .goreleaser.yml --rm-dist --snapshot --skip-validate --skip-publish
+		-f .goreleaser.yml --clean --snapshot --skip-validate --skip-publish
 
 .PHONY: release-dry-run
 release-dry-run:
@@ -38,7 +38,7 @@ release-dry-run:
 		-v `pwd`:/go/src/$(PACKAGE_NAME) \
 		-w /go/src/$(PACKAGE_NAME) \
 		goreleaser/goreleaser-cross:${GOLANG_CROSS_VERSION} \
-		-f .goreleaser.yml --rm-dist --skip-validate --skip-publish
+		-f .goreleaser.yml --clean --skip-validate --skip-publish
 
 .PHONY: release
 release:
@@ -51,4 +51,4 @@ release:
 		-v `pwd`:/go/src/$(PACKAGE_NAME) \
 		-w /go/src/$(PACKAGE_NAME) \
 		goreleaser/goreleaser-cross:${GOLANG_CROSS_VERSION} \
-		-f .goreleaser.yml release --rm-dist
+		-f .goreleaser.yml release --clean
