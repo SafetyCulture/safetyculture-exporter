@@ -38,7 +38,7 @@ release-dry-run:
 		-v `pwd`:/go/src/$(PACKAGE_NAME) \
 		-w /go/src/$(PACKAGE_NAME) \
 		goreleaser/goreleaser-cross:${GOLANG_CROSS_VERSION} \
-		-f .goreleaser.yml --clean  --skip-publish
+		-f .goreleaser.yml --clean --skip-validate --skip-publish
 
 .PHONY: release
 release:
