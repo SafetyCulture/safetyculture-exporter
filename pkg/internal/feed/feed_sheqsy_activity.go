@@ -17,7 +17,7 @@ import (
 
 // SheqsyActivity represents a user in sheqsy
 type SheqsyActivity struct {
-	ActivityUID             string    `json:"activityUId" csv:"activity_uid" gorm:"primarykey;column:activity_uid;size:32"`
+	ActivityUID             string    `json:"activityUId" csv:"activity_uid" gorm:"primarykey;column:activity_uid;size:36"`
 	ActivityID              int       `json:"activityId" csv:"activity_id" gorm:"column:activity_id"`
 	ExternalID              *string   `json:"externalId" csv:"external_id" gorm:"column:external_id"`
 	Email                   string    `json:"email" csv:"email" gorm:"column:email"`
