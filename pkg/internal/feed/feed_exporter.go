@@ -322,6 +322,7 @@ func (e *ExporterFeedClient) PrintSchemas(exporter *SchemaExporter) error {
 func (e *ExporterFeedClient) ExportInspectionReports(exporter *ReportExporter, ctx context.Context) error {
 	log := logger.GetLogger()
 	status := GetExporterStatus()
+	status.Reset()
 	status.started = true
 
 	resp, err := httpapi.WhoAmI(ctx, e.apiClient)
