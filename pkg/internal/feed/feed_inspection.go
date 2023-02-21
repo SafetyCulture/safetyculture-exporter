@@ -188,7 +188,13 @@ func (f *InspectionFeed) Export(ctx context.Context, apiClient *httpapi.Client, 
 		return events.WrapEventError(err, "process deleted inspections")
 	}
 
-	return exporter.FinaliseExport(f, &[]*Inspection{})
+	err = exporter.FinaliseExport(f, &[]*Inspection{})
+	if err != nil {
+		return events.WrapEventError(err, "finalise export")
+	}
+
+	status.FinishFeedExport(f.Name(), err)
+	return nil
 }
 
 func (f *InspectionFeed) processNewInspections(ctx context.Context, apiClient *httpapi.Client, exporter Exporter, orgID string, status *ExportStatus) error {
