@@ -1,6 +1,6 @@
 module github.com/SafetyCulture/safetyculture-exporter
 
-go 1.20
+go 1.18
 
 require (
 	github.com/dghubble/sling v1.4.1
