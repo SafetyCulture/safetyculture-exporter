@@ -1,3 +1,3 @@
-action_id,title,description,site_id,priority,status,due_date,created_at,modified_at,exported_at,creator_user_id,creator_user_name,template_id,audit_id,audit_title,audit_item_id,audit_item_label,organisation_id,completed_at
-123,action 1,action 1 description,,LOW,COMPLETE,--date--,--date--,--date--,--date--,user_a,User A,,,,,,role_123,
-456,action 2,,site_123,LOW,TODO,--date--,--date--,--date--,--date--,user_b,User B,template_123,audit_123,Inspection title,872,Item title,role_123,--date--
+action_id,title,description,site_id,priority,status,due_date,created_at,modified_at,exported_at,creator_user_id,creator_user_name,template_id,audit_id,audit_title,audit_item_id,audit_item_label,organisation_id,completed_at,action_label
+123,action 1,action 1 description,,LOW,COMPLETE,--date--,--date--,--date--,--date--,user_a,User A,,,,,,role_123,--date--,"{""label_id"":""fb209100-7351-43a9-a667-2478faa621ae""|""label_name"":""label""}"
+456,action 2,,site_123,LOW,TODO,--date--,--date--,--date--,--date--,user_b,User B,template_123,audit_123,Inspection title,872,Item title,role_123,--date--,"{""label_id"":""fb209100-7351-43a9-a667-2478faa621ae""|""label_name"":""label""}"
