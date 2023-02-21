@@ -14,8 +14,8 @@ import (
 
 // SheqsyDepartmentEmployee represents a user in sheqsy
 type SheqsyDepartmentEmployee struct {
-	EmployeeUID   string    `json:"employeeUId" csv:"employee_uid" gorm:"primaryKey;column:employee_uid;size:32"`
-	DepartmentUID string    `json:"departmentUId" csv:"department_uid" gorm:"primaryKey;column:department_uid;size:32"`
+	EmployeeUID   string    `json:"employeeUId" csv:"employee_uid" gorm:"primaryKey;column:employee_uid;size:36"`
+	DepartmentUID string    `json:"departmentUId" csv:"department_uid" gorm:"primaryKey;column:department_uid;size:36"`
 	EmployeeID    int       `json:"employeeId" csv:"employee_id" gorm:"column:employee_id"`
 	DepartmentID  int       `json:"departmentId" csv:"department_id" gorm:"column:department_id"`
 	ExportedAt    time.Time `json:"exported_at" csv:"exported_at" gorm:"autoUpdateTime"`
