@@ -30,6 +30,7 @@ jobs:
           # Workaround a bug in github actions:
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
           git config --global --add safe.directory /home/runner/work/safetyculture-exporter/safetyculture-exporter
+          git config --system --add safe.directory *
 
       - name: Setup release environment
         run: |-
