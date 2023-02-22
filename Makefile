@@ -1,5 +1,5 @@
 PACKAGE_NAME        	:= "github.com/safetyculture/safetyculture-exporter"
-GOLANG_CROSS_VERSION  := v1.20.0
+GOLANG_CROSS_VERSION  := v1.20.1
 
 .PHONY: help
 help:
