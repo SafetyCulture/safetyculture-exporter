@@ -20,9 +20,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Git Fech
-        run: git fetch --force --tags
-
       - name: Setup GO
         uses: actions/setup-go@v3
         with:
