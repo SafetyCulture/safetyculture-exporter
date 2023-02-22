@@ -31,10 +31,9 @@ jobs:
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
           git config --global --add safe.directory /home/runner/work/safetyculture-exporter/safetyculture-exporter
 
-      - uses: goreleaser/goreleaser-action@v4
-        with:
-          distribution: goreleaser
-          version: latest
-          args: release --clean
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Setup release environment
+        run: |-
+          echo 'GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}' >> .release-env
+
+      - name: Run GoReleaser
+        run: make release
