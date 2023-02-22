@@ -24,6 +24,7 @@ jobs:
         run: |
           # Workaround a bug in github actions:
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git config --global --add safe.directory /home/runner/work/safetyculture-exporter/safetyculture-exporter
 
       - name: Set up Go
         uses: actions/setup-go@v3
