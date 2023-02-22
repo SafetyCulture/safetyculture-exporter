@@ -16,10 +16,9 @@ jobs:
       contents: write
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
-
       - name: Set up Go
         uses: actions/setup-go@v2
         with:
@@ -28,6 +27,9 @@ jobs:
       - name: Setup release environment
         run: |-
           echo 'GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}' >> .release-env
+
+      - name: Prepare Safe Directory
+        run: git config --system --add safe.directory /home/runner/work/safetyculture-exporter/safetyculture-exporter
 
       - name: Run GoReleaser
         run: make release
