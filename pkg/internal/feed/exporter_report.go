@@ -59,7 +59,6 @@ func (e *ReportExporter) SaveReports(ctx context.Context, apiClient *httpapi.Cli
 	e.Logger.Info("Generating inspection reports")
 
 	status := GetExporterStatus()
-	status.Reset()
 
 	format, err := e.getFormats()
 	if err != nil {

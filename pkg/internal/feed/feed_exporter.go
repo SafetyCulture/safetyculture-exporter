@@ -321,6 +321,9 @@ func (e *ExporterFeedClient) PrintSchemas(exporter *SchemaExporter) error {
 
 func (e *ExporterFeedClient) ExportInspectionReports(exporter *ReportExporter, ctx context.Context) error {
 	log := logger.GetLogger()
+	status := GetExporterStatus()
+	status.Reset()
+	status.started = true
 
 	resp, err := httpapi.WhoAmI(ctx, e.apiClient)
 	if err != nil {
@@ -330,7 +333,10 @@ func (e *ExporterFeedClient) ExportInspectionReports(exporter *ReportExporter, c
 	log.Infof("Exporting inspection reports by user: %s %s", resp.Firstname, resp.Lastname)
 
 	feed := e.getInspectionFeed()
+	status.StartFeedExport(feed.Name(), true)
 	if err := feed.Export(ctx, e.apiClient, exporter, resp.OrganisationID); err != nil {
+		status.FinishFeedExport(feed.Name(), err)
+		status.MarkExportCompleted()
 		return fmt.Errorf("export inspection feed: %w", err)
 	}
 
