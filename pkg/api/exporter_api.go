@@ -216,6 +216,43 @@ func (s *SafetyCultureExporter) RunSQL() error {
 	return nil
 }
 
+// RunSQLite - runs the export and will save into a local sqlite db file
+func (s *SafetyCultureExporter) RunSQLite() error {
+	ctx, cancelFunc = context.WithCancel(context.Background())
+	exportPath := s.cfg.Export.Path
+
+	err := os.MkdirAll(exportPath, os.ModePerm)
+	if err != nil {
+		return errors.Wrapf(err, "Failed to create directory %s", exportPath)
+	}
+
+	if s.cfg.Export.Media {
+		err := os.MkdirAll(s.cfg.Export.MediaPath, os.ModePerm)
+		if err != nil {
+			return errors.Wrapf(err, "Failed to create directory %s", s.cfg.Export.MediaPath)
+		}
+	}
+
+	sqlExporter, err := feed.NewSQLiteExporter(exportPath, s.cfg.Export.MediaPath)
+	if err != nil {
+		return errors.Wrap(err, "unable to create sqlite exporter")
+	}
+
+	exporterApp := feed.NewExporterApp(s.apiClient, s.sheqsyApiClient, s.cfg.ToExporterConfig())
+	if s.cfg.Export.SchemaOnly {
+		return exporterApp.ExportSchemas(sqlExporter)
+	}
+
+	if len(s.cfg.AccessToken) != 0 || len(s.cfg.SheqsyUsername) != 0 {
+		err = exporterApp.ExportFeeds(sqlExporter, ctx)
+		if err != nil {
+			return errors.Wrap(err, "exporting feeds")
+		}
+	}
+
+	return nil
+}
+
 func (s *SafetyCultureExporter) RunCSV() error {
 	ctx, cancelFunc = context.WithCancel(context.Background())
 	exportPath := s.cfg.Export.Path

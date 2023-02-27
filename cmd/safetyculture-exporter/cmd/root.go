@@ -19,7 +19,7 @@ import (
 )
 
 var cfgFile string
-var connectionFlags, dbFlags, csvFlags, exportFlags, mediaFlags, inspectionFlags, actionFlags,
+var connectionFlags, dbFlags, sqliteFlags, csvFlags, exportFlags, mediaFlags, inspectionFlags, actionFlags,
 	templatesFlag, tablesFlag, schemasFlag, reportFlags, sitesFlags *flag.FlagSet
 
 // RootCmd represents the base command when called without any subcommands.
@@ -74,6 +74,7 @@ func init() {
 	// Add sub-commands
 	addCmd(export.SQLCmd(), connectionFlags, exportFlags, dbFlags, inspectionFlags, actionFlags, templatesFlag, tablesFlag, schemasFlag, mediaFlags, sitesFlags)
 	addCmd(export.CSVCmd(), connectionFlags, exportFlags, csvFlags, inspectionFlags, actionFlags, templatesFlag, tablesFlag, schemasFlag, mediaFlags, sitesFlags)
+	addCmd(export.SQLiteCmd(), connectionFlags, exportFlags, sqliteFlags, inspectionFlags, actionFlags, templatesFlag, tablesFlag, schemasFlag, mediaFlags, sitesFlags)
 	addCmd(export.InspectionJSONCmd(), exportFlags, connectionFlags, inspectionFlags, actionFlags, templatesFlag)
 	addCmd(export.ReportCmd(), connectionFlags, exportFlags, inspectionFlags, actionFlags, templatesFlag, reportFlags)
 	addCmd(export.PrintSchemaCmd())
@@ -101,6 +102,8 @@ func configFlags() {
 	dbFlags = flag.NewFlagSet("db", flag.ContinueOnError)
 	dbFlags.String("db-dialect", "mysql", "Database dialect. mysql, postgres and sqlserver are the only valid options.")
 	dbFlags.String("db-connection-string", "", "Database connection string")
+
+	sqliteFlags = flag.NewFlagSet("sqlite", flag.ContinueOnError)
 
 	csvFlags = flag.NewFlagSet("csv", flag.ContinueOnError)
 	csvFlags.Int("max-rows-per-file", 1000000, "Maximum number of rows in a csv file. New files will be created when reaching this limit.")

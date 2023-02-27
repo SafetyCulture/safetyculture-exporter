@@ -36,6 +36,20 @@ safetyculture-exporter csv --export-path /path/to/export/to`,
 	}
 }
 
+// SQLiteCmd is used to export data into SQLite db
+func SQLiteCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:   "sqlite",
+		Short: "Export SafetyCulture data to a local SQLite file",
+		Example: `// Limit inspections and schedules to these templates
+safetyculture-exporter sqlite --template-ids template_F492E54D87F2419E9398F7BDCA0FA5D9,template_d54e06808d2f11e2893e83a731dba0ca
+
+// Customise export location
+safetyculture-exporter sqlite --export-path /path/to/export/to`,
+		RunE: runSQLite,
+	}
+}
+
 // InspectionJSONCmd is used to export inspections to json files
 func InspectionJSONCmd() *cobra.Command {
 	return &cobra.Command{
@@ -91,6 +105,13 @@ func runCSV(cmd *cobra.Command, args []string) error {
 	exp := NewSafetyCultureExporter(viper.GetViper())
 	err := exp.RunCSV()
 	util.Check(err, "error while exporting CSV")
+	return nil
+}
+
+func runSQLite(cmd *cobra.Command, args []string) error {
+	exp := NewSafetyCultureExporter(viper.GetViper())
+	err := exp.RunSQLite()
+	util.Check(err, "error while exporting SQLITE")
 	return nil
 }
 
