@@ -223,7 +223,7 @@ func NewSQLExporter(dialect, connectionString string, autoMigrate bool, exportMe
 
 // NewSQLiteExporter creates a new instance of SQLExporter for SQLITE
 func NewSQLiteExporter(exportPath string, exportMediaPath string) (*SQLExporter, error) {
-	sqlExporter, err := NewSQLExporter("sqlite", filepath.Join(exportPath, "sqlite.db"), true, exportMediaPath)
+	sqlExporter, err := NewSQLExporter("sqlite", filepath.Join(exportPath, "sqlite_export.db"), true, exportMediaPath)
 	if err != nil {
 		return nil, err
 	}
