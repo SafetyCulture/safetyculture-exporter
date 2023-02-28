@@ -18,7 +18,7 @@ const RepoExporter string = "safetyculture-exporter"
 const archDarwinAmd64 string = "darwin-amd64"
 const archDarwinArm64 string = "darwin-arm64"
 const archLinuxAmd64 string = "linux-amd64"
-const archWindowsAmd64 string = "windows-x86_64"
+const archWindows string = "windows-amd64"
 
 // ReleaseInfo is the details of an available release.
 type ReleaseInfo struct {
@@ -77,8 +77,8 @@ func MapAssets(assets []github.ReleaseAsset) map[string]string {
 			result[archDarwinArm64] = *asset.BrowserDownloadURL
 		case strings.Contains(*asset.Name, archLinuxAmd64):
 			result[archLinuxAmd64] = *asset.BrowserDownloadURL
-		case strings.Contains(*asset.Name, archWindowsAmd64):
-			result[archWindowsAmd64] = *asset.BrowserDownloadURL
+		case strings.Contains(*asset.Name, "windows"):
+			result[archWindows] = *asset.BrowserDownloadURL
 		}
 	}
 	return result
