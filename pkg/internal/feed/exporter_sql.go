@@ -221,6 +221,19 @@ func NewSQLExporter(dialect, connectionString string, autoMigrate bool, exportMe
 	}, nil
 }
 
+// NewSQLiteExporter creates a new instance of SQLExporter for SQLITE
+func NewSQLiteExporter(exportPath string, exportMediaPath string) (*SQLExporter, error) {
+	sqlExporter, err := NewSQLExporter("sqlite", filepath.Join(exportPath, "sqlite_export.db"), true, exportMediaPath)
+	if err != nil {
+		return nil, err
+	}
+	if res := sqlExporter.DB.Exec("PRAGMA busy_timeout = 20000"); res.Error != nil {
+		return nil, res.Error
+	}
+
+	return sqlExporter, nil
+}
+
 // GetDatabase validates the db credentials and return a DB connection
 func GetDatabase(dialect string, connectionString string) (*gorm.DB, error) {
 	var dialector gorm.Dialector
