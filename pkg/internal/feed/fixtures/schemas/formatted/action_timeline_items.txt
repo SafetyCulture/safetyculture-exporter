@@ -1,0 +1,14 @@
++---------------------+----------+-------------+
+|        NAME         |   TYPE   | PRIMARY KEY |
++---------------------+----------+-------------+
+| item_id             | TEXT     | true        |
+| task_id             | TEXT     |             |
+| organisation_id     | TEXT     |             |
+| action_creator_id   | TEXT     |             |
+| action_creator_name | TEXT     |             |
+| timestamp           | datetime |             |
+| creator_id          | TEXT     |             |
+| creator_name        | TEXT     |             |
+| item_type           | TEXT     |             |
+| item_data           | TEXT     |             |
++---------------------+----------+-------------+
