@@ -93,7 +93,17 @@ func (client *Client) Export(ctx context.Context) error {
 		client.exporter.WriteRow(row.ID, inspection)
 	}
 
-	callback := func(resp *httpapi.ListInspectionsResponse) error {
+	callback := func(resp *httpapi.ListInspectionsResponse, l *zap.SugaredLogger) error {
+		remaining := resp.Total - resp.Count
+		if remaining < 0 {
+			remaining = resp.Count
+		}
+		l.
+			With("total", resp.Total).
+			With("processing", resp.Count).
+			With("remaining", remaining).
+			Info("export")
+
 		n := len(resp.Inspections)
 		for _, row := range resp.Inspections {
 			skip := skipIDs[row.ID]
