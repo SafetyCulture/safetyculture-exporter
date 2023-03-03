@@ -8,6 +8,7 @@ import (
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/httpapi"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/inspections"
 	"github.com/stretchr/testify/assert"
+	"go.uber.org/zap"
 	"gopkg.in/h2non/gock.v1"
 )
 
@@ -38,7 +39,7 @@ func TestAPIClientDrainInspections_should_return_for_as_long_next_page_set(t *te
 		context.Background(),
 		apiClient,
 		&httpapi.ListInspectionsParams{},
-		func(data *httpapi.ListInspectionsResponse) error {
+		func(data *httpapi.ListInspectionsResponse, log *zap.SugaredLogger) error {
 			for _, inspection := range data.Inspections {
 				auditIDs = append(auditIDs, inspection.ID)
 			}
@@ -66,7 +67,7 @@ func TestDrainInspectionsWithAPIError(t *testing.T) {
 		context.Background(),
 		apiClient,
 		&httpapi.ListInspectionsParams{},
-		func(data *httpapi.ListInspectionsResponse) error {
+		func(data *httpapi.ListInspectionsResponse, log *zap.SugaredLogger) error {
 			return nil
 		})
 	assert.NotNil(t, err)
@@ -98,7 +99,7 @@ func TestDrainInspectionsWithCallbackError(t *testing.T) {
 		context.Background(),
 		apiClient,
 		&httpapi.ListInspectionsParams{},
-		func(data *httpapi.ListInspectionsResponse) error {
+		func(data *httpapi.ListInspectionsResponse, log *zap.SugaredLogger) error {
 			return fmt.Errorf("test error")
 		})
 	assert.NotNil(t, err)
