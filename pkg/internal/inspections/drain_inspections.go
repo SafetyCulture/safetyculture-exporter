@@ -4,10 +4,13 @@ import (
 	"context"
 
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/httpapi"
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/logger"
+	"go.uber.org/zap"
 )
 
 // DrainInspections fetches the inspections in batches and triggers the callback for each batch.
-func DrainInspections(ctx context.Context, apiClient *httpapi.Client, params *httpapi.ListInspectionsParams, callback func(*httpapi.ListInspectionsResponse) error) error {
+func DrainInspections(ctx context.Context, apiClient *httpapi.Client, params *httpapi.ListInspectionsParams, callback func(*httpapi.ListInspectionsResponse, *zap.SugaredLogger) error) error {
+	l := logger.GetLogger().With("type", "inspection-json")
 	modifiedAfter := params.ModifiedAfter
 
 	for {
@@ -19,13 +22,14 @@ func DrainInspections(ctx context.Context, apiClient *httpapi.Client, params *ht
 				TemplateIDs:   params.TemplateIDs,
 				Archived:      params.Archived,
 				Completed:     params.Completed,
+				Limit:         100,
 			},
 		)
 		if err != nil {
 			return err
 		}
 
-		if err := callback(resp); err != nil {
+		if err := callback(resp, l); err != nil {
 			return err
 		}
 
