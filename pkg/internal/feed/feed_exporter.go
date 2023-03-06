@@ -270,8 +270,17 @@ func (e *ExporterFeedClient) GetFeeds() []Feed {
 			ModifiedAfter: e.configuration.ExportModifiedAfterTime,
 			Incremental:   e.configuration.ExportIncremental,
 		},
+		&ActionTimelineItemFeed{
+			ModifiedAfter: e.configuration.ExportModifiedAfterTime,
+			Incremental:   e.configuration.ExportIncremental,
+			Limit:         e.configuration.ExportActionLimit,
+		},
 		&IssueFeed{
 			Incremental: false, // this was disabled on request. Issues API doesn't support modified After filters
+			Limit:       e.configuration.ExportIssueLimit,
+		},
+		&IssueTimelineItemFeed{
+			Incremental: false, // Issues API doesn't support modified after filters
 			Limit:       e.configuration.ExportIssueLimit,
 		},
 		&AssetFeed{
