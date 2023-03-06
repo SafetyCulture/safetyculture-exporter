@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/logger"
@@ -34,6 +35,7 @@ type Action struct {
 	OrganisationID  string     `json:"organisation_id" csv:"organisation_id" gorm:"index:idx_act_modified_at;size:37"`
 	CompletedAt     *time.Time `json:"completed_at" csv:"completed_at"`
 	ActionLabel     string     `json:"action_label" csv:"action_label"`
+	Deleted         bool       `json:"deleted" csv:"deleted"`
 }
 
 // ActionFeed is a representation of the actions feed
@@ -160,5 +162,39 @@ func (f *ActionFeed) Export(ctx context.Context, apiClient *httpapi.Client, expo
 	if err := DrainFeed(ctx, apiClient, req, drainFn); err != nil {
 		return events.WrapEventError(err, fmt.Sprintf("feed %q", f.Name()))
 	}
+
+	// Process Deleted Actions
+	err = f.processDeletedActions(ctx, apiClient, exporter)
+	if err != nil && events.IsBlockingError(err) {
+		return events.WrapEventError(err, "process deleted actions")
+	}
+
 	return exporter.FinaliseExport(f, &[]*Action{})
+}
+
+func (f *ActionFeed) processDeletedActions(ctx context.Context, apiClient *httpapi.Client, exporter Exporter) error {
+	lg := logger.GetLogger()
+	dreq := httpapi.NewGetAccountsActivityLogRequest(f.Limit, f.ModifiedAfter, []string{"action.actions_deleted"})
+	delFn := func(resp *httpapi.GetAccountsActivityLogResponse) error {
+		var pkeys = make([]string, 0, len(resp.Activities))
+		for _, act := range resp.Activities {
+			for key, value := range act.Metadata {
+				if strings.HasPrefix(key, "action_id") {
+					pkeys = append(pkeys, value)
+				}
+			}
+		}
+		if len(pkeys) > 0 {
+			rowsUpdated, err := exporter.UpdateRows(f, pkeys, map[string]interface{}{"deleted": true})
+			if err != nil {
+				return events.NewEventErrorWithMessage(err,
+					events.ErrorSeverityWarning, events.ErrorSubSystemDB, false,
+					"unable to database records")
+			}
+			lg.Infof("there were %d rows marked as deleted", rowsUpdated)
+		}
+
+		return nil
+	}
+	return DrainAccountActivityHistoryLog(ctx, apiClient, dreq, delFn)
 }

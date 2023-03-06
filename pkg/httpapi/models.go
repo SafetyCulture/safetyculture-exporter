@@ -77,7 +77,7 @@ type timeFrame struct {
 
 // NewGetAccountsActivityLogRequest build a request for AccountsActivityLog
 // for now it serves the purposes only for inspection.deleted. If we need later, we can change this builder
-func NewGetAccountsActivityLogRequest(pageSize int, from time.Time) *GetAccountsActivityLogRequestParams {
+func NewGetAccountsActivityLogRequest(pageSize int, from time.Time, events []string) *GetAccountsActivityLogRequestParams {
 	return &GetAccountsActivityLogRequestParams{
 		PageSize: pageSize,
 		Filters: accountsActivityLogFilter{
@@ -85,7 +85,7 @@ func NewGetAccountsActivityLogRequest(pageSize int, from time.Time) *GetAccounts
 				From: from,
 			},
 			Limit:      pageSize,
-			EventTypes: []string{"inspection.deleted"},
+			EventTypes: events,
 		},
 	}
 }
