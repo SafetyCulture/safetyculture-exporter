@@ -21,4 +21,5 @@
 | organisation_id   | TEXT     |             |
 | completed_at      | datetime |             |
 | action_label      | TEXT     |             |
+| deleted           | numeric  |             |
 +-------------------+----------+-------------+
