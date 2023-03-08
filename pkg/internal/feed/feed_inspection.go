@@ -47,6 +47,7 @@ type Inspection struct {
 	Longitude       *float64   `json:"longitude" csv:"longitude"`
 	WebReportLink   string     `json:"web_report_link" csv:"web_report_link"`
 	Deleted         bool       `json:"deleted" csv:"deleted"`
+	AssetID         string     `json:"asset_id" csv:"asset_id" gorm:"size:36"`
 }
 
 // InspectionFeed is a representation of the inspections feed

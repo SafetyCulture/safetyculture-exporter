@@ -23,7 +23,8 @@
             "audit_item_label": null,
             "organisation_id": "role_123",
             "completed_at": "2020-11-05T12:28:42.000Z",
-            "action_label": "{\"label_id\":\"fb209100-7351-43a9-a667-2478faa621ae\"|\"label_name\":\"label\"}"
+            "action_label": "{\"label_id\":\"fb209100-7351-43a9-a667-2478faa621ae\"|\"label_name\":\"label\"}",
+            "asset_id": "asset_id_123"
         },
         {
             "id": "456",

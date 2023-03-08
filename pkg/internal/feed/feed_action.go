@@ -36,6 +36,7 @@ type Action struct {
 	CompletedAt     *time.Time `json:"completed_at" csv:"completed_at"`
 	ActionLabel     string     `json:"action_label" csv:"action_label"`
 	Deleted         bool       `json:"deleted" csv:"deleted"`
+	AssetID         string     `json:"asset_id" csv:"asset_id" gorm:"size:36"`
 }
 
 // ActionFeed is a representation of the actions feed

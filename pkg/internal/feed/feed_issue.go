@@ -33,6 +33,7 @@ type Issue struct {
 	CategoryLabel   string     `json:"category_label" csv:"category_label"`
 	ModifiedAt      time.Time  `json:"modified_at" csv:"modified_at"`
 	CompletedAt     *time.Time `json:"completed_at" csv:"completed_at"`
+	AssetID         string     `json:"asset_id" csv:"asset_id" gorm:"size:36"`
 }
 
 // IssueFeed is a representation of the issues feed
