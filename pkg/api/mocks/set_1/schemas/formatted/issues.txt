@@ -20,4 +20,5 @@
 | category_label    | TEXT     |             |
 | modified_at       | datetime |             |
 | completed_at      | datetime |             |
+| asset_id          | TEXT     |             |
 +-------------------+----------+-------------+

@@ -22,4 +22,5 @@
 | completed_at      | datetime |             |
 | action_label      | TEXT     |             |
 | deleted           | numeric  |             |
+| asset_id          | TEXT     |             |
 +-------------------+----------+-------------+

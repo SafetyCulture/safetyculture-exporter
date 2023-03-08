@@ -20,4 +20,5 @@
 | audit_item_label  | TEXT     |             |
 | organisation_id   | TEXT     |             |
 | completed_at      | datetime |             |
+| asset_id          | TEXT     |             |
 +-------------------+----------+-------------+
