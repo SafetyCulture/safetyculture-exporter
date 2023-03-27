@@ -66,3 +66,4 @@ Acceptable versions include `v3.0.0`, `v3.0.0-alpha.22`, `v3.0.0-prealpha.22`, `
 4. Push your tag to GitHub\
 `git push origin v3.0.0`
 5. Update the [release draft](https://github.com/SafetyCulture/safetyculture-exporter/releases) and publish it!
+6. Uploade the exe file to https://www.virustotal.com and check for false positives
