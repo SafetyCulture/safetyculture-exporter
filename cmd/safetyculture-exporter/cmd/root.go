@@ -56,7 +56,7 @@ func Execute() {
 	}
 }
 
-func writeDocs(cmd *cobra.Command, args []string) error {
+func writeDocs(*cobra.Command, []string) error {
 	return doc.GenMarkdownTree(RootCmd, "docs/")
 }
 

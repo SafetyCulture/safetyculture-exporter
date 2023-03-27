@@ -87,42 +87,42 @@ func ReportCmd() *cobra.Command {
 	}
 }
 
-func runSQL(cmd *cobra.Command, args []string) error {
+func runSQL(*cobra.Command, []string) error {
 	exp := NewSafetyCultureExporter(viper.GetViper())
 	err := exp.RunSQL()
 	util.Check(err, "error while exporting SQL")
 	return nil
 }
 
-func runInspectionJSON(cmd *cobra.Command, args []string) error {
+func runInspectionJSON(*cobra.Command, []string) error {
 	exp := NewSafetyCultureExporter(viper.GetViper())
 	err := exp.RunInspectionJSON()
 	util.Check(err, "error while exporting JSON")
 	return nil
 }
 
-func runCSV(cmd *cobra.Command, args []string) error {
+func runCSV(*cobra.Command, []string) error {
 	exp := NewSafetyCultureExporter(viper.GetViper())
 	err := exp.RunCSV()
 	util.Check(err, "error while exporting CSV")
 	return nil
 }
 
-func runSQLite(cmd *cobra.Command, args []string) error {
+func runSQLite(*cobra.Command, []string) error {
 	exp := NewSafetyCultureExporter(viper.GetViper())
 	err := exp.RunSQLite()
 	util.Check(err, "error while exporting SQLITE")
 	return nil
 }
 
-func printSchema(cmd *cobra.Command, args []string) error {
+func printSchema(*cobra.Command, []string) error {
 	exp := NewSafetyCultureExporter(viper.GetViper())
 	err := exp.RunPrintSchema()
 	util.Check(err, "error while printing schema")
 	return nil
 }
 
-func runInspectionReports(cmd *cobra.Command, args []string) error {
+func runInspectionReports(*cobra.Command, []string) error {
 	exp := NewSafetyCultureExporter(viper.GetViper())
 	err := exp.RunInspectionReports()
 	util.Check(err, "failed to generate reports")

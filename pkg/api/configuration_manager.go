@@ -246,10 +246,8 @@ func (c *ConfigurationManager) SaveConfiguration() error {
 
 // BuildConfigurationWithDefaults will set up an initial configuration with default values
 func BuildConfigurationWithDefaults() *ExporterConfiguration {
-	exportLocation, err := filepath.Rel("./", "export")
-	if err != nil {
-		exportLocation = "export"
-	}
+	exportLocation := getExportLocation()
+	mediaPathLocation := filepath.Join(exportLocation, "media")
 
 	cfg := &ExporterConfiguration{}
 	cfg.API.SheqsyURL = "https://app.sheqsy.com"
@@ -268,7 +266,7 @@ func BuildConfigurationWithDefaults() *ExporterConfiguration {
 	cfg.Export.Inspection.WebReportLink = "private"
 	cfg.Export.Issue.Limit = 100
 	cfg.Export.Path = exportLocation
-	cfg.Export.MediaPath = filepath.Join(exportLocation, "media")
+	cfg.Export.MediaPath = mediaPathLocation
 	cfg.Export.TimeZone = "UTC"
 	cfg.Export.ModifiedAfter = mTime{time.Now().UTC().AddDate(-1, 0, 0)}
 	cfg.Report.FilenameConvention = "INSPECTION_TITLE"
@@ -276,13 +274,21 @@ func BuildConfigurationWithDefaults() *ExporterConfiguration {
 	cfg.Report.RetryTimeout = 15
 	cfg.Session.ExportType = "csv"
 
-	err = os.MkdirAll(cfg.Export.Path, os.ModePerm)
+	err := os.MkdirAll(cfg.Export.Path, os.ModePerm)
 	if err != nil {
 		cfg.Export.Path = filepath.Join("export")
 		cfg.Export.MediaPath = filepath.Join("export", "media")
 	}
 
 	return cfg
+}
+
+func getExportLocation() string {
+	exportLocation, err := filepath.Rel("./", "export")
+	if err != nil {
+		exportLocation = "export"
+	}
+	return exportLocation
 }
 
 // NewConfigurationManagerFromFile will create a ConfigurationManager with data from the specified file
