@@ -1,0 +1,73 @@
+# yamllint disable rule:line-length
+---
+name: package
+
+# yamllint disable-line rule:truthy
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+jobs:
+  package:
+    strategy:
+      matrix:
+        go-version: [1.20]
+        os: [windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Install Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: ${{ matrix.go-version }}
+
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Build package windows
+        if: matrix.os == 'windows-latest'
+        run: |
+          $GP = (go env GOPATH)
+          $env:path = "$env:path;$GP\bin"
+          echo "building on ${{ matrix.os }}"
+          echo "${{ env.GITHUB_REF }}"
+          echo "${{ env.GITHUB_HEAD_REF }}"
+          choco install mingw
+          wails build -platform windows/amd64 -clean -ldflags "-s -w -X github.com/SafetyCulture/safetyculture-exporter-ui/internal/version.version=${{ github.ref_name }}" -skipbindings
+
+      - name: Sign Windows Binary
+        if: matrix.os == 'windows-latest'
+        run: |
+          echo "Creating certificate file"
+          New-Item -ItemType directory -Path certificate
+          Set-Content -Path certificate\certificate.txt -Value "${{ secrets.WIN_SIGNING_CERT }}"
+          certutil -decode certificate\certificate.txt certificate\certificate.pfx
+          echo "Signing binary"
+          & "C:/Program Files (x86)/Windows Kits/10/bin/10.0.17763.0/x86/signtool.exe" sign /fd sha256 /tr http://ts.ssl.com /f certificate\certificate.pfx /p "${{ secrets.WIN_SIGNING_CERT_PASSWORD }}" .\build\bin\safetyculture-exporter.exe
+          Copy-Item -Path .\build\bin\safetyculture-exporter.exe -Destination .\exporter-windows-x86_64-cli.exe
+
+      - name: Upload artifacts windows
+        if: matrix.os == 'windows-latest'
+        uses: actions/upload-artifact@v2
+        with:
+          name: exporter-windows
+          path: exporter-windows-x86_64-cli.exe
+
+  release:
+    runs-on: ubuntu-latest
+    needs: package
+    steps:
+      - name: Download package windows
+        uses: actions/download-artifact@v2
+        with:
+          name: exporter-windows
+
+      - name: Create Release
+        id: create_release
+        uses: ncipollo/release-action@v1
+        with:
+          token: "${{ secrets.GITHUB_TOKEN }}"
+          artifacts: "exporter-windows-x86_64-cli.exe"
+          allowUpdates: true
+          prerelease: true
+          makeLatest: false
