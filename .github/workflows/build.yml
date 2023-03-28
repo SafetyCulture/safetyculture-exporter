@@ -12,77 +12,115 @@ jobs:
   package:
     strategy:
       matrix:
-        go-version: [1.20.2]
-        os: [ubuntu-latest]
-    runs-on: ${{ matrix.os }}
+        build-os: [ubuntu-latest]
+        platform: [linux-amd64, windows-amd64, darwin-amd64, darwin-arm64]
+    runs-on: ${{ matrix.build-os }}
     steps:
       - name: Install Go
         uses: actions/setup-go@v2
         with:
-          go-version: ${{ matrix.go-version }}
+          go-version: 1.20.2
 
       - name: Checkout code
         uses: actions/checkout@v2
 
       - name: Install linux dependencies
-        if: matrix.os == 'ubuntu-latest'
         run: sudo apt-get update -y && sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.0-dev build-essential pkg-config gcc-mingw-w64 zip
 
-      - name: Build package windows
-        if: matrix.os == 'ubuntu-latest'
+      - name: Build packages windows-amd64
+        if: ${{ matrix.platform == 'windows-amd64' }}
         run: |
           export PATH=$PATH:$(go env GOPATH)/bin
-          echo "building on ${{ matrix.os }}"
+          echo "building for ${{ matrix.platform }}"
           GOOS=windows GOARCH=amd64 go build -v -ldflags "-s -w -X github.com/SafetyCulture/safetyculture-exporter/internal/app/version.version=${{ github.ref_name }}" -o exporter-windows-x86_64-cli.exe ./cmd/safetyculture-exporter/main.go
-          zip safetyculture-exporter_Windows_x86_64.zip exporter-windows-x86_64-cli.exe 
+          zip safetyculture-exporter_windows_x86_64.zip exporter-windows-x86_64-cli.exe 
 
-      - name: Build package macos AMD64
-        if: matrix.os == 'ubuntu-latest'
-        run: |
-          export PATH=$PATH:$(go env GOPATH)/bin
-          echo "building on ${{ matrix.os }}"
-          GOOS=darwin GOARCH=amd64 go build -v -ldflags "-s -w -X github.com/SafetyCulture/safetyculture-exporter/internal/app/version.version=${{ github.ref_name }}" -o exporter-macos-x86_64-cli ./cmd/safetyculture-exporter/main.go
-          zip safetyculture-exporter_MacOS_x86_64.zip exporter-macos-x86_64-cli
-
-      - name: Build package macos ARM64
-        if: matrix.os == 'ubuntu-latest'
-        run: |
-          export PATH=$PATH:$(go env GOPATH)/bin
-          echo "building on ${{ matrix.os }}"
-          GOOS=darwin GOARCH=arm64 go build -v -ldflags "-s -w -X github.com/SafetyCulture/safetyculture-exporter/internal/app/version.version=${{ github.ref_name }}" -o exporter-macos-arm64-cli ./cmd/safetyculture-exporter/main.go
-          zip safetyculture-exporter_MacOS_arm64.zip exporter-macos-arm64-cli
-
-
-      - name: Build package linux
-        if: matrix.os == 'ubuntu-latest'
-        run: |
-          export PATH=$PATH:$(go env GOPATH)/bin
-          echo "building on ${{ matrix.os }}"
-          GOOS=linux GOARCH=amd64 go build -v -ldflags "-s -w -X github.com/SafetyCulture/safetyculture-exporter/internal/app/version.version=${{ github.ref_name }}" -o exporter-linux-x86_64-cli ./cmd/safetyculture-exporter/main.go
-          zip safetyculture-exporter_Linux_x86_64.zip exporter-linux-x86_64-cli
-
-      - name: Upload artifacts windows
-        if: matrix.os == 'ubuntu-latest'
+      - name: Upload artifacts windows-amd64
+        if: ${{ matrix.platform == 'windows-amd64' }}
         uses: actions/upload-artifact@v2
         with:
-          name: exporter-windows
-          path: safetyculture-exporter_Windows_x86_64.zip
+          name: exporter-windows-amd64
+          path: safetyculture-exporter_windows_x86_64.zip
+      
+      
+      - name: Build package darwin-amd64
+        if: ${{ matrix.platform == 'darwin-amd64' }}
+        run: |
+          export PATH=$PATH:$(go env GOPATH)/bin
+          echo "building for ${{ matrix.platform }}"
+          GOOS=darwin GOARCH=amd64 go build -v -ldflags "-s -w -X github.com/SafetyCulture/safetyculture-exporter/internal/app/version.version=${{ github.ref_name }}" -o exporter-macos-x86_64-cli ./cmd/safetyculture-exporter/main.go
+          zip safetyculture-exporter_macos_x86_64.zip exporter-macos-x86_64-cli
+
+      - name: Upload artifacts darwin-amd64
+        if: ${{ matrix.platform == 'darwin-amd64' }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: exporter-darwin-amd64
+          path: safetyculture-exporter_macos_x86_64.zip
+    
+      
+      - name: Build package darwin-arm64
+        if: ${{ matrix.platform == 'darwin-arm64' }}
+        run: |
+          export PATH=$PATH:$(go env GOPATH)/bin
+          echo "building for ${{ matrix.platform }}"
+          GOOS=darwin GOARCH=arm64 go build -v -ldflags "-s -w -X github.com/SafetyCulture/safetyculture-exporter/internal/app/version.version=${{ github.ref_name }}" -o exporter-macos-arm64-cli ./cmd/safetyculture-exporter/main.go
+          zip safetyculture-exporter_macos_arm64.zip exporter-macos-arm64-cli
+
+      - name: Upload artifacts darwin-arm64
+        if: ${{ matrix.platform == 'darwin-arm64' }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: exporter-darwin-arm64
+          path: safetyculture-exporter_macos_arm64.zip
+      
+      
+      - name: Build package linux-amd64
+        if: ${{ matrix.platform == 'linux-amd64' }}
+        run: |
+          export PATH=$PATH:$(go env GOPATH)/bin
+          echo "building for ${{ matrix.platform }}"
+          GOOS=linux GOARCH=amd64 go build -v -ldflags "-s -w -X github.com/SafetyCulture/safetyculture-exporter/internal/app/version.version=${{ github.ref_name }}" -o exporter-linux-x86_64-cli ./cmd/safetyculture-exporter/main.go
+          zip safetyculture-exporter_linux_x86_64.zip exporter-linux-x86_64-cli
           
+      - name: Upload artifacts linux-amd64
+        if: ${{ matrix.platform == 'linux-amd64' }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: exporter-linux-amd64
+          path: safetyculture-exporter_linux_x86_64.zip
+  
+  
   release:
     runs-on: ubuntu-latest
     needs: package
     steps:
-      - name: Download package windows
+      - name: Download package windows amd64
         uses: actions/download-artifact@v2
         with:
-          name: exporter-windows
+          name: exporter-windows-amd64
+          
+      - name: Download package darwin amd64
+        uses: actions/download-artifact@v2
+        with:
+          name: exporter-darwin-amd64
+          
+      - name: Download package darwin arm64
+        uses: actions/download-artifact@v2
+        with:
+          name: exporter-darwin-arm64
+          
+      - name: Download package linux amd64
+        uses: actions/download-artifact@v2
+        with:
+          name: exporter-linux-amd64
 
       - name: Create Release
         id: create_release
         uses: ncipollo/release-action@v1
         with:
           token: "${{ secrets.GITHUB_TOKEN }}"
-          artifacts: "safetyculture-exporter_Windows_x86_64.zip"
+          artifacts: "safetyculture-exporter_windows_x86_64.zip,safetyculture-exporter_macos_x86_64.zip,safetyculture-exporter_macos_arm64.zip,safetyculture-exporter_linux_x86_64.zip"
           allowUpdates: true
           prerelease: true
           draft: true
