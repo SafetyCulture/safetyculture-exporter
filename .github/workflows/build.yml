@@ -34,23 +34,23 @@ jobs:
           export PATH=$PATH:$(go env GOPATH)/bin
           echo "building on ${{ matrix.os }}"
           GOOS=windows GOARCH=amd64 go build -v -ldflags "-s -w -X github.com/SafetyCulture/safetyculture-exporter/internal/app/version.version=${{ github.ref_name }}" -o exporter-windows-x86_64-cli.exe ./cmd/safetyculture-exporter/main.go
-          zip safetyculture-exporter_WindowsCLI_x86_64.zip exporter-windows-x86_64-cli.exe 
+          zip safetyculture-exporter_Windows_x86_64.zip exporter-windows-x86_64-cli.exe 
 
       - name: Build package macos AMD64
         if: matrix.os == 'ubuntu-latest'
         run: |
           export PATH=$PATH:$(go env GOPATH)/bin
           echo "building on ${{ matrix.os }}"
-          GOOS=darwin GOARCH=amd64 go build -v -ldflags "-s -w -X github.com/SafetyCulture/safetyculture-exporter/internal/app/version.version=${{ github.ref_name }}" -o exporter-windows-x86_64-cli.exe ./cmd/safetyculture-exporter/main.go
-          zip safetyculture-exporter_MacOSCLI_x86_64.zip exporter-macos-x86_64-cli.exe 
+          GOOS=darwin GOARCH=amd64 go build -v -ldflags "-s -w -X github.com/SafetyCulture/safetyculture-exporter/internal/app/version.version=${{ github.ref_name }}" -o exporter-macos-x86_64-cli ./cmd/safetyculture-exporter/main.go
+          zip safetyculture-exporter_MacOS_x86_64.zip exporter-macos-x86_64-cli
 
       - name: Build package macos ARM64
         if: matrix.os == 'ubuntu-latest'
         run: |
           export PATH=$PATH:$(go env GOPATH)/bin
           echo "building on ${{ matrix.os }}"
-          GOOS=darwin GOARCH=arm64 go build -v -ldflags "-s -w -X github.com/SafetyCulture/safetyculture-exporter/internal/app/version.version=${{ github.ref_name }}" -o exporter-windows-x86_64-cli.exe ./cmd/safetyculture-exporter/main.go
-          zip safetyculture-exporter_MacOSCLI_x86_64.zip exporter-macos-x86_64-cli.exe 
+          GOOS=darwin GOARCH=arm64 go build -v -ldflags "-s -w -X github.com/SafetyCulture/safetyculture-exporter/internal/app/version.version=${{ github.ref_name }}" -o exporter-macos-arm64-cli ./cmd/safetyculture-exporter/main.go
+          zip safetyculture-exporter_MacOS_arm64.zip exporter-macos-arm64-cli
 
 
       - name: Build package linux
@@ -58,15 +58,15 @@ jobs:
         run: |
           export PATH=$PATH:$(go env GOPATH)/bin
           echo "building on ${{ matrix.os }}"
-          GOOS=linux GOARCH=amd64 go build -v -ldflags "-s -w -X github.com/SafetyCulture/safetyculture-exporter/internal/app/version.version=${{ github.ref_name }}" -o exporter-windows-x86_64-cli.exe ./cmd/safetyculture-exporter/main.go
-          zip safetyculture-exporter_MacOSCLI_x86_64.zip exporter-macos-x86_64-cli.exe 
+          GOOS=linux GOARCH=amd64 go build -v -ldflags "-s -w -X github.com/SafetyCulture/safetyculture-exporter/internal/app/version.version=${{ github.ref_name }}" -o exporter-linux-x86_64-cli ./cmd/safetyculture-exporter/main.go
+          zip safetyculture-exporter_Linux_x86_64.zip exporter-linux-x86_64-cli
 
       - name: Upload artifacts windows
         if: matrix.os == 'ubuntu-latest'
         uses: actions/upload-artifact@v2
         with:
           name: exporter-windows
-          path: safetyculture-exporter_WindowsCLI_x86_64.zip
+          path: safetyculture-exporter_Windows_x86_64.zip
           
   release:
     runs-on: ubuntu-latest
@@ -82,7 +82,7 @@ jobs:
         uses: ncipollo/release-action@v1
         with:
           token: "${{ secrets.GITHUB_TOKEN }}"
-          artifacts: "safetyculture-exporter_WindowsCLI_x86_64.zip"
+          artifacts: "safetyculture-exporter_Windows_x86_64.zip"
           allowUpdates: true
           prerelease: true
           draft: true
