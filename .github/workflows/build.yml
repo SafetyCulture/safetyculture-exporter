@@ -15,9 +15,6 @@ jobs:
         go-version: [1.20]
         os: [ubuntu-latest]
     runs-on: ${{ matrix.os }}
-    env:
-      GOPATH: ${{ github.workspace }}
-      GOBIN: ${{ github.workspace }}/bin
     steps:
       - name: Install Go
         uses: actions/setup-go@v2
@@ -34,6 +31,8 @@ jobs:
       - name: Build package windows
         if: matrix.os == 'ubuntu-latest'
         run: |
+          export GOPATH=${{ github.workspace }}
+          export GOBIN=${{ github.workspace }}/bin
           export PATH=$PATH:$(go env GOPATH)/bin
           echo "building on ${{ matrix.os }}"
           echo ${{ env.GITHUB_REF }}
