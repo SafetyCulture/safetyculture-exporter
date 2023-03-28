@@ -32,7 +32,7 @@ jobs:
         run: |
           export PATH=$PATH:$(go env GOPATH)/bin
           echo "building for ${{ matrix.platform }}"
-          GOOS=windows GOARCH=amd64 go build -v -ldflags "-s -w -X github.com/SafetyCulture/safetyculture-exporter/internal/app/version.version=${{ github.ref_name }}" -o safetyculture-exporter.exe ./cmd/safetyculture-exporter/main.go
+          GOOS=windows GOARCH=amd64 CGO_ENABLED=1 go build -v -ldflags "-s -w -X github.com/SafetyCulture/safetyculture-exporter/internal/app/version.version=${{ github.ref_name }}" -o safetyculture-exporter.exe ./cmd/safetyculture-exporter/main.go
           mkdir dist
           cp safetyculture-exporter.exe README.md THIRD_PARTY_NOTICES.md dist/
           zip -r safetyculture-exporter_${{ github.ref_name }}_Windows_x86_64.zip dist
