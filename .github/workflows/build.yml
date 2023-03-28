@@ -30,10 +30,9 @@ jobs:
           $GP = (go env GOPATH)
           $env:path = "$env:path;$GP\bin"
           echo "building on ${{ matrix.os }}"
-          echo "${{ env.GITHUB_REF }}"
-          echo "${{ env.GITHUB_HEAD_REF }}"
+          echo "${{ github.ref_name }}"
           choco install mingw
-          go build -ldflags "-s -w -X github.com/SafetyCulture/safetyculture-exporter/internal/app/version.version=${{ github.ref_name }}" -o safetyculture-exporter.exe
+          go build -ldflags "-s -w -X github.com/SafetyCulture/safetyculture-exporter/internal/app/version.version=${{ github.ref_name }}" -o safetyculture-exporter.exe cmd/safetyculture-exporter/main.go 
 
       - name: Sign Windows Binary
         if: matrix.os == 'windows-latest'
