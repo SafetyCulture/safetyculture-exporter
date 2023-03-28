@@ -4,10 +4,9 @@ name: package
 
 # yamllint disable-line rule:truthy
 on:
-  workflow_run:
-    workflows: ["goreleaser"]
-    types:
-      - completed
+  push:
+    tags:
+      - "v*.*.*"
 
 jobs:
   package:
@@ -36,7 +35,32 @@ jobs:
           echo "building on ${{ matrix.os }}"
           GOOS=windows GOARCH=amd64 go build -v -ldflags "-s -w -X github.com/SafetyCulture/safetyculture-exporter/internal/app/version.version=${{ github.ref_name }}" -o exporter-windows-x86_64-cli.exe ./cmd/safetyculture-exporter/main.go
           zip safetyculture-exporter_WindowsCLI_x86_64.zip exporter-windows-x86_64-cli.exe 
-      
+
+      - name: Build package macos AMD64
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          export PATH=$PATH:$(go env GOPATH)/bin
+          echo "building on ${{ matrix.os }}"
+          GOOS=darwin GOARCH=amd64 go build -v -ldflags "-s -w -X github.com/SafetyCulture/safetyculture-exporter/internal/app/version.version=${{ github.ref_name }}" -o exporter-windows-x86_64-cli.exe ./cmd/safetyculture-exporter/main.go
+          zip safetyculture-exporter_MacOSCLI_x86_64.zip exporter-macos-x86_64-cli.exe 
+
+      - name: Build package macos ARM64
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          export PATH=$PATH:$(go env GOPATH)/bin
+          echo "building on ${{ matrix.os }}"
+          GOOS=darwin GOARCH=arm64 go build -v -ldflags "-s -w -X github.com/SafetyCulture/safetyculture-exporter/internal/app/version.version=${{ github.ref_name }}" -o exporter-windows-x86_64-cli.exe ./cmd/safetyculture-exporter/main.go
+          zip safetyculture-exporter_MacOSCLI_x86_64.zip exporter-macos-x86_64-cli.exe 
+
+
+      - name: Build package linux
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          export PATH=$PATH:$(go env GOPATH)/bin
+          echo "building on ${{ matrix.os }}"
+          GOOS=linux GOARCH=amd64 go build -v -ldflags "-s -w -X github.com/SafetyCulture/safetyculture-exporter/internal/app/version.version=${{ github.ref_name }}" -o exporter-windows-x86_64-cli.exe ./cmd/safetyculture-exporter/main.go
+          zip safetyculture-exporter_MacOSCLI_x86_64.zip exporter-macos-x86_64-cli.exe 
+
       - name: Upload artifacts windows
         if: matrix.os == 'ubuntu-latest'
         uses: actions/upload-artifact@v2
