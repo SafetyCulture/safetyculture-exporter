@@ -33,10 +33,10 @@ jobs:
           export PATH=$PATH:$(go env GOPATH)/bin
           echo "building for ${{ matrix.platform }}"
           GOOS=windows GOARCH=amd64 CGO_ENABLED=1 CC=x86_64-w64-mingw32-gcc go build -v -ldflags "-s -w -X github.com/SafetyCulture/safetyculture-exporter/internal/app/version.version=${{ github.ref_name }}" -o safetyculture-exporter.exe ./cmd/safetyculture-exporter/main.go
-          mkdir dist
-          cp safetyculture-exporter.exe README.md THIRD_PARTY_NOTICES.md dist/
-          zip -r safetyculture-exporter_${{ github.ref_name }}_Windows_x86_64.zip dist
-          rm -rf dist
+          mkdir safetyculture-exporter-cli
+          cp safetyculture-exporter.exe README.md THIRD_PARTY_NOTICES.md safetyculture-exporter-cli/
+          zip -r safetyculture-exporter_${{ github.ref_name }}_Windows_x86_64.zip safetyculture-exporter-cli
+          rm -rf safetyculture-exporter-cli
 
       - name: Upload artifacts windows-amd64
         if: ${{ matrix.platform == 'windows-amd64' }}
@@ -52,10 +52,10 @@ jobs:
           export PATH=$PATH:$(go env GOPATH)/bin
           echo "building for ${{ matrix.platform }}"
           GOOS=darwin GOARCH=amd64 go build -v -ldflags "-s -w -X github.com/SafetyCulture/safetyculture-exporter/internal/app/version.version=${{ github.ref_name }}" -o safetyculture-exporter ./cmd/safetyculture-exporter/main.go
-          mkdir dist
-          cp safetyculture-exporter README.md THIRD_PARTY_NOTICES.md dist/
-          zip -r safetyculture-exporter_${{ github.ref_name }}_macOS_x86_64.zip  dist
-          rm -rf dist
+          mkdir safetyculture-exporter-cli
+          cp safetyculture-exporter README.md THIRD_PARTY_NOTICES.md safetyculture-exporter-cli/
+          zip -r safetyculture-exporter_${{ github.ref_name }}_macOS_x86_64.zip  safetyculture-exporter-cli
+          rm -rf safetyculture-exporter-cli
           
       - name: Upload artifacts darwin-amd64
         if: ${{ matrix.platform == 'darwin-amd64' }}
@@ -71,10 +71,10 @@ jobs:
           export PATH=$PATH:$(go env GOPATH)/bin
           echo "building for ${{ matrix.platform }}"
           GOOS=darwin GOARCH=arm64 go build -v -ldflags "-s -w -X github.com/SafetyCulture/safetyculture-exporter/internal/app/version.version=${{ github.ref_name }}" -o safetyculture-exporter ./cmd/safetyculture-exporter/main.go
-          mkdir dist
-          cp safetyculture-exporter README.md THIRD_PARTY_NOTICES.md dist/
-          zip -r safetyculture-exporter_${{ github.ref_name }}_macOS_ARM.zip  dist
-          rm -rf dist
+          mkdir safetyculture-exporter-cli
+          cp safetyculture-exporter README.md THIRD_PARTY_NOTICES.md safetyculture-exporter-cli/
+          zip -r safetyculture-exporter_${{ github.ref_name }}_macOS_ARM.zip  safetyculture-exporter-cli
+          rm -rf safetyculture-exporter-cli
 
       - name: Upload artifacts darwin-arm64
         if: ${{ matrix.platform == 'darwin-arm64' }}
@@ -91,10 +91,10 @@ jobs:
           echo "building for ${{ matrix.platform }}"
           GOOS=linux GOARCH=amd64 go build -v -ldflags "-s -w -X github.com/SafetyCulture/safetyculture-exporter/internal/app/version.version=${{ github.ref_name }}" -o safetyculture-exporter ./cmd/safetyculture-exporter/main.go
           zip safetyculture-exporter_linux_x86_64.zip exporter-linux README.md THIRD_PARTY_NOTICES.md
-          mkdir dist
-          cp safetyculture-exporter README.md THIRD_PARTY_NOTICES.md dist/
-          zip -r safetyculture-exporter_${{ github.ref_name }}_Linux_x86_64.zip dist
-          rm -rf dist          
+          mkdir safetyculture-exporter-cli
+          cp safetyculture-exporter README.md THIRD_PARTY_NOTICES.md safetyculture-exporter-cli/
+          zip -r safetyculture-exporter_${{ github.ref_name }}_Linux_x86_64.zip safetyculture-exporter-cli
+          rm -rf safetyculture-exporter-cli          
           
       - name: Upload artifacts linux-amd64
         if: ${{ matrix.platform == 'linux-amd64' }}
