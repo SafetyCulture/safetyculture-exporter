@@ -29,18 +29,10 @@ jobs:
         run: sudo apt-get update -y && sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.0-dev build-essential pkg-config gcc-mingw-w64 zip
 
       - name: Build package windows
-        env:
-          GOPATH: ${{ github.workspace }}
-          GOBIN: ${{ github.workspace }}/bin
         if: matrix.os == 'ubuntu-latest'
         run: |
           export PATH=$PATH:$(go env GOPATH)/bin
           echo "building on ${{ matrix.os }}"
-          echo ${{ env.GITHUB_REF }}
-          echo ${{ env.GITHUB_HEAD_REF }}
-          echo ${{ env.GOPATH }}
-          echo "printing go version"
-          go version
           GOOS=windows GOARCH=amd64 go build -v -ldflags "-s -w" -o exporter-windows-x86_64-cli.exe ./cmd/safetyculture-exporter/main.go
           
       - name: Upload artifacts windows
