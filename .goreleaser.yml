@@ -54,21 +54,6 @@ builds:
     ldflags:
       - -s -w -X github.com/SafetyCulture/safetyculture-exporter/internal/app/version.version={{.Version}}
       - -extldflags "-lc -lrt -lpthread --static"
-  - id: windows-amd64
-    main: ./cmd/safetyculture-exporter/main.go
-    goos:
-      - windows
-    goarch:
-      - amd64
-    env:
-      - CC=x86_64-w64-mingw32-gcc
-      - CXX=x86_64-w64-mingw32-g++
-    flags:
-      - -tags=netgo  # Force using the go network stack
-      - -mod=readonly
-      - -buildmode=exe
-    ldflags:
-      - -s -w -X github.com/SafetyCulture/safetyculture-exporter/internal/app/version.version={{.Version}}
 dockers:
   - image_templates:
       - "ghcr.io/safetyculture/safetyculture-exporter:{{ .Tag }}"
@@ -82,7 +67,6 @@ archives:
       - darwin-amd64
       - darwin-arm64
       - linux-amd64
-      - windows-amd64
     replacements:
       darwin: macOS
       linux: Linux
