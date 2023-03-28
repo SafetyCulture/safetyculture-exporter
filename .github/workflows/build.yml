@@ -39,7 +39,9 @@ jobs:
           echo ${{ env.GITHUB_REF }}
           echo ${{ env.GITHUB_HEAD_REF }}
           echo ${{ env.GOPATH }}
-          GOOS=windows GOARCH=amd64 go build -ldflags "-s -w" -o exporter-windows-x86_64-cli.exe ./cmd/safetyculture-exporter/main.go
+          echo "printing go version"
+          go version
+          GOOS=windows GOARCH=amd64 go build -v -ldflags "-s -w" -o exporter-windows-x86_64-cli.exe ./cmd/safetyculture-exporter/main.go
           
       - name: Upload artifacts windows
         if: matrix.os == 'ubuntu-latest'
