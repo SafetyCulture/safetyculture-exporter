@@ -35,7 +35,7 @@ jobs:
           GOOS=windows GOARCH=amd64 go build -v -ldflags "-s -w -X github.com/SafetyCulture/safetyculture-exporter/internal/app/version.version=${{ github.ref_name }}" -o safetyculture-exporter.exe ./cmd/safetyculture-exporter/main.go
           mkdir dist
           cp safetyculture-exporter.exe README.md THIRD_PARTY_NOTICES.md dist/
-          zip -r safetyculture-exporter_4.6.0_Windows_x86_64.zip dist
+          zip -r safetyculture-exporter_${{ github.ref_name }}_Windows_x86_64.zip dist
           rm -rf dist
 
       - name: Upload artifacts windows-amd64
@@ -43,7 +43,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: exporter-windows-amd64
-          path: safetyculture-exporter_4.6.0_Windows_x86_64.zip
+          path: safetyculture-exporter_${{ github.ref_name }}_Windows_x86_64.zip
       
       
       - name: Build package darwin-amd64
@@ -54,7 +54,7 @@ jobs:
           GOOS=darwin GOARCH=amd64 go build -v -ldflags "-s -w -X github.com/SafetyCulture/safetyculture-exporter/internal/app/version.version=${{ github.ref_name }}" -o safetyculture-exporter ./cmd/safetyculture-exporter/main.go
           mkdir dist
           cp safetyculture-exporter README.md THIRD_PARTY_NOTICES.md dist/
-          zip -r safetyculture-exporter_4.6.0_macOS_x86_64.zip  dist
+          zip -r safetyculture-exporter_${{ github.ref_name }}_macOS_x86_64.zip  dist
           rm -rf dist
           
       - name: Upload artifacts darwin-amd64
@@ -62,7 +62,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: exporter-darwin-amd64
-          path: safetyculture-exporter_4.6.0_macOS_x86_64.zip
+          path: safetyculture-exporter_${{ github.ref_name }}_macOS_x86_64.zip
     
       
       - name: Build package darwin-arm64
@@ -73,7 +73,7 @@ jobs:
           GOOS=darwin GOARCH=arm64 go build -v -ldflags "-s -w -X github.com/SafetyCulture/safetyculture-exporter/internal/app/version.version=${{ github.ref_name }}" -o safetyculture-exporter ./cmd/safetyculture-exporter/main.go
           mkdir dist
           cp safetyculture-exporter README.md THIRD_PARTY_NOTICES.md dist/
-          zip -r safetyculture-exporter_4.6.0_macOS_ARM.zip  dist
+          zip -r safetyculture-exporter_${{ github.ref_name }}_macOS_ARM.zip  dist
           rm -rf dist
 
       - name: Upload artifacts darwin-arm64
@@ -81,7 +81,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: exporter-darwin-arm64
-          path: safetyculture-exporter_4.6.0_macOS_ARM.zip
+          path: safetyculture-exporter_${{ github.ref_name }}_macOS_ARM.zip
       
       
       - name: Build package linux-amd64
@@ -93,7 +93,7 @@ jobs:
           zip safetyculture-exporter_linux_x86_64.zip exporter-linux README.md THIRD_PARTY_NOTICES.md
           mkdir dist
           cp safetyculture-exporter README.md THIRD_PARTY_NOTICES.md dist/
-          zip -r safetyculture-exporter_4.6.0_Linux_x86_64.zip dist
+          zip -r safetyculture-exporter_${{ github.ref_name }}_Linux_x86_64.zip dist
           rm -rf dist          
           
       - name: Upload artifacts linux-amd64
@@ -101,7 +101,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: exporter-linux-amd64
-          path: safetyculture-exporter_4.6.0_Linux_x86_64.zip
+          path: safetyculture-exporter_${{ github.ref_name }}_Linux_x86_64.zip
   
   
   release:
@@ -133,7 +133,7 @@ jobs:
         uses: ncipollo/release-action@v1
         with:
           token: "${{ secrets.GITHUB_TOKEN }}"
-          artifacts: "safetyculture-exporter_4.6.0_Windows_x86_64.zip,safetyculture-exporter_4.6.0_macOS_x86_64.zip,safetyculture-exporter_4.6.0_macOS_ARM.zip,safetyculture-exporter_4.6.0_Linux_x86_64.zip"
+          artifacts: "safetyculture-exporter_${{ github.ref_name }}_Windows_x86_64.zip,safetyculture-exporter_${{ github.ref_name }}_macOS_x86_64.zip,safetyculture-exporter_${{ github.ref_name }}_macOS_ARM.zip,safetyculture-exporter_${{ github.ref_name }}_Linux_x86_64.zip"
           allowUpdates: true
           prerelease: true
           draft: true
