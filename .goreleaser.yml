@@ -68,7 +68,7 @@ builds:
       - -mod=readonly
       - -buildmode=exe
     ldflags:
-      - -s -X github.com/SafetyCulture/safetyculture-exporter/internal/app/version.version={{.Version}}
+      - -s -w -X github.com/SafetyCulture/safetyculture-exporter/internal/app/version.version={{.Version}}
 dockers:
   - image_templates:
       - "ghcr.io/safetyculture/safetyculture-exporter:{{ .Tag }}"
