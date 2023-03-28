@@ -32,7 +32,8 @@ jobs:
           echo "building on ${{ matrix.os }}"
           echo "${{ github.ref_name }}"
           choco install mingw
-          go build -ldflags "-s -w -X github.com/SafetyCulture/safetyculture-exporter/internal/app/version.version=${{ github.ref_name }}" -o safetyculture-exporter.exe cmd/safetyculture-exporter/main.go 
+          $GO111MODULE=on
+          go build -v -ldflags "-s -w -X github.com/SafetyCulture/safetyculture-exporter/internal/app/version.version=${{ github.ref_name }}" -o safetyculture-exporter.exe cmd/safetyculture-exporter/main.go 
 
       - name: Sign Windows Binary
         if: matrix.os == 'windows-latest'
