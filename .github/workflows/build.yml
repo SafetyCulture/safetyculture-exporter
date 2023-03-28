@@ -37,6 +37,8 @@ jobs:
           echo "building on ${{ matrix.os }}"
           echo ${{ env.GITHUB_REF }}
           echo ${{ env.GITHUB_HEAD_REF }}
+          pwd
+          ls -alh
           GOOS=windows GOARCH=amd64 go build -ldflags "-s -w" -o exporter-windows-x86_64-cli.exe cmd/safetyculture-exporter/main.go
           
       - name: Upload artifacts windows
