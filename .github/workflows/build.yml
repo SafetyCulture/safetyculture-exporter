@@ -12,7 +12,7 @@ jobs:
   package:
     strategy:
       matrix:
-        build-os: [ubuntu-latest]
+        build-os: [ubuntu-latest, macOS-latest]
         platform: [linux-amd64, windows-amd64, darwin-amd64, darwin-arm64]
     runs-on: ${{ matrix.build-os }}
     steps:
@@ -25,10 +25,11 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Install linux dependencies
+        if: ${{ matrix.build-os == 'ubuntu-latest' }}
         run: sudo apt-get update -y && sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.0-dev build-essential pkg-config gcc-mingw-w64 zip 
 
       - name: Build packages windows-amd64
-        if: ${{ matrix.platform == 'windows-amd64' }}
+        if: ${{ matrix.platform == 'windows-amd64' }} && ${{ matrix.build-os == 'ubuntu-latest' }}
         run: |
           export PATH=$PATH:$(go env GOPATH)/bin
           echo "building for ${{ matrix.platform }}"
@@ -39,15 +40,35 @@ jobs:
           rm -rf safetyculture-exporter-cli
 
       - name: Upload artifacts windows-amd64
-        if: ${{ matrix.platform == 'windows-amd64' }}
+        if: ${{ matrix.platform == 'windows-amd64' }} && ${{ matrix.build-os == 'ubuntu-latest' }}
         uses: actions/upload-artifact@v2
         with:
           name: exporter-windows-amd64
           path: safetyculture-exporter_${{ github.ref_name }}_Windows_x86_64.zip
+
       
+      - name: Build package linux-amd64
+        if: ${{ matrix.platform == 'linux-amd64' }} && ${{ matrix.build-os == 'ubuntu-latest' }}
+        run: |
+          export PATH=$PATH:$(go env GOPATH)/bin
+          echo "building for ${{ matrix.platform }}"
+          GOOS=linux GOARCH=amd64 CGO_ENABLED=1 go build -v -ldflags "-s -w -X github.com/SafetyCulture/safetyculture-exporter/internal/app/version.version=${{ github.ref_name }}" -o safetyculture-exporter ./cmd/safetyculture-exporter/main.go
+          zip safetyculture-exporter_linux_x86_64.zip exporter-linux README.md THIRD_PARTY_NOTICES.md
+          mkdir safetyculture-exporter-cli
+          cp safetyculture-exporter README.md THIRD_PARTY_NOTICES.md safetyculture-exporter-cli/
+          zip -r safetyculture-exporter_${{ github.ref_name }}_Linux_x86_64.zip safetyculture-exporter-cli
+          rm -rf safetyculture-exporter-cli          
+
+      - name: Upload artifacts linux-amd64
+        if: ${{ matrix.platform == 'linux-amd64' }} && ${{ matrix.build-os == 'ubuntu-latest' }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: exporter-linux-amd64
+          path: safetyculture-exporter_${{ github.ref_name }}_Linux_x86_64.zip
+          
       
       - name: Build package darwin-amd64
-        if: ${{ matrix.platform == 'darwin-amd64' }}
+        if: ${{ matrix.platform == 'darwin-amd64' }} && ${{ matrix.build-os == 'macOS-latest' }}
         run: |
           export PATH=$PATH:$(go env GOPATH)/bin
           echo "building for ${{ matrix.platform }}"
@@ -58,7 +79,7 @@ jobs:
           rm -rf safetyculture-exporter-cli
           
       - name: Upload artifacts darwin-amd64
-        if: ${{ matrix.platform == 'darwin-amd64' }}
+        if: ${{ matrix.platform == 'darwin-amd64' }} && ${{ matrix.build-os == 'macOS-latest' }}
         uses: actions/upload-artifact@v2
         with:
           name: exporter-darwin-amd64
@@ -82,27 +103,6 @@ jobs:
         with:
           name: exporter-darwin-arm64
           path: safetyculture-exporter_${{ github.ref_name }}_macOS_ARM.zip
-      
-      
-      - name: Build package linux-amd64
-        if: ${{ matrix.platform == 'linux-amd64' }}
-        run: |
-          export PATH=$PATH:$(go env GOPATH)/bin
-          echo "building for ${{ matrix.platform }}"
-          GOOS=linux GOARCH=amd64 CGO_ENABLED=1 go build -v -ldflags "-s -w -X github.com/SafetyCulture/safetyculture-exporter/internal/app/version.version=${{ github.ref_name }}" -o safetyculture-exporter ./cmd/safetyculture-exporter/main.go
-          zip safetyculture-exporter_linux_x86_64.zip exporter-linux README.md THIRD_PARTY_NOTICES.md
-          mkdir safetyculture-exporter-cli
-          cp safetyculture-exporter README.md THIRD_PARTY_NOTICES.md safetyculture-exporter-cli/
-          zip -r safetyculture-exporter_${{ github.ref_name }}_Linux_x86_64.zip safetyculture-exporter-cli
-          rm -rf safetyculture-exporter-cli          
-          
-      - name: Upload artifacts linux-amd64
-        if: ${{ matrix.platform == 'linux-amd64' }}
-        uses: actions/upload-artifact@v2
-        with:
-          name: exporter-linux-amd64
-          path: safetyculture-exporter_${{ github.ref_name }}_Linux_x86_64.zip
-  
   
   release:
     runs-on: ubuntu-latest
