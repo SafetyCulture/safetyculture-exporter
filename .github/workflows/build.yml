@@ -56,7 +56,7 @@ jobs:
           mkdir safetyculture-exporter-cli
           cp safetyculture-exporter README.md THIRD_PARTY_NOTICES.md safetyculture-exporter-cli/
           zip -r safetyculture-exporter_${{ github.ref_name }}_Linux_x86_64.zip safetyculture-exporter-cli
-          rm -rf safetyculture-exporter-cli          
+          rm -rf safetyculture-exporter-cli
 
       - name: Upload artifacts linux-amd64
         if: ${{ matrix.platform == 'linux-amd64' && matrix.build-os == 'ubuntu-latest' }}
@@ -100,7 +100,7 @@ jobs:
         with:
           name: exporter-darwin-arm64
           path: safetyculture-exporter_${{ github.ref_name }}_macOS_ARM.zip
-  
+
   release:
     runs-on: ubuntu-latest
     needs: package
