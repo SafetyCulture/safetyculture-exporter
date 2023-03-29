@@ -29,7 +29,7 @@ jobs:
         run: sudo apt-get update -y && sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.0-dev build-essential pkg-config gcc-mingw-w64 zip 
 
       - name: Build packages windows-amd64
-        if: ${{ matrix.platform == 'windows-amd64' }} && ${{ matrix.build-os == 'ubuntu-latest' }}
+        if: ${{ matrix.platform == 'windows-amd64' && matrix.build-os == 'ubuntu-latest' }}
         run: |
           export PATH=$PATH:$(go env GOPATH)/bin
           echo "building for ${{ matrix.platform }}"
@@ -40,7 +40,7 @@ jobs:
           rm -rf safetyculture-exporter-cli
 
       - name: Upload artifacts windows-amd64
-        if: ${{ matrix.platform == 'windows-amd64' }} && ${{ matrix.build-os == 'ubuntu-latest' }}
+        if: ${{ matrix.platform == 'windows-amd64' && matrix.build-os == 'ubuntu-latest' }}
         uses: actions/upload-artifact@v2
         with:
           name: exporter-windows-amd64
@@ -48,7 +48,7 @@ jobs:
 
       
       - name: Build package linux-amd64
-        if: ${{ matrix.platform == 'linux-amd64' }} && ${{ matrix.build-os == 'ubuntu-latest' }}
+        if: ${{ matrix.platform == 'linux-amd64' && matrix.build-os == 'ubuntu-latest' }}
         run: |
           export PATH=$PATH:$(go env GOPATH)/bin
           echo "building for ${{ matrix.platform }}"
@@ -60,7 +60,7 @@ jobs:
           rm -rf safetyculture-exporter-cli          
 
       - name: Upload artifacts linux-amd64
-        if: ${{ matrix.platform == 'linux-amd64' }} && ${{ matrix.build-os == 'ubuntu-latest' }}
+        if: ${{ matrix.platform == 'linux-amd64' && matrix.build-os == 'ubuntu-latest' }}
         uses: actions/upload-artifact@v2
         with:
           name: exporter-linux-amd64
@@ -68,7 +68,7 @@ jobs:
           
       
       - name: Build package darwin-amd64
-        if: ${{ matrix.platform == 'darwin-amd64' }} && ${{ matrix.build-os == 'macOS-latest' }}
+        if: ${{ matrix.platform == 'darwin-amd64' && matrix.build-os == 'macOS-latest' }}
         run: |
           export PATH=$PATH:$(go env GOPATH)/bin
           echo "building for ${{ matrix.platform }}"
@@ -79,7 +79,7 @@ jobs:
           rm -rf safetyculture-exporter-cli
           
       - name: Upload artifacts darwin-amd64
-        if: ${{ matrix.platform == 'darwin-amd64' }} && ${{ matrix.build-os == 'macOS-latest' }}
+        if: ${{ matrix.platform == 'darwin-amd64' && matrix.build-os == 'macOS-latest' }}
         uses: actions/upload-artifact@v2
         with:
           name: exporter-darwin-amd64
@@ -87,7 +87,7 @@ jobs:
     
       
       - name: Build package darwin-arm64
-        if: ${{ matrix.platform == 'darwin-arm64' }}
+        if: ${{ matrix.platform == 'darwin-arm64' && matrix.build-os == 'macOS-latest' }}
         run: |
           export PATH=$PATH:$(go env GOPATH)/bin
           echo "building for ${{ matrix.platform }}"
@@ -98,7 +98,7 @@ jobs:
           rm -rf safetyculture-exporter-cli
 
       - name: Upload artifacts darwin-arm64
-        if: ${{ matrix.platform == 'darwin-arm64' }}
+        if: ${{ matrix.platform == 'darwin-arm64' && matrix.build-os == 'macOS-latest' }}
         uses: actions/upload-artifact@v2
         with:
           name: exporter-darwin-arm64
