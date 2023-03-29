@@ -46,7 +46,6 @@ jobs:
           name: exporter-windows-amd64
           path: safetyculture-exporter_${{ github.ref_name }}_Windows_x86_64.zip
 
-      
       - name: Build package linux-amd64
         if: ${{ matrix.platform == 'linux-amd64' && matrix.build-os == 'ubuntu-latest' }}
         run: |
@@ -65,8 +64,7 @@ jobs:
         with:
           name: exporter-linux-amd64
           path: safetyculture-exporter_${{ github.ref_name }}_Linux_x86_64.zip
-          
-      
+
       - name: Build package darwin-amd64
         if: ${{ matrix.platform == 'darwin-amd64' && matrix.build-os == 'macOS-latest' }}
         run: |
@@ -77,15 +75,14 @@ jobs:
           cp safetyculture-exporter README.md THIRD_PARTY_NOTICES.md safetyculture-exporter-cli/
           zip -r safetyculture-exporter_${{ github.ref_name }}_macOS_x86_64.zip  safetyculture-exporter-cli
           rm -rf safetyculture-exporter-cli
-          
+
       - name: Upload artifacts darwin-amd64
         if: ${{ matrix.platform == 'darwin-amd64' && matrix.build-os == 'macOS-latest' }}
         uses: actions/upload-artifact@v2
         with:
           name: exporter-darwin-amd64
           path: safetyculture-exporter_${{ github.ref_name }}_macOS_x86_64.zip
-    
-      
+
       - name: Build package darwin-arm64
         if: ${{ matrix.platform == 'darwin-arm64' && matrix.build-os == 'macOS-latest' }}
         run: |
@@ -112,17 +109,17 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: exporter-windows-amd64
-          
+
       - name: Download package darwin amd64
         uses: actions/download-artifact@v2
         with:
           name: exporter-darwin-amd64
-          
+
       - name: Download package darwin arm64
         uses: actions/download-artifact@v2
         with:
           name: exporter-darwin-arm64
-          
+
       - name: Download package linux amd64
         uses: actions/download-artifact@v2
         with:
