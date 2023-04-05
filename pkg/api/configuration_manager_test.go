@@ -34,12 +34,7 @@ func TestNewConfigurationManager_should_use_last_year_time(t *testing.T) {
 	assert.NotNil(t, cm)
 	assert.NotNil(t, cm.Configuration)
 	assert.EqualValues(t, "", cm.Configuration.Db.ConnectionString)
-
-	today := time.Now().
-		UTC().
-		AddDate(-1, 0, 0).
-		Format(util.TimeISO8601)
-	assert.EqualValues(t, today, cm.Configuration.Export.ModifiedAfter.Time.Format(util.TimeISO8601))
+	assert.EqualValues(t, "0001-01-01", cm.Configuration.Export.ModifiedAfter.Time.Format(util.TimeISO8601))
 }
 
 func TestNewConfigurationManagerFromFile_when_filename_exists_with_time(t *testing.T) {
@@ -116,12 +111,7 @@ func TestNewConfigurationManagerFromFile_when_filename_exists_without_time(t *te
 	assert.False(t, cfg.Export.Media)
 	assert.Equal(t, "./export/media/", cfg.Export.MediaPath)
 	assert.Equal(t, "./export/", cfg.Export.Path)
-
-	today := time.Now().
-		UTC().
-		AddDate(-1, 0, 0).
-		Format(util.TimeISO8601)
-	assert.Equal(t, today, cfg.Export.ModifiedAfter.Time.Format(util.TimeISO8601))
+	assert.Equal(t, "0001-01-01", cfg.Export.ModifiedAfter.Time.Format(util.TimeISO8601))
 	assert.False(t, cfg.Export.Site.IncludeDeleted)
 	assert.False(t, cfg.Export.Site.IncludeFullHierarchy)
 	assert.Equal(t, []string{"TA1", "TA2", "TA3"}, cfg.Export.Tables)
@@ -217,12 +207,7 @@ func TestNewConfigurationManagerFromFile_WhenZeroLengthFile(t *testing.T) {
 	assert.EqualValues(t, "mysql", cm.Configuration.Db.Dialect)
 	assert.EqualValues(t, "export", cm.Configuration.Export.Path)
 	assert.EqualValues(t, "export/media", cm.Configuration.Export.MediaPath)
-
-	today := time.Now().
-		UTC().
-		AddDate(-1, 0, 0).
-		Format(util.TimeISO8601)
-	assert.EqualValues(t, today, cm.Configuration.Export.ModifiedAfter.UTC().Format(util.TimeISO8601))
+	assert.EqualValues(t, "0001-01-01", cm.Configuration.Export.ModifiedAfter.UTC().Format(util.TimeISO8601))
 }
 
 func TestNewConfigurationManagerFromFile_WhenFileIsCorrupt(t *testing.T) {
