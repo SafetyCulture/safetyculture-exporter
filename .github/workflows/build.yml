@@ -99,7 +99,17 @@ jobs:
 
       - name: Build package darwin-arm64
         if: ${{ matrix.platform == 'darwin-arm64' && matrix.build-os == 'macOS-latest' }}
+        env:
+          MAC_SIGNING_CERT: ${{ secrets.MAC_SIGNING_CERT }}
         run: |
+          echo "Importing certificates"
+          echo $MAC_SIGNING_CERT | base64 --decode > certificate.p12
+          security create-keychain -p ${{ secrets.MAC_SIGNING_KEYCHAIN_PWD }} build.keychain
+          security default-keychain -s build.keychain
+          security unlock-keychain -p ${{ secrets.MAC_SIGNING_KEYCHAIN_PWD }} build.keychain
+          security import certificate.p12 -k build.keychain -P ${{ secrets.MAC_SIGNING_CERT_PASSWORD }} -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k ${{ secrets.MAC_SIGNING_KEYCHAIN_PWD }} build.keychain
+          
           export PATH=$PATH:$(go env GOPATH)/bin
           echo "building for ${{ matrix.platform }}"
           GOOS=darwin GOARCH=arm64 CGO_ENABLED=1 go build -v -ldflags "-s -w -X github.com/SafetyCulture/safetyculture-exporter/internal/app/version.version=${{ github.ref_name }}" -o safetyculture-exporter ./cmd/safetyculture-exporter/main.go
