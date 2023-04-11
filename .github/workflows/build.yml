@@ -55,7 +55,7 @@ jobs:
           zip safetyculture-exporter_linux_x86_64.zip exporter-linux README.md THIRD_PARTY_NOTICES.md
           mkdir safetyculture-exporter-cli
           cp safetyculture-exporter README.md THIRD_PARTY_NOTICES.md safetyculture-exporter-cli/
-          zip -r safetyculture-exporter_${{ github.ref_name }}_linux_amd64.zip safetyculture-exporter-cli
+          zip -r safetyculture-exporter_linux_amd64.zip safetyculture-exporter-cli
           rm -rf safetyculture-exporter-cli
 
       - name: Upload artifacts linux-amd64
@@ -87,7 +87,7 @@ jobs:
           
           mkdir safetyculture-exporter-cli
           cp safetyculture-exporter README.md THIRD_PARTY_NOTICES.md safetyculture-exporter-cli/
-          zip -r safetyculture-exporter_${{ github.ref_name }}_darwin-amd64.zip safetyculture-exporter-cli
+          zip -r safetyculture-exporter_darwin-amd64.zip safetyculture-exporter-cli
           rm -rf safetyculture-exporter-cli
 
       - name: Upload artifacts darwin-amd64
@@ -119,7 +119,7 @@ jobs:
           
           mkdir safetyculture-exporter-cli
           cp safetyculture-exporter README.md THIRD_PARTY_NOTICES.md safetyculture-exporter-cli/
-          zip -r safetyculture-exporter_${{ github.ref_name }}_darwin-arm64.zip safetyculture-exporter-cli
+          zip -r safetyculture-exporter_darwin-arm64.zip safetyculture-exporter-cli
           rm -rf safetyculture-exporter-cli
 
       - name: Upload artifacts darwin-arm64
