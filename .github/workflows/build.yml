@@ -90,8 +90,8 @@ jobs:
           zip -r safetyculture-exporter_${{ github.ref_name }}_darwin-amd64.zip safetyculture-exporter-cli
           rm -rf safetyculture-exporter-cli
           
-          echo "${{ secrets.APPSTORE_API_KEY }}" > appstore_api_key.p8
-          xcrun notarytool submit "safetyculture-exporter-darwin-amd64.zip" --key "appstore_api_key.p8" --key-id "${{ secrets.APPSTORE_API_KEY_ID }}" --issuer "${{ secrets.APPSTORE_API_ISSUER_ID }}" --wait
+#          echo "${{ secrets.APPSTORE_API_KEY }}" > appstore_api_key.p8
+#          xcrun notarytool submit "safetyculture-exporter-darwin-amd64.zip" --key "appstore_api_key.p8" --key-id "${{ secrets.APPSTORE_API_KEY_ID }}" --issuer "${{ secrets.APPSTORE_API_ISSUER_ID }}" --wait
 
       - name: Upload artifacts darwin-amd64
         if: ${{ matrix.platform == 'darwin-amd64' && matrix.build-os == 'macOS-latest' }}
