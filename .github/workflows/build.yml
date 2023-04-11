@@ -71,16 +71,11 @@ jobs:
           MAC_SIGNING_CERT: ${{ secrets.MAC_SIGNING_CERT }}
         run: |
           echo "Importing certificates"
-          echo $MAC_SIGNING_CERT | base64 --decode > certificate.
-          echo "A"
+          echo $MAC_SIGNING_CERT | base64 --decode > certificate.p12
           security create-keychain -p ${{ secrets.MAC_SIGNING_KEYCHAIN_PWD }} build.keychain
-          echo "B"
           security default-keychain -s build.keychain
-          echo "C"
           security unlock-keychain -p ${{ secrets.MAC_SIGNING_KEYCHAIN_PWD }} build.keychain
-          echo "D"
           security import certificate.p12 -k build.keychain -P ${{ secrets.MAC_SIGNING_CERT_PASSWORD }} -T /usr/bin/codesign
-          echo "E"
           security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k ${{ secrets.MAC_SIGNING_KEYCHAIN_PWD }} build.keychain
           
           export PATH=$PATH:$(go env GOPATH)/bin
