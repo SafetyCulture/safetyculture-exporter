@@ -127,7 +127,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: exporter-darwin-arm64
-          path: safetyculture-exporter-darwin-arm64.zip
+          path: safetyculture-exporter_darwin-arm64.zip
 
   release:
     runs-on: ubuntu-latest
