@@ -215,10 +215,6 @@ func (c *ConfigurationManager) ApplySafetyGuards() {
 		c.Configuration.Db.Dialect = defaultCfg.Db.Dialect
 	}
 
-	if c.Configuration.Export.ModifiedAfter.IsZero() {
-		c.Configuration.Export.ModifiedAfter = defaultCfg.Export.ModifiedAfter
-	}
-
 	if c.Configuration.Export.Path == "" {
 		c.Configuration.Export.Path = defaultCfg.Export.Path
 	}
@@ -268,7 +264,7 @@ func BuildConfigurationWithDefaults() *ExporterConfiguration {
 	cfg.Export.Path = exportLocation
 	cfg.Export.MediaPath = mediaPathLocation
 	cfg.Export.TimeZone = "UTC"
-	cfg.Export.ModifiedAfter = mTime{time.Now().UTC().AddDate(-1, 0, 0)}
+	cfg.Export.ModifiedAfter = mTime{}
 	cfg.Report.FilenameConvention = "INSPECTION_TITLE"
 	cfg.Report.Format = []string{"PDF"}
 	cfg.Report.RetryTimeout = 15
