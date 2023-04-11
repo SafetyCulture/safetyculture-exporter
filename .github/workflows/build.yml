@@ -77,14 +77,14 @@ jobs:
           security unlock-keychain -p ${{ secrets.MAC_SIGNING_KEYCHAIN_PWD }} build.keychain
           security import certificate.p12 -k build.keychain -P ${{ secrets.MAC_SIGNING_CERT_PASSWORD }} -T /usr/bin/codesign
           security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k ${{ secrets.MAC_SIGNING_KEYCHAIN_PWD }} build.keychain
-          
+
           export PATH=$PATH:$(go env GOPATH)/bin
           echo "building for ${{ matrix.platform }}"
           GOOS=darwin GOARCH=amd64 CGO_ENABLED=1 go build -v -ldflags "-s -w -X github.com/SafetyCulture/safetyculture-exporter/internal/app/version.version=${{ github.ref_name }}" -o safetyculture-exporter ./cmd/safetyculture-exporter/main.go
-          
+
           echo "Code signing darwin/amd64"
           codesign --force -s "${{ secrets.MAC_SIGNING_CERT_NAME }}" --options runtime ./safetyculture-exporter -v
-          
+
           mkdir safetyculture-exporter-cli
           cp safetyculture-exporter README.md THIRD_PARTY_NOTICES.md safetyculture-exporter-cli/
           zip -r safetyculture-exporter_darwin-amd64.zip safetyculture-exporter-cli
@@ -109,14 +109,14 @@ jobs:
           security unlock-keychain -p ${{ secrets.MAC_SIGNING_KEYCHAIN_PWD }} build.keychain
           security import certificate.p12 -k build.keychain -P ${{ secrets.MAC_SIGNING_CERT_PASSWORD }} -T /usr/bin/codesign
           security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k ${{ secrets.MAC_SIGNING_KEYCHAIN_PWD }} build.keychain
-          
+
           export PATH=$PATH:$(go env GOPATH)/bin
           echo "building for ${{ matrix.platform }}"
           GOOS=darwin GOARCH=arm64 CGO_ENABLED=1 go build -v -ldflags "-s -w -X github.com/SafetyCulture/safetyculture-exporter/internal/app/version.version=${{ github.ref_name }}" -o safetyculture-exporter ./cmd/safetyculture-exporter/main.go
-          
+
           echo "Code signing darwin/arm64"
           codesign --force -s "${{ secrets.MAC_SIGNING_CERT_NAME }}" --options runtime ./safetyculture-exporter -v
-          
+
           mkdir safetyculture-exporter-cli
           cp safetyculture-exporter README.md THIRD_PARTY_NOTICES.md safetyculture-exporter-cli/
           zip -r safetyculture-exporter_darwin-arm64.zip safetyculture-exporter-cli
