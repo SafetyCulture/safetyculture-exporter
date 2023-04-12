@@ -85,10 +85,14 @@ jobs:
           echo "Code signing darwin/amd64"
           codesign --force -s "${{ secrets.MAC_SIGNING_CERT_NAME }}" --options runtime ./safetyculture-exporter -v
 
+          echo "Zipping Package"
           mkdir safetyculture-exporter-cli
           cp safetyculture-exporter README.md THIRD_PARTY_NOTICES.md safetyculture-exporter-cli/
           zip -r safetyculture-exporter-darwin-amd64.zip safetyculture-exporter-cli
           rm -rf safetyculture-exporter-cli
+
+          echo "${{ secrets.APPSTORE_API_KEY }}" > appstore_api_key.p8
+          xcrun notarytool submit "safetyculture-exporter-darwin-amd64.zip" --key "appstore_api_key.p8" --key-id "${{ secrets.APPSTORE_API_KEY_ID }}" --issuer "${{ secrets.APPSTORE_API_ISSUER_ID }}" --wait
 
       - name: Upload artifacts darwin-amd64
         if: ${{ matrix.platform == 'darwin-amd64' && matrix.build-os == 'macOS-latest' }}
@@ -117,10 +121,14 @@ jobs:
           echo "Code signing darwin/arm64"
           codesign --force -s "${{ secrets.MAC_SIGNING_CERT_NAME }}" --options runtime ./safetyculture-exporter -v
 
+          echo "Zipping Package"
           mkdir safetyculture-exporter-cli
           cp safetyculture-exporter README.md THIRD_PARTY_NOTICES.md safetyculture-exporter-cli/
           zip -r safetyculture-exporter-darwin-arm64.zip safetyculture-exporter-cli
           rm -rf safetyculture-exporter-cli
+
+          echo "${{ secrets.APPSTORE_API_KEY }}" > appstore_api_key.p8
+          xcrun notarytool submit "safetyculture-exporter-darwin-arm64.zip" --key "appstore_api_key.p8" --key-id "${{ secrets.APPSTORE_API_KEY_ID }}" --issuer "${{ secrets.APPSTORE_API_ISSUER_ID }}" --wait
 
       - name: Upload artifacts darwin-arm64
         if: ${{ matrix.platform == 'darwin-arm64' && matrix.build-os == 'macOS-latest' }}
