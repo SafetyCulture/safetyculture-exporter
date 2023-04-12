@@ -19,7 +19,7 @@ func Cmd() *cobra.Command {
 	}
 }
 
-func generateYamlConfiguration(cmd *cobra.Command, args []string) error {
+func generateYamlConfiguration(*cobra.Command, []string) error {
 	cm := exporterAPI.NewConfigurationManager("", viper.ConfigFileUsed())
 	err := cm.SaveConfiguration()
 	util.Check(err, "while writing config to file")

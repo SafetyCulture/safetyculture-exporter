@@ -34,29 +34,29 @@ type GormLogger struct {
 }
 
 // LogMode log mode.
-func (l *GormLogger) LogMode(level logger.LogLevel) logger.Interface {
+func (l *GormLogger) LogMode(logger.LogLevel) logger.Interface {
 	newlogger := *l
 
 	return &newlogger
 }
 
 // Info print info.
-func (l GormLogger) Info(ctx context.Context, msg string, data ...interface{}) {
+func (l GormLogger) Info(_ context.Context, msg string, data ...interface{}) {
 	l.Infof(infoStr+msg, append([]interface{}{utils.FileWithLineNum()}, data...)...)
 }
 
 // Warn print warn messages.
-func (l GormLogger) Warn(ctx context.Context, msg string, data ...interface{}) {
+func (l GormLogger) Warn(_ context.Context, msg string, data ...interface{}) {
 	l.Warnf(warnStr+msg, append([]interface{}{utils.FileWithLineNum()}, data...)...)
 }
 
 // Error print error messages.
-func (l GormLogger) Error(ctx context.Context, msg string, data ...interface{}) {
+func (l GormLogger) Error(_ context.Context, msg string, data ...interface{}) {
 	l.Errorf(errStr+msg, append([]interface{}{utils.FileWithLineNum()}, data...)...)
 }
 
 // Trace print sql message.
-func (l GormLogger) Trace(ctx context.Context, begin time.Time, fc func() (string, int64), err error) {
+func (l GormLogger) Trace(_ context.Context, begin time.Time, fc func() (string, int64), err error) {
 	// do not log ErrRecordNotFound errors
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return
