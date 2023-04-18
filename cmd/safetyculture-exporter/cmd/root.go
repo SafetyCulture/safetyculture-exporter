@@ -103,6 +103,7 @@ func configFlags() {
 	dbFlags = flag.NewFlagSet("db", flag.ContinueOnError)
 	dbFlags.String("db-dialect", "mysql", "Database dialect. mysql, postgres and sqlserver are the only valid options.")
 	dbFlags.String("db-connection-string", "", "Database connection string")
+	dbFlags.Bool("db-auto-migrate-disabled", false, "Disable database auto migrations")
 
 	sqliteFlags = flag.NewFlagSet("sqlite", flag.ContinueOnError)
 
