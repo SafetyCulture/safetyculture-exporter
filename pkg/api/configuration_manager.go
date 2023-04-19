@@ -27,8 +27,9 @@ type ExporterConfiguration struct {
 		MaxRowsPerFile int `yaml:"max_rows_per_file"`
 	} `yaml:"csv"`
 	Db struct {
-		ConnectionString string `yaml:"connection_string"`
-		Dialect          string `yaml:"dialect"`
+		ConnectionString    string `yaml:"connection_string"`
+		Dialect             string `yaml:"dialect"`
+		AutoMigrateDisabled bool   `yaml:"auto_migrate_disabled"`
 	} `yaml:"db"`
 	Export struct {
 		Action struct {

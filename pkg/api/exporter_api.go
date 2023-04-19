@@ -196,7 +196,7 @@ func (s *SafetyCultureExporter) RunSQL() error {
 		}
 	}
 
-	e, err := feed.NewSQLExporter(s.cfg.Db.Dialect, s.cfg.Db.ConnectionString, true, s.cfg.Export.MediaPath)
+	e, err := feed.NewSQLExporter(s.cfg.Db.Dialect, s.cfg.Db.ConnectionString, !s.cfg.Db.AutoMigrateDisabled, s.cfg.Export.MediaPath)
 	if err != nil {
 		return errors.Wrap(err, "create sql exporter")
 	}
