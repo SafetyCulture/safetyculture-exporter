@@ -1,7 +1,7 @@
 package export
 
 import (
-	"github.com/SafetyCulture/safetyculture-exporter/cmd/safetyculture-exporter/cmd/utils"
+	util "github.com/SafetyCulture/safetyculture-exporter/cmd/safetyculture-exporter/cmd/utils"
 	"github.com/SafetyCulture/safetyculture-exporter/internal/app/version"
 	exporterAPI "github.com/SafetyCulture/safetyculture-exporter/pkg/api"
 	"github.com/spf13/cobra"
@@ -155,6 +155,7 @@ func MapViperConfigToExporterConfiguration(v *viper.Viper, cfg *exporterAPI.Expo
 	cfg.SheqsyCompanyID = v.GetString("sheqsy_company_id")
 	cfg.Db.Dialect = v.GetString("db.dialect")
 	cfg.Db.ConnectionString = v.GetString("db.connection_string")
+	cfg.Db.AutoMigrateDisabled = v.GetBool("db.auto_migrate_disabled")
 	cfg.Csv.MaxRowsPerFile = v.GetInt("csv.max_rows_per_file")
 	cfg.Export.Path = v.GetString("export.path")
 	cfg.Export.Incremental = v.GetBool("export.incremental")

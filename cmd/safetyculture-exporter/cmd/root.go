@@ -7,7 +7,7 @@ import (
 
 	"github.com/SafetyCulture/safetyculture-exporter/cmd/safetyculture-exporter/cmd/configure"
 	"github.com/SafetyCulture/safetyculture-exporter/cmd/safetyculture-exporter/cmd/export"
-	"github.com/SafetyCulture/safetyculture-exporter/cmd/safetyculture-exporter/cmd/utils"
+	util "github.com/SafetyCulture/safetyculture-exporter/cmd/safetyculture-exporter/cmd/utils"
 	"github.com/SafetyCulture/safetyculture-exporter/internal/app/version"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/update"
 	"github.com/gookit/color"
@@ -103,6 +103,7 @@ func configFlags() {
 	dbFlags = flag.NewFlagSet("db", flag.ContinueOnError)
 	dbFlags.String("db-dialect", "mysql", "Database dialect. mysql, postgres and sqlserver are the only valid options.")
 	dbFlags.String("db-connection-string", "", "Database connection string")
+	dbFlags.Bool("db-auto-migrate-disabled", false, "Disable database auto migrations")
 
 	sqliteFlags = flag.NewFlagSet("sqlite", flag.ContinueOnError)
 
@@ -163,6 +164,7 @@ func bindFlags() {
 
 	util.Check(viper.BindPFlag("db.dialect", dbFlags.Lookup("db-dialect")), "while binding flag")
 	util.Check(viper.BindPFlag("db.connection_string", dbFlags.Lookup("db-connection-string")), "while binding flag")
+	util.Check(viper.BindPFlag("db.auto_migrate_disabled", dbFlags.Lookup("db-auto-migrate-disabled")), "while binding flag")
 
 	util.Check(viper.BindPFlag("csv.max_rows_per_file", csvFlags.Lookup("max-rows-per-file")), "while binding flag")
 
