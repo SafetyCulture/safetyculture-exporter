@@ -23,4 +23,5 @@
 | action_label      | TEXT     |             |
 | deleted           | numeric  |             |
 | asset_id          | TEXT     |             |
+| unique_id         | TEXT     |             |
 +-------------------+----------+-------------+
