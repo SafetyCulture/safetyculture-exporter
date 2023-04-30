@@ -24,7 +24,8 @@
             "organisation_id": "role_123",
             "completed_at": "2020-11-05T12:28:42.000Z",
             "action_label": "{\"label_id\":\"fb209100-7351-43a9-a667-2478faa621ae\"|\"label_name\":\"label\"}",
-            "asset_id": "asset_id_123"
+            "asset_id": "asset_id_123",
+            "unique_id": "AC-1"
         },
         {
             "id": "456",
@@ -45,7 +46,8 @@
             "audit_item_label": "Item title",
             "organisation_id": "role_123",
             "completed_at": "2020-11-18T02:07:50.702Z",
-            "action_label": "{\"label_id\":\"fb209100-7351-43a9-a667-2478faa621ae\"|\"label_name\":\"label\"}"
+            "action_label": "{\"label_id\":\"fb209100-7351-43a9-a667-2478faa621ae\"|\"label_name\":\"label\"}",
+            "unique_id": "AC-2"
         }
     ]
 }

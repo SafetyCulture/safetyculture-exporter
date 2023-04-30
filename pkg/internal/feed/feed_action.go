@@ -37,6 +37,7 @@ type Action struct {
 	ActionLabel     string     `json:"action_label" csv:"action_label"`
 	Deleted         bool       `json:"deleted" csv:"deleted"`
 	AssetID         string     `json:"asset_id" csv:"asset_id" gorm:"size:36"`
+	UniqueID        string     `json:"unique_id" csv:"unique_id"`
 }
 
 // ActionFeed is a representation of the actions feed
@@ -88,6 +89,7 @@ func (f *ActionFeed) Columns() []string {
 		"organisation_id",
 		"completed_at",
 		"action_label",
+		"unique_id",
 	}
 }
 
