@@ -3,6 +3,7 @@ module github.com/SafetyCulture/safetyculture-exporter
 go 1.18
 
 require (
+	github.com/MickStanciu/go-fn v1.3.0
 	github.com/dghubble/sling v1.4.1
 	github.com/gocarina/gocsv v0.0.0-20220310154401-d4df709ca055
 	github.com/gofrs/uuid v4.4.0+incompatible

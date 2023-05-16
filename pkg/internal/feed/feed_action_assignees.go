@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/MickStanciu/go-fn/fn"
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/util"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/logger"
 
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/httpapi"
@@ -76,27 +78,25 @@ func (f *ActionAssigneeFeed) CreateSchema(exporter Exporter) error {
 func (f *ActionAssigneeFeed) writeRows(exporter Exporter, rows []*ActionAssignee) error {
 	// Calculate the size of the batch we can insert into the DB at once. Column count + buffer to account for primary keys
 	batchSize := exporter.ParameterLimit() / (len(f.Columns()) + 4)
+	err := util.SplitSliceInBatch(batchSize, rows, func(batch []*ActionAssignee) error {
+		// Delete the actions if already exists
+		actionIDs := fn.Map(batch, func(row *ActionAssignee) string {
+			return row.ActionID
+		})
 
-	for i := 0; i < len(rows); i += batchSize {
-		j := i + batchSize
-		if j > len(rows) {
-			j = len(rows)
-		}
-		var actionIDs []string
-		for k := range rows[i:j] {
-			actionIDs = append(actionIDs, rows[k].ActionID)
-		}
-
-		// Delete the actions if already exist
 		if err := exporter.DeleteRowsIfExist(f, "action_id IN ?", actionIDs); err != nil {
 			return fmt.Errorf("delete rows: %w", err)
 		}
 
-		if err := exporter.WriteRows(f, rows[i:j]); err != nil {
+		if err := exporter.WriteRows(f, batch); err != nil {
 			return events.WrapEventError(err, "write rows")
 		}
+		return nil
+	})
+	
+	if err != nil {
+		return err
 	}
-
 	return nil
 }
 
