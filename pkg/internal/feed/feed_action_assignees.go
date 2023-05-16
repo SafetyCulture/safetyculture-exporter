@@ -93,7 +93,7 @@ func (f *ActionAssigneeFeed) writeRows(exporter Exporter, rows []*ActionAssignee
 		}
 		return nil
 	})
-	
+
 	if err != nil {
 		return err
 	}
