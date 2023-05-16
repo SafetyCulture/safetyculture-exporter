@@ -44,6 +44,17 @@ func TestSplitSliceInBatch(t *testing.T) {
 				return nil
 			},
 		},
+		"when errors out": {
+			size:       3,
+			collection: []string{"a", "b", "c", "d", "e", "f"},
+			fn: func(strings []string) error {
+				if strings[0] == "d" {
+					return fmt.Errorf("error in processing function")
+				}
+				return nil
+			},
+			expectedErr: fmt.Errorf("error in processing function"),
+		},
 	}
 
 	for name, tt := range tests {
