@@ -106,7 +106,7 @@ func GetLogger() *zap.SugaredLogger {
 	prodConfig.EncodeTime = zapcore.ISO8601TimeEncoder
 	logFileEncoder := zapcore.NewJSONEncoder(prodConfig)
 	consoleEncoder := zapcore.NewConsoleEncoder(zap.NewDevelopmentEncoderConfig())
-	logName := fmt.Sprintf("sc-exporter-%s.log", time.Now().Format("2023-01-15"))
+	logName := fmt.Sprintf("sc-exporter-%s.log", time.DateOnly)
 	file, err := os.OpenFile(logName, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
 		log.Fatalf("unable to open log file %v", err)
