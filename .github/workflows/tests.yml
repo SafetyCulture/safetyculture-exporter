@@ -139,7 +139,7 @@ jobs:
     services:
       sqlserver:
         image: mcr.microsoft.com/mssql/server
-        env
+        env:
           SA_PASSWORD: "SafetyCultureExporter12345"
           ACCEPT_EULA: "Y"
         options: >-
