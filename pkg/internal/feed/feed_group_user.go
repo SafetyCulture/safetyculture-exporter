@@ -97,16 +97,14 @@ func (f *GroupUserFeed) Export(ctx context.Context, apiClient *httpapi.Client, e
 		if len(deDupedRows) != 0 {
 			// Calculate the size of the batch we can insert into the DB at once. Column count + buffer to account for primary keys
 			batchSize := exporter.ParameterLimit() / (len(f.Columns()) + 4)
-
-			for i := 0; i < len(deDupedRows); i += batchSize {
-				j := i + batchSize
-				if j > len(deDupedRows) {
-					j = len(deDupedRows)
-				}
-
-				if err := exporter.WriteRows(f, deDupedRows[i:j]); err != nil {
+			err := util.SplitSliceInBatch(batchSize, deDupedRows, func(batch []*GroupUser) error {
+				if err := exporter.WriteRows(f, batch); err != nil {
 					return events.WrapEventError(err, "write rows")
 				}
+				return nil
+			})
+			if err != nil {
+				return err
 			}
 		}
 
