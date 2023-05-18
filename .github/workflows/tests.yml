@@ -16,7 +16,7 @@ jobs:
       - name: Set up Go 1.x
         uses: actions/setup-go@v2
         with:
-          go-version: 1.20
+          go-version: '1.20'
 
       - name: Check out code into the Go module directory
         uses: actions/checkout@v2
@@ -63,7 +63,7 @@ jobs:
       - name: Set up Go 1.x
         uses: actions/setup-go@v2
         with:
-          go-version: 1.20
+          go-version: '1.20'
 
       - name: Check out code into the Go module directory
         uses: actions/checkout@v2
@@ -109,7 +109,7 @@ jobs:
       - name: Set up Go 1.x
         uses: actions/setup-go@v2
         with:
-          go-version: 1.20
+          go-version: '1.20'
 
       - name: Check out code into the Go module directory
         uses: actions/checkout@v2
@@ -139,11 +139,11 @@ jobs:
     services:
       sqlserver:
         image: mcr.microsoft.com/mssql/server
-        env:
+        env
           SA_PASSWORD: "SafetyCultureExporter12345"
           ACCEPT_EULA: "Y"
         options: >-
-          --health-cmd "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P SafetyCultureExporter12345 -Q \"SELECT 1\" || exit 1"
+          --health-cmd "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P SafeyCultureExporter12345 -Q \"SELECT 1\" || exit 1"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
@@ -154,7 +154,7 @@ jobs:
       - name: Set up Go 1.x
         uses: actions/setup-go@v2
         with:
-          go-version: 1.20
+          go-version: '1.20'
 
       - name: Check out code into the Go module directory
         uses: actions/checkout@v2
