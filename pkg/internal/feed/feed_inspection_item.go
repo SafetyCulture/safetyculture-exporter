@@ -8,6 +8,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/util"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/logger"
 
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/httpapi"
@@ -163,12 +164,7 @@ func (f *InspectionItemFeed) writeRows(ctx context.Context, exporter Exporter, r
 
 	// Calculate the size of the batch we can insert into the DB at once. Column count + buffer to account for primary keys
 	batchSize := exporter.ParameterLimit() / (len(f.Columns()) + 5)
-	for i := 0; i < len(rows); i += batchSize {
-		j := i + batchSize
-		if j > len(rows) {
-			j = len(rows)
-		}
-
+	err := util.SplitSliceInBatch(batchSize, rows, func(batch []*InspectionItem) error {
 		// you can specify level of concurrency by increasing channel size
 		buffers := make(chan bool, maxGoRoutines)
 		var wg sync.WaitGroup
@@ -177,7 +173,7 @@ func (f *InspectionItemFeed) writeRows(ctx context.Context, exporter Exporter, r
 		// We can't insert them simultaneously. This means we are dropping data, which sucks.
 		var rowsToInsert []*InspectionItem
 		idSeen := map[string]bool{}
-		for _, row := range rows[i:j] {
+		for _, row := range batch {
 			skip := skipIDs[row.AuditID]
 			seen := idSeen[row.ID]
 			if seen || skip {
@@ -220,10 +216,13 @@ func (f *InspectionItemFeed) writeRows(ctx context.Context, exporter Exporter, r
 			wg.Wait()
 		}
 
-		err := exporter.WriteRows(f, rowsToInsert)
-		if err != nil {
+		if err := exporter.WriteRows(f, rowsToInsert); err != nil {
 			return err
 		}
+		return nil
+	})
+	if err != nil {
+		return err
 	}
 
 	return nil

@@ -7,6 +7,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/MickStanciu/go-fn/fn"
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/util"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/logger"
 
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/httpapi"
@@ -132,27 +134,22 @@ func (f *InspectionFeed) writeRows(exporter Exporter, rows []Inspection) error {
 
 	// Calculate the size of the batch we can insert into the DB at once. Column count + buffer to account for primary keys
 	batchSize := exporter.ParameterLimit() / (len(f.Columns()) + 4)
-	for i := 0; i < len(rows); i += batchSize {
-		j := i + batchSize
-		if j > len(rows) {
-			j = len(rows)
-		}
-
+	err := util.SplitSliceInBatch(batchSize, rows, func(batch []Inspection) error {
 		// Some audits in production have the same item ID multiple times
 		// We can't insert them simultaneously. This means we are dropping data, which sucks.
-		var rowsToInsert []Inspection
-		for _, row := range rows[i:j] {
-			skip := skipIDs[row.ID]
-			if !skip {
-				rowsToInsert = append(rowsToInsert, row)
-			}
-		}
+		var rowsToInsert = fn.Filter(batch, func(row Inspection) bool {
+			return !skipIDs[row.ID]
+		})
 
 		if err := exporter.WriteRows(f, rowsToInsert); err != nil {
 			return err
 		}
-	}
+		return nil
+	})
 
+	if err != nil {
+		return err
+	}
 	return nil
 }
 

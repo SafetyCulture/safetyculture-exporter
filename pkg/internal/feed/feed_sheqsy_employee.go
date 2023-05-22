@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/httpapi"
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/util"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/logger"
 
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/events"
@@ -143,16 +144,14 @@ func (f *SheqsyEmployeeFeed) Export(ctx context.Context, apiClient *httpapi.Clie
 	if len(rows) != 0 {
 		// Calculate the size of the batch we can insert into the DB at once. Column count + buffer to account for primary keys
 		batchSize := exporter.ParameterLimit() / (len(f.Columns()) + 4)
-
-		for i := 0; i < len(rows); i += batchSize {
-			j := i + batchSize
-			if j > len(rows) {
-				j = len(rows)
-			}
-
-			if err := exporter.WriteRows(f, rows[i:j]); err != nil {
+		err := util.SplitSliceInBatch(batchSize, rows, func(batch []*SheqsyEmployee) error {
+			if err := exporter.WriteRows(f, batch); err != nil {
 				return events.WrapEventError(err, "write rows")
 			}
+			return nil
+		})
+		if err != nil {
+			return err
 		}
 	}
 

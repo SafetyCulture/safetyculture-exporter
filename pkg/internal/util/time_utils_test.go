@@ -1,6 +1,7 @@
 package util_test
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/util"
@@ -8,58 +9,60 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestTimeFromString_RFC3339(t *testing.T) {
-	input := "2006-01-02T15:04:05.000Z"
-	result, err := util.TimeFromString(input)
-	require.Nil(t, err)
-	assert.EqualValues(t, "2006-01-02 15:04:05 +0000 UTC", result.String())
-}
+func TestTimeFromString(t *testing.T) {
+	tests := map[string]struct {
+		input    string
+		expected string
+		err      error
+	}{
+		"RFC3339": {
+			input:    "2023-04-02T15:04:05.000Z",
+			expected: "2023-04-02 15:04:05 +0000 UTC",
+		},
+		"RFC1123": {
+			input:    "Mon, 02 Jan 2006 15:04:05 MST",
+			expected: "2006-01-02 15:04:05 +0000 MST",
+		},
+		"RFC822": {
+			input:    "02 Jan 06 15:04 MST",
+			expected: "2006-01-02 15:04:00 +0000 MST",
+		},
+		"RFC850": {
+			input:    "Monday, 02-Jan-06 15:04:05 MST",
+			expected: "2006-01-02 15:04:05 +0000 MST",
+		},
+		"ANSIC": {
+			input:    "Mon Jan 2 15:04:05 2006",
+			expected: "2006-01-02 15:04:05 +0000 UTC",
+		},
+		"UNIXDATE": {
+			input:    "Mon Jan 2 15:04:05 MST 2006",
+			expected: "2006-01-02 15:04:05 +0000 MST",
+		},
+		"ISO8601": {
+			input:    "2006-01-02",
+			expected: "2006-01-02 00:00:00 +0000 UTC",
+		},
+		"CUSTOM": {
+			input:    "02 Jan 2006",
+			expected: "2006-01-02 00:00:00 +0000 UTC",
+		},
+		"INVALID": {
+			input: "invalid",
+			err:   fmt.Errorf(`parsing time "invalid" as "02 Jan 2006": cannot parse "invalid" as "02"`),
+		},
+	}
 
-func TestTimeFromString_RFC1123(t *testing.T) {
-	input := "Mon, 02 Jan 2006 15:04:05 MST"
-	result, err := util.TimeFromString(input)
-	require.Nil(t, err)
-	assert.EqualValues(t, "2006-01-02 15:04:05 +0000 MST", result.String())
-}
-
-func TestTimeFromString_RFC822(t *testing.T) {
-	input := "02 Jan 06 15:04 MST"
-	result, err := util.TimeFromString(input)
-	require.Nil(t, err)
-	assert.EqualValues(t, "2006-01-02 15:04:00 +0000 MST", result.String())
-}
-
-func TestTimeFromString_RFC850(t *testing.T) {
-	input := "Monday, 02-Jan-06 15:04:05 MST"
-	result, err := util.TimeFromString(input)
-	require.Nil(t, err)
-	assert.EqualValues(t, "2006-01-02 15:04:05 +0000 MST", result.String())
-}
-
-func TestTimeFromString_ANSIC(t *testing.T) {
-	input := "Mon Jan 2 15:04:05 2006"
-	result, err := util.TimeFromString(input)
-	require.Nil(t, err)
-	assert.EqualValues(t, "2006-01-02 15:04:05 +0000 UTC", result.String())
-}
-
-func TestTimeFromString_UNIXDATE(t *testing.T) {
-	input := "Mon Jan 2 15:04:05 MST 2006"
-	result, err := util.TimeFromString(input)
-	require.Nil(t, err)
-	assert.EqualValues(t, "2006-01-02 15:04:05 +0000 MST", result.String())
-}
-
-func TestTimeFromString_ISO8601(t *testing.T) {
-	input := "2006-01-02"
-	result, err := util.TimeFromString(input)
-	require.Nil(t, err)
-	assert.EqualValues(t, "2006-01-02 00:00:00 +0000 UTC", result.String())
-}
-
-func TestTimeFromString_CUSTOM(t *testing.T) {
-	input := "02 Jan 2006"
-	result, err := util.TimeFromString(input)
-	require.Nil(t, err)
-	assert.EqualValues(t, "2006-01-02 00:00:00 +0000 UTC", result.String())
+	for name, test := range tests {
+		t.Run(name, func(t *testing.T) {
+			result, err := util.TimeFromString(test.input)
+			if test.err != nil {
+				require.EqualError(t, err, test.err.Error())
+			} else if test.err == nil {
+				assert.EqualValues(t, test.expected, result.String())
+			} else {
+				require.Fail(t, "unexpected error")
+			}
+		})
+	}
 }

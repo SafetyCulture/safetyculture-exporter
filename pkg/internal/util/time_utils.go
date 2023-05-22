@@ -23,7 +23,6 @@ func TimeFromString(input string) (time.Time, error) {
 			continue
 		}
 		return t, nil
-
 	}
 	return time.Time{}, lastErr
 }

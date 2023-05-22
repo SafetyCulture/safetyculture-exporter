@@ -391,6 +391,6 @@ func TestExporterFeedClient_ExportFeeds_should_handle_lots_of_rows_ok(t *testing
 func getMockedExporter() *mocks.Exporter {
 	exporter := &mocks.Exporter{}
 	exporter.On("SupportsUpsert").Return(true)
-	exporter.On("ParameterLimit").Return(0)
+	exporter.On("ParameterLimit").Return(100)
 	return exporter
 }

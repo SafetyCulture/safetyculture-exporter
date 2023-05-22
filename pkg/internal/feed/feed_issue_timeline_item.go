@@ -7,6 +7,8 @@ import (
 	"time"
 
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/httpapi"
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/events"
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/util"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/logger"
 )
 
@@ -98,16 +100,15 @@ func (f *IssueTimelineItemFeed) Export(ctx context.Context, apiClient *httpapi.C
 			// Calculate the size of the batch we can insert into the DB at once.
 			// Column count + buffer to account for primary keys
 			batchSize := exporter.ParameterLimit() / (len(f.Columns()) + 4)
-
-			for i := 0; i < len(rows); i += batchSize {
-				j := i + batchSize
-				if j > len(rows) {
-					j = len(rows)
+			err := util.SplitSliceInBatch(batchSize, rows, func(batch []*IssueTimelineItem) error {
+				if err := exporter.WriteRows(f, batch); err != nil {
+					return events.WrapEventError(err, "write rows")
 				}
+				return nil
+			})
 
-				if err := exporter.WriteRows(f, rows[i:j]); err != nil {
-					return fmt.Errorf("exporter: %w", err)
-				}
+			if err != nil {
+				return err
 			}
 		}
 
