@@ -106,7 +106,8 @@ func GetLogger() *zap.SugaredLogger {
 	prodConfig.EncodeTime = zapcore.ISO8601TimeEncoder
 	logFileEncoder := zapcore.NewJSONEncoder(prodConfig)
 	consoleEncoder := zapcore.NewConsoleEncoder(zap.NewDevelopmentEncoderConfig())
-	logName := fmt.Sprintf("sc-exporter-%s.log", time.DateOnly)
+
+	logName := fmt.Sprintf("sc-exporter-%s.log", time.Now().Format(time.DateOnly))
 	file, err := os.OpenFile(logName, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
 		log.Fatalf("unable to open log file %v", err)
@@ -144,20 +145,18 @@ func GetExporterLogger(path string) *ExporterLogger {
 	prodConfig := zap.NewProductionEncoderConfig()
 	prodConfig.EncodeTime = zapcore.ISO8601TimeEncoder
 	logFileEncoder := zapcore.NewJSONEncoder(prodConfig)
-	// consoleEncoder := zapcore.NewConsoleEncoder(zap.NewDevelopmentEncoderConfig())
 
-	file, err := os.OpenFile(filepath.Join(path, "logs.log"), os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	logName := fmt.Sprintf("sc-exporter-%s.log", time.Now().Format(time.DateOnly))
+	file, err := os.OpenFile(filepath.Join(path, logName), os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
 		log.Fatalf("unable to open log file %v", err)
 	}
 
 	logFileWriter := zapcore.Lock(file)
-	// consoleWriter := zapcore.Lock(os.Stderr)
 
 	// Log to both console and the log file. This allows for succinct console logs and
 	// Verbose detailed logs to review is something goes wrong.
 	core := zapcore.NewTee(
-		// zapcore.NewCore(consoleEncoder, consoleWriter, zap.InfoLevel),
 		zapcore.NewCore(logFileEncoder, logFileWriter, zap.DebugLevel),
 	)
 
@@ -199,11 +198,11 @@ func (logger *ExporterLogger) Fatal(message string) {
 	logger.l.Fatalln(message)
 }
 
-func (logger *ExporterLogger) Print(message string) {
+func (logger *ExporterLogger) Print(string) {
 	panic("don't use print")
 }
 
-func (logger *ExporterLogger) Trace(message string) {
+func (logger *ExporterLogger) Trace(string) {
 	// unimplemented
 	panic("don't use trace")
 }

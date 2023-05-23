@@ -161,6 +161,7 @@ func TestConfigurationManager_SaveConfiguration(t *testing.T) {
 	assert.EqualValues(t, "private", newCm.Configuration.Export.Inspection.WebReportLink)
 	assert.EqualValues(t, "export", newCm.Configuration.Export.Path)
 	assert.EqualValues(t, "export/media", newCm.Configuration.Export.MediaPath)
+	assert.False(t, newCm.Configuration.Export.Site.IncludeFullHierarchy)
 	assert.EqualValues(t, "INSPECTION_TITLE", newCm.Configuration.Report.FilenameConvention)
 	assert.EqualValues(t, []string{"PDF"}, newCm.Configuration.Report.Format)
 	assert.EqualValues(t, 15, newCm.Configuration.Report.RetryTimeout)

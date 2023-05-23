@@ -147,7 +147,7 @@ func configFlags() {
 
 	sitesFlags = flag.NewFlagSet("sites", flag.ContinueOnError)
 	sitesFlags.Bool("site-include-deleted", false, "Include deleted sites in the sites table (default false)")
-	sitesFlags.Bool("site-include-full-hierarchy", false, "Include full sites hierarchy in table e.g. areas, regions, etc (default false)")
+	sitesFlags.Bool("site-include-full-hierarchy", true, "Include full sites hierarchy in table e.g. areas, regions, etc (default true)")
 }
 
 func bindFlags() {
