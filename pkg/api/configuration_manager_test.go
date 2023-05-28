@@ -48,6 +48,16 @@ func TestNewConfigurationManagerFromFile_when_filename_exists_with_time(t *testi
 	assert.Equal(t, exp, cfg.Export.ModifiedAfter.Time)
 }
 
+func TestNewConfigurationManagerFromFile_when_filename_exists_with_site_hierarchy(t *testing.T) {
+	cm, err := api.NewConfigurationManagerFromFile("", "fixtures/valid_with_site_hierarchy.yaml")
+	require.Nil(t, err)
+	require.NotNil(t, cm)
+	require.NotNil(t, cm.Configuration)
+
+	cfg := cm.Configuration
+	assert.True(t, cfg.Export.Site.IncludeFullHierarchy)
+}
+
 func TestNewConfigurationManagerFromFile_when_filename_exists_with_time_rfc3339(t *testing.T) {
 	cm, err := api.NewConfigurationManagerFromFile("", "fixtures/valid_with_time_long.yaml")
 	require.Nil(t, err)
@@ -161,6 +171,7 @@ func TestConfigurationManager_SaveConfiguration(t *testing.T) {
 	assert.EqualValues(t, "private", newCm.Configuration.Export.Inspection.WebReportLink)
 	assert.EqualValues(t, "export", newCm.Configuration.Export.Path)
 	assert.EqualValues(t, "export/media", newCm.Configuration.Export.MediaPath)
+	assert.True(t, newCm.Configuration.Export.Site.IncludeFullHierarchy)
 	assert.EqualValues(t, "INSPECTION_TITLE", newCm.Configuration.Report.FilenameConvention)
 	assert.EqualValues(t, []string{"PDF"}, newCm.Configuration.Report.Format)
 	assert.EqualValues(t, 15, newCm.Configuration.Report.RetryTimeout)

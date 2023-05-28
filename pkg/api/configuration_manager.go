@@ -266,6 +266,7 @@ func BuildConfigurationWithDefaults() *ExporterConfiguration {
 	cfg.Export.MediaPath = mediaPathLocation
 	cfg.Export.TimeZone = "UTC"
 	cfg.Export.ModifiedAfter = mTime{}
+	cfg.Export.Site.IncludeFullHierarchy = true
 	cfg.Report.FilenameConvention = "INSPECTION_TITLE"
 	cfg.Report.Format = []string{"PDF"}
 	cfg.Report.RetryTimeout = 15
