@@ -245,7 +245,7 @@ func GetDatabase(dialect string, connectionString string) (*gorm.DB, error) {
 	case "sqlserver":
 		dialector = sqlserver.Open(connectionString)
 	case "sqlite":
-		dialector = sqlite.Open(connectionString)
+		dialector = sqlite.Open(connectionString + "?_journal_mode=WAL&_synchronous=FULL&_busy_timeout=20000")
 	default:
 		return nil, fmt.Errorf("invalid database dialect %s", dialect)
 	}
