@@ -17,11 +17,12 @@ import (
 type ExporterConfiguration struct {
 	AccessToken string `yaml:"access_token"`
 	API         struct {
-		ProxyURL      string `yaml:"proxy_url"`
-		SheqsyURL     string `yaml:"sheqsy_url"`
-		TLSCert       string `yaml:"tls_cert"`
-		TLSSkipVerify bool   `yaml:"tls_skip_verify"`
-		URL           string `yaml:"url"`
+		ProxyURL       string `yaml:"proxy_url"`
+		SheqsyURL      string `yaml:"sheqsy_url"`
+		TLSCert        string `yaml:"tls_cert"`
+		TLSSkipVerify  bool   `yaml:"tls_skip_verify"`
+		URL            string `yaml:"url"`
+		MaxConcurrency int    `yaml:"max_concurrency"`
 	} `yaml:"api"`
 	Csv struct {
 		MaxRowsPerFile int `yaml:"max_rows_per_file"`
@@ -249,6 +250,7 @@ func BuildConfigurationWithDefaults() *ExporterConfiguration {
 	cfg := &ExporterConfiguration{}
 	cfg.API.SheqsyURL = "https://app.sheqsy.com"
 	cfg.API.URL = "https://api.safetyculture.io"
+	cfg.API.MaxConcurrency = 10
 	cfg.Csv.MaxRowsPerFile = 1000000
 	cfg.Db.Dialect = "mysql"
 	cfg.Export.Tables = []string{}
@@ -339,6 +341,7 @@ func (ec *ExporterConfiguration) ToExporterConfig() *feed.ExporterFeedCfg {
 		ExportSiteIncludeFullHierarchy:        ec.Export.Site.IncludeFullHierarchy,
 		ExportIssueLimit:                      ec.Export.Issue.Limit,
 		ExportAssetLimit:                      ec.Export.Asset.Limit,
+		MaxConcurrentGoRoutines:               ec.API.MaxConcurrency,
 	}
 }
 
