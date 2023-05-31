@@ -52,6 +52,8 @@ type InspectionItem struct {
 	Inactive                bool      `json:"inactive" csv:"inactive"`
 	LocationLatitude        *float32  `json:"location_latitude" csv:"location_latitude"`
 	LocationLongitude       *float32  `json:"location_longitude" csv:"location_longitude"`
+	PrimeelementID          string    `json:"primeelement_id" csv:"primeelement_id" gorm:"size:100"`
+	PrimeelementIndex       *int64    `json:"primeelement_index" csv:"primeelement_index"`
 }
 
 // InspectionItemFeed is a representation of the inspection_items feed
@@ -119,6 +121,8 @@ func (f *InspectionItemFeed) Columns() []string {
 		"inactive",
 		"location_latitude",
 		"location_longitude",
+		"primeelement_id",
+		"primeelement_index",
 	}
 }
 
