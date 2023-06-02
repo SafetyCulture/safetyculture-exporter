@@ -99,6 +99,7 @@ func configFlags() {
 	connectionFlags.Bool("tls-skip-verify", false, "Skip verification of API TLS certificates")
 	connectionFlags.String("tls-cert", "", "Custom root CA certificate to use when making API requests")
 	connectionFlags.String("proxy-url", "", "Proxy URL for making API requests through")
+	connectionFlags.Int("max-concurrency", 10, "Maximum number of concurrent API requests (defaults to max 10)")
 
 	dbFlags = flag.NewFlagSet("db", flag.ContinueOnError)
 	dbFlags.String("db-dialect", "mysql", "Database dialect. mysql, postgres and sqlserver are the only valid options.")
@@ -166,6 +167,7 @@ func bindFlags() {
 	util.Check(viper.BindPFlag("api.tls_skip_verify", connectionFlags.Lookup("tls-skip-verify")), "while binding flag")
 	util.Check(viper.BindPFlag("api.tls_cert", connectionFlags.Lookup("tls-cert")), "while binding flag")
 	util.Check(viper.BindPFlag("api.proxy_url", connectionFlags.Lookup("proxy-url")), "while binding flag")
+	util.Check(viper.BindPFlag("api.max_concurrency", connectionFlags.Lookup("max-concurrency")), "while binding flag")
 
 	util.Check(viper.BindPFlag("db.dialect", dbFlags.Lookup("db-dialect")), "while binding flag")
 	util.Check(viper.BindPFlag("db.connection_string", dbFlags.Lookup("db-connection-string")), "while binding flag")

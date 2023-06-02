@@ -151,6 +151,7 @@ func NewSafetyCultureExporter(v *viper.Viper) *exporterAPI.SafetyCultureExporter
 // MapViperConfigToExporterConfiguration maps Viper config to ExporterConfiguration structure
 func MapViperConfigToExporterConfiguration(v *viper.Viper, cfg *exporterAPI.ExporterConfiguration) {
 	cfg.AccessToken = v.GetString("access_token")
+	cfg.API.MaxConcurrency = v.GetInt("api.max_concurrency")
 	cfg.SheqsyUsername = v.GetString("sheqsy_username")
 	cfg.SheqsyCompanyID = v.GetString("sheqsy_company_id")
 	cfg.Db.Dialect = v.GetString("db.dialect")

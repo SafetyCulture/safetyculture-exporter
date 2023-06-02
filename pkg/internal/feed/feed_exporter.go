@@ -7,6 +7,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/MickStanciu/go-fn/fn"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/httpapi"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/events"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/logger"
@@ -61,6 +62,7 @@ type ExporterFeedCfg struct {
 	ExportAssetLimit                      int
 	ExportScheduleOccurrenceStartDate     time.Time
 	ExportScheduleOccurrenceEndDate       time.Time
+	MaxConcurrentGoRoutines               int
 }
 
 func NewExporterApp(scApiClient *httpapi.Client, sheqsyApiClient *httpapi.Client, cfg *ExporterFeedCfg) *ExporterFeedClient {
@@ -101,8 +103,12 @@ func (e *ExporterFeedClient) ExportFeeds(exporter Exporter, ctx context.Context)
 		tablesMap[table] = true
 	}
 
+	maxConcurrentRoutines := fn.GetOrElse(e.configuration.MaxConcurrentGoRoutines, maxConcurrentGoRoutines, func(i int) bool {
+		return i > 0
+	})
+
 	var wg sync.WaitGroup
-	semaphore := make(chan int, maxConcurrentGoRoutines)
+	semaphore := make(chan int, maxConcurrentRoutines)
 
 	atLeastOneRun := false
 
@@ -229,17 +235,7 @@ func (e *ExporterFeedClient) ExportFeeds(exporter Exporter, ctx context.Context)
 func (e *ExporterFeedClient) GetFeeds() []Feed {
 	return []Feed{
 		e.getInspectionFeed(),
-		&InspectionItemFeed{
-			SkipIDs:         e.configuration.ExportInspectionSkipIds,
-			ModifiedAfter:   e.configuration.ExportModifiedAfterTime,
-			TemplateIDs:     e.configuration.ExportTemplateIds,
-			Archived:        e.configuration.ExportInspectionArchived,
-			Completed:       e.configuration.ExportInspectionCompleted,
-			IncludeInactive: e.configuration.ExportInspectionIncludedInactiveItems,
-			Incremental:     e.configuration.ExportIncremental,
-			Limit:           e.configuration.ExportInspectionLimit,
-			ExportMedia:     e.configuration.ExportMedia,
-		},
+		&UserFeed{},
 		&TemplateFeed{
 			Incremental: e.configuration.ExportIncremental,
 		},
@@ -251,7 +247,6 @@ func (e *ExporterFeedClient) GetFeeds() []Feed {
 			IncludeFullHierarchy: e.configuration.ExportSiteIncludeFullHierarchy,
 		},
 		&SiteMemberFeed{},
-		&UserFeed{},
 		&GroupFeed{},
 		&GroupUserFeed{},
 		&ScheduleFeed{
@@ -278,6 +273,17 @@ func (e *ExporterFeedClient) GetFeeds() []Feed {
 			ModifiedAfter: e.configuration.ExportModifiedAfterTime,
 			Incremental:   e.configuration.ExportIncremental,
 			Limit:         e.configuration.ExportActionLimit,
+		},
+		&InspectionItemFeed{
+			SkipIDs:         e.configuration.ExportInspectionSkipIds,
+			ModifiedAfter:   e.configuration.ExportModifiedAfterTime,
+			TemplateIDs:     e.configuration.ExportTemplateIds,
+			Archived:        e.configuration.ExportInspectionArchived,
+			Completed:       e.configuration.ExportInspectionCompleted,
+			IncludeInactive: e.configuration.ExportInspectionIncludedInactiveItems,
+			Incremental:     e.configuration.ExportIncremental,
+			Limit:           e.configuration.ExportInspectionLimit,
+			ExportMedia:     e.configuration.ExportMedia,
 		},
 		&IssueFeed{
 			Incremental: false, // this was disabled on request. Issues API doesn't support modified After filters

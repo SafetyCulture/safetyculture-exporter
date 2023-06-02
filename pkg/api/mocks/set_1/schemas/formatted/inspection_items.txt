@@ -34,4 +34,6 @@
 | inactive                  | numeric  |             |
 | location_latitude         | REAL     |             |
 | location_longitude        | REAL     |             |
+| primeelement_id           | TEXT     |             |
+| primeelement_index        | INTEGER  |             |
 +---------------------------+----------+-------------+
