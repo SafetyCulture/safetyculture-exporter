@@ -68,6 +68,8 @@ type GetFeedParams struct {
 	IncludeInactive bool      `url:"include_inactive,omitempty"`
 	Limit           int       `url:"limit,omitempty"`
 	WebReportLink   string    `url:"web_report_link,omitempty"`
+	StartDate       time.Time `url:"start_date,omitempty"`
+	EndDate         time.Time `url:"end_date,omitempty"`
 
 	// Applicable only for sites
 	IncludeDeleted    bool  `url:"include_deleted,omitempty"`

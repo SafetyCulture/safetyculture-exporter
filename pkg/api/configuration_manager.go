@@ -55,8 +55,14 @@ type ExporterConfiguration struct {
 		ModifiedAfter mTime  `yaml:"modified_after"`
 		TimeZone      string `yaml:"time_zone"`
 		Path          string `yaml:"path"`
-		SchemaOnly    bool   `yaml:"-"`
-		Site          struct {
+
+		ScheduleOccurrences struct {
+			StartDate mTime `yaml:"start_date"`
+			EndDate   mTime `yaml:"end_date"`
+		} `yaml:"schedule_occurrences"`
+
+		SchemaOnly bool `yaml:"-"`
+		Site       struct {
 			IncludeDeleted       bool `yaml:"include_deleted"`
 			IncludeFullHierarchy bool `yaml:"include_full_hierarchy"`
 		} `yaml:"site"`
@@ -266,6 +272,8 @@ func BuildConfigurationWithDefaults() *ExporterConfiguration {
 	cfg.Export.MediaPath = mediaPathLocation
 	cfg.Export.TimeZone = "UTC"
 	cfg.Export.ModifiedAfter = mTime{}
+	cfg.Export.ScheduleOccurrences.StartDate = mTime{}
+	cfg.Export.ScheduleOccurrences.EndDate = mTime{}
 	cfg.Export.Site.IncludeFullHierarchy = true
 	cfg.Report.FilenameConvention = "INSPECTION_TITLE"
 	cfg.Report.Format = []string{"PDF"}
@@ -339,6 +347,8 @@ func (ec *ExporterConfiguration) ToExporterConfig() *feed.ExporterFeedCfg {
 		ExportSiteIncludeFullHierarchy:        ec.Export.Site.IncludeFullHierarchy,
 		ExportIssueLimit:                      ec.Export.Issue.Limit,
 		ExportAssetLimit:                      ec.Export.Asset.Limit,
+		ExportScheduleOccurrenceStartDate:     ec.Export.ScheduleOccurrences.StartDate.Time,
+		ExportScheduleOccurrenceEndDate:       ec.Export.ScheduleOccurrences.EndDate.Time,
 	}
 }
 
