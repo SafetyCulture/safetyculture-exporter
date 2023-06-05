@@ -20,7 +20,7 @@ import (
 
 var cfgFile string
 var connectionFlags, dbFlags, sqliteFlags, csvFlags, exportFlags, mediaFlags, inspectionFlags, actionFlags,
-	templatesFlag, tablesFlag, schemasFlag, reportFlags, occurrencesFlags, sitesFlags *flag.FlagSet
+	templatesFlag, tablesFlag, schemasFlag, reportFlags, sitesFlags *flag.FlagSet
 
 // RootCmd represents the base command when called without any subcommands.
 var RootCmd = &cobra.Command{
