@@ -139,10 +139,8 @@ func (f *ScheduleOccurrenceFeed) Export(ctx context.Context, apiClient *httpapi.
 
 	if !f.StartDate.IsZero() {
 		req.Params.StartDate = f.StartDate
-	}
-
-	if !f.EndDate.IsZero() {
-		req.Params.EndDate = f.EndDate
+		// hard limit to 31 days at a time
+		req.Params.EndDate = f.StartDate.Add(31 * day)
 	}
 
 	if err := DrainFeed(ctx, apiClient, req, drainFn); err != nil {
@@ -150,3 +148,6 @@ func (f *ScheduleOccurrenceFeed) Export(ctx context.Context, apiClient *httpapi.
 	}
 	return exporter.FinaliseExport(f, &[]*ScheduleOccurrence{})
 }
+
+// DAY holds the number of seconds in a da
+var day = 24 * 60 * 60 * time.Second

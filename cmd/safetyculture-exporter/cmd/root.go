@@ -149,11 +149,6 @@ func configFlags() {
 	sitesFlags = flag.NewFlagSet("sites", flag.ContinueOnError)
 	sitesFlags.Bool("site-include-deleted", false, "Include deleted sites in the sites table (default false)")
 	sitesFlags.Bool("site-include-full-hierarchy", true, "Include full sites hierarchy in table e.g. areas, regions, etc (default true)")
-
-	occurrencesFlags = flag.NewFlagSet("schedule-occurrences", flag.ContinueOnError)
-	occurrencesFlags.String("schedule-occurrences-start-date", "", "Schedule occurrences have happened after this date and time")
-	occurrencesFlags.String("schedule-occurrences-end-date", "", "Schedule occurrences will be returned up to this date and time")
-
 }
 
 func bindFlags() {
@@ -192,9 +187,6 @@ func bindFlags() {
 	util.Check(viper.BindPFlag("export.inspection.web_report_link", inspectionFlags.Lookup("inspection-web-report-link")), "while binding flag")
 
 	util.Check(viper.BindPFlag("export.action.limit", actionFlags.Lookup("action-limit")), "while binding flag")
-
-	util.Check(viper.BindPFlag("export.schedule_occurrences.start_date", occurrencesFlags.Lookup("schedule-occurrences-start-date")), "while binding flag")
-	util.Check(viper.BindPFlag("export.schedule_occurrences.end_date", occurrencesFlags.Lookup("schedule-occurrences-end-date")), "while binding flag")
 
 	util.Check(viper.BindPFlag("export.site.include_deleted", sitesFlags.Lookup("site-include-deleted")), "while binding flag")
 	util.Check(viper.BindPFlag("export.site.include_full_hierarchy", sitesFlags.Lookup("site-include-full-hierarchy")), "while binding flag")

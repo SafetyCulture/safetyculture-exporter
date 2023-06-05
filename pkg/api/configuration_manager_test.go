@@ -58,22 +58,6 @@ func TestNewConfigurationManagerFromFile_when_filename_exists_with_site_hierarch
 	assert.True(t, cfg.Export.Site.IncludeFullHierarchy)
 }
 
-func TestNewConfigurationManagerFromFile_with_schedule_occurrences_config(t *testing.T) {
-	cm, err := api.NewConfigurationManagerFromFile("", "fixtures/valid_with_occurrences_hierarchy.yaml")
-	require.Nil(t, err)
-	require.NotNil(t, cm)
-	require.NotNil(t, cm.Configuration)
-
-	cfg := cm.Configuration
-	exp, _ := time.Parse(time.RFC3339, "2023-05-01T00:00:00Z")
-	assert.False(t, cfg.Export.ScheduleOccurrences.StartDate.Time.IsZero())
-	assert.Equal(t, exp, cfg.Export.ScheduleOccurrences.StartDate.Time)
-
-	exp, _ = time.Parse(time.RFC3339, "2023-06-01T00:00:00Z")
-	assert.False(t, cfg.Export.ScheduleOccurrences.EndDate.Time.IsZero())
-	assert.Equal(t, exp, cfg.Export.ScheduleOccurrences.EndDate.Time)
-}
-
 func TestNewConfigurationManagerFromFile_when_filename_exists_with_time_rfc3339(t *testing.T) {
 	cm, err := api.NewConfigurationManagerFromFile("", "fixtures/valid_with_time_long.yaml")
 	require.Nil(t, err)

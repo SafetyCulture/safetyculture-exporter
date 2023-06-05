@@ -170,8 +170,6 @@ func MapViperConfigToExporterConfiguration(v *viper.Viper, cfg *exporterAPI.Expo
 	cfg.Export.Inspection.SkipIds = v.GetStringSlice("export.inspection.skip_ids")
 	cfg.Export.Inspection.Limit = v.GetInt("export.inspection.limit")
 	cfg.Export.Inspection.WebReportLink = v.GetString("export.inspection.web_report_link")
-	cfg.Export.ScheduleOccurrences.StartDate.Time = v.GetTime("export.schedule_occurrences.start_date")
-	cfg.Export.ScheduleOccurrences.EndDate.Time = v.GetTime("export.schedule_occurrences.end_date")
 	cfg.Export.Site.IncludeDeleted = v.GetBool("export.site.include_deleted")
 	cfg.Export.Site.IncludeFullHierarchy = v.GetBool("export.site.include_full_hierarchy")
 	cfg.Export.Media = v.GetBool("export.media")

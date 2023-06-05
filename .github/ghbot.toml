@@ -1,0 +1,1 @@
+spelling.ignorepaths = ["pkg/api/mocks"]

@@ -60,8 +60,6 @@ type ExporterFeedCfg struct {
 	ExportSiteIncludeFullHierarchy        bool
 	ExportIssueLimit                      int
 	ExportAssetLimit                      int
-	ExportScheduleOccurrenceStartDate     time.Time
-	ExportScheduleOccurrenceEndDate       time.Time
 	MaxConcurrentGoRoutines               int
 }
 
@@ -257,8 +255,7 @@ func (e *ExporterFeedClient) GetFeeds() []Feed {
 		},
 		&ScheduleOccurrenceFeed{
 			TemplateIDs: e.configuration.ExportTemplateIds,
-			StartDate:   e.configuration.ExportScheduleOccurrenceStartDate,
-			EndDate:     e.configuration.ExportScheduleOccurrenceEndDate,
+			StartDate:   e.configuration.ExportModifiedAfterTime,
 		},
 		&ActionFeed{
 			ModifiedAfter: e.configuration.ExportModifiedAfterTime,
