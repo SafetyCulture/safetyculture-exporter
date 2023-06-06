@@ -255,6 +255,7 @@ func (e *ExporterFeedClient) GetFeeds() []Feed {
 		},
 		&ScheduleOccurrenceFeed{
 			TemplateIDs: e.configuration.ExportTemplateIds,
+			StartDate:   e.configuration.ExportModifiedAfterTime,
 		},
 		&ActionFeed{
 			ModifiedAfter: e.configuration.ExportModifiedAfterTime,

@@ -34,6 +34,7 @@ type ScheduleOccurrence struct {
 // ScheduleOccurrenceFeed is a representation of the schedule_occurrences feed
 type ScheduleOccurrenceFeed struct {
 	TemplateIDs []string
+	StartDate   time.Time
 }
 
 // Name is the name of the feed
@@ -135,8 +136,15 @@ func (f *ScheduleOccurrenceFeed) Export(ctx context.Context, apiClient *httpapi.
 		},
 	}
 
+	if !f.StartDate.IsZero() {
+		req.Params.StartDate = f.StartDate
+		req.Params.EndDate = f.StartDate.Add(31 * day) // hard limit to 31 days at a time
+	}
+
 	if err := DrainFeed(ctx, apiClient, req, drainFn); err != nil {
 		return events.WrapEventError(err, fmt.Sprintf("feed %q", f.Name()))
 	}
 	return exporter.FinaliseExport(f, &[]*ScheduleOccurrence{})
 }
+
+var day = 24 * 60 * 60 * time.Second
