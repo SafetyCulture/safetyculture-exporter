@@ -19,7 +19,7 @@ func NewTemplatesClient(apiClient *httpapi.Client) *Client {
 	}
 }
 
-// GetTemplateList will gracefully return template list. On Error will return empty or what was temporarly downloaded
+// GetTemplateList will gracefully return template list. On Error will return empty or what was temporarily downloaded
 func (c *Client) GetTemplateList(ctx context.Context, pageSize int) []TemplateResponseItem {
 	l := logger.GetLogger()
 	var items []TemplateResponseItem
