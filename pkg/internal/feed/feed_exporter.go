@@ -128,7 +128,13 @@ func (e *ExporterFeedClient) ExportFeeds(exporter Exporter, ctx context.Context)
 			return fmt.Errorf("get details of the current user: %w", err)
 		}
 
-		log.Infof("exporting data by user: %s %s", resp.Firstname, resp.Lastname)
+		log = log.With(
+			"user.id", resp.UserID,
+			"user.org_id", resp.OrganisationID,
+			"user.name", fmt.Sprintf("%s %s", resp.Firstname, resp.Lastname),
+		)
+
+		log.Infof("exporting data for user")
 
 		if len(feeds) == 0 {
 			return errors.New("no tables selected")
