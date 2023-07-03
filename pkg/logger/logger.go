@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/SafetyCulture/safetyculture-exporter/internal/app/version"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/diagnostics"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
@@ -105,7 +106,7 @@ func getLogger(cores ...zapcore.Core) *zap.SugaredLogger {
 	)
 
 	// From a zapcore.Core, it's easy to construct a Logger.
-	l := zap.New(core).Named("safetyculture-exporter")
+	l := zap.New(core).Named(version.GetIntegrationID())
 	defer l.Sync()
 
 	// redirects output from the standard library's package-global logger to the supplied logger
@@ -113,6 +114,7 @@ func getLogger(cores ...zapcore.Core) *zap.SugaredLogger {
 
 	slg := l.Sugar().
 		With(
+			"version", version.GetVersion(),
 			"pid", os.Getpid(),
 			"uid", os.Getuid(),
 		)
