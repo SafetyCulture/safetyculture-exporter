@@ -24,7 +24,8 @@
       "category_label": "Tow Trucks",
       "modified_at": "2020-04-14T02:36:53.304Z",
       "completed_at": "2020-04-14T02:36:53.304Z",
-      "asset_id": "asset_id_123"
+      "asset_id": "asset_id_123",
+      "unique_id": "ID_1"
     },
     {
       "id": "52a88aeb-5ec6-4876-8c6c-85a642e4bddc",
@@ -44,7 +45,8 @@
       "location_name": null,
       "category_id": null,
       "category_label": null,
-      "modified_at": "2020-04-14T02:36:53.304Z"
+      "modified_at": "2020-04-14T02:36:53.304Z",
+      "unique_id": "ID_2"
     },
     {
       "id": "5b9fdfa5-dc17-4fde-9823-692dc0723d87",
@@ -64,7 +66,8 @@
       "location_name": null,
       "category_id": "53894e05-108a-485b-a003-985beb8d9af5",
       "category_label": "Property Damage",
-      "modified_at": "2020-04-14T02:36:53.304Z"
+      "modified_at": "2020-04-14T02:36:53.304Z",
+      "unique_id": "ID_3"
     },
     {
       "id": "5181d553-7f00-4b4f-b366-53b1e71034f1",
@@ -84,7 +87,8 @@
       "location_name": null,
       "category_id": "53894e05-108a-485b-a003-985beb8d9af5",
       "category_label": "Property Damage",
-      "modified_at": "2020-04-14T09:36:53.304Z"
+      "modified_at": "2020-04-14T09:36:53.304Z",
+      "unique_id": "ID_4"
     },
     {
       "id": "58b0d3d1-7f72-4d74-b5df-5a4e2e615e46",
@@ -104,7 +108,8 @@
       "location_name": null,
       "category_id": "53894e05-108a-485b-a003-985beb8d9af5",
       "category_label": "Property Damage",
-      "modified_at": "2020-04-15T02:36:53.304Z"
+      "modified_at": "2020-04-15T02:36:53.304Z",
+      "unique_id": "ID_5"
     },
     {
       "id": "54af7953-1c57-415c-b81e-785d3bda2880",
@@ -124,7 +129,8 @@
       "location_name": null,
       "category_id": "592ec130-90e0-4c0e-a1c0-1f37f12f5fbb",
       "category_label": "Tow Trucks",
-      "modified_at": "2020-04-15T04:36:53.304Z"
+      "modified_at": "2020-04-15T04:36:53.304Z",
+      "unique_id": "ID_6"
     },
     {
       "id": "530ac66e-3822-4b75-95ad-9533f60e8fc6",
@@ -144,7 +150,8 @@
       "location_name": null,
       "category_id": "53894e05-108a-485b-a003-985beb8d9af5",
       "category_label": "Property Damage",
-      "modified_at": "2020-04-16T02:36:53.304Z"
+      "modified_at": "2020-04-16T02:36:53.304Z",
+      "unique_id": "ID_7"
     },
     {
       "id": "51d930f1-6169-4853-b478-6f80f7e8aec9",
@@ -164,7 +171,8 @@
       "location_name": null,
       "category_id": "692ec130-90e0-4c0e-a1c0-1f37f12f5fbb",
       "category_label": "Tow Trucks",
-      "modified_at": "2020-04-17T02:36:53.304Z"
+      "modified_at": "2020-04-17T02:36:53.304Z",
+      "unique_id": "ID_8"
     },
     {
       "id": "5283d20e-f9b1-4b3b-b320-6417407dcb89",
@@ -184,7 +192,8 @@
       "location_name": null,
       "category_id": "592ec130-90e0-4c0e-a1c0-1f37f12f5fbb",
       "category_label": "Tow Trucks",
-      "modified_at": "2020-04-17T02:36:53.304Z"
+      "modified_at": "2020-04-17T02:36:53.304Z",
+      "unique_id": "ID_9"
     },
     {
       "id": "5bff040d-cb0c-415f-bdc6-525d97812297",
@@ -204,7 +213,8 @@
       "location_name": null,
       "category_id": "5233f246-75d7-411d-85a9-ef80b83c041f",
       "category_label": "Incident",
-      "modified_at": "2020-04-17T02:36:53.304Z"
+      "modified_at": "2020-04-17T02:36:53.304Z",
+      "unique_id": "ID_10"
     },
     {
       "id": "57755109-2862-435a-bcd9-2ce0b239e4ee",
@@ -224,7 +234,8 @@
       "location_name": null,
       "category_id": "5233f246-75d7-411d-85a9-ef80b83c0415",
       "category_label": "Incident",
-      "modified_at": "2020-04-17T02:36:53.304Z"
+      "modified_at": "2020-04-17T02:36:53.304Z",
+      "unique_id": "ID_11"
     },
     {
       "id": "5db430e0-7983-4643-bcc3-a233ec26463f",
@@ -244,7 +255,8 @@
       "location_name": null,
       "category_id": "592ec130-90e0-4c0e-a1c0-1f37f12f5fbb",
       "category_label": "Tow Trucks",
-      "modified_at": "2020-04-17T02:36:53.304Z"
+      "modified_at": "2020-04-17T02:36:53.304Z",
+      "unique_id": "ID_12"
     },
     {
       "id": "535e21c6-444b-42af-b8da-21609d497df3",
@@ -264,7 +276,8 @@
       "location_name": null,
       "category_id": "5a273d68-1b70-4bd4-8cf3-ee22fd75ab95",
       "category_label": "Commissions Priority",
-      "modified_at": "2020-04-17T02:36:53.304Z"
+      "modified_at": "2020-04-17T02:36:53.304Z",
+      "unique_id": "ID_13"
     },
     {
       "id": "5ad3c52e-57c7-430c-a217-69f6a7442b6b",
@@ -284,7 +297,8 @@
       "location_name": null,
       "category_id": "592ec130-90e0-4c0e-a1c0-1f37f12f5fbb",
       "category_label": "Tow Trucks",
-      "modified_at": "2020-04-17T02:36:53.304Z"
+      "modified_at": "2020-04-17T02:36:53.304Z",
+      "unique_id": "ID_14"
     },
     {
       "id": "5f746513-e6f8-47bc-8ca9-67fd335c851d",
@@ -304,7 +318,8 @@
       "location_name": null,
       "category_id": "592ec130-90e0-4c0e-a1c0-1f37f12f5fbb",
       "category_label": "Tow Trucks",
-      "modified_at": "2020-04-17T02:36:53.304Z"
+      "modified_at": "2020-04-17T02:36:53.304Z",
+      "unique_id": "ID_15"
     },
     {
       "id": "5c16d1ff-e33b-4600-bf34-f87db7e15215",
@@ -324,7 +339,8 @@
       "location_name": null,
       "category_id": "592ec130-90e0-4c0e-a1c0-1f37f12f5fbb",
       "category_label": "Tow Trucks",
-      "modified_at": "2020-04-18T02:36:53.304Z"
+      "modified_at": "2020-04-18T02:36:53.304Z",
+      "unique_id": "ID_16"
     },
     {
       "id": "519f007d-516f-4196-9c55-1ee1e735f694",
@@ -344,7 +360,8 @@
       "location_name": null,
       "category_id": "592ec130-90e0-4c0e-a1c0-1f37f12f5fbb",
       "category_label": "Tow Trucks",
-      "modified_at": "2020-04-18T02:36:53.304Z"
+      "modified_at": "2020-04-18T02:36:53.304Z",
+      "unique_id": "ID_17"
     },
     {
       "id": "5eee3475-77b3-4232-9c28-f8a3e5e7a391",
@@ -364,7 +381,8 @@
       "location_name": null,
       "category_id": "592ec130-90e0-4c0e-a1c0-1f37f12f5fbb",
       "category_label": "Tow Trucks",
-      "modified_at": "2020-04-18T02:36:53.304Z"
+      "modified_at": "2020-04-18T02:36:53.304Z",
+      "unique_id": "ID_18"
     },
     {
       "id": "511d8914-fcc3-4070-873a-6eb54a1bfd99",
@@ -384,7 +402,8 @@
       "location_name": null,
       "category_id": "5233f246-75d7-411d-85a9-ef80b83c041f",
       "category_label": "Incident",
-      "modified_at": "2020-04-18T02:36:53.304Z"
+      "modified_at": "2020-04-18T02:36:53.304Z",
+      "unique_id": "ID_19"
     },
     {
       "id": "58436988-30ba-4a3d-bad3-ade3629199e4",
@@ -404,7 +423,8 @@
       "location_name": null,
       "category_id": "52a419e3-5142-4fb3-a26c-31114dc80682",
       "category_label": "Hazard 2",
-      "modified_at": "2020-04-21T02:36:53.304Z"
+      "modified_at": "2020-04-21T02:36:53.304Z",
+      "unique_id": "ID_20"
     }
   ]
 }
