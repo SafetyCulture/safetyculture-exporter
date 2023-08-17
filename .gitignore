@@ -13,6 +13,7 @@
 *.out
 .DS_Store
 dist/
+.run
 
 *swp
 .vscode/

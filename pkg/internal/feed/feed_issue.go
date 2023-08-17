@@ -35,6 +35,7 @@ type Issue struct {
 	ModifiedAt      time.Time  `json:"modified_at" csv:"modified_at"`
 	CompletedAt     *time.Time `json:"completed_at" csv:"completed_at"`
 	AssetID         string     `json:"asset_id" csv:"asset_id" gorm:"size:36"`
+	UniqueID        string     `json:"unique_id" csv:"unique_id"`
 }
 
 // IssueFeed is a representation of the issues feed
@@ -69,7 +70,8 @@ func (f *IssueFeed) Columns() []string {
 		"id", "title", "description", "creator_id", "creator_user_name",
 		"created_at", "due_at", "priority", "status", "template_id",
 		"inspection_id", "inspection_name", "site_id", "site_name",
-		"location_name", "category_id", "category_label",
+		"location_name", "category_id", "category_label", "modified_at",
+		"completed_at", "asset_id", "unique_id",
 	}
 }
 
