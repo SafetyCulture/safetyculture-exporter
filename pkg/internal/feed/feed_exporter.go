@@ -60,6 +60,7 @@ type ExporterFeedCfg struct {
 	ExportSiteIncludeFullHierarchy        bool
 	ExportIssueLimit                      int
 	ExportAssetLimit                      int
+	ExportCourseProgressLimit             int
 	MaxConcurrentGoRoutines               int
 }
 
@@ -299,6 +300,10 @@ func (e *ExporterFeedClient) GetFeeds() []Feed {
 		&AssetFeed{
 			Incremental: false, // Assets API doesn't support modified after filters
 			Limit:       e.configuration.ExportAssetLimit,
+		},
+		&TrainingCourseProgressFeed{
+			Incremental: false, // CourseProgress doesn't support modified after filters,
+			Offset:      e.configuration.ExportCourseProgressLimit,
 		},
 	}
 }
