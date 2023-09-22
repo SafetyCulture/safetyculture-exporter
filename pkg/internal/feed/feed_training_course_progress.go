@@ -14,7 +14,7 @@ import (
 
 // TrainingCourseProgress represents a row for the feed
 type TrainingCourseProgress struct {
-	ID               string     `json:"id" csv:"course_progress_id" gorm:"primarykey;column:course_progress_id;size:375"` // TODO size?
+	ID               string     `json:"id" csv:"course_progress_id" gorm:"primarykey;column:course_progress_id;size:512"`
 	OpenedAt         *time.Time `json:"opened_at" csv:"opened_at"`
 	CompletedAt      *time.Time `json:"completed_at" csv:"completed_at"`
 	TotalLessons     int32      `json:"total_lessons" csv:"total_lessons"`
@@ -29,7 +29,7 @@ type TrainingCourseProgress struct {
 	UserExternalID   string     `json:"user_external_id" csv:"user_external_id"`
 	ProgressPercent  float32    `json:"progress_percent" csv:"progress_percent"`
 	Score            int32      `json:"score" csv:"score"`
-	DueAt            *time.Time `json:"completed_at" csv:"completed_at"`
+	DueAt            *time.Time `json:"due_at" csv:"due_at"`
 }
 
 // TrainingCourseProgressFeed is a representation of the feed
