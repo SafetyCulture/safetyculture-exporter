@@ -13,18 +13,17 @@ import (
 
 // TrainingCourseProgress represents a row for the feed
 type TrainingCourseProgress struct {
-	ID               string  `json:"id" csv:"course_progress_id" gorm:"primarykey;column:course_progress_id;size:512"`
 	OpenedAt         string  `json:"opened_at" csv:"opened_at"`
 	CompletedAt      string  `json:"completed_at" csv:"completed_at"`
 	TotalLessons     int32   `json:"total_lessons" csv:"total_lessons"`
 	CompletedLessons int32   `json:"completed_lessons" csv:"completed_lessons"`
-	CourseID         string  `json:"course_id" csv:"course_id" gorm:"size:64"`
+	CourseID         string  `json:"course_id" csv:"course_id" gorm:"primarykey;column:course_id;size:64"`
 	CourseExternalID string  `json:"course_external_id" csv:"course_external_id" gorm:"size:256"`
 	CourseTitle      string  `json:"course_title" csv:"course_title"`
 	UserEmail        string  `json:"user_email" csv:"user_email" gorm:"size:256"`
 	UserFirstName    string  `json:"user_first_name" csv:"user_first_name"`
 	UserLastName     string  `json:"user_last_name" csv:"user_last_name"`
-	UserID           string  `json:"user_id" csv:"user_id" gorm:"size:37"`
+	UserID           string  `json:"user_id" csv:"user_id" gorm:"primarykey;column:user_id;size:37"`
 	UserExternalID   string  `json:"user_external_id" csv:"user_external_id"`
 	ProgressPercent  float32 `json:"progress_percent" csv:"progress_percent"`
 	Score            int32   `json:"score" csv:"score"`
