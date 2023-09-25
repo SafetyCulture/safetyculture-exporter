@@ -130,7 +130,7 @@ func (f *TrainingCourseProgressFeed) Export(ctx context.Context, apiClient *http
 	}
 
 	req := &GetFeedRequest{
-		InitialURL: "/feed/training-course-progress",
+		InitialURL: "/training/v1/feed/training-course-progress+",
 		Params: GetFeedParams{
 			Offset: f.Offset,
 		},
