@@ -76,5 +76,6 @@ type GetFeedParams struct {
 	ShowOnlyLeafNodes *bool `url:"show_only_leaf_nodes,omitempty"`
 
 	// Applicable only for course progress
-	Offset int `url:"offset,omitempty"`
+	Offset           int    `url:"offset,omitempty"`
+	CompletionStatus string `url:"completion_status,omitempty"`
 }

@@ -32,8 +32,9 @@ type TrainingCourseProgress struct {
 
 // TrainingCourseProgressFeed is a representation of the feed
 type TrainingCourseProgressFeed struct {
-	Incremental bool
-	Offset      int
+	Incremental      bool
+	Limit            int
+	CompletionStatus string
 }
 
 // Name is the name of the feed
@@ -103,7 +104,8 @@ func (f *TrainingCourseProgressFeed) Export(ctx context.Context, apiClient *http
 			return events.NewEventErrorWithMessage(err, events.ErrorSeverityError, events.ErrorSubSystemDataIntegrity, false, "map data")
 		}
 
-		if len(rows) != 0 {
+		numRows := len(rows)
+		if numRows != 0 {
 			// Calculate the size of the batch we can insert into the DB at once. Column count + buffer to account for primary keys
 			batchSize := exporter.ParameterLimit() / (len(f.Columns()) + 4)
 			err := util.SplitSliceInBatch(batchSize, rows, func(batch []*TrainingCourseProgress) error {
@@ -119,10 +121,10 @@ func (f *TrainingCourseProgressFeed) Export(ctx context.Context, apiClient *http
 		}
 
 		// note: this feed api doesn't return remaining items
-		status.UpdateStatus(f.Name(), -1, apiClient.Duration.Milliseconds())
+		status.IncrementStatus(f.Name(), int64(numRows), apiClient.Duration.Milliseconds())
 
 		l.With(
-			"estimated_remaining", -1,
+			"downloaded", numRows,
 			"duration_ms", apiClient.Duration.Milliseconds(),
 			"export_duration_ms", exporter.GetDuration().Milliseconds(),
 		).Info("export batch complete")
@@ -130,9 +132,10 @@ func (f *TrainingCourseProgressFeed) Export(ctx context.Context, apiClient *http
 	}
 
 	req := &GetFeedRequest{
-		InitialURL: "/training/v1/feed/training-course-progress+",
+		InitialURL: "/training/v1/feed/training-course-progress",
 		Params: GetFeedParams{
-			Offset: f.Offset,
+			Limit:            f.Limit,
+			CompletionStatus: f.CompletionStatus,
 		},
 	}
 

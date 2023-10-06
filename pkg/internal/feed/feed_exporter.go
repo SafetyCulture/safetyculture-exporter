@@ -302,8 +302,9 @@ func (e *ExporterFeedClient) GetFeeds() []Feed {
 			Limit:       e.configuration.ExportAssetLimit,
 		},
 		&TrainingCourseProgressFeed{
-			Incremental: false, // CourseProgress doesn't support modified after filters,
-			Offset:      e.configuration.ExportCourseProgressLimit,
+			Incremental:      false, // CourseProgress doesn't support modified after filters,
+			Limit:            e.configuration.ExportCourseProgressLimit,
+			CompletionStatus: "COMPLETION_STATUS_COMPLETED",
 		},
 	}
 }
