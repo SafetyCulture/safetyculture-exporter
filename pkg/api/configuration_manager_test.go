@@ -117,6 +117,7 @@ func TestNewConfigurationManagerFromFile_when_filename_exists_without_time(t *te
 	assert.False(t, cfg.Export.Inspection.IncludedInactiveItems)
 	assert.Equal(t, 100, cfg.Export.Inspection.Limit)
 	assert.Equal(t, 1000, cfg.Export.Course.Progress.Limit)
+	assert.Equal(t, "COMPLETION_STATUS_COMPLETED", cfg.Export.Course.Progress.CompletionStatus)
 	assert.Equal(t, []string{"ID1", "ID2"}, cfg.Export.Inspection.SkipIds)
 	assert.Equal(t, "private", cfg.Export.Inspection.WebReportLink)
 	assert.False(t, cfg.Export.Media)
@@ -167,6 +168,7 @@ func TestConfigurationManager_SaveConfiguration(t *testing.T) {
 	assert.EqualValues(t, 1000000, newCm.Configuration.Csv.MaxRowsPerFile)
 	assert.EqualValues(t, 100, newCm.Configuration.Export.Action.Limit)
 	assert.EqualValues(t, 1000, newCm.Configuration.Export.Course.Progress.Limit)
+	assert.EqualValues(t, "COMPLETION_STATUS_COMPLETED", newCm.Configuration.Export.Course.Progress.CompletionStatus)
 	assert.True(t, newCm.Configuration.Export.Incremental)
 	assert.EqualValues(t, "false", newCm.Configuration.Export.Inspection.Archived)
 	assert.EqualValues(t, "true", newCm.Configuration.Export.Inspection.Completed)
@@ -199,6 +201,13 @@ func TestMapViperConfigToConfigurationOptions_ShouldEnforceLimit(t *testing.T) {
 	assert.EqualValues(t, 1000, cm.Configuration.Export.Course.Progress.Limit)
 }
 
+func TestMapViperConfigToConfigurationOptions_CustomValues(t *testing.T) {
+	cm, err := api.NewConfigurationManagerFromFile("", "fixtures/test_custom_values.yaml")
+	require.Nil(t, err)
+	require.NotNil(t, cm)
+	assert.EqualValues(t, "COMPLETION_STATUS_ALL", cm.Configuration.Export.Course.Progress.CompletionStatus)
+}
+
 func TestNewConfigurationManagerFromFile_WhenZeroLengthFile(t *testing.T) {
 	cm, err := api.NewConfigurationManagerFromFile("", "fixtures/empty_configuration.yaml")
 	require.Nil(t, err)
@@ -215,6 +224,7 @@ func TestNewConfigurationManagerFromFile_WhenZeroLengthFile(t *testing.T) {
 	assert.EqualValues(t, 100, cm.Configuration.Export.Inspection.Limit)
 	assert.EqualValues(t, 100, cm.Configuration.Export.Asset.Limit)
 	assert.EqualValues(t, 1000, cm.Configuration.Export.Course.Progress.Limit)
+	assert.EqualValues(t, "COMPLETION_STATUS_COMPLETED", cm.Configuration.Export.Course.Progress.CompletionStatus)
 	assert.EqualValues(t, "true", cm.Configuration.Export.Inspection.Completed)
 	assert.EqualValues(t, "false", cm.Configuration.Export.Inspection.Archived)
 	assert.EqualValues(t, "UTC", cm.Configuration.Export.TimeZone)

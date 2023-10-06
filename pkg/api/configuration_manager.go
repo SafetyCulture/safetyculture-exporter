@@ -41,7 +41,8 @@ type ExporterConfiguration struct {
 		} `yaml:"asset"`
 		Course struct {
 			Progress struct {
-				Limit int `yaml:"limit"`
+				Limit            int    `yaml:"limit"`
+				CompletionStatus string `yaml:"completion_status"`
 			} `yaml:"progress"`
 		} `yaml:"course"`
 		Incremental bool `yaml:"incremental"`
@@ -171,6 +172,10 @@ func (c *ConfigurationManager) ApplySafetyGuards() {
 		c.Configuration.Export.Course.Progress.Limit = defaultCfg.Export.Course.Progress.Limit
 	}
 
+	if c.Configuration.Export.Course.Progress.CompletionStatus == "" {
+		c.Configuration.Export.Course.Progress.CompletionStatus = defaultCfg.Export.Course.Progress.CompletionStatus
+	}
+
 	if c.Configuration.Export.Inspection.Limit == 0 {
 		c.Configuration.Export.Inspection.Limit = defaultCfg.Export.Inspection.Limit
 	}
@@ -268,6 +273,7 @@ func BuildConfigurationWithDefaults() *ExporterConfiguration {
 	cfg.Export.Action.Limit = 100
 	cfg.Export.Asset.Limit = 100
 	cfg.Export.Course.Progress.Limit = 1000
+	cfg.Export.Course.Progress.CompletionStatus = "COMPLETION_STATUS_COMPLETED"
 	cfg.Export.Incremental = true
 	cfg.Export.Inspection.Archived = "false"
 	cfg.Export.Inspection.Completed = "true"
