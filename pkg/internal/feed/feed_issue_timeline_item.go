@@ -39,7 +39,7 @@ func (f *IssueTimelineItemFeed) Name() string {
 
 // HasRemainingInformation returns true if the feed returns remaining items information
 func (f *IssueTimelineItemFeed) HasRemainingInformation() bool {
-	return true
+	return false
 }
 
 // Model returns the model of the feed row

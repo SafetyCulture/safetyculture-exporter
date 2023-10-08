@@ -51,7 +51,7 @@ func (f *IssueFeed) Name() string {
 
 // HasRemainingInformation returns true if the feed returns remaining items information
 func (f *IssueFeed) HasRemainingInformation() bool {
-	return true
+	return false
 }
 
 // Model returns the model of the feed row
