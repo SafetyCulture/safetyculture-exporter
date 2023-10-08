@@ -53,6 +53,11 @@ func (f *ActionFeed) Name() string {
 	return "actions"
 }
 
+// HasRemainingInformation returns true if the feed returns remaining items information
+func (f *ActionFeed) HasRemainingInformation() bool {
+	return true
+}
+
 // Model returns the model of the feed row
 func (f *ActionFeed) Model() interface{} {
 	return Action{}

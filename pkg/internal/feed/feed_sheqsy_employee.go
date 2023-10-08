@@ -41,6 +41,11 @@ func (f *SheqsyEmployeeFeed) Name() string {
 	return "sheqsy_employees"
 }
 
+// HasRemainingInformation returns true if the feed returns remaining items information
+func (f *SheqsyEmployeeFeed) HasRemainingInformation() bool {
+	return true
+}
+
 // Model returns the model of the feed row
 func (f *SheqsyEmployeeFeed) Model() interface{} {
 	return SheqsyEmployee{}

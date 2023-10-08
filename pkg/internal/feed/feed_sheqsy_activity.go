@@ -52,6 +52,11 @@ func (f *SheqsyActivityFeed) Name() string {
 	return "sheqsy_activities"
 }
 
+// HasRemainingInformation returns true if the feed returns remaining items information
+func (f *SheqsyActivityFeed) HasRemainingInformation() bool {
+	return true
+}
+
 // Model returns the model of the feed row
 func (f *SheqsyActivityFeed) Model() interface{} {
 	return SheqsyActivity{}

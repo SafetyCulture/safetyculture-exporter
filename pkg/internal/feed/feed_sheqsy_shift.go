@@ -40,6 +40,11 @@ func (f *SheqsyShiftFeed) Name() string {
 	return "sheqsy_shifts"
 }
 
+// HasRemainingInformation returns true if the feed returns remaining items information
+func (f *SheqsyShiftFeed) HasRemainingInformation() bool {
+	return true
+}
+
 // Model returns the model of the feed row
 func (f *SheqsyShiftFeed) Model() interface{} {
 	return SheqsyShift{}

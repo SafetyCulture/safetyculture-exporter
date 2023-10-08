@@ -153,7 +153,7 @@ func (e *ExporterFeedClient) ExportFeeds(exporter Exporter, ctx context.Context)
 					return
 				default:
 					log.Infof(" ... queueing %s\n", f.Name())
-					status.StartFeedExport(f.Name(), true)
+					status.StartFeedExport(f.Name(), f.HasRemainingInformation())
 					exportErr := f.Export(c, e.apiClient, exporter, resp.OrganisationID)
 					var curatedErr error
 					if exportErr != nil {
@@ -361,7 +361,7 @@ func (e *ExporterFeedClient) ExportInspectionReports(exporter *ReportExporter, c
 	log.Infof("Exporting inspection reports by user: %s %s", resp.Firstname, resp.Lastname)
 
 	feed := e.getInspectionFeed()
-	status.StartFeedExport(feed.Name(), true)
+	status.StartFeedExport(feed.Name(), feed.HasRemainingInformation())
 	if err := feed.Export(ctx, e.apiClient, exporter, resp.OrganisationID); err != nil {
 		status.FinishFeedExport(feed.Name(), err)
 		status.MarkExportCompleted()

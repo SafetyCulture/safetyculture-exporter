@@ -42,6 +42,11 @@ func (f *TrainingCourseProgressFeed) Name() string {
 	return "training_course_progresses"
 }
 
+// HasRemainingInformation returns true if the feed returns remaining items information
+func (f *TrainingCourseProgressFeed) HasRemainingInformation() bool {
+	return false
+}
+
 // Model returns the model of the feed row
 func (f *TrainingCourseProgressFeed) Model() interface{} {
 	return TrainingCourseProgress{}

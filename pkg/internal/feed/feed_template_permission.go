@@ -34,6 +34,11 @@ func (f *TemplatePermissionFeed) Name() string {
 	return "template_permissions"
 }
 
+// HasRemainingInformation returns true if the feed returns remaining items information
+func (f *TemplatePermissionFeed) HasRemainingInformation() bool {
+	return true
+}
+
 // Model returns the model of the feed row
 func (f *TemplatePermissionFeed) Model() interface{} {
 	return TemplatePermission{}
