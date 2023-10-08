@@ -109,7 +109,8 @@ func (f *IssueFeed) Export(ctx context.Context, apiClient *httpapi.Client, expor
 			return events.NewEventErrorWithMessage(err, events.ErrorSeverityError, events.ErrorSubSystemDataIntegrity, false, "map data")
 		}
 
-		if len(rows) != 0 {
+		numRows := len(rows)
+		if numRows != 0 {
 			// Calculate the size of the batch we can insert into the DB at once.
 			// Column count + buffer to account for primary keys
 			batchSize := exporter.ParameterLimit() / (len(f.Columns()) + 4)
@@ -125,7 +126,8 @@ func (f *IssueFeed) Export(ctx context.Context, apiClient *httpapi.Client, expor
 			}
 		}
 
-		status.UpdateStatus(f.Name(), resp.Metadata.RemainingRecords, exporter.GetDuration().Milliseconds())
+		// note: this feed api doesn't return remaining items
+		status.IncrementStatus(f.Name(), int64(numRows), apiClient.Duration.Milliseconds())
 
 		l.With(
 			"estimated_remaining", resp.Metadata.RemainingRecords,
