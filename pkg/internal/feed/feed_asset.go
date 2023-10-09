@@ -36,6 +36,11 @@ func (f *AssetFeed) Name() string {
 	return "assets"
 }
 
+// HasRemainingInformation returns true if the feed returns remaining items information
+func (f *AssetFeed) HasRemainingInformation() bool {
+	return true
+}
+
 // Model returns the model of the feed row
 func (f *AssetFeed) Model() interface{} {
 	return Asset{}

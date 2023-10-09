@@ -37,6 +37,11 @@ func (f *ActionAssigneeFeed) Name() string {
 	return "action_assignees"
 }
 
+// HasRemainingInformation returns true if the feed returns remaining items information
+func (f *ActionAssigneeFeed) HasRemainingInformation() bool {
+	return true
+}
+
 // Model returns the model of the feed row
 func (f *ActionAssigneeFeed) Model() interface{} {
 	return ActionAssignee{}

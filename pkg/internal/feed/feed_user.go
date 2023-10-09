@@ -33,6 +33,11 @@ func (f *UserFeed) Name() string {
 	return "users"
 }
 
+// HasRemainingInformation returns true if the feed returns remaining items information
+func (f *UserFeed) HasRemainingInformation() bool {
+	return true
+}
+
 // Model returns the model of the feed row
 func (f *UserFeed) Model() interface{} {
 	return User{}

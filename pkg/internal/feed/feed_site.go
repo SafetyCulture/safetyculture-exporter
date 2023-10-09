@@ -37,6 +37,11 @@ func (f *SiteFeed) Name() string {
 	return "sites"
 }
 
+// HasRemainingInformation returns true if the feed returns remaining items information
+func (f *SiteFeed) HasRemainingInformation() bool {
+	return true
+}
+
 // Model returns the model of the feed row
 func (f *SiteFeed) Model() interface{} {
 	return Site{}

@@ -1,0 +1,93 @@
+{
+    "metadata": {
+        "next_page": null,
+        "next_page_token": null
+    },
+    "data": [
+        {
+            "opened_at": "2022-10-07T02:08:46.289Z",
+            "completed_at": "",
+            "total_lessons": 6,
+            "completed_lessons": 0,
+            "course_id": "733e547a8a7dfb438d27acc8",
+            "course_external_id": "",
+            "course_title": "Leading Under Pressure",
+            "user_email": "a@safetyculture.io",
+            "user_first_name": "Tony",
+            "user_last_name": "Blair",
+            "user_id": "user_4c5b19c1b75449a4ac3ea72d158a5a3d",
+            "user_external_id": "",
+            "progress_percent": 0,
+            "score": 0,
+            "due_at": ""
+        },
+        {
+            "opened_at": "2022-10-07T04:39:05.861Z",
+            "completed_at": "",
+            "total_lessons": 6,
+            "completed_lessons": 0,
+            "course_id": "733e547a8a7dfb438d27acc8",
+            "course_external_id": "",
+            "course_title": "Leading Under Pressure",
+            "user_email": "b@safetyculture.io",
+            "user_first_name": "John",
+            "user_last_name": "Murphy",
+            "user_id": "user_d64b89887cf44b8d83681103c319f922",
+            "user_external_id": "",
+            "progress_percent": 0,
+            "score": 0,
+            "due_at": ""
+        },
+        {
+            "opened_at": "2022-10-10T21:06:22.727Z",
+            "completed_at": "",
+            "total_lessons": 6,
+            "completed_lessons": 0,
+            "course_id": "733e547a8a7dfb438d27acc8",
+            "course_external_id": "",
+            "course_title": "Leading Under Pressure",
+            "user_email": "c@safetyculture.io",
+            "user_first_name": "Ryan",
+            "user_last_name": "Black",
+            "user_id": "user_839468bf0d574dd18c5cacb31fcfa6c1",
+            "user_external_id": "",
+            "progress_percent": 0,
+            "score": 0,
+            "due_at": ""
+        },
+        {
+            "opened_at": "2022-10-11T04:21:30.861Z",
+            "completed_at": "",
+            "total_lessons": 6,
+            "completed_lessons": 0,
+            "course_id": "733e547a8a7dfb438d27acc8",
+            "course_external_id": "",
+            "course_title": "Leading Under Pressure",
+            "user_email": "d@safetyculture.io",
+            "user_first_name": "Joe",
+            "user_last_name": "White",
+            "user_id": "user_3f2e6fc4924e3f049929a0684d670afc",
+            "user_external_id": "",
+            "progress_percent": 0,
+            "score": 0,
+            "due_at": ""
+        },
+        {
+            "opened_at": "2022-10-11T05:07:52.748Z",
+            "completed_at": "",
+            "total_lessons": 6,
+            "completed_lessons": 0,
+            "course_id": "733e547a8a7dfb438d27acc8",
+            "course_external_id": "",
+            "course_title": "Leading Under Pressure",
+            "user_email": "e@safetyculture.io",
+            "user_first_name": "Janet",
+            "user_last_name": "Polqa",
+            "user_id": "user_a424d7f87378442dbc22f4df684165c3",
+            "user_external_id": "",
+            "progress_percent": 0,
+            "score": 0,
+            "due_at": ""
+        }
+    ]
+}

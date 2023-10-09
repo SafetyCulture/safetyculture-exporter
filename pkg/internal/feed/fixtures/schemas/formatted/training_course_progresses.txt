@@ -1,0 +1,19 @@
++--------------------+---------+-------------+
+|        NAME        |  TYPE   | PRIMARY KEY |
++--------------------+---------+-------------+
+| opened_at          | TEXT    |             |
+| completed_at       | TEXT    |             |
+| total_lessons      | INTEGER |             |
+| completed_lessons  | INTEGER |             |
+| course_id          | TEXT    | true        |
+| course_external_id | TEXT    |             |
+| course_title       | TEXT    |             |
+| user_email         | TEXT    |             |
+| user_first_name    | TEXT    |             |
+| user_last_name     | TEXT    |             |
+| user_id            | TEXT    | true        |
+| user_external_id   | TEXT    |             |
+| progress_percent   | REAL    |             |
+| score              | INTEGER |             |
+| due_at             | TEXT    |             |
++--------------------+---------+-------------+

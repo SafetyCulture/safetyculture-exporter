@@ -21,6 +21,9 @@ type Feed interface {
 
 	CreateSchema(exporter Exporter) error
 	Export(ctx context.Context, apiClient *httpapi.Client, exporter Exporter, orgID string) error
+
+	// HasRemainingInformation - true if the feed data source provides remaining number of items
+	HasRemainingInformation() bool
 }
 
 // InitFeedOptions contains the options used when initialising a feed

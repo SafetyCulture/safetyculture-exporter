@@ -37,6 +37,11 @@ func (f *IssueTimelineItemFeed) Name() string {
 	return "issue_timeline_items"
 }
 
+// HasRemainingInformation returns true if the feed returns remaining items information
+func (f *IssueTimelineItemFeed) HasRemainingInformation() bool {
+	return false
+}
+
 // Model returns the model of the feed row
 func (f *IssueTimelineItemFeed) Model() interface{} {
 	return IssueTimelineItem{}
@@ -96,7 +101,8 @@ func (f *IssueTimelineItemFeed) Export(ctx context.Context, apiClient *httpapi.C
 			return fmt.Errorf("map data: %w", err)
 		}
 
-		if len(rows) != 0 {
+		numRows := len(rows)
+		if numRows != 0 {
 			// Calculate the size of the batch we can insert into the DB at once.
 			// Column count + buffer to account for primary keys
 			batchSize := exporter.ParameterLimit() / (len(f.Columns()) + 4)
@@ -112,7 +118,8 @@ func (f *IssueTimelineItemFeed) Export(ctx context.Context, apiClient *httpapi.C
 			}
 		}
 
-		status.UpdateStatus(f.Name(), resp.Metadata.RemainingRecords, exporter.GetDuration().Milliseconds())
+		// note: this feed api doesn't return remaining items
+		status.IncrementStatus(f.Name(), int64(numRows), apiClient.Duration.Milliseconds())
 
 		l.With(
 			"estimated_remaining", resp.Metadata.RemainingRecords,

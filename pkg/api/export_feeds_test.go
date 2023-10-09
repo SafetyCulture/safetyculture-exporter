@@ -41,6 +41,8 @@ func TestExporterFeedClient_ExportFeeds_should_create_all_schemas_to_file(t *tes
 	filesEqualish(t, "mocks/set_1/schemas/schedules.csv", filepath.Join(exporter.ExportPath, "schedules.csv"))
 	filesEqualish(t, "mocks/set_1/schemas/schedule_assignees.csv", filepath.Join(exporter.ExportPath, "schedule_assignees.csv"))
 	filesEqualish(t, "mocks/set_1/schemas/schedule_occurrences.csv", filepath.Join(exporter.ExportPath, "schedule_occurrences.csv"))
+
+	filesEqualish(t, "mocks/set_1/schemas/training_course_progresses.csv", filepath.Join(exporter.ExportPath, "training_course_progresses.csv"))
 }
 
 func TestExporterFeedClient_ExportFeeds_should_export_all_feeds_to_file(t *testing.T) {
@@ -119,6 +121,8 @@ func TestExporterFeedClient_ExportFeeds_should_export_all_feeds_to_file(t *testi
 	filesEqualish(t, "mocks/set_1/outputs/sheqsy_shifts.csv", filepath.Join(exporter.ExportPath, "sheqsy_shifts.csv"))
 	filesEqualish(t, "mocks/set_1/outputs/sheqsy_activities.csv", filepath.Join(exporter.ExportPath, "sheqsy_activities.csv"))
 	filesEqualish(t, "mocks/set_1/outputs/sheqsy_departments.csv", filepath.Join(exporter.ExportPath, "sheqsy_departments.csv"))
+
+	filesEqualish(t, "mocks/set_1/outputs/training_course_progresses.csv", filepath.Join(exporter.ExportPath, "training_course_progresses.csv"))
 }
 
 func TestExporterFeedClient_ExportFeeds_should_err_when_not_auth(t *testing.T) {

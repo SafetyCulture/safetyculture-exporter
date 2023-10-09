@@ -16,6 +16,9 @@ export:
     limit: 101
   issue:
     limit: 101
+  course:
+    progress:
+      limit: 1001
   incremental: true
   inspection:
     archived: "false"

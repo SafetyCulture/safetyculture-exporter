@@ -32,6 +32,11 @@ func (f *SheqsyDepartmentFeed) Name() string {
 	return "sheqsy_departments"
 }
 
+// HasRemainingInformation returns true if the feed returns remaining items information
+func (f *SheqsyDepartmentFeed) HasRemainingInformation() bool {
+	return true
+}
+
 // Model returns the model of the feed row
 func (f *SheqsyDepartmentFeed) Model() interface{} {
 	return SheqsyDepartment{}
