@@ -107,6 +107,15 @@ func (e *ExportStatus) ReadStatus() map[string]*ExportStatusItem {
 	return e.status
 }
 
+func (e *ExportStatus) ReadCounter(feedName string) int64 {
+	e.lock.Lock()
+	defer e.lock.Unlock()
+	if _, ok := e.status[feedName]; ok {
+		return e.status[feedName].Counter
+	}
+	return 0
+}
+
 func (e *ExportStatus) PurgeFinished() {
 	e.lock.Lock()
 	pendingFeeds := map[string]*ExportStatusItem{}
