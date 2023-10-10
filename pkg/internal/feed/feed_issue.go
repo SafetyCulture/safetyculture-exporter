@@ -130,7 +130,7 @@ func (f *IssueFeed) Export(ctx context.Context, apiClient *httpapi.Client, expor
 		status.IncrementStatus(f.Name(), int64(numRows), apiClient.Duration.Milliseconds())
 
 		l.With(
-			"estimated_remaining", resp.Metadata.RemainingRecords,
+			"downloaded", status.ReadCounter(f.Name()),
 			"duration_ms", apiClient.Duration.Milliseconds(),
 			"export_duration_ms", exporter.GetDuration().Milliseconds(),
 		).Info("export batch complete")
