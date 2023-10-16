@@ -74,4 +74,8 @@ type GetFeedParams struct {
 	// Applicable only for sites
 	IncludeDeleted    bool  `url:"include_deleted,omitempty"`
 	ShowOnlyLeafNodes *bool `url:"show_only_leaf_nodes,omitempty"`
+
+	// Applicable only for course progress
+	Offset           int    `url:"offset,omitempty"`
+	CompletionStatus string `url:"completion_status,omitempty"`
 }

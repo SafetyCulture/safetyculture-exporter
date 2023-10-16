@@ -24,9 +24,9 @@ func TestSchemaWriter_should_write_schema(t *testing.T) {
 		err = exporter.WriteSchema(f)
 		assert.Nil(t, err, fmt.Sprintf("something is wrong when writing schema %s, %v", f.Name(), err))
 
-		actual, err := os.ReadFile(fmt.Sprintf("fixtures/schemas/formatted/%s.txt", f.Name()))
+		expected, err := os.ReadFile(fmt.Sprintf("fixtures/schemas/formatted/%s.txt", f.Name()))
 		assert.Nil(t, err, fmt.Sprintf("something is wrong when reading file %s.txt, %v", f.Name(), err))
-		assert.Equal(t, strings.TrimSpace(buf.String()), strings.TrimSpace(string(actual)))
+		assert.Equal(t, strings.TrimSpace(string(expected)), strings.TrimSpace(buf.String()))
 
 		buf.Reset()
 	}
@@ -35,12 +35,10 @@ func TestSchemaWriter_should_write_schema(t *testing.T) {
 	exporterApp := feed.NewExporterApp(nil, nil, cfg.ToExporterConfig())
 
 	for _, f := range exporterApp.GetFeeds() {
-		fmt.Printf("TESTING FEED: %s\n", f.Name())
 		testSchema(f)
 	}
 
 	for _, f := range exporterApp.GetSheqsyFeeds() {
-		fmt.Printf("TESTING FEED: %s\n", f.Name())
 		testSchema(f)
 	}
 }

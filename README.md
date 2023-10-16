@@ -44,7 +44,7 @@ This way we can preserve the CSV columns in the export files.
 
 ### Testing
 
-Locally you can run `go test ./...`, this will run all of the Unit tests and Integration tests that can be run without an external DB.
+Locally you can run `go test ./...`, this will run all the Unit tests and Integration tests that can be run without an external DB.
 
 SQL Database integration tests can be run by starting the SQL DBs `docker-compose up -d` and then running `make integration-tests`.
 

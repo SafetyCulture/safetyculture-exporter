@@ -38,7 +38,6 @@ func (e *SchemaExporter) WriteSchema(feed Feed) error {
 	e.Logger.With("feed", feed.Name()).Info("writing schema")
 
 	schema := &[]*schema{}
-
 	resp := e.DB.Raw(fmt.Sprintf("PRAGMA table_info('%s') ", feed.Name())).Scan(schema)
 	if resp.Error != nil {
 		return resp.Error

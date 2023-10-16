@@ -74,6 +74,11 @@ func (f *InspectionItemFeed) Name() string {
 	return "inspection_items"
 }
 
+// HasRemainingInformation returns true if the feed returns remaining items information
+func (f *InspectionItemFeed) HasRemainingInformation() bool {
+	return true
+}
+
 // Model returns the model of the feed row
 func (f *InspectionItemFeed) Model() interface{} {
 	return InspectionItem{}

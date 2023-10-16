@@ -19,6 +19,7 @@ export:
   course:
     progress:
       limit: 50
+      completion_status: "COMPLETION_STATUS_ALL"
   incremental: true
   inspection:
     archived: "false"

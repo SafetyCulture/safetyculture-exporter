@@ -29,6 +29,11 @@ func (f *GroupUserFeed) Name() string {
 	return "group_users"
 }
 
+// HasRemainingInformation returns true if the feed returns remaining items information
+func (f *GroupUserFeed) HasRemainingInformation() bool {
+	return true
+}
+
 // Model returns the model of the feed row
 func (f *GroupUserFeed) Model() interface{} {
 	return GroupUser{}

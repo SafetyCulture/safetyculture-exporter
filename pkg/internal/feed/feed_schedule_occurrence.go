@@ -42,6 +42,11 @@ func (f *ScheduleOccurrenceFeed) Name() string {
 	return "schedule_occurrences"
 }
 
+// HasRemainingInformation returns true if the feed returns remaining items information
+func (f *ScheduleOccurrenceFeed) HasRemainingInformation() bool {
+	return true
+}
+
 // RowsModel returns the model of feed rows
 func (f *ScheduleOccurrenceFeed) RowsModel() interface{} {
 	return &[]*ScheduleOccurrence{}

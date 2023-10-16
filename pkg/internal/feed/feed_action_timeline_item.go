@@ -38,6 +38,11 @@ func (f *ActionTimelineItemFeed) Name() string {
 	return "action_timeline_items"
 }
 
+// HasRemainingInformation returns true if the feed returns remaining items information
+func (f *ActionTimelineItemFeed) HasRemainingInformation() bool {
+	return true
+}
+
 // Model returns the model of the feed row
 func (f *ActionTimelineItemFeed) Model() interface{} {
 	return ActionTimelineItem{}

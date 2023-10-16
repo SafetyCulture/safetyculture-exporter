@@ -45,6 +45,11 @@ func (f *ScheduleFeed) Name() string {
 	return "schedules"
 }
 
+// HasRemainingInformation returns true if the feed returns remaining items information
+func (f *ScheduleFeed) HasRemainingInformation() bool {
+	return true
+}
+
 // Model returns the model of the feed row
 func (f *ScheduleFeed) Model() interface{} {
 	return Schedule{}
