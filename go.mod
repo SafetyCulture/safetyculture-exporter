@@ -12,7 +12,7 @@ require (
 	github.com/hashicorp/go-version v1.6.0
 	github.com/olekukonko/tablewriter v0.0.5
 	github.com/pkg/errors v0.9.1
-	github.com/shirou/gopsutil/v3 v3.23.8
+	github.com/shirou/gopsutil/v3 v3.23.9
 	github.com/spf13/cobra v1.7.0
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.17.0
@@ -23,10 +23,10 @@ require (
 	gopkg.in/h2non/gock.v1 v1.1.2
 	gopkg.in/yaml.v3 v3.0.1
 	gorm.io/driver/mysql v1.5.1
-	gorm.io/driver/postgres v1.5.2
+	gorm.io/driver/postgres v1.5.3
 	gorm.io/driver/sqlite v1.5.4
-	gorm.io/driver/sqlserver v1.5.1
-	gorm.io/gorm v1.25.4
+	gorm.io/driver/sqlserver v1.5.2
+	gorm.io/gorm v1.25.5
 )
 
 require (
@@ -50,7 +50,7 @@ require (
 	github.com/magiconair/properties v1.8.7 // indirect
 	github.com/mattn/go-runewidth v0.0.15 // indirect
 	github.com/mattn/go-sqlite3 v1.14.17 // indirect
-	github.com/microsoft/go-mssqldb v1.5.0 // indirect
+	github.com/microsoft/go-mssqldb v1.6.0 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/pelletier/go-toml/v2 v2.1.0 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
