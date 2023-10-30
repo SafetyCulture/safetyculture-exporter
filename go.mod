@@ -1,6 +1,6 @@
 module github.com/SafetyCulture/safetyculture-exporter
 
-go 1.20
+go 1.21
 
 require (
 	github.com/MickStanciu/go-fn v1.3.0
