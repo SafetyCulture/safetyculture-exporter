@@ -11,11 +11,3 @@ updates:
           - "*"
     commit-message:
       prefix: "[INTG-1601]"
-# Workaround to disable public go module cache
-# https://github.com/dependabot/dependabot-core/issues/1437#issuecomment-1020449381
-registries:
-  github-octocat:
-    type: git
-    url: https://example.com
-    username: placeholder
-    password: ${{secrets.PLACEHOLDER}}
