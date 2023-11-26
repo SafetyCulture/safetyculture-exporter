@@ -5,5 +5,9 @@ updates:
     directory: "/"
     schedule:
       interval: "monthly"
+    groups:
+      dependencies:
+        patterns:
+          - "*"
     commit-message:
       prefix: "[INTG-1601]"
