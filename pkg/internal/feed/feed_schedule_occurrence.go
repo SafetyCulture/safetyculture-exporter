@@ -33,8 +33,9 @@ type ScheduleOccurrence struct {
 
 // ScheduleOccurrenceFeed is a representation of the schedule_occurrences feed
 type ScheduleOccurrenceFeed struct {
-	TemplateIDs []string
-	StartDate   time.Time
+	TemplateIDs    []string
+	StartDate      time.Time
+	ResumeDownload bool // EXPERIMENTAL: we don't have modified_at from the backend. We will use start_time
 }
 
 // Name is the name of the feed
@@ -96,10 +97,15 @@ func (f *ScheduleOccurrenceFeed) Export(ctx context.Context, apiClient *httpapi.
 	status := GetExporterStatus()
 
 	if err := exporter.InitFeed(f, &InitFeedOptions{
-		// Always truncate. This data must be refreshed in order to be accurate
-		Truncate: false,
+		// Delete data if incremental refresh is disabled so there is no duplicates
+		Truncate: !f.ResumeDownload,
 	}); err != nil {
 		return events.WrapEventError(err, "init feed")
+	}
+
+	if f.ResumeDownload {
+		f.StartDate = exporter.LastRecord(f, f.StartDate, orgID, "start_time")
+		l.Info("resuming schedule occurrences from ", f.StartDate.String())
 	}
 
 	drainFn := func(resp *GetFeedResponse) error {

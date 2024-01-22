@@ -61,6 +61,7 @@ type ExporterFeedCfg struct {
 	ExportIssueLimit                      int
 	ExportAssetLimit                      int
 	ExportCourseProgressLimit             int
+	ExportScheduleResumeDownload          bool
 	MaxConcurrentGoRoutines               int
 }
 
@@ -261,8 +262,9 @@ func (e *ExporterFeedClient) GetFeeds() []Feed {
 			TemplateIDs: e.configuration.ExportTemplateIds,
 		},
 		&ScheduleOccurrenceFeed{
-			TemplateIDs: e.configuration.ExportTemplateIds,
-			StartDate:   e.configuration.ExportModifiedAfterTime,
+			TemplateIDs:    e.configuration.ExportTemplateIds,
+			StartDate:      e.configuration.ExportModifiedAfterTime,
+			ResumeDownload: e.configuration.ExportScheduleResumeDownload,
 		},
 		&ActionFeed{
 			ModifiedAfter: e.configuration.ExportModifiedAfterTime,
