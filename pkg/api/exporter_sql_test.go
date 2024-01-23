@@ -384,6 +384,92 @@ func TestSQLExporterLastModifiedAt_should_return_modified_after_if_latest(t *tes
 	assert.Equal(t, now.Add(time.Hour).Format(time.RFC3339), lastModifiedAt.Format(time.RFC3339))
 }
 
+func TestSQLExporterLastRecord_should_return_modified_after_if_latest(t *testing.T) {
+	exporter, err := getInmemorySQLExporter("")
+	assert.NoError(t, err)
+
+	inspectionFeed := &feed.InspectionFeed{}
+
+	err = exporter.InitFeed(inspectionFeed, &feed.InitFeedOptions{
+		Truncate: false,
+	})
+	assert.NoError(t, err)
+
+	now := time.Now()
+	inspections := []feed.Inspection{
+		{
+			ID:             "audit_1",
+			ModifiedAt:     now.Add(time.Hour * -1),
+			OrganisationID: "role_123",
+		},
+		{
+			ID:             "audit_2",
+			ModifiedAt:     now.Add(time.Hour * -128),
+			OrganisationID: "role_123",
+		},
+		{
+			ID:             "audit_3",
+			ModifiedAt:     now.Add(time.Hour * -3000),
+			OrganisationID: "role_123",
+		},
+		{
+			ID:             "audit_4",
+			ModifiedAt:     now.Add(time.Hour * -2),
+			OrganisationID: "role_123",
+		},
+	}
+
+	err = exporter.WriteRows(inspectionFeed, inspections)
+	assert.NoError(t, err)
+
+	// Check the timestamp for the audits that doesn't have organisation_id
+	lastModifiedAt := exporter.LastRecord(inspectionFeed, now.Add(time.Hour), "role_123", "modified_at")
+	assert.Equal(t, now.Add(time.Hour*-1).Format(time.RFC3339), lastModifiedAt.Format(time.RFC3339))
+}
+
+func TestSQLExporterLastRecord_should_return_the_given_date_when_no_rows_matching(t *testing.T) {
+	exporter, err := getInmemorySQLExporter("")
+	assert.NoError(t, err)
+
+	inspectionFeed := &feed.InspectionFeed{}
+
+	err = exporter.InitFeed(inspectionFeed, &feed.InitFeedOptions{
+		Truncate: false,
+	})
+	assert.NoError(t, err)
+
+	now := time.Now()
+	inspections := []feed.Inspection{
+		{
+			ID:             "audit_1",
+			ModifiedAt:     now.Add(time.Hour * -1),
+			OrganisationID: "role_1234",
+		},
+		{
+			ID:             "audit_2",
+			ModifiedAt:     now.Add(time.Hour * -128),
+			OrganisationID: "role_1234",
+		},
+		{
+			ID:             "audit_3",
+			ModifiedAt:     now.Add(time.Hour * -3000),
+			OrganisationID: "role_1234",
+		},
+		{
+			ID:             "audit_4",
+			ModifiedAt:     now.Add(time.Hour * -2),
+			OrganisationID: "role_1234",
+		},
+	}
+
+	err = exporter.WriteRows(inspectionFeed, inspections)
+	assert.NoError(t, err)
+
+	// Check the timestamp for the audits that doesn't have organisation_id
+	lastModifiedAt := exporter.LastRecord(inspectionFeed, now.Add(time.Hour), "role_123", "modified_at")
+	assert.Equal(t, now.Add(time.Hour).Format(time.RFC3339), lastModifiedAt.Format(time.RFC3339))
+}
+
 func TestNewSQLExporter_should_create_exporter_for_sqlite(t *testing.T) {
 	sqlExporter, err := feed.NewSQLExporter("sqlite", "file::memory:", true, "")
 	assert.NoError(t, err)
