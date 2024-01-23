@@ -176,6 +176,24 @@ func (e *SQLExporter) LastModifiedAt(feed Feed, modifiedAfter time.Time, orgID s
 	return modifiedAfter, nil
 }
 
+// LastRecord returns the latest stored record the feed
+func (e *SQLExporter) LastRecord(feed Feed, modifiedAfter time.Time, orgID string, sortColumn string) time.Time {
+	type Ts struct {
+		TimeValue time.Time
+	}
+	latestRow := Ts{}
+
+	result := e.DB.
+		Raw(fmt.Sprintf("SELECT %s as time_value FROM %s WHERE organisation_id = '%s' ORDER BY %s DESC LIMIT 1", sortColumn, feed.Name(), orgID, sortColumn)).
+		First(&latestRow)
+
+	if result.RowsAffected != 0 {
+		return latestRow.TimeValue
+	}
+
+	return modifiedAfter
+}
+
 // FinaliseExport closes out an export
 func (e *SQLExporter) FinaliseExport(Feed, interface{}) error {
 	return nil

@@ -179,6 +179,7 @@ func TestConfigurationManager_SaveConfiguration(t *testing.T) {
 	assert.EqualValues(t, "INSPECTION_TITLE", newCm.Configuration.Report.FilenameConvention)
 	assert.EqualValues(t, []string{"PDF"}, newCm.Configuration.Report.Format)
 	assert.EqualValues(t, 15, newCm.Configuration.Report.RetryTimeout)
+	assert.EqualValues(t, false, newCm.Configuration.Export.Schedule.ResumeDownload)
 
 	_ = os.Remove("fake_file.yaml")
 }
