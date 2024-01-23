@@ -149,10 +149,6 @@ type modifiedAtRow struct {
 	ModifiedAt time.Time
 }
 
-type startTimeRow struct {
-	StartTime time.Time
-}
-
 // LastModifiedAt returns the latest stored modified at date for the feed
 func (e *SQLExporter) LastModifiedAt(feed Feed, modifiedAfter time.Time, orgID string) (time.Time, error) {
 	latestRow := modifiedAtRow{}
@@ -182,16 +178,17 @@ func (e *SQLExporter) LastModifiedAt(feed Feed, modifiedAfter time.Time, orgID s
 
 // LastRecord returns the latest stored record the feed
 func (e *SQLExporter) LastRecord(feed Feed, modifiedAfter time.Time, orgID string, sortColumn string) time.Time {
-	latestRow := startTimeRow{}
+	type Ts struct {
+		TimeValue time.Time
+	}
+	latestRow := Ts{}
 
-	result := e.DB.Table(feed.Name()).
-		Where("organisation_id = ?", orgID).
-		Order(fmt.Sprintf("%s DESC", sortColumn)).
-		Limit(1).
+	result := e.DB.
+		Raw(fmt.Sprintf("SELECT %s as time_value FROM %s WHERE organisation_id = '%s' ORDER BY %s DESC LIMIT 1", sortColumn, feed.Name(), orgID, sortColumn)).
 		First(&latestRow)
 
 	if result.RowsAffected != 0 {
-		return latestRow.StartTime
+		return latestRow.TimeValue
 	}
 
 	return modifiedAfter
