@@ -12,7 +12,7 @@ require (
 	github.com/hashicorp/go-version v1.6.0
 	github.com/olekukonko/tablewriter v0.0.5
 	github.com/pkg/errors v0.9.1
-	github.com/shirou/gopsutil/v3 v3.23.12
+	github.com/shirou/gopsutil/v3 v3.24.1
 	github.com/spf13/cobra v1.8.0
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.18.2
@@ -26,7 +26,7 @@ require (
 	gorm.io/driver/postgres v1.5.4
 	gorm.io/driver/sqlite v1.5.4
 	gorm.io/driver/sqlserver v1.5.2
-	gorm.io/gorm v1.25.5
+	gorm.io/gorm v1.25.6
 )
 
 require (
@@ -74,7 +74,7 @@ require (
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/crypto v0.16.0 // indirect
 	golang.org/x/exp v0.0.0-20230905200255-921286631fa9 // indirect
-	golang.org/x/sys v0.15.0 // indirect
+	golang.org/x/sys v0.16.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 )
