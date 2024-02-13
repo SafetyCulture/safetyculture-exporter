@@ -19,4 +19,5 @@
 | site_id           | TEXT     |             |
 | template_id       | TEXT     |             |
 | creator_user_id   | TEXT     |             |
+| asset_id          | TEXT     |             |
 +-------------------+----------+-------------+

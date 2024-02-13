@@ -21,7 +21,8 @@
       "site_id": "site_1",
       "template_id": "template_1",
       "creator_user_id": "user_3",
-      "organisation_id": "role_123"
+      "organisation_id": "role_123",
+      "asset_id": "abdd6ceb-b85d-4731-bcc2-d89b0d9cc524"
     },
     {
       "id": "scheduleitem_2",
@@ -40,7 +41,8 @@
       "site_id": null,
       "template_id": "template_2",
       "creator_user_id": "user_2",
-      "organisation_id": "role_123"
+      "organisation_id": "role_123",
+      "asset_id": null
     }
   ]
 }
