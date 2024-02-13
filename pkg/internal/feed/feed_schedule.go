@@ -33,6 +33,7 @@ type Schedule struct {
 	SiteID          string     `json:"site_id" csv:"site_id" gorm:"size:41"`
 	TemplateID      string     `json:"template_id" csv:"template_id" gorm:"size:100"`
 	CreatorUserID   string     `json:"creator_user_id" csv:"creator_user_id" gorm:"size:37"`
+	AssetID         string     `json:"asset_id" csv:"asset_id" gorm:"size:37"`
 }
 
 // ScheduleFeed is a representation of the schedules feed
@@ -85,6 +86,7 @@ func (f *ScheduleFeed) Columns() []string {
 		"site_id",
 		"template_id",
 		"creator_user_id",
+		"asset_id",
 	}
 }
 
