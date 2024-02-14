@@ -23,4 +23,4 @@ linters:
     - interfacer  # Prone to bad suggestions. Check has been deprecated: https://github.com/mvdan/interfacer
     - lll  # Line-length-linter: restricts lines to 131 characters.
     - scopelint  # Detects too many false positives in tests: https://github.com/kyoh86/scopelint/issues/4
-    - wsl  # adds to unnessary complexity
+    - wsl  # adds to unnecessary complexity
