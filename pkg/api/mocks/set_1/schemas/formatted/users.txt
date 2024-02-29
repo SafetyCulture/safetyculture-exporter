@@ -9,4 +9,5 @@
 | active          | numeric  |             |
 | last_seen_at    | datetime |             |
 | exported_at     | datetime |             |
+| seat_type       | TEXT     |             |
 +-----------------+----------+-------------+

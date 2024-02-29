@@ -23,6 +23,7 @@ type User struct {
 	Active         bool       `json:"active" csv:"active"`
 	LastSeenAt     *time.Time `json:"last_seen_at" csv:"last_seen_at"`
 	ExportedAt     time.Time  `json:"exported_at" csv:"exported_at" gorm:"autoUpdateTime"`
+	SeatType       string     `json:"seat_type" csv:"seat_type" gorm:"seat_type"`
 }
 
 // UserFeed is a representation of the users feed

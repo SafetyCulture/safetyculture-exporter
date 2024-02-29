@@ -12,7 +12,8 @@
       "lastname": "Schrute",
       "active": true,
       "organisation_id": "role_123",
-      "last_seen_at": "2020-10-29T12:28:42.000Z"
+      "last_seen_at": "2020-10-29T12:28:42.000Z",
+      "seat_type": "premium"
     },
     {
       "id": "user_2",
@@ -21,7 +22,8 @@
       "firstname": "Abraham",
       "lastname": "Lincoln",
       "active": true,
-      "organisation_id": "role_123"
+      "organisation_id": "role_123",
+      "seat_type": "lite"
     },
     {
       "id": "user_3",
@@ -30,7 +32,8 @@
       "firstname": "Stefani Joanne Angelina",
       "lastname": "Germanotta",
       "active": true,
-      "organisation_id": "role_123"
+      "organisation_id": "role_123",
+      "seat_type": "premium"
     },
     {
       "id": "user_4",
