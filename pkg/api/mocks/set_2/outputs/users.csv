@@ -1,5 +1,5 @@
 user_id,organisation_id,email,firstname,lastname,active,last_seen_at,exported_at,seat_type
-user_1,role_123,tests+dwight.schrute@safetyculture.io,Dwight,Schrute,true,--date--,--date--,premium
-user_2,role_123,tests+abraham.lincoln@safetyculture.io,Abraham,Lincoln,true,,--date--,lite
-user_3,role_123,tests+stefani.joanne.angelina.germanotta@safetyculture.io,Stefani Joanne Angelina,Germanotta,true,,--date--,premium
-user_4,role_123,tests+Agnetha.Fältskog@safetyculture.io,Agnetha,Fältskog,false,,--date--,
+user_1,role_123,tests+dwight.schrute@example.com,Dwight,Schrute,true,--date--,--date--,premium
+user_2,role_123,tests+abraham.lincoln@example.com,Abraham,Lincoln,true,,--date--,lite
+user_3,role_123,tests+stefani.joanne.angelina.germanotta@example.com,Stefani Joanne Angelina,Germanotta,true,,--date--,premium
+user_4,role_123,tests+Agnetha.Fältskog@example.com,Agnetha,Fältskog,false,,--date--,
