@@ -7,7 +7,7 @@
     {
       "id": "user_507d568aa8d24b149baa6b1d38ae22bb",
       "organisation_id": "role_e8b289b159d34fa0aa0a1e0e1eeeaaa7",
-      "email": "george@safetyculture.io",
+      "email": "george@example.com",
       "firstname": "George",
       "lastname": "Santos",
       "active": true,
@@ -16,7 +16,7 @@
     {
       "id": "user_3cf901f03a5942af85f1cad2e9e7e603",
       "organisation_id": "role_e8b289b159d34fa0aa0a1e0e1eeeaaa7",
-      "email": "john@safetyculture.io",
+      "email": "john@example.com",
       "firstname": "John",
       "lastname": "Wolf",
       "active": true,
@@ -25,7 +25,7 @@
     {
       "id": "user_1a6cb344580d4783963184802ddbacfb",
       "organisation_id": "role_e8b289b159d34fa0aa0a1e0e1eeeaaa7",
-      "email": "maurice@safetyculture.io",
+      "email": "maurice@example.com",
       "firstname": "Maurice",
       "lastname": "Jack",
       "active": true,

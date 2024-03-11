@@ -29,5 +29,5 @@ func TestActionAssigneeFeedExport_should_export_rows_to_sql_db(t *testing.T) {
 	assert.Nil(t, resp.Error)
 
 	assert.Equal(t, 2, len(rows))
-	assert.Equal(t, "email@domain.com", rows[0].AssigneeID)
+	assert.Equal(t, "email@example.com", rows[0].AssigneeID)
 }

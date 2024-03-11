@@ -4,7 +4,7 @@
 			"shiftId": 200000,
 			"employeeName": "Abraham",
 			"employeeSurname": "Lincoln",
-			"email": "tests+abraham.lincoln@safetyculture.io",
+			"email": "tests+abraham.lincoln@example.com",
 			"phoneNumber": "+1555555555",
 			"startDateTimeUTC": "2022-03-21T22:55:26.277",
 			"startDateTimeLocal": "2022-03-21T18:55:26.277",

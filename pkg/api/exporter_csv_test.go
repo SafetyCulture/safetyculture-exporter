@@ -375,14 +375,14 @@ func TestCSVExporter_should_do_rollover_files(t *testing.T) {
 		{
 			ID:             "user_1",
 			OrganisationID: "role_123",
-			Email:          "user.1@test.com",
+			Email:          "user.1@example.com",
 			Firstname:      "User 1",
 			Lastname:       "User 1",
 		},
 		{
 			ID:             "user_2",
 			OrganisationID: "role_123",
-			Email:          "user.2@test.com",
+			Email:          "user.2@example.com",
 			Firstname:      "User 2",
 			Lastname:       "User 2",
 		},
@@ -400,7 +400,7 @@ func TestCSVExporter_should_do_rollover_files(t *testing.T) {
 	contentString := dateRegex.ReplaceAllLiteralString(strings.TrimSpace(string(content)), "--date--")
 
 	expected := `user_id,organisation_id,email,firstname,lastname,active,last_seen_at,exported_at,seat_type
-user_2,role_123,user.2@test.com,User 2,User 2,false,,--date--,`
+user_2,role_123,user.2@example.com,User 2,User 2,false,,--date--,`
 	assert.Equal(t, strings.TrimSpace(expected), contentString)
 }
 
@@ -419,14 +419,14 @@ func TestCSVExporterFinaliseExport_should_write_rows_out_to_file(t *testing.T) {
 		{
 			ID:             "user_1",
 			OrganisationID: "role_123",
-			Email:          "user.1@test.com",
+			Email:          "user.1@example.com",
 			Firstname:      "User 1",
 			Lastname:       "User 1",
 		},
 		{
 			ID:             "user_2",
 			OrganisationID: "role_123",
-			Email:          "user.2@test.com",
+			Email:          "user.2@example.com",
 			Firstname:      "User 2",
 			Lastname:       "User 2",
 			SeatType:       "premium",
@@ -440,14 +440,14 @@ func TestCSVExporterFinaliseExport_should_write_rows_out_to_file(t *testing.T) {
 		{
 			ID:             "user_1",
 			OrganisationID: "role_123",
-			Email:          "user.1@test.com",
+			Email:          "user.1@example.com",
 			Firstname:      "User 1",
 			Lastname:       "User 1",
 		},
 		{
 			ID:             "user_2",
 			OrganisationID: "role_123",
-			Email:          "user.2@test.com",
+			Email:          "user.2@example.com",
 			Firstname:      "User 2",
 			Lastname:       "User 2",
 			SeatType:       "premium",
@@ -455,7 +455,7 @@ func TestCSVExporterFinaliseExport_should_write_rows_out_to_file(t *testing.T) {
 		{
 			ID:             "user_3",
 			OrganisationID: "role_123",
-			Email:          "user.3@test.com",
+			Email:          "user.3@example.com",
 			Firstname:      "User 3",
 			Lastname:       "User 3",
 		},
@@ -473,9 +473,9 @@ func TestCSVExporterFinaliseExport_should_write_rows_out_to_file(t *testing.T) {
 	contentString := dateRegex.ReplaceAllLiteralString(strings.TrimSpace(string(content)), "--date--")
 
 	expected := `user_id,organisation_id,email,firstname,lastname,active,last_seen_at,exported_at,seat_type
-user_1,role_123,user.1@test.com,User 1,User 1,false,,--date--,
-user_2,role_123,user.2@test.com,User 2,User 2,false,,--date--,premium
-user_3,role_123,user.3@test.com,User 3,User 3,false,,--date--,`
+user_1,role_123,user.1@example.com,User 1,User 1,false,,--date--,
+user_2,role_123,user.2@example.com,User 2,User 2,false,,--date--,premium
+user_3,role_123,user.3@example.com,User 3,User 3,false,,--date--,`
 	assert.Equal(t, strings.TrimSpace(expected), contentString)
 }
 
@@ -494,21 +494,21 @@ func TestCSVExporterFinaliseExport_should_write_rows_to_multiple_file(t *testing
 		{
 			ID:             "user_1",
 			OrganisationID: "role_123",
-			Email:          "user.1@test.com",
+			Email:          "user.1@example.com",
 			Firstname:      "User 1",
 			Lastname:       "User 1",
 		},
 		{
 			ID:             "user_2",
 			OrganisationID: "role_123",
-			Email:          "user.2@test.com",
+			Email:          "user.2@example.com",
 			Firstname:      "User 2",
 			Lastname:       "User 2",
 		},
 		{
 			ID:             "user_3",
 			OrganisationID: "role_123",
-			Email:          "user.3@test.com",
+			Email:          "user.3@example.com",
 			Firstname:      "User 3",
 			Lastname:       "User 3",
 			SeatType:       "premium",
@@ -531,8 +531,8 @@ func TestCSVExporterFinaliseExport_should_write_rows_to_multiple_file(t *testing
 	content1String := dateRegex.ReplaceAllLiteralString(strings.TrimSpace(string(content1)), "--date--")
 
 	expected1 := `user_id,organisation_id,email,firstname,lastname,active,last_seen_at,exported_at,seat_type
-user_1,role_123,user.1@test.com,User 1,User 1,false,,--date--,
-user_2,role_123,user.2@test.com,User 2,User 2,false,,--date--,`
+user_1,role_123,user.1@example.com,User 1,User 1,false,,--date--,
+user_2,role_123,user.2@example.com,User 2,User 2,false,,--date--,`
 	assert.Equal(t, strings.TrimSpace(expected1), content1String)
 
 	content2, err := os.ReadFile(files[1])
@@ -541,6 +541,6 @@ user_2,role_123,user.2@test.com,User 2,User 2,false,,--date--,`
 	content2String := dateRegex.ReplaceAllLiteralString(strings.TrimSpace(string(content2)), "--date--")
 
 	expected2 := `user_id,organisation_id,email,firstname,lastname,active,last_seen_at,exported_at,seat_type
-user_3,role_123,user.3@test.com,User 3,User 3,false,,--date--,premium`
+user_3,role_123,user.3@example.com,User 3,User 3,false,,--date--,premium`
 	assert.Equal(t, strings.TrimSpace(expected2), content2String)
 }

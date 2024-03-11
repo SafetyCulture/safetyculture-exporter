@@ -7,9 +7,9 @@
 		{
             "id": "id2",
             "action_id": "abc",
-            "assignee_id": "email_new@domain.com",
+            "assignee_id": "email_new@example.com",
             "modified_at": "2020-11-12T00:59:40.437Z",
-            "name": "email@domain.com",
+            "name": "email@example.com",
             "type": "email",
             "organisation_id": "role_123"
         },
