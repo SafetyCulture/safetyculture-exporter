@@ -1,6 +1,6 @@
 opened_at,completed_at,total_lessons,completed_lessons,course_id,course_external_id,course_title,user_email,user_first_name,user_last_name,user_id,user_external_id,progress_percent,score,due_at
---date--,,6,0,733e547a8a7dfb438d27acc8,,Leading Under Pressure,a@safetyculture.io,Tony,Blair,user_4c5b19c1b75449a4ac3ea72d158a5a3d,,0,0,
---date--,,6,0,733e547a8a7dfb438d27acc8,,Leading Under Pressure,b@safetyculture.io,John,Murphy,user_d64b89887cf44b8d83681103c319f922,,0,0,
---date--,,6,0,733e547a8a7dfb438d27acc8,,Leading Under Pressure,c@safetyculture.io,Ryan,Black,user_839468bf0d574dd18c5cacb31fcfa6c1,,0,0,
---date--,,6,0,733e547a8a7dfb438d27acc8,,Leading Under Pressure,d@safetyculture.io,Joe,White,user_3f2e6fc4924e3f049929a0684d670afc,,0,0,
---date--,,6,0,733e547a8a7dfb438d27acc8,,Leading Under Pressure,e@safetyculture.io,Janet,Polqa,user_a424d7f87378442dbc22f4df684165c3,,0,0,
+--date--,,6,0,733e547a8a7dfb438d27acc8,,Leading Under Pressure,a@example.com,Tony,Blair,user_4c5b19c1b75449a4ac3ea72d158a5a3d,,0,0,
+--date--,,6,0,733e547a8a7dfb438d27acc8,,Leading Under Pressure,b@example.com,John,Murphy,user_d64b89887cf44b8d83681103c319f922,,0,0,
+--date--,,6,0,733e547a8a7dfb438d27acc8,,Leading Under Pressure,c@example.com,Ryan,Black,user_839468bf0d574dd18c5cacb31fcfa6c1,,0,0,
+--date--,,6,0,733e547a8a7dfb438d27acc8,,Leading Under Pressure,d@example.com,Joe,White,user_3f2e6fc4924e3f049929a0684d670afc,,0,0,
+--date--,,6,0,733e547a8a7dfb438d27acc8,,Leading Under Pressure,e@example.com,Janet,Polqa,user_a424d7f87378442dbc22f4df684165c3,,0,0,
