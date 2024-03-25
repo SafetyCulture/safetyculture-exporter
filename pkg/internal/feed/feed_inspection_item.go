@@ -59,6 +59,7 @@ type InspectionItem struct {
 // InspectionItemFeed is a representation of the inspection_items feed
 type InspectionItemFeed struct {
 	SkipIDs         []string
+	SkipFields      []string
 	ModifiedAfter   time.Time
 	TemplateIDs     []string
 	Archived        string
@@ -164,7 +165,7 @@ func fetchAndWriteMedia(ctx context.Context, apiClient *httpapi.Client, exporter
 	return nil
 }
 
-func (f *InspectionItemFeed) writeRows(ctx context.Context, exporter Exporter, rows []*InspectionItem, apiClient *httpapi.Client) error {
+func (f *InspectionItemFeed) writeRows(ctx context.Context, exporter Exporter, rows []*InspectionItem, skipFields []string, apiClient *httpapi.Client) error {
 	l := logger.GetLogger()
 	skipIDs := map[string]bool{}
 	for _, id := range f.SkipIDs {
@@ -189,7 +190,7 @@ func (f *InspectionItemFeed) writeRows(ctx context.Context, exporter Exporter, r
 				continue
 			}
 			idSeen[row.ID] = true
-			rowsToInsert = append(rowsToInsert, row)
+			rowsToInsert = append(rowsToInsert, processSkipFields(skipFields, row))
 
 			if !f.ExportMedia || len(row.MediaHypertextReference) == 0 {
 				continue
@@ -237,6 +238,18 @@ func (f *InspectionItemFeed) writeRows(ctx context.Context, exporter Exporter, r
 	return nil
 }
 
+// processSkipFields - will remove the content if the field is in the list.
+func processSkipFields(fields []string, row *InspectionItem) *InspectionItem {
+	var rowClone = *row
+	for _, field := range fields {
+		switch field {
+		case "media_hypertext_reference":
+			rowClone.MediaHypertextReference = ""
+		}
+	}
+	return &rowClone
+}
+
 // CreateSchema creates the schema of the feed for the supplied exporter
 func (f *InspectionItemFeed) CreateSchema(exporter Exporter) error {
 	return exporter.CreateSchema(f, &[]*InspectionItem{})
@@ -266,7 +279,7 @@ func (f *InspectionItemFeed) Export(ctx context.Context, apiClient *httpapi.Clie
 		}
 
 		if len(rows) != 0 {
-			if err := f.writeRows(ctx, exporter, rows, apiClient); err != nil {
+			if err := f.writeRows(ctx, exporter, rows, f.SkipFields, apiClient); err != nil {
 				return err
 			}
 		}

@@ -180,6 +180,7 @@ func TestConfigurationManager_SaveConfiguration(t *testing.T) {
 	assert.EqualValues(t, []string{"PDF"}, newCm.Configuration.Report.Format)
 	assert.EqualValues(t, 15, newCm.Configuration.Report.RetryTimeout)
 	assert.EqualValues(t, false, newCm.Configuration.Export.Schedule.ResumeDownload)
+	assert.Empty(t, cm.Configuration.Export.InspectionItems.SkipFields)
 
 	_ = os.Remove("fake_file.yaml")
 }
@@ -207,6 +208,9 @@ func TestMapViperConfigToConfigurationOptions_CustomValues(t *testing.T) {
 	require.Nil(t, err)
 	require.NotNil(t, cm)
 	assert.EqualValues(t, "COMPLETION_STATUS_ALL", cm.Configuration.Export.Course.Progress.CompletionStatus)
+
+	expected := []string{"field_1", "field_2"}
+	assert.EqualValues(t, expected, cm.Configuration.Export.InspectionItems.SkipFields)
 }
 
 func TestNewConfigurationManagerFromFile_WhenZeroLengthFile(t *testing.T) {
@@ -235,6 +239,7 @@ func TestNewConfigurationManagerFromFile_WhenZeroLengthFile(t *testing.T) {
 	assert.EqualValues(t, "export", cm.Configuration.Export.Path)
 	assert.EqualValues(t, "export/media", cm.Configuration.Export.MediaPath)
 	assert.EqualValues(t, "0001-01-01", cm.Configuration.Export.ModifiedAfter.UTC().Format(util.TimeISO8601))
+	assert.Empty(t, cm.Configuration.Export.InspectionItems.SkipFields)
 }
 
 func TestNewConfigurationManagerFromFile_WhenFileIsCorrupt(t *testing.T) {

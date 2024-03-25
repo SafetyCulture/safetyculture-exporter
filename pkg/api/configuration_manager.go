@@ -54,6 +54,9 @@ type ExporterConfiguration struct {
 			SkipIds               []string `yaml:"skip_ids"`
 			WebReportLink         string   `yaml:"web_report_link"`
 		} `yaml:"inspection"`
+		InspectionItems struct {
+			SkipFields []string `yaml:"skip_fields"`
+		} `yaml:"inspection_items"`
 		Issue struct {
 			Limit int `yaml:"limit"`
 		} `yaml:"issue"`
@@ -283,6 +286,7 @@ func BuildConfigurationWithDefaults() *ExporterConfiguration {
 	cfg.Export.Inspection.Limit = 100
 	cfg.Export.Inspection.SkipIds = []string{}
 	cfg.Export.Inspection.WebReportLink = "private"
+	cfg.Export.InspectionItems.SkipFields = []string{}
 	cfg.Export.Issue.Limit = 100
 	cfg.Export.Path = exportLocation
 	cfg.Export.MediaPath = mediaPathLocation
@@ -353,6 +357,7 @@ func (ec *ExporterConfiguration) ToExporterConfig() *feed.ExporterFeedCfg {
 		ExportInspectionCompleted:             ec.Export.Inspection.Completed,
 		ExportInspectionIncludedInactiveItems: ec.Export.Inspection.IncludedInactiveItems,
 		ExportInspectionWebReportLink:         ec.Export.Inspection.WebReportLink,
+		ExportInspectionItemsSkipFields:       ec.Export.InspectionItems.SkipFields,
 		ExportScheduleResumeDownload:          ec.Export.Schedule.ResumeDownload,
 		ExportIncremental:                     ec.Export.Incremental,
 		ExportInspectionLimit:                 ec.Export.Inspection.Limit,
