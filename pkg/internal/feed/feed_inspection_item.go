@@ -17,6 +17,8 @@ import (
 
 const maxGoRoutines = 10
 
+const IgnoreMediaHypertextReference = "media_hypertext_reference"
+
 // InspectionItem represents a row from the inspection_items feed
 type InspectionItem struct {
 	ID                      string    `json:"id" csv:"id" gorm:"primarykey;size:150"`
@@ -243,11 +245,11 @@ func processSkipFields(fields []string, row *InspectionItem) *InspectionItem {
 	if len(fields) == 0 {
 		return row
 	}
-	
+
 	var rowClone = *row
 	for _, field := range fields {
 		switch field {
-		case "media_hypertext_reference":
+		case IgnoreMediaHypertextReference:
 			rowClone.MediaHypertextReference = ""
 		}
 	}
