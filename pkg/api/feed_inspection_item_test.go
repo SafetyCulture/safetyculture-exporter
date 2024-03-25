@@ -94,7 +94,7 @@ func TestInspectionItemFeedExportWithMedia(t *testing.T) {
 	apiClient := GetTestClient()
 	defer resetMocks(apiClient.HTTPClient())
 	gock.InterceptClient(apiClient.HTTPClient())
-	
+
 	initMockFeedsSet1(apiClient.HTTPClient())
 
 	inspectionItemFeed := feed.InspectionItemFeed{
