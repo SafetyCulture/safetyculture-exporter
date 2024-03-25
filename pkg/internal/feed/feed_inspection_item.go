@@ -240,6 +240,10 @@ func (f *InspectionItemFeed) writeRows(ctx context.Context, exporter Exporter, r
 
 // processSkipFields - will remove the content if the field is in the list.
 func processSkipFields(fields []string, row *InspectionItem) *InspectionItem {
+	if len(fields) == 0 {
+		return row
+	}
+	
 	var rowClone = *row
 	for _, field := range fields {
 		switch field {
