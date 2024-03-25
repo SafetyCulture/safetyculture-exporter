@@ -308,6 +308,10 @@ func (e *ExporterFeedClient) GetFeeds() []Feed {
 			Limit:            e.configuration.ExportCourseProgressLimit,
 			CompletionStatus: "COMPLETION_STATUS_COMPLETED",
 		},
+		&IssueAssigneeFeed{
+			Incremental: false, // IssueAssignee doesn't support modified after filters
+			Limit:       e.configuration.ExportIssueLimit,
+		},
 	}
 }
 
