@@ -404,6 +404,15 @@ func initMockIssuesFeed(httpClient *http.Client) {
 		File("mocks/set_1/feed_issues_2.json")
 }
 
+func initMockInspectionItemsFeed(httpClient *http.Client) {
+	gock.InterceptClient(httpClient)
+
+	gock.New("http://localhost:9999").
+		Get("/feed/inspection_items").
+		Reply(200).
+		File("mocks/items_ignore_fields/feed_inspection_items.json")
+}
+
 func resetMocks(httpClient *http.Client) {
 	gock.Off()
 	gock.Clean()

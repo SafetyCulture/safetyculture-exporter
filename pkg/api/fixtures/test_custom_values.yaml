@@ -28,6 +28,8 @@ export:
     limit: 100
     skip_ids: ["ID1", "ID2"]
     web_report_link: private
+  inspection_items:
+    skip_fields: ["field_1", "field_2"]
   media: false
   media_path: ./export/media/
   modified_after: ""
