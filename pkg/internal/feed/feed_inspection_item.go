@@ -243,7 +243,7 @@ func processSkipFields(fields []string, row *InspectionItem) *InspectionItem {
 	if len(fields) == 0 {
 		return row
 	}
-	
+
 	var rowClone = *row
 	for _, field := range fields {
 		switch field {
