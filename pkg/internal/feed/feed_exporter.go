@@ -52,6 +52,7 @@ type ExporterFeedCfg struct {
 	ExportInspectionCompleted             string
 	ExportInspectionIncludedInactiveItems bool
 	ExportInspectionWebReportLink         string
+	ExportInspectionItemsSkipFields       []string
 	ExportIncremental                     bool
 	ExportInspectionLimit                 int
 	ExportMedia                           bool
@@ -282,6 +283,7 @@ func (e *ExporterFeedClient) GetFeeds() []Feed {
 		},
 		&InspectionItemFeed{
 			SkipIDs:         e.configuration.ExportInspectionSkipIds,
+			SkipFields:      e.configuration.ExportInspectionItemsSkipFields,
 			ModifiedAfter:   e.configuration.ExportModifiedAfterTime,
 			TemplateIDs:     e.configuration.ExportTemplateIds,
 			Archived:        e.configuration.ExportInspectionArchived,
