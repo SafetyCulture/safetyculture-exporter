@@ -17,6 +17,9 @@ func TestInspectionItemFeedExport_should_export_rows_to_sql_db(t *testing.T) {
 	assert.NoError(t, err)
 
 	apiClient := GetTestClient()
+	defer resetMocks(apiClient.HTTPClient())
+	gock.InterceptClient(apiClient.HTTPClient())
+
 	initMockFeedsSet1(apiClient.HTTPClient())
 
 	inspectionItemFeed := feed.InspectionItemFeed{
@@ -41,7 +44,11 @@ func TestInspectionItemFeedExport_should_export_rows_to_sql_db(t *testing.T) {
 func TestInspectionItemFeedExport_should_ignore_media_hyper(t *testing.T) {
 	exporter, err := getInmemorySQLExporter("")
 	assert.NoError(t, err)
+
 	apiClient := GetTestClient()
+	defer resetMocks(apiClient.HTTPClient())
+	gock.InterceptClient(apiClient.HTTPClient())
+
 	initMockInspectionItemsFeed(apiClient.HTTPClient())
 
 	inspectionItemFeed := feed.InspectionItemFeed{
@@ -85,7 +92,9 @@ func TestInspectionItemFeedExportWithMedia(t *testing.T) {
 	req.SetHeader("Content-Type", "image/test-content")
 
 	apiClient := GetTestClient()
+	defer resetMocks(apiClient.HTTPClient())
 	gock.InterceptClient(apiClient.HTTPClient())
+	
 	initMockFeedsSet1(apiClient.HTTPClient())
 
 	inspectionItemFeed := feed.InspectionItemFeed{
