@@ -1,3 +1,3 @@
 id,issue_id,assignee_id,name,organisation_id,modified_at,type
-44f0d61f-6e2a-40fe-97d0-a8db16ef8897_user_3c546133210044fcbb9cf10d97c09208,44f0d61f-6e2a-40fe-97d0-a8db16ef8897,user_3c546133210044fcbb9cf10d97c09208,Test User,role_e73aed1517724161b5dd1db75fff9874,2024-03-13T03:19:34Z,user
-f4b136dc-7bb8-47a9-8d95-2bd4c6fa33dc_user_75969a1378464d3089e29fd6f18ab342,f4b136dc-7bb8-47a9-8d95-2bd4c6fa33dc,user_75969a1378464d3089e29fd6f18ab342,13 Mar,role_e73aed1517724161b5dd1db75fff9874,2024-03-13T03:20:56Z,user
+test-1,issue-1,user-1,Test User,role-1,--date--,user
+test-2,issue-2,user-1,13 Mar,role-1,--date--,user
