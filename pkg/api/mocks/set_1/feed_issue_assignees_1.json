@@ -1,0 +1,26 @@
+{
+  "metadata": {
+    "next_page": null,
+    "next_page_token": ""
+  },
+  "data": [
+    {
+      "id": "test-1",
+      "issue_id": "issue-1",
+      "assignee_id": "user-1",
+      "name": "Test User",
+      "organisation_id": "role-1",
+      "modified_at": "2024-03-13T03:19:34Z",
+      "type": "user"
+    },
+    {
+      "id": "test-2",
+      "issue_id": "issue-1",
+      "assignee_id": "user-1",
+      "name": "13 Mar",
+      "organisation_id": "role-1",
+      "modified_at": "2024-03-13T03:20:56Z",
+      "type": "user"
+    }
+  ]
+}

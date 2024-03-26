@@ -43,6 +43,7 @@ func TestExporterFeedClient_ExportFeeds_should_create_all_schemas_to_file(t *tes
 	filesEqualish(t, "mocks/set_1/schemas/schedule_occurrences.csv", filepath.Join(exporter.ExportPath, "schedule_occurrences.csv"))
 
 	filesEqualish(t, "mocks/set_1/schemas/training_course_progresses.csv", filepath.Join(exporter.ExportPath, "training_course_progresses.csv"))
+	filesEqualish(t, "mocks/set_1/schemas/issue_assignees.csv", filepath.Join(exporter.ExportPath, "issue_assignees.csv"))
 }
 
 func TestExporterFeedClient_ExportFeeds_should_export_all_feeds_to_file(t *testing.T) {
