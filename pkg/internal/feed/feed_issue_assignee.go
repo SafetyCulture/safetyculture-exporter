@@ -13,12 +13,12 @@ import (
 )
 
 type IssueAssignee struct {
-	ID             string    `json:"id" csv:"id" gorm:"primarykey;column:id;size:36"`
-	IssueID        string    `json:"issue_id" csv:"issue_id" gorm:"index;column:issue_id;size:36"`
-	AssigneeID     string    `json:"assignee_id" csv:"assignee_id" gorm:"index;column:assignee_id;size:36"`
+	ID             string    `json:"id" csv:"id" gorm:"primarykey;column:id;size:375"`
+	IssueID        string    `json:"issue_id" csv:"issue_id" gorm:"index:idx_issue_asg_issue_id;column:issue_id;size:36"`
+	AssigneeID     string    `json:"assignee_id" csv:"assignee_id" gorm:"size:256"`
 	Name           string    `json:"name" csv:"name"`
-	OrganisationID string    `json:"organisation_id" csv:"organisation_id" gorm:"index;column:organisation_id;size:36"`
-	ModifiedAt     time.Time `json:"modified_at" csv:"modified_at"`
+	OrganisationID string    `json:"organisation_id" csv:"organisation_id" gorm:"size:37"`
+	ModifiedAt     time.Time `json:"modified_at" csv:"modified_at" gorm:"index:idx_issue_asg_modified_at,sort:desc;column:modified_at"`
 	Type           string    `json:"type" csv:"type"`
 }
 
