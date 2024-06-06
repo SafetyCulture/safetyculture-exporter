@@ -63,6 +63,9 @@ func (e *SQLExporter) CreateSchema(feed Feed, _ interface{}) error {
 
 // InitFeed initialises any tables required to export
 func (e *SQLExporter) InitFeed(feed Feed, opts *InitFeedOptions) error {
+	e.mu.Lock()
+	defer e.mu.Unlock()
+
 	model := feed.Model()
 
 	if e.AutoMigrate {
