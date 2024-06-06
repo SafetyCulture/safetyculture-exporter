@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/logger"
@@ -27,6 +28,7 @@ type SQLExporter struct {
 	AutoMigrate     bool
 	ExportMediaPath string
 	duration        time.Duration
+	mu              sync.Mutex
 }
 
 // DBConnection db connection
@@ -61,6 +63,9 @@ func (e *SQLExporter) CreateSchema(feed Feed, _ interface{}) error {
 
 // InitFeed initialises any tables required to export
 func (e *SQLExporter) InitFeed(feed Feed, opts *InitFeedOptions) error {
+	e.mu.Lock()
+	defer e.mu.Unlock()
+
 	model := feed.Model()
 
 	if e.AutoMigrate {
@@ -90,6 +95,9 @@ func (e *SQLExporter) GetDuration() time.Duration {
 
 // DeleteRowsIfExist will delete the rows if already exist
 func (e *SQLExporter) DeleteRowsIfExist(feed Feed, query string, args ...interface{}) error {
+	e.mu.Lock()
+	defer e.mu.Unlock()
+
 	del := e.DB.Table(feed.Name()).
 		Clauses(clause.Where{
 			Exprs: []clause.Expression{
@@ -109,6 +117,9 @@ func (e *SQLExporter) DeleteRowsIfExist(feed Feed, query string, args ...interfa
 
 // WriteRows writes out the rows to the DB
 func (e *SQLExporter) WriteRows(feed Feed, rows interface{}) error {
+	e.mu.Lock()
+	defer e.mu.Unlock()
+
 	var columns []clause.Column
 	for _, column := range feed.PrimaryKey() {
 		columns = append(columns, clause.Column{Name: column})
@@ -132,6 +143,9 @@ func (e *SQLExporter) WriteRows(feed Feed, rows interface{}) error {
 
 // UpdateRows batch updates. Returns number of rows updated or error. Works with single PKey, not with composed PKeys
 func (e *SQLExporter) UpdateRows(feed Feed, primaryKeys []string, element map[string]interface{}) (int64, error) {
+	e.mu.Lock()
+	defer e.mu.Unlock()
+
 	result := e.DB.
 		Model(feed.Model()).
 		Where(primaryKeys).
