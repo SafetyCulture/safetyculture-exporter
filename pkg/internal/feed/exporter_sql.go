@@ -144,7 +144,7 @@ func (e *SQLExporter) WriteRows(feed Feed, rows interface{}) error {
 // UpdateRows batch updates. Returns number of rows updated or error. Works with single PKey, not with composed PKeys
 func (e *SQLExporter) UpdateRows(feed Feed, primaryKeys []string, element map[string]interface{}) (int64, error) {
 	e.mu.Lock()
-	e.mu.Unlock()
+	defer e.mu.Unlock()
 
 	result := e.DB.
 		Model(feed.Model()).
