@@ -29,6 +29,7 @@ type ScheduleOccurrence struct {
 	ExportedAt       time.Time  `json:"exported_at" csv:"exported_at" gorm:"autoUpdateTime"`
 	UserID           string     `json:"user_id" csv:"user_id" gorm:"size:37"`
 	AssigneeStatus   string     `json:"assignee_status" csv:"assignee_status" gorm:"size:20"`
+	Note             string     `json:"note" csv:"note" gorm:"size:255"`
 }
 
 // ScheduleOccurrenceFeed is a representation of the schedule_occurrences feed
