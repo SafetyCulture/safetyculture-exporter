@@ -81,10 +81,11 @@ func (e *ExportStatus) IncrementStatus(feedName string, counter int64, durationM
 	e.lock.Unlock()
 }
 
-func (e *ExportStatus) UpdateStage(feedName string, stage ExportStatusItemStage) {
+func (e *ExportStatus) UpdateStage(feedName string, stage ExportStatusItemStage, counterDecremental bool) {
 	e.lock.Lock()
 	if _, ok := e.status[feedName]; ok {
 		e.status[feedName].Stage = stage
+		e.status[feedName].CounterDecremental = counterDecremental
 	}
 	e.lock.Unlock()
 }

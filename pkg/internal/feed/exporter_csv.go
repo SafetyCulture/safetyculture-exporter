@@ -52,14 +52,15 @@ func (e *CSVExporter) FinaliseExport(feed Feed, rows interface{}) error {
 	logger := e.Logger.With("feed", feed.Name())
 	logger.Info("writing out CSV file")
 	status := GetExporterStatus()
-	status.UpdateStage(feed.Name(), StageCsv)
+	status.UpdateStage(feed.Name(), StageCsv, false)
 
 	err := e.cleanOldFiles(feed.Name())
 	if err != nil {
 		return err
 	}
 
-	limit := 10000
+	// TODO remove me
+	limit := 10
 	if limit > e.MaxRowsPerFile {
 		limit = e.MaxRowsPerFile
 	}
@@ -113,10 +114,10 @@ func (e *CSVExporter) FinaliseExport(feed Feed, rows interface{}) error {
 		offset = offset + limit
 		rowsAdded += int(resp.RowsAffected)
 
-		status.UpdateStatus(feed.Name(), resp.RowsAffected, postWriteTime.Sub(preTime).Milliseconds())
+		status.UpdateStatus(feed.Name(), int64(rowsAdded), postWriteTime.Sub(preTime).Milliseconds())
 
 		logger.With(
-			"rows_added", resp.RowsAffected,
+			"rows_added", rowsAdded,
 			"total_time_ms", postWriteTime.Sub(preTime).Milliseconds(),
 			"query_time_ms", postQueryTime.Sub(preTime).Milliseconds(),
 			"write_time_ms", postWriteTime.Sub(postQueryTime).Milliseconds(),
