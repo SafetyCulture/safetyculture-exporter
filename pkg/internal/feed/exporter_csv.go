@@ -59,8 +59,7 @@ func (e *CSVExporter) FinaliseExport(feed Feed, rows interface{}) error {
 		return err
 	}
 
-	// TODO remove me
-	limit := 10
+	limit := 10000
 	if limit > e.MaxRowsPerFile {
 		limit = e.MaxRowsPerFile
 	}
