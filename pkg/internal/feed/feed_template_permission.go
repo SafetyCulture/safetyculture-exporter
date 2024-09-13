@@ -95,6 +95,14 @@ func (f *TemplatePermissionFeed) Export(ctx context.Context, apiClient *httpapi.
 		}
 
 		if len(rows) != 0 {
+			// we had issues where the assignee_type was longer than 10 characters, causing issues while exporting to SQL.
+			// was caused by some email addresses ending up instead of keywords: role, user ..
+			for _, row := range rows {
+				if len(row.AssigneeType) > 10 {
+					row.AssigneeType = row.AssigneeType[:10]
+				}
+			}
+
 			// Calculate the size of the batch we can insert into the DB at once. Column count + buffer to account for primary keys
 			batchSize := exporter.ParameterLimit() / (len(f.Columns()) + 4)
 			err := util.SplitSliceInBatch(batchSize, rows, func(batch []*TemplatePermission) error {
