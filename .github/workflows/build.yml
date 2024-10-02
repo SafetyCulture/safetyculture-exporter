@@ -41,7 +41,7 @@ jobs:
 
       - name: Upload artifacts windows-amd64
         if: ${{ matrix.platform == 'windows-amd64' && matrix.build-os == 'ubuntu-latest' }}
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: exporter-windows-amd64
           path: safetyculture-exporter-windows-x86_64.zip
@@ -60,7 +60,7 @@ jobs:
 
       - name: Upload artifacts linux-amd64
         if: ${{ matrix.platform == 'linux-amd64' && matrix.build-os == 'ubuntu-latest' }}
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: exporter-linux-amd64
           path: safetyculture-exporter-linux-amd64.zip
@@ -92,7 +92,7 @@ jobs:
 
       - name: Upload artifacts darwin-amd64
         if: ${{ matrix.platform == 'darwin-amd64' && matrix.build-os == 'macOS-latest' }}
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: exporter-darwin-amd64
           path: safetyculture-exporter-darwin-amd64.zip
@@ -124,7 +124,7 @@ jobs:
 
       - name: Upload artifacts darwin-arm64
         if: ${{ matrix.platform == 'darwin-arm64' && matrix.build-os == 'macOS-latest' }}
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: exporter-darwin-arm64
           path: safetyculture-exporter-darwin-arm64.zip
@@ -134,22 +134,22 @@ jobs:
     needs: package
     steps:
       - name: Download package windows amd64
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           name: exporter-windows-amd64
 
       - name: Download package darwin amd64
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           name: exporter-darwin-amd64
 
       - name: Download package darwin arm64
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           name: exporter-darwin-arm64
 
       - name: Download package linux amd64
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           name: exporter-linux-amd64
 

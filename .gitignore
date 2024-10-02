@@ -21,6 +21,6 @@ dist/
 .release-env
 
 /export/
-safetyculture-exporter.yaml
+safetyculture-exporter*.yaml
 *.log
 perf.md

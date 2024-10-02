@@ -32,7 +32,7 @@ jobs:
           ./cc-test-reporter format-coverage -o codeclimate.json --prefix $(go list -m)
 
       - name: Upload Coverage Result Artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: codeclimate-unit
           path: codeclimate.json
@@ -81,7 +81,7 @@ jobs:
           ./cc-test-reporter format-coverage -o codeclimate.json --prefix $(go list -m)
 
       - name: Upload Coverage Result Artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: codeclimate-intg-postgres
           path: codeclimate.json
@@ -127,7 +127,7 @@ jobs:
           ./cc-test-reporter format-coverage -o codeclimate.json --prefix $(go list -m)
 
       - name: Upload Coverage Result Artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: codeclimate-mysql-8
           path: codeclimate.json
@@ -143,10 +143,10 @@ jobs:
           SA_PASSWORD: "SafetyCultureExporter12345"
           ACCEPT_EULA: "Y"
         options: >-
-          --health-cmd "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P SafetyCultureExporter12345 -Q \"SELECT 1\" || exit 1"
+          --health-cmd "/opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P SafetyCultureExporter12345 -Q \"SELECT 1\" || exit 1"
           --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
+          --health-timeout 10s
+          --health-retries 20
         ports:
           - 1433:1433
 
@@ -172,7 +172,7 @@ jobs:
           ./cc-test-reporter format-coverage -o codeclimate.json --prefix $(go list -m)
 
       - name: Upload Coverage Result Artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: codeclimate-intg-sql-server
           path: codeclimate.json
@@ -187,7 +187,7 @@ jobs:
       - SQL-Server-Integration-Tests
     steps:
       - name: Download all coverage results
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
 
       - name: Upload Coverage to Code Climate
         env:
