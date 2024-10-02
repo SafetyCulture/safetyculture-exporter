@@ -32,7 +32,7 @@ jobs:
           ./cc-test-reporter format-coverage -o codeclimate.json --prefix $(go list -m)
 
       - name: Upload Coverage Result Artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: codeclimate-unit
           path: codeclimate.json
@@ -81,7 +81,7 @@ jobs:
           ./cc-test-reporter format-coverage -o codeclimate.json --prefix $(go list -m)
 
       - name: Upload Coverage Result Artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: codeclimate-intg-postgres
           path: codeclimate.json
@@ -127,7 +127,7 @@ jobs:
           ./cc-test-reporter format-coverage -o codeclimate.json --prefix $(go list -m)
 
       - name: Upload Coverage Result Artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: codeclimate-mysql-8
           path: codeclimate.json
@@ -172,7 +172,7 @@ jobs:
           ./cc-test-reporter format-coverage -o codeclimate.json --prefix $(go list -m)
 
       - name: Upload Coverage Result Artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: codeclimate-intg-sql-server
           path: codeclimate.json
