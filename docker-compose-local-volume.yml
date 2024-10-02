@@ -21,7 +21,7 @@ services:
       - "3308:3306"
 
   sqlserver:
-    image: mcr.microsoft.com/mssql/server:2022-latest
+    image: mcr.microsoft.com/mssql/server:2019-latest
     environment:
       SA_PASSWORD: "SafetyCultureExporter12345"
       ACCEPT_EULA: "Y"
