@@ -187,7 +187,7 @@ jobs:
       - SQL-Server-Integration-Tests
     steps:
       - name: Download all coverage results
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
 
       - name: Upload Coverage to Code Climate
         env:

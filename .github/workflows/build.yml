@@ -134,22 +134,22 @@ jobs:
     needs: package
     steps:
       - name: Download package windows amd64
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           name: exporter-windows-amd64
 
       - name: Download package darwin amd64
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           name: exporter-darwin-amd64
 
       - name: Download package darwin arm64
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           name: exporter-darwin-arm64
 
       - name: Download package linux amd64
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           name: exporter-linux-amd64
 
