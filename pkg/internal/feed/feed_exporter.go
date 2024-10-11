@@ -314,6 +314,10 @@ func (e *ExporterFeedClient) GetFeeds() []Feed {
 			Incremental: false, // IssueAssignee doesn't support modified after filters
 			Limit:       e.configuration.ExportIssueLimit,
 		},
+		&AccountHistoryFeed{
+			Incremental: true,
+			Limit:       250,
+		},
 	}
 }
 
