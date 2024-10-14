@@ -13,7 +13,10 @@ import (
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/events"
 )
 
-// const feedPath = "/accounts/history/v2/feed/activity_log_events"
+//const feedPath = "/accounts/history/v2/feed/activity_log_events"
+
+//const feedPath = "/accounts/history/v1/feed/activity_log_events_v2"
+
 const feedPath = "/accounts/history/v1/feed/activity_log_events"
 
 // AccountHistory represents a row from the account history feed
@@ -31,13 +34,15 @@ type AccountHistory struct {
 
 // AccountHistoryFeed is a representation of the account history feed
 type AccountHistoryFeed struct {
-	Incremental bool
-	Limit       int
+	ExportedAt    time.Time
+	Incremental   bool
+	Limit         int
+	SortingColumn string
 }
 
 // Name is the name of the feed
 func (f *AccountHistoryFeed) Name() string {
-	return "activity_log_events"
+	return "account_histories"
 }
 
 // HasRemainingInformation returns true if the feed returns remaining items information
@@ -97,6 +102,12 @@ func (f *AccountHistoryFeed) Export(ctx context.Context, apiClient *httpapi.Clie
 		return events.WrapEventError(err, "init feed")
 	}
 
+	var err error
+	f.ExportedAt, err = exporter.LastModifiedAt(f, f.ExportedAt, f.SortingColumn, orgID)
+	if err != nil {
+		return events.NewEventErrorWithMessage(err, events.ErrorSeverityError, events.ErrorSubSystemDB, false, "unable to load modified after")
+	}
+
 	drainFn := func(resp *GetFeedResponse) error {
 		fmt.Printf(" > %s \n", resp.Metadata.NextPage)
 		var rows []*AccountHistory
@@ -134,7 +145,8 @@ func (f *AccountHistoryFeed) Export(ctx context.Context, apiClient *httpapi.Clie
 	req := &GetFeedRequest{
 		InitialURL: feedPath,
 		Params: GetFeedParams{
-			Limit: f.Limit,
+			Limit:         f.Limit,
+			ModifiedAfter: f.ExportedAt,
 		},
 	}
 

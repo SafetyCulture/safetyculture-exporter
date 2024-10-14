@@ -223,12 +223,12 @@ func TestCSVExporterLastModifiedAt_should_return_latest_modified_at(t *testing.T
 	assert.NoError(t, err)
 
 	// Check the timestamp for the audits that doesn't have organisation_id
-	lastModifiedAt, err := exporter.LastModifiedAt(inspectionFeed, time.Now().Add(time.Hour*-30000), "role_123")
+	lastModifiedAt, err := exporter.LastModifiedAt(inspectionFeed, time.Now().Add(time.Hour*-30000), feed.DefaultSortingColumn, "role_123")
 	assert.NoError(t, err)
 	// Times are slightly lossy, convert to ISO string
 	assert.Equal(t, now.Format(time.RFC3339), lastModifiedAt.Format(time.RFC3339))
 
-	lastModifiedAt, err = exporter.LastModifiedAt(inspectionFeed, time.Now().Add(time.Hour*-30000), "role_1234")
+	lastModifiedAt, err = exporter.LastModifiedAt(inspectionFeed, time.Now().Add(time.Hour*-30000), feed.DefaultSortingColumn, "role_1234")
 	assert.NoError(t, err)
 	// Times are slightly lossy, convert to ISO string
 	assert.Equal(t, now.Format(time.RFC3339), lastModifiedAt.Format(time.RFC3339))
@@ -260,12 +260,12 @@ func TestCSVExporterLastModifiedAt_should_return_latest_modified_at(t *testing.T
 	assert.NoError(t, err)
 
 	// Check the timestamp for the audits that contains organisation_id
-	lastModifiedAt, err = exporter.LastModifiedAt(inspectionFeed, time.Now().Add(time.Hour*-30000), "role_123")
+	lastModifiedAt, err = exporter.LastModifiedAt(inspectionFeed, time.Now().Add(time.Hour*-30000), feed.DefaultSortingColumn, "role_123")
 	assert.NoError(t, err)
 	// Times are slightly lossy, convert to ISO string
 	assert.Equal(t, now.Format(time.RFC3339), lastModifiedAt.Format(time.RFC3339))
 
-	lastModifiedAt, err = exporter.LastModifiedAt(inspectionFeed, time.Now().Add(time.Hour*-30000), "role_1234")
+	lastModifiedAt, err = exporter.LastModifiedAt(inspectionFeed, time.Now().Add(time.Hour*-30000), feed.DefaultSortingColumn, "role_1234")
 	assert.NoError(t, err)
 	// Times are slightly lossy, convert to ISO string
 	assert.Equal(t, now.Add(time.Hour*-2).Format(time.RFC3339), lastModifiedAt.Format(time.RFC3339))
@@ -306,12 +306,12 @@ func TestCSVExporterLastModifiedAt_should_return_modified_after_if_latest(t *tes
 	assert.NoError(t, err)
 
 	// Check the timestamp for the audits that doesn't have organisation_id
-	lastModifiedAt, err := exporter.LastModifiedAt(inspectionFeed, now.Add(time.Hour), "role_123")
+	lastModifiedAt, err := exporter.LastModifiedAt(inspectionFeed, now.Add(time.Hour), feed.DefaultSortingColumn, "role_123")
 	assert.NoError(t, err)
 	// Times are slightly lossy, converting to ISO string
 	assert.Equal(t, now.Add(time.Hour).Format(time.RFC3339), lastModifiedAt.Format(time.RFC3339))
 
-	lastModifiedAt, err = exporter.LastModifiedAt(inspectionFeed, now.Add(time.Hour), "role_124")
+	lastModifiedAt, err = exporter.LastModifiedAt(inspectionFeed, now.Add(time.Hour), feed.DefaultSortingColumn, "role_124")
 	assert.NoError(t, err)
 	// Times are slightly lossy, converting to ISO string
 	assert.Equal(t, now.Add(time.Hour).Format(time.RFC3339), lastModifiedAt.Format(time.RFC3339))
@@ -343,12 +343,12 @@ func TestCSVExporterLastModifiedAt_should_return_modified_after_if_latest(t *tes
 	assert.NoError(t, err)
 
 	// Check the timestamp for the audits that contains organisation_id
-	lastModifiedAt, err = exporter.LastModifiedAt(inspectionFeed, now.Add(time.Hour), "role_123")
+	lastModifiedAt, err = exporter.LastModifiedAt(inspectionFeed, now.Add(time.Hour), feed.DefaultSortingColumn, "role_123")
 	assert.NoError(t, err)
 	// Times are slightly lossy, converting to ISO string
 	assert.Equal(t, now.Add(time.Hour).Format(time.RFC3339), lastModifiedAt.Format(time.RFC3339))
 
-	lastModifiedAt, err = exporter.LastModifiedAt(inspectionFeed, now.Add(time.Hour), "role_124")
+	lastModifiedAt, err = exporter.LastModifiedAt(inspectionFeed, now.Add(time.Hour), feed.DefaultSortingColumn, "role_124")
 	assert.NoError(t, err)
 	// Times are slightly lossy, converting to ISO string
 	assert.Equal(t, now.Add(time.Hour).Format(time.RFC3339), lastModifiedAt.Format(time.RFC3339))

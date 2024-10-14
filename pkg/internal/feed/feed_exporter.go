@@ -19,6 +19,7 @@ NOTE: these functions were migrated from various feed methods and adapted not to
 They are called directly by the CMD from export cmd.package
 */
 const maxConcurrentGoRoutines = 10
+const DefaultSortingColumn = "modified_at"
 
 // SafetyCultureFeedExporter defines the basic action in regard to the exporter
 type SafetyCultureFeedExporter interface {
@@ -244,7 +245,8 @@ func (e *ExporterFeedClient) GetFeeds() []Feed {
 		e.getInspectionFeed(),
 		&UserFeed{},
 		&TemplateFeed{
-			Incremental: e.configuration.ExportIncremental,
+			Incremental:   e.configuration.ExportIncremental,
+			SortingColumn: DefaultSortingColumn,
 		},
 		&TemplatePermissionFeed{
 			Incremental: e.configuration.ExportIncremental,
@@ -271,10 +273,12 @@ func (e *ExporterFeedClient) GetFeeds() []Feed {
 			ModifiedAfter: e.configuration.ExportModifiedAfterTime,
 			Incremental:   e.configuration.ExportIncremental,
 			Limit:         e.configuration.ExportActionLimit,
+			SortingColumn: DefaultSortingColumn,
 		},
 		&ActionAssigneeFeed{
 			ModifiedAfter: e.configuration.ExportModifiedAfterTime,
 			Incremental:   e.configuration.ExportIncremental,
+			SortingColumn: DefaultSortingColumn,
 		},
 		&ActionTimelineItemFeed{
 			ModifiedAfter: e.configuration.ExportModifiedAfterTime,
@@ -292,6 +296,7 @@ func (e *ExporterFeedClient) GetFeeds() []Feed {
 			Incremental:     e.configuration.ExportIncremental,
 			Limit:           e.configuration.ExportInspectionLimit,
 			ExportMedia:     e.configuration.ExportMedia,
+			SortingColumn:   DefaultSortingColumn,
 		},
 		&IssueFeed{
 			Incremental: false, // this was disabled on request. Issues API doesn't support modified After filters
@@ -315,8 +320,9 @@ func (e *ExporterFeedClient) GetFeeds() []Feed {
 			Limit:       e.configuration.ExportIssueLimit,
 		},
 		&AccountHistoryFeed{
-			Incremental: true,
-			Limit:       250,
+			Incremental:   true,
+			Limit:         250,
+			SortingColumn: "event_at",
 		},
 	}
 }
@@ -331,6 +337,7 @@ func (e *ExporterFeedClient) getInspectionFeed() *InspectionFeed {
 		Incremental:   e.configuration.ExportIncremental,
 		Limit:         e.configuration.ExportInspectionLimit,
 		WebReportLink: e.configuration.ExportInspectionWebReportLink,
+		SortingColumn: DefaultSortingColumn,
 	}
 }
 

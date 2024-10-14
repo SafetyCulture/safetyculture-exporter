@@ -30,6 +30,7 @@ type ActionAssignee struct {
 type ActionAssigneeFeed struct {
 	ModifiedAfter time.Time
 	Incremental   bool
+	SortingColumn string
 }
 
 // Name is the name of the feed
@@ -118,7 +119,7 @@ func (f *ActionAssigneeFeed) Export(ctx context.Context, apiClient *httpapi.Clie
 	}
 
 	var err error
-	f.ModifiedAfter, err = exporter.LastModifiedAt(f, f.ModifiedAfter, orgID)
+	f.ModifiedAfter, err = exporter.LastModifiedAt(f, f.ModifiedAfter, f.SortingColumn, orgID)
 	if err != nil {
 		return events.NewEventErrorWithMessage(err, events.ErrorSeverityError, events.ErrorSubSystemDB, false, "unable to load modified after")
 	}
