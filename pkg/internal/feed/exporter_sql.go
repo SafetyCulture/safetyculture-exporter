@@ -191,7 +191,7 @@ func (e *SQLExporter) LastModifiedAt(feed Feed, modifiedAfter time.Time, columnN
 }
 
 // LastRecord returns the latest stored record the feed
-func (e *SQLExporter) LastRecord(feed Feed, modifiedAfter time.Time, orgID string, sortColumn string) time.Time {
+func (e *SQLExporter) LastRecord(feed Feed, fallbackTime time.Time, orgID string, sortColumn string) time.Time {
 	type Ts struct {
 		TimeValue time.Time
 	}
@@ -205,7 +205,7 @@ func (e *SQLExporter) LastRecord(feed Feed, modifiedAfter time.Time, orgID strin
 		return latestRow.TimeValue
 	}
 
-	return modifiedAfter
+	return fallbackTime
 }
 
 // FinaliseExport closes out an export

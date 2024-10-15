@@ -14,6 +14,7 @@ import (
 )
 
 const feedPath = "/accounts/history/v2/feed/activity_log_events"
+const accountHistorySortingColumn = "event_at"
 
 // AccountHistory represents a row from the account history feed
 type AccountHistory struct {
@@ -30,10 +31,9 @@ type AccountHistory struct {
 
 // AccountHistoryFeed is a representation of the account history feed
 type AccountHistoryFeed struct {
-	ExportedAt    time.Time
-	Incremental   bool
-	Limit         int
-	SortingColumn string
+	ExportedAt  time.Time
+	Incremental bool
+	Limit       int
 }
 
 // Name is the name of the feed
@@ -88,6 +88,11 @@ func (f *AccountHistoryFeed) CreateSchema(exporter Exporter) error {
 // Export exports the feed to the supplied exporter
 func (f *AccountHistoryFeed) Export(ctx context.Context, apiClient *httpapi.Client, exporter Exporter, orgID string) error {
 	l := logger.GetLogger().With("feed", f.Name(), "org_id", orgID)
+	s12OrgID := util.ConvertS12ToUUID(orgID)
+	if s12OrgID.IsNil() {
+		return fmt.Errorf("cannot convert organisation ID to UUID")
+	}
+
 	status := GetExporterStatus()
 
 	if err := exporter.InitFeed(f, &InitFeedOptions{
@@ -98,10 +103,8 @@ func (f *AccountHistoryFeed) Export(ctx context.Context, apiClient *httpapi.Clie
 		return events.WrapEventError(err, "init feed")
 	}
 
-	var err error
-	f.ExportedAt, err = exporter.LastModifiedAt(f, f.ExportedAt, f.SortingColumn, orgID)
-	if err != nil {
-		return events.NewEventErrorWithMessage(err, events.ErrorSeverityError, events.ErrorSubSystemDB, false, "unable to load modified after")
+	if f.Incremental {
+		f.ExportedAt = exporter.LastRecord(f, f.ExportedAt, s12OrgID.String(), accountHistorySortingColumn)
 	}
 
 	drainFn := func(resp *GetFeedResponse) error {
@@ -140,8 +143,8 @@ func (f *AccountHistoryFeed) Export(ctx context.Context, apiClient *httpapi.Clie
 	req := &GetFeedRequest{
 		InitialURL: feedPath,
 		Params: GetFeedParams{
-			Limit:         f.Limit,
-			ModifiedAfter: f.ExportedAt,
+			Limit:        f.Limit,
+			CreatedAfter: f.ExportedAt,
 		},
 	}
 

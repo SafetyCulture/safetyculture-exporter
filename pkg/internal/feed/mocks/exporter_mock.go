@@ -136,8 +136,8 @@ func (_m *Exporter) LastModifiedAt(_a0 feed.Feed, modifiedAfter time.Time, colum
 }
 
 // LastRecord provides a mock function with given fields: _a0, modifiedAfter, orgID, sortColumn
-func (_m *Exporter) LastRecord(_a0 feed.Feed, modifiedAfter time.Time, orgID string, sortColumn string) time.Time {
-	ret := _m.Called(_a0, modifiedAfter, orgID, sortColumn)
+func (_m *Exporter) LastRecord(_a0 feed.Feed, fallbackTime time.Time, orgID string, sortColumn string) time.Time {
+	ret := _m.Called(_a0, fallbackTime, orgID, sortColumn)
 
 	if len(ret) == 0 {
 		panic("no return value specified for LastRecord")
@@ -145,7 +145,7 @@ func (_m *Exporter) LastRecord(_a0 feed.Feed, modifiedAfter time.Time, orgID str
 
 	var r0 time.Time
 	if rf, ok := ret.Get(0).(func(feed.Feed, time.Time, string, string) time.Time); ok {
-		r0 = rf(_a0, modifiedAfter, orgID, sortColumn)
+		r0 = rf(_a0, fallbackTime, orgID, sortColumn)
 	} else {
 		r0 = ret.Get(0).(time.Time)
 	}

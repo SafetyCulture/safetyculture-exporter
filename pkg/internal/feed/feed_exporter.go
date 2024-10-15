@@ -245,8 +245,7 @@ func (e *ExporterFeedClient) GetFeeds() []Feed {
 		e.getInspectionFeed(),
 		&UserFeed{},
 		&TemplateFeed{
-			Incremental:   e.configuration.ExportIncremental,
-			SortingColumn: DefaultSortingColumn,
+			Incremental: e.configuration.ExportIncremental,
 		},
 		&TemplatePermissionFeed{
 			Incremental: e.configuration.ExportIncremental,
@@ -273,12 +272,10 @@ func (e *ExporterFeedClient) GetFeeds() []Feed {
 			ModifiedAfter: e.configuration.ExportModifiedAfterTime,
 			Incremental:   e.configuration.ExportIncremental,
 			Limit:         e.configuration.ExportActionLimit,
-			SortingColumn: DefaultSortingColumn,
 		},
 		&ActionAssigneeFeed{
 			ModifiedAfter: e.configuration.ExportModifiedAfterTime,
 			Incremental:   e.configuration.ExportIncremental,
-			SortingColumn: DefaultSortingColumn,
 		},
 		&ActionTimelineItemFeed{
 			ModifiedAfter: e.configuration.ExportModifiedAfterTime,
@@ -296,7 +293,6 @@ func (e *ExporterFeedClient) GetFeeds() []Feed {
 			Incremental:     e.configuration.ExportIncremental,
 			Limit:           e.configuration.ExportInspectionLimit,
 			ExportMedia:     e.configuration.ExportMedia,
-			SortingColumn:   DefaultSortingColumn,
 		},
 		&IssueFeed{
 			Incremental: false, // this was disabled on request. Issues API doesn't support modified After filters
@@ -320,9 +316,8 @@ func (e *ExporterFeedClient) GetFeeds() []Feed {
 			Limit:       e.configuration.ExportIssueLimit,
 		},
 		&AccountHistoryFeed{
-			Incremental:   true,
-			Limit:         250,
-			SortingColumn: "event_at",
+			Incremental: true,
+			Limit:       250,
 		},
 	}
 }
