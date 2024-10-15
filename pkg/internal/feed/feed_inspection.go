@@ -62,7 +62,6 @@ type InspectionFeed struct {
 	Incremental   bool
 	Limit         int
 	WebReportLink string
-	SortingColumn string
 }
 
 // Name is the name of the feed
@@ -176,7 +175,7 @@ func (f *InspectionFeed) Export(ctx context.Context, apiClient *httpapi.Client, 
 	}
 
 	var err error
-	f.ModifiedAfter, err = exporter.LastModifiedAt(f, f.ModifiedAfter, f.SortingColumn, orgID)
+	f.ModifiedAfter, err = exporter.LastModifiedAt(f, f.ModifiedAfter, orgID)
 	if err != nil {
 		return events.NewEventErrorWithMessage(err, events.ErrorSeverityError, events.ErrorSubSystemDB, false, "unable to load modified after")
 	}

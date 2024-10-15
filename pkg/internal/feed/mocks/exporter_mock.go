@@ -107,9 +107,9 @@ func (_m *Exporter) InitFeed(_a0 feed.Feed, opts *feed.InitFeedOptions) error {
 	return r0
 }
 
-// LastModifiedAt provides a mock function with given fields: _a0, modifiedAfter, columnName, orgID
-func (_m *Exporter) LastModifiedAt(_a0 feed.Feed, modifiedAfter time.Time, columnName string, orgID string) (time.Time, error) {
-	ret := _m.Called(_a0, modifiedAfter, columnName, orgID)
+// LastModifiedAt provides a mock function with given fields: _a0, modifiedAfter, orgID
+func (_m *Exporter) LastModifiedAt(_a0 feed.Feed, modifiedAfter time.Time, orgID string) (time.Time, error) {
+	ret := _m.Called(_a0, modifiedAfter, orgID)
 
 	if len(ret) == 0 {
 		panic("no return value specified for LastModifiedAt")
@@ -117,17 +117,17 @@ func (_m *Exporter) LastModifiedAt(_a0 feed.Feed, modifiedAfter time.Time, colum
 
 	var r0 time.Time
 	var r1 error
-	if rf, ok := ret.Get(0).(func(feed.Feed, time.Time, string, string) (time.Time, error)); ok {
-		return rf(_a0, modifiedAfter, columnName, orgID)
+	if rf, ok := ret.Get(0).(func(feed.Feed, time.Time, string) (time.Time, error)); ok {
+		return rf(_a0, modifiedAfter, orgID)
 	}
-	if rf, ok := ret.Get(0).(func(feed.Feed, time.Time, string, string) time.Time); ok {
-		r0 = rf(_a0, modifiedAfter, columnName, orgID)
+	if rf, ok := ret.Get(0).(func(feed.Feed, time.Time, string) time.Time); ok {
+		r0 = rf(_a0, modifiedAfter, orgID)
 	} else {
 		r0 = ret.Get(0).(time.Time)
 	}
 
-	if rf, ok := ret.Get(1).(func(feed.Feed, time.Time, string, string) error); ok {
-		r1 = rf(_a0, modifiedAfter, columnName, orgID)
+	if rf, ok := ret.Get(1).(func(feed.Feed, time.Time, string) error); ok {
+		r1 = rf(_a0, modifiedAfter, orgID)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -135,7 +135,7 @@ func (_m *Exporter) LastModifiedAt(_a0 feed.Feed, modifiedAfter time.Time, colum
 	return r0, r1
 }
 
-// LastRecord provides a mock function with given fields: _a0, modifiedAfter, orgID, sortColumn
+// LastRecord provides a mock function with given fields: _a0, fallbackTime, orgID, sortColumn
 func (_m *Exporter) LastRecord(_a0 feed.Feed, fallbackTime time.Time, orgID string, sortColumn string) time.Time {
 	ret := _m.Called(_a0, fallbackTime, orgID, sortColumn)
 

@@ -19,7 +19,6 @@ NOTE: these functions were migrated from various feed methods and adapted not to
 They are called directly by the CMD from export cmd.package
 */
 const maxConcurrentGoRoutines = 10
-const DefaultSortingColumn = "modified_at"
 
 // SafetyCultureFeedExporter defines the basic action in regard to the exporter
 type SafetyCultureFeedExporter interface {
@@ -332,7 +331,6 @@ func (e *ExporterFeedClient) getInspectionFeed() *InspectionFeed {
 		Incremental:   e.configuration.ExportIncremental,
 		Limit:         e.configuration.ExportInspectionLimit,
 		WebReportLink: e.configuration.ExportInspectionWebReportLink,
-		SortingColumn: DefaultSortingColumn,
 	}
 }
 

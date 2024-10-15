@@ -122,7 +122,7 @@ func (f *ActionFeed) Export(ctx context.Context, apiClient *httpapi.Client, expo
 	}
 
 	var err error
-	f.ModifiedAfter, err = exporter.LastModifiedAt(f, f.ModifiedAfter, DefaultSortingColumn, orgID)
+	f.ModifiedAfter, err = exporter.LastModifiedAt(f, f.ModifiedAfter, orgID)
 	if err != nil {
 		return events.NewEventErrorWithMessage(err, events.ErrorSeverityError, events.ErrorSubSystemDB, false, "unable to load modified after")
 	}

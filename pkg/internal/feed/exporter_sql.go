@@ -164,13 +164,13 @@ type modifiedAtRow struct {
 }
 
 // LastModifiedAt returns the latest stored modified at date for the feed
-func (e *SQLExporter) LastModifiedAt(feed Feed, modifiedAfter time.Time, columnName string, orgID string) (time.Time, error) {
+func (e *SQLExporter) LastModifiedAt(feed Feed, modifiedAfter time.Time, orgID string) (time.Time, error) {
 	latestRow := modifiedAtRow{}
 
 	var result *gorm.DB
 	result = e.DB.Table(feed.Name()).
 		Where("organisation_id = ?", orgID).
-		Order(fmt.Sprintf("%s DESC", columnName)).
+		Order("modified_at DESC").
 		Limit(1).
 		First(&latestRow)
 	if result.RowsAffected == 0 {
@@ -179,7 +179,7 @@ func (e *SQLExporter) LastModifiedAt(feed Feed, modifiedAfter time.Time, columnN
 		// where there is no org_id defined.
 		result = e.DB.Table(feed.Name()).
 			Where("organisation_id IS NULL OR organisation_id = ''").
-			Order(fmt.Sprintf("%s DESC", columnName)).
+			Order("modified_at DESC").
 			Limit(1).
 			First(&latestRow)
 	}
