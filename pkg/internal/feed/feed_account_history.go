@@ -13,11 +13,7 @@ import (
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/events"
 )
 
-//const feedPath = "/accounts/history/v2/feed/activity_log_events"
-
-//const feedPath = "/accounts/history/v1/feed/activity_log_events_v2"
-
-const feedPath = "/accounts/history/v1/feed/activity_log_events"
+const feedPath = "/accounts/history/v2/feed/activity_log_events"
 
 // AccountHistory represents a row from the account history feed
 type AccountHistory struct {
@@ -109,7 +105,6 @@ func (f *AccountHistoryFeed) Export(ctx context.Context, apiClient *httpapi.Clie
 	}
 
 	drainFn := func(resp *GetFeedResponse) error {
-		fmt.Printf(" > %s \n", resp.Metadata.NextPage)
 		var rows []*AccountHistory
 
 		if err := json.Unmarshal(resp.Data, &rows); err != nil {
