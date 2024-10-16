@@ -90,7 +90,7 @@ func (f *AccountHistoryFeed) Export(ctx context.Context, apiClient *httpapi.Clie
 	l := logger.GetLogger().With("feed", f.Name(), "org_id", orgID)
 	s12OrgID := util.ConvertS12ToUUID(orgID)
 	if s12OrgID.IsNil() {
-		return fmt.Errorf("cannot convert organisation ID to UUID")
+		return fmt.Errorf("cannot convert given %q organisation ID to UUID", orgID)
 	}
 
 	status := GetExporterStatus()

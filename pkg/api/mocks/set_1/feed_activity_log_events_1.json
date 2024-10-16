@@ -1,0 +1,128 @@
+{
+  "metadata": {
+    "next_page": null,
+    "next_page_token": null
+  },
+  "data": [
+    {
+      "id": "df502160-ff21-4314-becc-0d14583144ad",
+      "event_at": "2023-10-15T23:03:05.287Z",
+      "type": "auth.login",
+      "user_id": "4ef9fca4-beb3-46fb-a5d5-13e57fa89ef4",
+      "organisation_id": "a08b6ac0-8a05-11e2-9951-ddd1182f65d8",
+      "client_class": "web",
+      "agent": "",
+      "metadata": "{}",
+      "remote_ip": "2a06:98c0:3600::103",
+      "initiator": "INITIATOR_USER"
+    },
+    {
+      "id": "38f69f3a-69f6-4b24-8f68-1b12f3970e4a",
+      "event_at": "2023-10-15T23:18:50.651Z",
+      "type": "auth.login",
+      "user_id": "c30d8eb8-317f-43b4-bc87-b63e9a5f7311",
+      "organisation_id": "a08b6ac0-8a05-11e2-9951-ddd1182f65d8",
+      "client_class": "sc_service",
+      "agent": "Go-http-client/2.0",
+      "metadata": "{}",
+      "remote_ip": "",
+      "initiator": "INITIATOR_USER"
+    },
+    {
+      "id": "bb62b60f-2c42-4970-aa19-113f7ea256ff",
+      "event_at": "2023-10-15T23:18:51.681Z",
+      "type": "auth.login",
+      "user_id": "c30d8eb8-317f-43b4-bc87-b63e9a5f7311",
+      "organisation_id": "a08b6ac0-8a05-11e2-9951-ddd1182f65d8",
+      "client_class": "service",
+      "agent": "Go-http-client/2.0",
+      "metadata": "{}",
+      "remote_ip": "10.253.134.238",
+      "initiator": "INITIATOR_USER"
+    },
+    {
+      "id": "6d403b11-cb10-4d27-9bf7-1cfe72064383",
+      "event_at": "2023-10-15T23:18:56.124Z",
+      "type": "sensor.sensor_metadata_updated",
+      "user_id": "c30d8eb8-317f-43b4-bc87-b63e9a5f7311",
+      "organisation_id": "a08b6ac0-8a05-11e2-9951-ddd1182f65d8",
+      "client_class": "sc_service",
+      "agent": "grpc-go/1.58.2",
+      "metadata": "{\"source_id\":\"196451697411935\",\"source_name\":\"s12test\"}",
+      "remote_ip": "",
+      "initiator": "INITIATOR_USER"
+    },
+    {
+      "id": "31ae09dd-6e40-4684-b450-5db5ac83126c",
+      "event_at": "2023-10-15T23:19:52.181Z",
+      "type": "sensor.gateway_deprovisioned",
+      "user_id": "c30d8eb8-317f-43b4-bc87-b63e9a5f7311",
+      "organisation_id": "a08b6ac0-8a05-11e2-9951-ddd1182f65d8",
+      "client_class": "sc_service",
+      "agent": "grpc-go/1.58.0",
+      "metadata": "{\"source_id\":\"153591697411991\",\"source_name\":\"s12test\"}",
+      "remote_ip": "10.254.11.167",
+      "initiator": "INITIATOR_USER"
+    },
+    {
+      "id": "9f5238f7-ce83-416d-9e0f-fd529ea540a3",
+      "event_at": "2023-10-15T23:19:52.457Z",
+      "type": "sensor.sensor_metadata_updated",
+      "user_id": "c30d8eb8-317f-43b4-bc87-b63e9a5f7311",
+      "organisation_id": "a08b6ac0-8a05-11e2-9951-ddd1182f65d8",
+      "client_class": "sc_service",
+      "agent": "grpc-go/1.58.2",
+      "metadata": "{\"source_id\":\"148661697411992\",\"source_name\":\"s12test\"}",
+      "remote_ip": "",
+      "initiator": "INITIATOR_USER"
+    },
+    {
+      "id": "78a9df0e-711a-4ad4-9e9d-dcb85f8aa9c1",
+      "event_at": "2023-10-15T23:19:52.565Z",
+      "type": "sensor.sensor_metadata_updated",
+      "user_id": "c30d8eb8-317f-43b4-bc87-b63e9a5f7311",
+      "organisation_id": "a08b6ac0-8a05-11e2-9951-ddd1182f65d8",
+      "client_class": "sc_service",
+      "agent": "grpc-go/1.58.2",
+      "metadata": "{\"source_id\":\"102591697411992\",\"source_name\":\"s12test\"}",
+      "remote_ip": "",
+      "initiator": "INITIATOR_USER"
+    },
+    {
+      "id": "f9068f8f-a800-4882-98c4-ecedb87d6988",
+      "event_at": "2023-10-15T23:20:04.415Z",
+      "type": "auth.login",
+      "user_id": "148e564c-1f62-4445-b8b3-2aa57acd6e34",
+      "organisation_id": "a08b6ac0-8a05-11e2-9951-ddd1182f65d8",
+      "client_class": "sc_service",
+      "agent": "Go-http-client/2.0",
+      "metadata": "{}",
+      "remote_ip": "",
+      "initiator": "INITIATOR_USER"
+    },
+    {
+      "id": "efe70b32-3d5a-4021-a812-5c3e205ca3b2",
+      "event_at": "2023-10-15T23:20:05.452Z",
+      "type": "auth.login",
+      "user_id": "148e564c-1f62-4445-b8b3-2aa57acd6e34",
+      "organisation_id": "a08b6ac0-8a05-11e2-9951-ddd1182f65d8",
+      "client_class": "service",
+      "agent": "Go-http-client/2.0",
+      "metadata": "{}",
+      "remote_ip": "10.254.8.44",
+      "initiator": "INITIATOR_USER"
+    },
+    {
+      "id": "437ca49b-859a-410d-8e29-79344bcceb06",
+      "event_at": "2023-10-15T23:20:05.635Z",
+      "type": "sensor.sensor_metadata_updated",
+      "user_id": "148e564c-1f62-4445-b8b3-2aa57acd6e34",
+      "organisation_id": "a08b6ac0-8a05-11e2-9951-ddd1182f65d8",
+      "client_class": "sc_service",
+      "agent": "grpc-go/1.58.2",
+      "metadata": "{\"source_id\":\"154161697412005\",\"source_name\":\"s12test\"}",
+      "remote_ip": "",
+      "initiator": "INITIATOR_USER"
+    }
+  ]
+}
