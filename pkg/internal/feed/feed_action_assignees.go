@@ -30,6 +30,7 @@ type ActionAssignee struct {
 type ActionAssigneeFeed struct {
 	ModifiedAfter time.Time
 	Incremental   bool
+	Limit         int
 }
 
 // Name is the name of the feed
@@ -150,6 +151,7 @@ func (f *ActionAssigneeFeed) Export(ctx context.Context, apiClient *httpapi.Clie
 		InitialURL: "/feed/action_assignees",
 		Params: GetFeedParams{
 			ModifiedAfter: f.ModifiedAfter,
+			Limit:         f.Limit,
 		},
 	}
 
