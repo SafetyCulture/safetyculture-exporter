@@ -275,6 +275,7 @@ func (e *ExporterFeedClient) GetFeeds() []Feed {
 		&ActionAssigneeFeed{
 			ModifiedAfter: e.configuration.ExportModifiedAfterTime,
 			Incremental:   e.configuration.ExportIncremental,
+			Limit:         e.configuration.ExportActionLimit,
 		},
 		&ActionTimelineItemFeed{
 			ModifiedAfter: e.configuration.ExportModifiedAfterTime,
