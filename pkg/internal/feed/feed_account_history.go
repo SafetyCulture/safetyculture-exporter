@@ -105,6 +105,7 @@ func (f *AccountHistoryFeed) Export(ctx context.Context, apiClient *httpapi.Clie
 
 	if f.Incremental {
 		f.ExportedAt = exporter.LastRecord(f, f.ExportedAt, s12OrgID.String(), accountHistorySortingColumn)
+		l.Info("resuming account history feed from ", f.ExportedAt.String())
 	}
 
 	drainFn := func(resp *GetFeedResponse) error {
