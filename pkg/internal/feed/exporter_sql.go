@@ -191,21 +191,28 @@ func (e *SQLExporter) LastModifiedAt(feed Feed, modifiedAfter time.Time, orgID s
 }
 
 // LastRecord returns the latest stored record the feed
-func (e *SQLExporter) LastRecord(feed Feed, modifiedAfter time.Time, orgID string, sortColumn string) time.Time {
-	type Ts struct {
-		TimeValue time.Time
-	}
-	latestRow := Ts{}
+func (e *SQLExporter) LastRecord(feed Feed, fallbackTime time.Time, orgID string, sortColumn string) time.Time {
+	var latestRow = time.Time{}
 
-	result := e.DB.
-		Raw(fmt.Sprintf("SELECT %s as time_value FROM %s WHERE organisation_id = '%s' ORDER BY %s DESC LIMIT 1", sortColumn, feed.Name(), orgID, sortColumn)).
-		First(&latestRow)
+	result := e.DB.Table(feed.Name()).
+		Select(sortColumn).
+		Where("organisation_id = ?", orgID).
+		Order(clause.OrderByColumn{
+			Column: clause.Column{
+				Name: sortColumn,
+				Raw:  false,
+			},
+			Desc:    true,
+			Reorder: false,
+		}).
+		Limit(1).
+		Scan(&latestRow)
 
 	if result.RowsAffected != 0 {
-		return latestRow.TimeValue
+		return latestRow
 	}
 
-	return modifiedAfter
+	return fallbackTime
 }
 
 // FinaliseExport closes out an export

@@ -1,0 +1,11 @@
+event_id,event_at,type,user_id,organisation_id,client_class,agent,initiator,exported_at
+31ae09dd-6e40-4684-b450-5db5ac83126c,--date--,sensor.gateway_deprovisioned,c30d8eb8-317f-43b4-bc87-b63e9a5f7311,a08b6ac0-8a05-11e2-9951-ddd1182f65d8,sc_service,grpc-go/1.58.0,INITIATOR_USER,--date--
+38f69f3a-69f6-4b24-8f68-1b12f3970e4a,--date--,auth.login,c30d8eb8-317f-43b4-bc87-b63e9a5f7311,a08b6ac0-8a05-11e2-9951-ddd1182f65d8,sc_service,Go-http-client/2.0,INITIATOR_USER,--date--
+437ca49b-859a-410d-8e29-79344bcceb06,--date--,sensor.sensor_metadata_updated,148e564c-1f62-4445-b8b3-2aa57acd6e34,a08b6ac0-8a05-11e2-9951-ddd1182f65d8,sc_service,grpc-go/1.58.2,INITIATOR_USER,--date--
+6d403b11-cb10-4d27-9bf7-1cfe72064383,--date--,sensor.sensor_metadata_updated,c30d8eb8-317f-43b4-bc87-b63e9a5f7311,a08b6ac0-8a05-11e2-9951-ddd1182f65d8,sc_service,grpc-go/1.58.2,INITIATOR_USER,--date--
+78a9df0e-711a-4ad4-9e9d-dcb85f8aa9c1,--date--,sensor.sensor_metadata_updated,c30d8eb8-317f-43b4-bc87-b63e9a5f7311,a08b6ac0-8a05-11e2-9951-ddd1182f65d8,sc_service,grpc-go/1.58.2,INITIATOR_USER,--date--
+9f5238f7-ce83-416d-9e0f-fd529ea540a3,--date--,sensor.sensor_metadata_updated,c30d8eb8-317f-43b4-bc87-b63e9a5f7311,a08b6ac0-8a05-11e2-9951-ddd1182f65d8,sc_service,grpc-go/1.58.2,INITIATOR_USER,--date--
+bb62b60f-2c42-4970-aa19-113f7ea256ff,--date--,auth.login,c30d8eb8-317f-43b4-bc87-b63e9a5f7311,a08b6ac0-8a05-11e2-9951-ddd1182f65d8,service,Go-http-client/2.0,INITIATOR_USER,--date--
+df502160-ff21-4314-becc-0d14583144ad,--date--,auth.login,4ef9fca4-beb3-46fb-a5d5-13e57fa89ef4,a08b6ac0-8a05-11e2-9951-ddd1182f65d8,web,,INITIATOR_USER,--date--
+efe70b32-3d5a-4021-a812-5c3e205ca3b2,--date--,auth.login,148e564c-1f62-4445-b8b3-2aa57acd6e34,a08b6ac0-8a05-11e2-9951-ddd1182f65d8,service,Go-http-client/2.0,INITIATOR_USER,--date--
+f9068f8f-a800-4882-98c4-ecedb87d6988,--date--,auth.login,148e564c-1f62-4445-b8b3-2aa57acd6e34,a08b6ac0-8a05-11e2-9951-ddd1182f65d8,sc_service,Go-http-client/2.0,INITIATOR_USER,--date--

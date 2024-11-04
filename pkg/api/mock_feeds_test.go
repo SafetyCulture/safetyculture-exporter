@@ -164,6 +164,11 @@ func initMockFeedsSet1(httpClient *http.Client) {
 		Get("/feed/issue_assignees").
 		Reply(200).
 		File("mocks/set_1/feed_issue_assignees_1.json")
+
+	gock.New("http://localhost:9999").
+		Get("/accounts/history/v2/feed/activity_log_events").
+		Reply(200).
+		File("mocks/set_1/feed_activity_log_events_1.json")
 }
 
 func initMockFeedsSet2(httpClient *http.Client) {
@@ -279,6 +284,11 @@ func initMockFeedsSet2(httpClient *http.Client) {
 		Get("/feed/issue_assignees").
 		Reply(200).
 		File("mocks/set_1/feed_issue_assignees_1.json")
+
+	gock.New("http://localhost:9999").
+		Get("/accounts/history/v2/feed/activity_log_events").
+		Reply(200).
+		File("mocks/set_1/feed_activity_log_events_1.json")
 }
 
 func initMockFeedsSet3(httpClient *http.Client) {
@@ -388,6 +398,11 @@ func initMockFeedsSet3(httpClient *http.Client) {
 		Get("/feed/issue_assignees").
 		Reply(200).
 		File("mocks/set_1/feed_issue_assignees_1.json")
+
+	gock.New("http://localhost:9999").
+		Get("/accounts/history/v2/feed/activity_log_events").
+		Reply(200).
+		File("mocks/set_1/feed_activity_log_events_1.json")
 }
 
 func initMockIssuesFeed(httpClient *http.Client) {
