@@ -1,11 +1,10 @@
 module github.com/SafetyCulture/safetyculture-exporter
 
 go 1.22
-
-toolchain go1.22.3
+toolchain go1.23.2
 
 require (
-	github.com/MickStanciu/go-fn v1.4.2
+	github.com/MickStanciu/go-fn v1.5.0
 	github.com/dghubble/sling v1.4.2
 	github.com/gocarina/gocsv v0.0.0-20230616125104-99d496ca653d
 	github.com/gofrs/uuid v4.4.0+incompatible
@@ -19,7 +18,7 @@ require (
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.19.0
 	github.com/stretchr/testify v1.9.0
-	github.com/tidwall/gjson v1.17.3
+	github.com/tidwall/gjson v1.18.0
 	github.com/tidwall/sjson v1.2.5
 	go.uber.org/zap v1.27.0
 	gopkg.in/h2non/gock.v1 v1.1.2
