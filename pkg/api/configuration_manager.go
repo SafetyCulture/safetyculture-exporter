@@ -210,7 +210,7 @@ func (c *ConfigurationManager) ApplySafetyGuards() {
 		c.Configuration.Export.Inspection.SkipIds = defaultCfg.Export.Inspection.SkipIds
 	}
 
-	if c.Configuration.Report.Format == nil || len(c.Configuration.Report.Format) == 0 {
+	if len(c.Configuration.Report.Format) == 0 {
 		c.Configuration.Report.Format = defaultCfg.Report.Format
 	}
 

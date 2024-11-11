@@ -44,6 +44,9 @@ func TestExporterFeedClient_ExportFeeds_should_create_all_schemas_to_file(t *tes
 
 	filesEqualish(t, "mocks/set_1/schemas/training_course_progresses.csv", filepath.Join(exporter.ExportPath, "training_course_progresses.csv"))
 	filesEqualish(t, "mocks/set_1/schemas/issue_assignees.csv", filepath.Join(exporter.ExportPath, "issue_assignees.csv"))
+
+	filesEqualish(t, "mocks/set_1/schemas/issue_assignees.csv", filepath.Join(exporter.ExportPath, "issue_assignees.csv"))
+	filesEqualish(t, "mocks/set_1/schemas/account_histories.csv", filepath.Join(exporter.ExportPath, "account_histories.csv"))
 }
 
 func TestExporterFeedClient_ExportFeeds_should_export_all_feeds_to_file(t *testing.T) {
@@ -60,8 +63,8 @@ func TestExporterFeedClient_ExportFeeds_should_export_all_feeds_to_file(t *testi
 		Reply(200).
 		BodyString(`
 		{
-			"user_id": "user_123",
-			"organisation_id": "role_123",
+			"user_id": "user_bda3042f16a44249915ddc088adef92b",
+			"organisation_id": "role_ada3042f16a44249915ddc088adef92a",
 			"firstname": "Test",
 			"lastname": "Test"
 		  }
@@ -124,6 +127,7 @@ func TestExporterFeedClient_ExportFeeds_should_export_all_feeds_to_file(t *testi
 	filesEqualish(t, "mocks/set_1/outputs/sheqsy_departments.csv", filepath.Join(exporter.ExportPath, "sheqsy_departments.csv"))
 
 	filesEqualish(t, "mocks/set_1/outputs/training_course_progresses.csv", filepath.Join(exporter.ExportPath, "training_course_progresses.csv"))
+	filesEqualish(t, "mocks/set_1/outputs/account_histories.csv", filepath.Join(exporter.ExportPath, "account_histories.csv"))
 }
 
 func TestExporterFeedClient_ExportFeeds_should_err_when_not_auth(t *testing.T) {
@@ -165,8 +169,8 @@ func TestExporterFeedClient_ExportFeeds_should_err_when_InitFeed_errors(t *testi
 		Reply(200).
 		BodyString(`
 		{
-			"user_id": "user_123",
-			"organisation_id": "role_123",
+			"user_id": "user_bda3042f16a44249915ddc088adef92b",
+			"organisation_id": "role_ada3042f16a44249915ddc088adef92a",
 			"firstname": "Test",
 			"lastname": "Test"
 		  }
@@ -205,8 +209,8 @@ func TestExporterFeedClient_ExportFeeds_should_err_when_cannot_unmarshal(t *test
 		Reply(200).
 		BodyString(`
 		{
-			"user_id": "user_123",
-			"organisation_id": "role_123",
+			"user_id": "user_bda3042f16a44249915ddc088adef92b",
+			"organisation_id": "role_ada3042f16a44249915ddc088adef92a",
 			"firstname": "Test",
 			"lastname": "Test"
 		  }
@@ -253,8 +257,8 @@ func TestExporterFeedClient_ExportFeeds_should_err_when_cannot_write_rows(t *tes
 		Reply(200).
 		BodyString(`
 		{
-			"user_id": "user_123",
-			"organisation_id": "role_123",
+			"user_id": "user_bda3042f16a44249915ddc088adef92b",
+			"organisation_id": "role_ada3042f16a44249915ddc088adef92a",
 			"firstname": "Test",
 			"lastname": "Test"
 		  }
@@ -290,8 +294,8 @@ func TestExporterFeedClient_ExportFeeds_should_perform_incremental_update_on_sec
 		Reply(200).
 		BodyString(`
 		{
-			"user_id": "user_123",
-			"organisation_id": "role_123",
+			"user_id": "user_bda3042f16a44249915ddc088adef92b",
+			"organisation_id": "role_ada3042f16a44249915ddc088adef92a",
 			"firstname": "Test",
 			"lastname": "Test"
 		  }
@@ -338,6 +342,7 @@ func TestExporterFeedClient_ExportFeeds_should_perform_incremental_update_on_sec
 
 	filesEqualish(t, "mocks/set_2/outputs/users.csv", filepath.Join(exporter.ExportPath, "users.csv"))
 	filesEqualish(t, "mocks/set_2/outputs/groups.csv", filepath.Join(exporter.ExportPath, "groups.csv"))
+
 	filesEqualish(t, "mocks/set_2/outputs/group_users.csv", filepath.Join(exporter.ExportPath, "group_users.csv"))
 
 	filesEqualish(t, "mocks/set_2/outputs/schedules.csv", filepath.Join(exporter.ExportPath, "schedules.csv"))
@@ -368,8 +373,8 @@ func TestExporterFeedClient_ExportFeeds_should_handle_lots_of_rows_ok(t *testing
 		Reply(200).
 		BodyString(`
 		{
-			"user_id": "user_123",
-			"organisation_id": "role_123",
+			"user_id": "user_bda3042f16a44249915ddc088adef92b",
+			"organisation_id": "role_ada3042f16a44249915ddc088adef92a",
 			"firstname": "Test",
 			"lastname": "Test"
 		  }

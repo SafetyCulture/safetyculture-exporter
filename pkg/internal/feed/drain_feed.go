@@ -78,4 +78,7 @@ type GetFeedParams struct {
 	// Applicable only for course progress
 	Offset           int    `url:"offset,omitempty"`
 	CompletionStatus string `url:"completion_status,omitempty"`
+
+	// Applicable only for account history
+	CreatedAfter time.Time `url:"created_after,omitempty"`
 }

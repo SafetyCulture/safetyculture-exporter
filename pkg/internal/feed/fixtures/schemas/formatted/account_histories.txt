@@ -1,0 +1,13 @@
++-----------------+----------+-------------+
+|      NAME       |   TYPE   | PRIMARY KEY |
++-----------------+----------+-------------+
+| event_id        | TEXT     | true        |
+| event_at        | datetime |             |
+| type            | TEXT     |             |
+| user_id         | TEXT     |             |
+| organisation_id | TEXT     |             |
+| client_class    | TEXT     |             |
+| agent           | TEXT     |             |
+| initiator       | TEXT     |             |
+| exported_at     | datetime |             |
++-----------------+----------+-------------+

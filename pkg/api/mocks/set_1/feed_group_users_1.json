@@ -7,22 +7,22 @@
     {
       "user_id": "user_1",
       "group_id": "role_group1",
-      "organisation_id": "role_123"
+      "organisation_id": "role_ada3042f16a44249915ddc088adef92a"
     },
     {
       "user_id": "user_1",
       "group_id": "role_group2",
-      "organisation_id": "role_123"
+      "organisation_id": "role_ada3042f16a44249915ddc088adef92a"
     },
     {
       "user_id": "user_2",
       "group_id": "role_group1",
-      "organisation_id": "role_123"
+      "organisation_id": "role_ada3042f16a44249915ddc088adef92a"
     },
     {
       "user_id": "user_2",
       "group_id": "role_group2",
-      "organisation_id": "role_123"
+      "organisation_id": "role_ada3042f16a44249915ddc088adef92a"
     }
   ]
 }

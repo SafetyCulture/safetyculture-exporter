@@ -35,7 +35,7 @@ func TestIntegrationDbCreateSchema_should_create_all_schemas(t *testing.T) {
 		BodyString(`
 		{
 			"user_id": "user_123",
-			"organisation_id": "role_123",
+			"organisation_id": "role_ada3042f16a44249915ddc088adef92a",
 			"firstname": "Test",
 			"lastname": "Test"
 		  }
@@ -84,7 +84,7 @@ func TestIntegrationDbExportFeeds_should_export_all_feeds_to_file(t *testing.T) 
 		BodyString(`
 		{
 			"user_id": "user_123",
-			"organisation_id": "role_123",
+			"organisation_id": "role_ada3042f16a44249915ddc088adef92a",
 			"firstname": "Test",
 			"lastname": "Test"
 		  }
@@ -135,7 +135,7 @@ func TestIntegrationDbExportFeeds_should_perform_incremental_update_on_second_ru
 		BodyString(`
 		{
 			"user_id": "user_123",
-			"organisation_id": "role_123",
+			"organisation_id": "role_ada3042f16a44249915ddc088adef92a",
 			"firstname": "Test",
 			"lastname": "Test"
 		  }
@@ -202,7 +202,7 @@ func TestIntegrationDbExportFeeds_should_handle_lots_of_rows_ok(t *testing.T) {
 		BodyString(`
 		{
 			"user_id": "user_123",
-			"organisation_id": "role_123",
+			"organisation_id": "role_ada3042f16a44249915ddc088adef92a",
 			"firstname": "Test",
 			"lastname": "Test"
 		  }
@@ -239,7 +239,7 @@ func TestIntegrationDbExportFeeds_should_update_action_assignees_on_second_run(t
 		BodyString(`
 		{
 			"user_id": "user_123",
-			"organisation_id": "role_123",
+			"organisation_id": "role_ada3042f16a44249915ddc088adef92a",
 			"firstname": "Test",
 			"lastname": "Test"
 		  }
@@ -295,7 +295,7 @@ func TestGroupUserFeed_Export_should_filter_duplicates(t *testing.T) {
 		BodyString(`
 		{
 			"user_id": "user_123",
-			"organisation_id": "role_123",
+			"organisation_id": "role_ada3042f16a44249915ddc088adef92a",
 			"firstname": "Test",
 			"lastname": "Test"
 		  }
