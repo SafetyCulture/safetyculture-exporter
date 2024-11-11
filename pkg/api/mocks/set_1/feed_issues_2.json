@@ -23,7 +23,8 @@
       "category_id": "52a419e3-5142-4fb3-a26c-31114dc80682",
       "category_label": "Hazard 2",
       "modified_at": "2020-04-21T02:36:53.304Z",
-      "unique_id": "ID_21"
+      "unique_id": "ID_21",
+      "occurred_at": "2020-04-20T04:54:54.018Z"
     },
     {
       "id": "5148a8a3-9ac8-4075-b329-871db7be01f2",
@@ -44,7 +45,8 @@
       "category_id": "5047bf61-178d-4413-bb5c-0ae3e2dd2b8e",
       "category_label": "Near Miss",
       "modified_at": "2020-04-21T02:36:53.304Z",
-      "unique_id": "ID_22"
+      "unique_id": "ID_22",
+      "occurred_at": "2020-04-20T06:28:35.733Z"
     },
     {
       "id": "5324b868-de44-46da-b39c-87ae091dd7a9",
@@ -65,7 +67,8 @@
       "category_id": "52a419e3-5142-4fb3-a26c-31114dc80682",
       "category_label": "Hazard 2",
       "modified_at": "2020-04-22T02:36:53.304Z",
-      "unique_id": "ID_23"
+      "unique_id": "ID_23",
+      "occurred_at": "2020-04-21T06:43:05.123Z"
     },
     {
       "id": "500c4ffe-b247-41bb-ad51-d8d5f0168a26",
@@ -86,7 +89,8 @@
       "category_id": "52a419e3-5142-4fb3-a26c-31114dc80682",
       "category_label": "Hazard 2",
       "modified_at": "2020-04-22T02:36:53.304Z",
-      "unique_id": "ID_24"
+      "unique_id": "ID_24",
+      "occurred_at": "2020-04-21T06:50:06.957Z"
     },
     {
       "id": "532ded7c-8e79-49d9-88ae-d46c0b27835b",
@@ -107,7 +111,8 @@
       "category_id": "592ec130-90e0-4c0e-a1c0-1f37f12f5fbb",
       "category_label": "Tow Trucks",
       "modified_at": "2020-04-23T02:36:53.304Z",
-      "unique_id": "ID_25"
+      "unique_id": "ID_25",
+      "occurred_at": "2020-04-22T04:24:10.952Z"
     },
     {
       "id": "53934aae-e0e9-4c97-8b2d-df7e919c2c1a",
@@ -128,7 +133,8 @@
       "category_id": "592ec130-90e0-4c0e-a1c0-1f37f12f5fbb",
       "category_label": "Tow Trucks",
       "modified_at": "2020-04-23T02:36:53.304Z",
-      "unique_id": "ID_26"
+      "unique_id": "ID_26",
+      "occurred_at": "2020-04-22T04:24:54.380Z"
     },
     {
       "id": "581bbd4e-54de-49d2-8f28-6d008fece7a9",
@@ -149,7 +155,8 @@
       "category_id": "53894e05-108a-485b-a003-985beb8d9af5",
       "category_label": "Property Damage",
       "modified_at": "2020-04-22T02:36:53.304Z",
-      "unique_id": "ID_27"
+      "unique_id": "ID_27",
+      "occurred_at": "2020-04-20T08:30:37.313Z"
     },
     {
       "id": "5c687fe6-d788-4004-839c-765fd9dec628",
@@ -170,7 +177,8 @@
       "category_id": "5233f246-75d7-411d-85a9-ef80b83c041f",
       "category_label": "Incident",
       "modified_at": "2020-04-23T02:36:53.304Z",
-      "unique_id": "ID_28"
+      "unique_id": "ID_28",
+      "occurred_at": "2020-04-22T04:47:05.743Z"
     },
     {
       "id": "5774d130-f5ec-445a-bd43-836b3d5ff393",
@@ -191,7 +199,8 @@
       "category_id": "5233f246-75d7-411d-85a9-ef80b83c041f",
       "category_label": "Incident",
       "modified_at": "2020-04-23T02:36:53.304Z",
-      "unique_id": "ID_29"
+      "unique_id": "ID_29",
+      "occurred_at": "2020-04-22T04:50:00.780Z"
     },
     {
       "id": "58906f20-e7af-4d6d-93c9-ab037cd78fca",
@@ -212,7 +221,8 @@
       "category_id": "5047bf61-178d-4413-bb5c-0ae3e2dd2b8e",
       "category_label": "Near Miss",
       "modified_at": "2020-04-23T02:36:53.304Z",
-      "unique_id": "ID_30"
+      "unique_id": "ID_30",
+      "occurred_at": "2020-04-22T04:25:02.077Z"
     },
     {
       "id": "5c36e8de-2945-4098-add9-872448a91586",
@@ -233,7 +243,8 @@
       "category_id": "5233f246-75d7-411d-85a9-ef80b83c041f",
       "category_label": "Incident",
       "modified_at": "2020-04-23T02:36:53.304Z",
-      "unique_id": "ID_31"
+      "unique_id": "ID_31",
+      "occurred_at": "2020-04-22T05:09:01.543Z"
     },
     {
       "id": "5f3f37ef-d374-4e8a-905f-a23a165a7f89",
@@ -254,7 +265,8 @@
       "category_id": "52a419e3-5142-4fb3-a26c-31114dc80682",
       "category_label": "Hazard 2",
       "modified_at": "2020-04-23T02:36:53.304Z",
-      "unique_id": "ID_32"
+      "unique_id": "ID_32",
+      "occurred_at": "2020-04-22T06:27:57.370Z"
     },
     {
       "id": "5752bb28-3ff8-4e18-9cb1-b9068bb4d4e4",
@@ -275,7 +287,8 @@
       "category_id": "5047bf61-178d-4413-bb5c-0ae3e2dd2b8e",
       "category_label": "Near Miss",
       "modified_at": "2020-04-23T02:36:53.304Z",
-      "unique_id": "ID_33"
+      "unique_id": "ID_33",
+      "occurred_at": "2020-04-22T06:37:40.502Z"
     },
     {
       "id": "5493ada7-801b-457b-97de-0029a144b9e0",
@@ -296,7 +309,8 @@
       "category_id": "52a419e3-5142-4fb3-a26c-31114dc80682",
       "category_label": "Hazard 2",
       "modified_at": "2020-04-23T02:36:53.304Z",
-      "unique_id": "ID_34"
+      "unique_id": "ID_34",
+      "occurred_at": "2020-04-22T23:55:04.372Z"
     },
     {
       "id": "5449f69f-e5be-4d03-82bb-0feae5c207a2",
@@ -317,7 +331,8 @@
       "category_id": "5a273d68-1b70-4bd4-8cf3-ee22fd75ab95",
       "category_label": "Commissions Priority",
       "modified_at": "2020-04-24T02:36:53.304Z",
-      "unique_id": "ID_35"
+      "unique_id": "ID_35",
+      "occurred_at": "2020-04-23T05:14:44.564Z"
     },
     {
       "id": "50c0d7dd-6f27-4da5-8f8e-b71b7dbc6fe6",
@@ -338,7 +353,8 @@
       "category_id": "592ec130-90e0-4c0e-a1c0-1f37f12f5fbb",
       "category_label": "Tow Trucks",
       "modified_at": "2020-04-24T02:36:53.304Z",
-      "unique_id": "ID_36"
+      "unique_id": "ID_36",
+      "occurred_at": "2020-04-23T05:38:49.290Z"
     },
     {
       "id": "5f383f02-fcca-4634-b858-d924071423e2",
@@ -359,7 +375,8 @@
       "category_id": "53894e05-108a-485b-a003-985beb8d9af5",
       "category_label": "Property Damage",
       "modified_at": "2020-04-14T02:36:53.304Z",
-      "unique_id": "ID_37"
+      "unique_id": "ID_37",
+      "occurred_at": "2020-04-23T05:39:33.349Z"
     },
     {
       "id": "50a4464c-410b-4e08-9dca-5d9ca140bd37",
@@ -380,7 +397,8 @@
       "category_id": "52a419e3-5142-4fb3-a26c-31114dc80682",
       "category_label": "Hazard 2",
       "modified_at": "2020-04-24T02:36:53.304Z",
-      "unique_id": "ID_38"
+      "unique_id": "ID_38",
+      "occurred_at": "2020-04-23T05:44:49.979Z"
     },
     {
       "id": "57688da9-9519-4737-9d50-b5b7aa7c26a4",
@@ -400,7 +418,8 @@
       "location_name": null,
       "category_id": "5a273d68-1b70-4bd4-8cf3-ee22fd75ab95",
       "category_label": "Commissions Priority",
-      "modified_at": "2020-04-24T02:36:53.304Z"
+      "modified_at": "2020-04-24T02:36:53.304Z",
+      "occurred_at": "2020-04-23T05:51:45.130Z"
     }
   ]
 }
