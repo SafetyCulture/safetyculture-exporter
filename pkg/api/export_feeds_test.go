@@ -47,6 +47,7 @@ func TestExporterFeedClient_ExportFeeds_should_create_all_schemas_to_file(t *tes
 
 	filesEqualish(t, "mocks/set_1/schemas/issue_assignees.csv", filepath.Join(exporter.ExportPath, "issue_assignees.csv"))
 	filesEqualish(t, "mocks/set_1/schemas/account_histories.csv", filepath.Join(exporter.ExportPath, "account_histories.csv"))
+	filesEqualish(t, "mocks/set_1/schemas/issue_relationships.csv", filepath.Join(exporter.ExportPath, "issue_relationships.csv"))
 }
 
 func TestExporterFeedClient_ExportFeeds_should_export_all_feeds_to_file(t *testing.T) {
@@ -128,6 +129,7 @@ func TestExporterFeedClient_ExportFeeds_should_export_all_feeds_to_file(t *testi
 
 	filesEqualish(t, "mocks/set_1/outputs/training_course_progresses.csv", filepath.Join(exporter.ExportPath, "training_course_progresses.csv"))
 	filesEqualish(t, "mocks/set_1/outputs/account_histories.csv", filepath.Join(exporter.ExportPath, "account_histories.csv"))
+	filesEqualish(t, "mocks/set_1/outputs/issue_relationships.csv", filepath.Join(exporter.ExportPath, "issue_relationships.csv"))
 }
 
 func TestExporterFeedClient_ExportFeeds_should_err_when_not_auth(t *testing.T) {
