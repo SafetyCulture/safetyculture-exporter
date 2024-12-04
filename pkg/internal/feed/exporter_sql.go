@@ -193,36 +193,20 @@ func (e *SQLExporter) LastModifiedAt(feed Feed, modifiedAfter time.Time, orgID s
 // LastRecord returns the latest stored record the feed
 func (e *SQLExporter) LastRecord(feed Feed, fallbackTime time.Time, orgID string, sortColumn string) time.Time {
 	var latestRow = time.Time{}
-	var result *gorm.DB
 
-	if orgID == "" {
-		result = e.DB.Table(feed.Name()).
-			Select(sortColumn).
-			Order(clause.OrderByColumn{
-				Column: clause.Column{
-					Name: sortColumn,
-					Raw:  false,
-				},
-				Desc:    true,
-				Reorder: false,
-			}).
-			Limit(1).
-			Scan(&latestRow)
-	} else {
-		result = e.DB.Table(feed.Name()).
-			Select(sortColumn).
-			Where("organisation_id = ?", orgID).
-			Order(clause.OrderByColumn{
-				Column: clause.Column{
-					Name: sortColumn,
-					Raw:  false,
-				},
-				Desc:    true,
-				Reorder: false,
-			}).
-			Limit(1).
-			Scan(&latestRow)
-	}
+	result := e.DB.Table(feed.Name()).
+		Select(sortColumn).
+		Where("organisation_id = ?", orgID).
+		Order(clause.OrderByColumn{
+			Column: clause.Column{
+				Name: sortColumn,
+				Raw:  false,
+			},
+			Desc:    true,
+			Reorder: false,
+		}).
+		Limit(1).
+		Scan(&latestRow)
 
 	if result.RowsAffected != 0 {
 		return latestRow
