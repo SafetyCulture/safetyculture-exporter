@@ -22,4 +22,5 @@
 | completed_at      | datetime |             |
 | asset_id          | TEXT     |             |
 | unique_id         | TEXT     |             |
+| occurred_at       | datetime |             |
 +-------------------+----------+-------------+
