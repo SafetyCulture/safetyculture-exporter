@@ -12,7 +12,7 @@ jobs:
   package:
     strategy:
       matrix:
-        build-os: [ubuntu-latest, macOS-latest]
+        build-os: [ubuntu-22.04, macOS-latest]
         platform: [linux-amd64, windows-amd64, darwin-amd64, darwin-arm64]
     runs-on: ${{ matrix.build-os }}
     steps:
@@ -25,11 +25,11 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Install linux dependencies
-        if: ${{ matrix.build-os == 'ubuntu-latest' }}
+        if: ${{ matrix.build-os == 'ubuntu-22.04' }}
         run: sudo apt-get update -y && sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.0-dev build-essential pkg-config gcc-mingw-w64 zip
 
       - name: Build packages windows-amd64
-        if: ${{ matrix.platform == 'windows-amd64' && matrix.build-os == 'ubuntu-latest' }}
+        if: ${{ matrix.platform == 'windows-amd64' && matrix.build-os == 'ubuntu-22.04' }}
         run: |
           export PATH=$PATH:$(go env GOPATH)/bin
           echo "building for ${{ matrix.platform }}"
@@ -40,14 +40,14 @@ jobs:
           rm -rf safetyculture-exporter-cli
 
       - name: Upload artifacts windows-amd64
-        if: ${{ matrix.platform == 'windows-amd64' && matrix.build-os == 'ubuntu-latest' }}
+        if: ${{ matrix.platform == 'windows-amd64' && matrix.build-os == 'ubuntu-22.04' }}
         uses: actions/upload-artifact@v4
         with:
           name: exporter-windows-amd64
           path: safetyculture-exporter-windows-x86_64.zip
 
       - name: Build package linux-amd64
-        if: ${{ matrix.platform == 'linux-amd64' && matrix.build-os == 'ubuntu-latest' }}
+        if: ${{ matrix.platform == 'linux-amd64' && matrix.build-os == 'ubuntu-22.04' }}
         run: |
           export PATH=$PATH:$(go env GOPATH)/bin
           echo "building for ${{ matrix.platform }}"
@@ -59,7 +59,7 @@ jobs:
           rm -rf safetyculture-exporter-cli
 
       - name: Upload artifacts linux-amd64
-        if: ${{ matrix.platform == 'linux-amd64' && matrix.build-os == 'ubuntu-latest' }}
+        if: ${{ matrix.platform == 'linux-amd64' && matrix.build-os == 'ubuntu-22.04' }}
         uses: actions/upload-artifact@v4
         with:
           name: exporter-linux-amd64
@@ -130,7 +130,7 @@ jobs:
           path: safetyculture-exporter-darwin-arm64.zip
 
   release:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: package
     steps:
       - name: Download package windows amd64
