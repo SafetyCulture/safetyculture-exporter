@@ -95,6 +95,11 @@ func (f *ActionTimelineItemFeed) Export(ctx context.Context, apiClient *httpapi.
 		return fmt.Errorf("init feed: %w", err)
 	}
 
+	if f.Incremental {
+		f.ModifiedAfter = exporter.LastRecord(f, f.ModifiedAfter, orgID, "timestamp")
+		l.Info("resuming feed action timeline items from ", f.ModifiedAfter.String())
+	}
+
 	drainFn := func(resp *GetFeedResponse) error {
 		var rows []*ActionTimelineItem
 
