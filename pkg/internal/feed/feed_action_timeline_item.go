@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/MickStanciu/go-fn/fn"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/httpapi"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/events"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/util"
@@ -95,6 +96,11 @@ func (f *ActionTimelineItemFeed) Export(ctx context.Context, apiClient *httpapi.
 		return fmt.Errorf("init feed: %w", err)
 	}
 
+	if f.Incremental {
+		f.ModifiedAfter = exporter.LastRecord(f, f.ModifiedAfter, orgID, "timestamp")
+		l.Info("resuming feed action timeline items from ", f.ModifiedAfter.String())
+	}
+
 	drainFn := func(resp *GetFeedResponse) error {
 		var rows []*ActionTimelineItem
 
@@ -102,7 +108,12 @@ func (f *ActionTimelineItemFeed) Export(ctx context.Context, apiClient *httpapi.
 			return fmt.Errorf("map data: %w", err)
 		}
 
-		if len(rows) != 0 {
+		// deduplicate rows (hotfix) because the feed returns duplicates and this creates PK violations issues
+		deDupedRows := fn.DeduplicateList(rows, func(row *ActionTimelineItem) string {
+			return fmt.Sprintf("pk__%s", row.ID)
+		})
+
+		if len(deDupedRows) != 0 {
 			// Calculate the size of the batch we can insert into the DB at once.
 			// Column count + buffer to account for primary keys
 			batchSize := exporter.ParameterLimit() / (len(f.Columns()) + 4)
