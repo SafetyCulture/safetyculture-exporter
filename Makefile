@@ -25,4 +25,3 @@ start-local-mssql:
 .PHONY: start-local-postgres
 start-local-postgres:
 	 docker-compose -f docker-compose-local-volume.yml up postgres
-
