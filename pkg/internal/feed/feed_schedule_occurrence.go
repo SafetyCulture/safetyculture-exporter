@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/MickStanciu/go-fn/fn"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/util"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/logger"
 
@@ -118,7 +117,7 @@ func (f *ScheduleOccurrenceFeed) Export(ctx context.Context, apiClient *httpapi.
 		}
 
 		// deduplicate rows (hotfix) because the feed might return duplicates in the same page and this creates PK violations issues
-		deDupedRows := fn.DeduplicateList(rows, func(row *ScheduleOccurrence) string {
+		deDupedRows := util.DeduplicateList(rows, func(row *ScheduleOccurrence) string {
 			return fmt.Sprintf("pk__%s", row.ID)
 		})
 
