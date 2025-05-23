@@ -109,7 +109,7 @@ func (f *ActionTimelineItemFeed) Export(ctx context.Context, apiClient *httpapi.
 		}
 
 		// deduplicate rows (hotfix) because the feed returns duplicates and this creates PK violations issues
-		deDupedRows := fn.DeduplicateList(rows, func(row *ActionTimelineItem) string {
+		deDupedRows := fn.DeduplicateOrderedList(rows, func(row *ActionTimelineItem) string {
 			return fmt.Sprintf("pk__%s", row.ID)
 		})
 

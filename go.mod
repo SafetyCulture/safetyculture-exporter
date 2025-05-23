@@ -5,7 +5,7 @@ go 1.23
 toolchain go1.24.1
 
 require (
-	github.com/MickStanciu/go-fn v1.6.0
+	github.com/MickStanciu/go-fn v1.8.1
 	github.com/dghubble/sling v1.4.2
 	github.com/gocarina/gocsv v0.0.0-20230616125104-99d496ca653d
 	github.com/gofrs/uuid v4.4.0+incompatible

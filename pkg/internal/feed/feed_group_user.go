@@ -96,7 +96,7 @@ func (f *GroupUserFeed) Export(ctx context.Context, apiClient *httpapi.Client, e
 		}
 
 		// deduplicate rows (hotfix) because the feed Api GetUserGroups returns duplicates and this creates PK violations issues
-		deDupedRows := fn.DeduplicateList(rows, func(row *GroupUser) string {
+		deDupedRows := fn.DeduplicateOrderedList(rows, func(row *GroupUser) string {
 			return fmt.Sprintf("pk__%s_%s", row.UserID, row.GroupID)
 		})
 
