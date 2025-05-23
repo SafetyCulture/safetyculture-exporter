@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/MickStanciu/go-fn/fn"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/util"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/logger"
 
@@ -116,10 +117,15 @@ func (f *ScheduleOccurrenceFeed) Export(ctx context.Context, apiClient *httpapi.
 			return events.NewEventErrorWithMessage(err, events.ErrorSeverityError, events.ErrorSubSystemDataIntegrity, false, "map data")
 		}
 
-		if len(rows) != 0 {
+		// deduplicate rows (hotfix) because the feed might return duplicates in the same page and this creates PK violations issues
+		deDupedRows := fn.DeduplicateOrderedList(rows, func(row *ScheduleOccurrence) string {
+			return fmt.Sprintf("pk__%s", row.ID)
+		})
+
+		if len(deDupedRows) != 0 {
 			// Calculate the size of the batch we can insert into the DB at once. Column count + buffer to account for primary keys
 			batchSize := exporter.ParameterLimit() / (len(f.Columns()) + 4)
-			err := util.SplitSliceInBatch(batchSize, rows, func(batch []*ScheduleOccurrence) error {
+			err := util.SplitSliceInBatch(batchSize, deDupedRows, func(batch []*ScheduleOccurrence) error {
 				if err := exporter.WriteRows(f, batch); err != nil {
 					return events.WrapEventError(err, "write rows")
 				}

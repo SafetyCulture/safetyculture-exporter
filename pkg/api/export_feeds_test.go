@@ -283,7 +283,7 @@ func TestExporterFeedClient_ExportFeeds_should_err_when_cannot_write_rows(t *tes
 	assert.EqualError(t, err, `feed "users": write rows: cannot write rows`)
 }
 
-// Expectation of this test is that group_users and schedule_assignees are truncated and refreshed
+// The expectation of this test is that group_users and schedule_assignees are truncated and refreshed
 // and that other tables are incrementally updated
 func TestExporterFeedClient_ExportFeeds_should_perform_incremental_update_on_second_run(t *testing.T) {
 	defer gock.Off()

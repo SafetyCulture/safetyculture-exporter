@@ -21,3 +21,7 @@ soak-tests:
 .PHONY: start-local-mssql
 start-local-mssql:
 	 docker-compose -f docker-compose-local-volume.yml up sqlserver
+
+.PHONY: start-local-postgres
+start-local-postgres:
+	 docker-compose -f docker-compose-local-volume.yml up postgres

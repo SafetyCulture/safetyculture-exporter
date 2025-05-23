@@ -109,7 +109,7 @@ func (f *ActionTimelineItemFeed) Export(ctx context.Context, apiClient *httpapi.
 		}
 
 		// deduplicate rows (hotfix) because the feed returns duplicates and this creates PK violations issues
-		deDupedRows := fn.DeduplicateList(rows, func(row *ActionTimelineItem) string {
+		deDupedRows := fn.DeduplicateOrderedList(rows, func(row *ActionTimelineItem) string {
 			return fmt.Sprintf("pk__%s", row.ID)
 		})
 
@@ -117,7 +117,7 @@ func (f *ActionTimelineItemFeed) Export(ctx context.Context, apiClient *httpapi.
 			// Calculate the size of the batch we can insert into the DB at once.
 			// Column count + buffer to account for primary keys
 			batchSize := exporter.ParameterLimit() / (len(f.Columns()) + 4)
-			err := util.SplitSliceInBatch(batchSize, rows, func(batch []*ActionTimelineItem) error {
+			err := util.SplitSliceInBatch(batchSize, deDupedRows, func(batch []*ActionTimelineItem) error {
 				if err := exporter.WriteRows(f, batch); err != nil {
 					return events.WrapEventError(err, "write rows")
 				}
