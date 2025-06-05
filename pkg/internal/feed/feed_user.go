@@ -24,6 +24,7 @@ type User struct {
 	LastSeenAt     *time.Time `json:"last_seen_at" csv:"last_seen_at"`
 	ExportedAt     time.Time  `json:"exported_at" csv:"exported_at" gorm:"autoUpdateTime"`
 	SeatType       string     `json:"seat_type" csv:"seat_type" gorm:"seat_type"`
+	CreatedAt      *time.Time `json:"created_at" csv:"created_at" gorm:"autoCreateTime"`
 }
 
 // UserFeed is a representation of the users feed
@@ -64,6 +65,8 @@ func (f *UserFeed) Columns() []string {
 		"active",
 		"last_seen_at",
 		"exported_at",
+		"seat_type",
+		"created_at",
 	}
 }
 

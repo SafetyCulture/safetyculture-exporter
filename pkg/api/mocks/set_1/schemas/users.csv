@@ -1,1 +1,1 @@
-user_id,organisation_id,email,firstname,lastname,active,last_seen_at,exported_at,seat_type
+user_id,organisation_id,email,firstname,lastname,active,last_seen_at,exported_at,seat_type,created_at
