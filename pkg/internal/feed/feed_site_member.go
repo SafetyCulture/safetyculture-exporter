@@ -15,12 +15,14 @@ import (
 
 // SiteMember represents a row from the site members feed
 type SiteMember struct {
-	SiteID     string    `json:"site_id" csv:"site_id" gorm:"primarykey;column:site_id;size:41"`
-	MemberID   string    `json:"member_id" csv:"member_id" gorm:"primarykey;column:member_id;size:37"`
-	ExportedAt time.Time `json:"exported_at" csv:"exported_at" gorm:"autoUpdateTime"`
+	SiteID         string    `json:"site_id" csv:"site_id" gorm:"primarykey;column:site_id;size:41"`
+	MemberID       string    `json:"member_id" csv:"member_id" gorm:"primarykey;column:member_id;size:37"`
+	ExportedAt     time.Time `json:"exported_at" csv:"exported_at" gorm:"autoUpdateTime"`
+	ModifiedAt     time.Time `json:"modified_at" csv:"modified_at"`
+	OrganisationID string    `json:"organisation_id" csv:"organisation_id"`
 }
 
-// SiteMemberFeed is a representation of the sites feed
+// SiteMemberFeed is a representation of the site-members feed
 type SiteMemberFeed struct {
 }
 
