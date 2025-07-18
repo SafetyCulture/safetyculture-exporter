@@ -21,22 +21,9 @@ jobs:
       - name: Check out code into the Go module directory
         uses: actions/checkout@v2
 
-      - name: Test & Coverage
-        env:
-          CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
+      - name: Test
         run: |
-          curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
-          chmod +x ./cc-test-reporter
-          ./cc-test-reporter before-build
-          go test -coverprofile c.out -coverpkg ./... ./...
-          ./cc-test-reporter format-coverage -o codeclimate.json --prefix $(go list -m)
-
-      - name: Upload Coverage Result Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: codeclimate-unit
-          path: codeclimate.json
-          retention-days: 1
+          go test ./...
 
       - uses: actions/setup-python@v2
       - name: Run pre commit linting
@@ -68,24 +55,12 @@ jobs:
       - name: Check out code into the Go module directory
         uses: actions/checkout@v2
 
-      - name: Test & Coverage
+      - name: Test
         env:
-          CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
           TEST_DB_DIALECT: postgres
           TEST_DB_CONN_STRING: "postgresql://safetyculture_exporter:safetyculture_exporter@localhost:5432/safetyculture_exporter_db"
         run: |
-          curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
-          chmod +x ./cc-test-reporter
-          ./cc-test-reporter before-build
-          go test -coverprofile c.out -coverpkg ./... ./... -tags=sql
-          ./cc-test-reporter format-coverage -o codeclimate.json --prefix $(go list -m)
-
-      - name: Upload Coverage Result Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: codeclimate-intg-postgres
-          path: codeclimate.json
-          retention-days: 1
+          go test ./... -tags=sql
 
   MySQL-8-Integration-Tests:
     runs-on: ubuntu-latest
@@ -114,25 +89,12 @@ jobs:
       - name: Check out code into the Go module directory
         uses: actions/checkout@v2
 
-      - name: Test & Coverage
+      - name: Test
         env:
-          CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
           TEST_DB_DIALECT: mysql
           TEST_DB_CONN_STRING: "root:safetyculture_exporter@tcp(localhost:3306)/safetyculture_exporter_db?charset=utf8mb4&parseTime=True&loc=Local"
         run: |
-          curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
-          chmod +x ./cc-test-reporter
-          ./cc-test-reporter before-build
-          go test -coverprofile c.out -coverpkg ./... ./... -tags=sql
-          ./cc-test-reporter format-coverage -o codeclimate.json --prefix $(go list -m)
-
-      - name: Upload Coverage Result Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: codeclimate-mysql-8
-          path: codeclimate.json
-          retention-days: 1
-
+          go test ./... -tags=sql
 
   SQL-Server-Integration-Tests:
     runs-on: ubuntu-latest
@@ -161,39 +123,7 @@ jobs:
 
       - name: Test & Coverage
         env:
-          CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
           TEST_DB_DIALECT: sqlserver
           TEST_DB_CONN_STRING: "sqlserver://sa:SafetyCultureExporter12345@localhost:1433?database=master"
         run: |
-          curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
-          chmod +x ./cc-test-reporter
-          ./cc-test-reporter before-build
-          go test -coverprofile c.out -coverpkg ./... ./... -tags=sql
-          ./cc-test-reporter format-coverage -o codeclimate.json --prefix $(go list -m)
-
-      - name: Upload Coverage Result Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: codeclimate-intg-sql-server
-          path: codeclimate.json
-          retention-days: 1
-
-  Upload-Coverage:
-    runs-on: ubuntu-latest
-    needs:
-      - Unit-Tests
-      - PostgreSQL-Integration-Tests
-      - MySQL-8-Integration-Tests
-      - SQL-Server-Integration-Tests
-    steps:
-      - name: Download all coverage results
-        uses: actions/download-artifact@v4
-
-      - name: Upload Coverage to Code Climate
-        env:
-          CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
-        run: |
-          curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
-          chmod +x ./cc-test-reporter
-          ./cc-test-reporter sum-coverage */codeclimate.json -p 4 -o codeclimate.total.json
-          ./cc-test-reporter upload-coverage -i codeclimate.total.json
+          go test ./... -tags=sql
