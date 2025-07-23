@@ -79,6 +79,6 @@ type GetFeedParams struct {
 	Offset           int    `url:"offset,omitempty"`
 	CompletionStatus string `url:"completion_status,omitempty"`
 
-	// Applicable only for account history
+	// Applicable only for account history, issue relationship
 	CreatedAfter time.Time `url:"created_after,omitempty"`
 }

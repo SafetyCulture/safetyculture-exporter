@@ -1,0 +1,12 @@
++-----------------+----------+-------------+
+|      NAME       |   TYPE   | PRIMARY KEY |
++-----------------+----------+-------------+
+| id              | TEXT     | true        |
+| from_id         | TEXT     |             |
+| from_label      | TEXT     |             |
+| rel_type        | TEXT     |             |
+| rel_created_at  | datetime |             |
+| to_id           | TEXT     |             |
+| to_label        | TEXT     |             |
+| organisation_id | TEXT     |             |
++-----------------+----------+-------------+
