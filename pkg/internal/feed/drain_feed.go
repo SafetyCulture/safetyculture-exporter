@@ -62,6 +62,7 @@ type PageFeedMetadata struct {
 // GetFeedParams is a list of all parameters we can set when fetching a feed
 type GetFeedParams struct {
 	ModifiedAfter   time.Time `url:"modified_after,omitempty"`
+	ModifiedBefore  time.Time `url:"modified_before,omitempty"`
 	TemplateIDs     []string  `url:"template,omitempty"`
 	Archived        string    `url:"archived,omitempty"`
 	Completed       string    `url:"completed,omitempty"`

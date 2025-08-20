@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/MickStanciu/go-fn/fn"
+
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/util"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/logger"
 
@@ -54,14 +55,16 @@ type Inspection struct {
 
 // InspectionFeed is a representation of the inspections feed
 type InspectionFeed struct {
-	SkipIDs       []string
-	ModifiedAfter time.Time
-	TemplateIDs   []string
-	Archived      string
-	Completed     string
-	Incremental   bool
-	Limit         int
-	WebReportLink string
+	SkipIDs        []string
+	ModifiedAfter  time.Time
+	ModifiedBefore time.Time
+	BlockSize      string
+	TemplateIDs    []string
+	Archived       string
+	Completed      string
+	Incremental    bool
+	Limit          int
+	WebReportLink  string
 }
 
 // Name is the name of the feed
@@ -202,15 +205,22 @@ func (f *InspectionFeed) Export(ctx context.Context, apiClient *httpapi.Client, 
 
 func (f *InspectionFeed) processNewInspections(ctx context.Context, apiClient *httpapi.Client, exporter Exporter, orgID string, status *ExportStatus) error {
 	l := logger.GetLogger().With("feed", f.Name(), "org_id", orgID)
+
+	// Split date range into smaller blocks if blocks and process one block at a time if enabled
+	if f.BlockSize != "" {
+		return f.processInspectionsInBlocks(ctx, apiClient, exporter, orgID, status)
+	}
+
 	req := GetFeedRequest{
 		InitialURL: "/feed/inspections",
 		Params: GetFeedParams{
-			ModifiedAfter: f.ModifiedAfter,
-			TemplateIDs:   f.TemplateIDs,
-			Archived:      f.Archived,
-			Completed:     f.Completed,
-			Limit:         f.Limit,
-			WebReportLink: f.WebReportLink,
+			ModifiedAfter:  f.ModifiedAfter,
+			ModifiedBefore: f.ModifiedBefore,
+			TemplateIDs:    f.TemplateIDs,
+			Archived:       f.Archived,
+			Completed:      f.Completed,
+			Limit:          f.Limit,
+			WebReportLink:  f.WebReportLink,
 		},
 	}
 	feedFn := func(resp *GetFeedResponse) error {
@@ -239,6 +249,83 @@ func (f *InspectionFeed) processNewInspections(ctx context.Context, apiClient *h
 	}
 
 	return DrainFeed(ctx, apiClient, &req, feedFn)
+}
+
+func (f *InspectionFeed) processInspectionsInBlocks(ctx context.Context, apiClient *httpapi.Client, exporter Exporter, orgID string, status *ExportStatus) error {
+	l := logger.GetLogger().With("feed", f.Name(), "org_id", orgID)
+
+	// Set end date to now if not specified
+	endDate := f.ModifiedBefore
+	if endDate.IsZero() {
+		endDate = time.Now()
+	}
+
+	// Generate time blocks
+	blocks, err := util.GenerateTimeBlocksFromString(f.ModifiedAfter, endDate, f.BlockSize)
+	if err != nil {
+		return fmt.Errorf("failed to generate time blocks: %w", err)
+	}
+
+	if len(blocks) == 0 {
+		l.Info("no time blocks to process")
+		return nil
+	}
+
+	l.With("total_blocks", len(blocks), "block_size", f.BlockSize).Info("starting block-based export")
+
+	// Process each block
+	for i, block := range blocks {
+		l.With("block", i+1, "total_blocks", len(blocks), "start", block.Start.Format(time.RFC3339), "end", block.End.Format(time.RFC3339)).Info("processing time block")
+
+		req := GetFeedRequest{
+			InitialURL: "/feed/inspections",
+			Params: GetFeedParams{
+				ModifiedAfter:  block.Start,
+				ModifiedBefore: block.End,
+				TemplateIDs:    f.TemplateIDs,
+				Archived:       f.Archived,
+				Completed:      f.Completed,
+				Limit:          f.Limit,
+				WebReportLink:  f.WebReportLink,
+			},
+		}
+
+		feedFn := func(resp *GetFeedResponse) error {
+			var rows []Inspection
+
+			if err := json.Unmarshal(resp.Data, &rows); err != nil {
+				return events.NewEventErrorWithMessage(err, events.ErrorSeverityError, events.ErrorSubSystemDataIntegrity, false, "map data")
+			}
+
+			if len(rows) != 0 {
+				err := f.writeRows(exporter, rows)
+				if err != nil {
+					return err
+				}
+			}
+
+			status.UpdateStatus(f.Name(), resp.Metadata.RemainingRecords, exporter.GetDuration().Milliseconds())
+
+			l.With(
+				"block", i+1,
+				"estimated_remaining", resp.Metadata.RemainingRecords,
+				"duration_ms", apiClient.Duration.Milliseconds(),
+				"export_duration_ms", exporter.GetDuration().Milliseconds(),
+			).Info("export batch complete")
+
+			return nil
+		}
+
+		if err := DrainFeed(ctx, apiClient, &req, feedFn); err != nil {
+			l.With("block", i+1, "error", err).Error("failed to process block")
+			return fmt.Errorf("failed to process block %d/%d: %w", i+1, len(blocks), err)
+		}
+
+		l.With("block", i+1, "total_blocks", len(blocks)).Info("completed time block")
+	}
+
+	l.With("total_blocks", len(blocks)).Info("completed block-based export")
+	return nil
 }
 
 func (f *InspectionFeed) processDeletedInspections(ctx context.Context, apiClient *httpapi.Client, exporter Exporter) error {

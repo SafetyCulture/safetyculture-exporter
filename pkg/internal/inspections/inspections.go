@@ -20,14 +20,16 @@ const maxGoRoutines = 10
 type Client struct {
 	*zap.SugaredLogger
 
-	apiClient     *httpapi.Client
-	exporter      exporter.SafetyCultureJSONExporter
-	SkipIDs       []string
-	ModifiedAfter time.Time
-	TemplateIDs   []string
-	Archived      string
-	Completed     string
-	Incremental   bool
+	apiClient      *httpapi.Client
+	exporter       exporter.SafetyCultureJSONExporter
+	SkipIDs        []string
+	ModifiedAfter  time.Time
+	ModifiedBefore time.Time
+	BlockSize      string
+	TemplateIDs    []string
+	Archived       string
+	Completed      string
+	Incremental    bool
 }
 
 // InspectionClient is an interface to get inspections from server
@@ -36,26 +38,30 @@ type InspectionClient interface {
 }
 
 type InspectionClientCfg struct {
-	SkipIDs       []string
-	ModifiedAfter time.Time
-	TemplateIDs   []string
-	Archived      string
-	Completed     string
-	Incremental   bool
+	SkipIDs        []string
+	ModifiedAfter  time.Time
+	ModifiedBefore time.Time
+	BlockSize      string
+	TemplateIDs    []string
+	Archived       string
+	Completed      string
+	Incremental    bool
 }
 
 // NewInspectionClient returns a new instance of InspectionClient
 func NewInspectionClient(cfg *InspectionClientCfg, apiClient *httpapi.Client, exporter exporter.SafetyCultureJSONExporter) InspectionClient {
 	return &Client{
-		apiClient:     apiClient,
-		exporter:      exporter,
-		SkipIDs:       cfg.SkipIDs,
-		ModifiedAfter: cfg.ModifiedAfter,
-		TemplateIDs:   cfg.TemplateIDs,
-		Archived:      cfg.Archived,
-		Completed:     cfg.Completed,
-		Incremental:   cfg.Incremental,
-		SugaredLogger: util2.GetLogger(),
+		apiClient:      apiClient,
+		exporter:       exporter,
+		SkipIDs:        cfg.SkipIDs,
+		ModifiedAfter:  cfg.ModifiedAfter,
+		ModifiedBefore: cfg.ModifiedBefore,
+		BlockSize:      cfg.BlockSize,
+		TemplateIDs:    cfg.TemplateIDs,
+		Archived:       cfg.Archived,
+		Completed:      cfg.Completed,
+		Incremental:    cfg.Incremental,
+		SugaredLogger:  util2.GetLogger(),
 	}
 }
 
