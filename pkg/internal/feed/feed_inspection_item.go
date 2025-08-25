@@ -63,6 +63,8 @@ type InspectionItemFeed struct {
 	SkipIDs         []string
 	SkipFields      []string
 	ModifiedAfter   time.Time
+	ModifiedBefore  time.Time
+	BlockSize       string
 	TemplateIDs     []string
 	Archived        string
 	Completed       string
@@ -263,18 +265,40 @@ func (f *InspectionItemFeed) CreateSchema(exporter Exporter) error {
 
 // Export exports the feed to the supplied exporter
 func (f *InspectionItemFeed) Export(ctx context.Context, apiClient *httpapi.Client, exporter Exporter, orgID string) error {
-	l := logger.GetLogger().With("feed", f.Name(), "org_id", orgID)
 	status := GetExporterStatus()
 
-	exporter.InitFeed(f, &InitFeedOptions{
+	if err := exporter.InitFeed(f, &InitFeedOptions{
 		// Delete data if incremental refresh is disabled so there is no duplicates
 		Truncate: !f.Incremental,
-	})
+	}); err != nil {
+		return events.WrapEventError(err, "init feed")
+	}
 
 	var err error
 	f.ModifiedAfter, err = exporter.LastModifiedAt(f, f.ModifiedAfter, orgID)
 	if err != nil {
 		return events.NewEventErrorWithMessage(err, events.ErrorSeverityError, events.ErrorSubSystemDB, false, "unable to load modified after")
+	}
+
+	// Process inspection items
+	if err := f.processInspectionItems(ctx, apiClient, exporter, orgID, status); err != nil {
+		return events.WrapEventError(err, "export")
+	}
+
+	err = exporter.FinaliseExport(f, &[]*InspectionItem{})
+	if err != nil {
+		return events.WrapEventError(err, "finalise export")
+	}
+
+	return nil
+}
+
+func (f *InspectionItemFeed) processInspectionItems(ctx context.Context, apiClient *httpapi.Client, exporter Exporter, orgID string, status *ExportStatus) error {
+	l := logger.GetLogger().With("feed", f.Name(), "org_id", orgID)
+
+	// Split date range into smaller blocks if blocks and process one block at a time if enabled
+	if f.BlockSize != "" {
+		return f.processInspectionItemsInBlocks(ctx, apiClient, exporter, orgID, status)
 	}
 
 	drainFn := func(resp *GetFeedResponse) error {
@@ -304,6 +328,7 @@ func (f *InspectionItemFeed) Export(ctx context.Context, apiClient *httpapi.Clie
 		InitialURL: "/feed/inspection_items",
 		Params: GetFeedParams{
 			ModifiedAfter:   f.ModifiedAfter,
+			ModifiedBefore:  f.ModifiedBefore,
 			TemplateIDs:     f.TemplateIDs,
 			Archived:        f.Archived,
 			Completed:       f.Completed,
@@ -324,5 +349,93 @@ func (f *InspectionItemFeed) Export(ctx context.Context, apiClient *httpapi.Clie
 	if f.ExportMedia {
 		status.FinishFeedExport("media", nil)
 	}
-	return exporter.FinaliseExport(f, &[]*InspectionItem{})
+	return nil
+}
+
+func (f *InspectionItemFeed) processInspectionItemsInBlocks(ctx context.Context, apiClient *httpapi.Client, exporter Exporter, orgID string, status *ExportStatus) error {
+	l := logger.GetLogger().With("feed", f.Name(), "org_id", orgID)
+
+	// Set end date to now if not specified
+	endDate := f.ModifiedBefore
+	if endDate.IsZero() {
+		endDate = time.Now()
+	}
+
+	// Generate time blocks
+	blocks, err := util.GenerateTimeBlocksFromString(f.ModifiedAfter, endDate, f.BlockSize)
+	if err != nil {
+		return fmt.Errorf("failed to generate time blocks: %w", err)
+	}
+
+	if len(blocks) == 0 {
+		l.Info("no time blocks to process")
+		return nil
+	}
+
+	l.With("total_blocks", len(blocks), "block_size", f.BlockSize).Info("starting block-based export")
+
+	// Process each block
+	for i, block := range blocks {
+		l.With("block", i+1, "total_blocks", len(blocks), "start", block.Start.Format(time.RFC3339), "end", block.End.Format(time.RFC3339)).Info("processing time block")
+
+		req := GetFeedRequest{
+			InitialURL: "/feed/inspection_items",
+			Params: GetFeedParams{
+				ModifiedAfter:   block.Start,
+				ModifiedBefore:  block.End,
+				TemplateIDs:     f.TemplateIDs,
+				Archived:        f.Archived,
+				Completed:       f.Completed,
+				IncludeInactive: f.IncludeInactive,
+				Limit:           f.Limit,
+			},
+		}
+
+		drainFn := func(resp *GetFeedResponse) error {
+			var rows []*InspectionItem
+
+			if err := json.Unmarshal(resp.Data, &rows); err != nil {
+				return events.NewEventErrorWithMessage(err, events.ErrorSeverityError, events.ErrorSubSystemDataIntegrity, false, "map data")
+			}
+
+			if len(rows) != 0 {
+				if err := f.writeRows(ctx, exporter, rows, f.SkipFields, apiClient); err != nil {
+					return err
+				}
+			}
+
+			status.UpdateStatus(f.Name(), resp.Metadata.RemainingRecords, exporter.GetDuration().Milliseconds())
+
+			l.With(
+				"block", i+1,
+				"estimated_remaining", resp.Metadata.RemainingRecords,
+				"duration_ms", apiClient.Duration.Milliseconds(),
+				"export_duration_ms", exporter.GetDuration().Milliseconds(),
+			).Info("export batch complete")
+
+			return nil
+		}
+
+		if f.ExportMedia && i == 0 { // Start media export only once
+			status.StartFeedExport("media", false)
+		}
+
+		if err := DrainFeed(ctx, apiClient, &req, drainFn); err != nil {
+			l.With("block", i+1, "error", err).Error("failed to process block")
+			if f.ExportMedia {
+				status.FinishFeedExport("media", err)
+			}
+			return fmt.Errorf("failed to process block %d/%d: %w", i+1, len(blocks), err)
+		}
+
+		l.With("block", i+1, "total_blocks", len(blocks)).Info("completed time block")
+	}
+
+	// Finish media export if enabled
+	if f.ExportMedia {
+		status.FinishFeedExport("media", nil)
+	}
+
+	l.With("total_blocks", len(blocks)).Info("completed block-based export")
+	return nil
 }

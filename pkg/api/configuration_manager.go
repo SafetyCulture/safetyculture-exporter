@@ -7,10 +7,11 @@ import (
 	"strings"
 	"time"
 
+	"gopkg.in/yaml.v3"
+
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/feed"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/inspections"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/util"
-	"gopkg.in/yaml.v3"
 )
 
 // ExporterConfiguration is the equivalent struct of YAML
@@ -53,6 +54,8 @@ type ExporterConfiguration struct {
 			Limit                 int      `yaml:"limit"`
 			SkipIds               []string `yaml:"skip_ids"`
 			WebReportLink         string   `yaml:"web_report_link"`
+			ModifiedBefore        mTime    `yaml:"modified_before"`
+			BlockSize             string   `yaml:"block_size"`
 		} `yaml:"inspection"`
 		InspectionItems struct {
 			SkipFields []string `yaml:"skip_fields"`
@@ -245,6 +248,19 @@ func (c *ConfigurationManager) ApplySafetyGuards() {
 	if c.Configuration.Export.MediaPath == "" {
 		c.Configuration.Export.MediaPath = defaultCfg.Export.MediaPath
 	}
+
+	if c.Configuration.Export.Inspection.BlockSize != "" {
+		if _, err := util.ParseDuration(c.Configuration.Export.Inspection.BlockSize); err != nil {
+			c.Configuration.Export.Inspection.BlockSize = defaultCfg.Export.Inspection.BlockSize
+		}
+	}
+
+	if !c.Configuration.Export.Inspection.ModifiedBefore.Time.IsZero() && !c.Configuration.Export.ModifiedAfter.Time.IsZero() {
+		if c.Configuration.Export.Inspection.ModifiedBefore.Time.Before(c.Configuration.Export.ModifiedAfter.Time) ||
+			c.Configuration.Export.Inspection.ModifiedBefore.Time.Equal(c.Configuration.Export.ModifiedAfter.Time) {
+			c.Configuration.Export.Inspection.ModifiedBefore = defaultCfg.Export.Inspection.ModifiedBefore
+		}
+	}
 }
 
 // SaveConfiguration will save the configuration to the file
@@ -283,6 +299,8 @@ func BuildConfigurationWithDefaults() *ExporterConfiguration {
 	cfg.Export.Incremental = true
 	cfg.Export.Inspection.Archived = "false"
 	cfg.Export.Inspection.Completed = "true"
+	cfg.Export.Inspection.ModifiedBefore = mTime{}
+	cfg.Export.Inspection.BlockSize = ""
 	cfg.Export.Inspection.Limit = 100
 	cfg.Export.Inspection.SkipIds = []string{}
 	cfg.Export.Inspection.WebReportLink = "private"
@@ -352,6 +370,8 @@ func (ec *ExporterConfiguration) ToExporterConfig() *feed.ExporterFeedCfg {
 		SheqsyCompanyID:                       ec.SheqsyCompanyID,
 		ExportInspectionSkipIds:               ec.Export.Inspection.SkipIds,
 		ExportModifiedAfterTime:               ec.Export.ModifiedAfter.Time,
+		ExportModifiedBeforeTime:              ec.Export.Inspection.ModifiedBefore.Time,
+		ExportBlockSize:                       ec.Export.Inspection.BlockSize,
 		ExportTemplateIds:                     ec.Export.TemplateIds,
 		ExportInspectionArchived:              ec.Export.Inspection.Archived,
 		ExportInspectionCompleted:             ec.Export.Inspection.Completed,

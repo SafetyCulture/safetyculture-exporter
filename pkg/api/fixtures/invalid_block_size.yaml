@@ -1,0 +1,7 @@
+---
+access_token: "fake_token"
+api:
+  url: https://api.safetyculture.io
+export:
+  inspection:
+    block_size: "invalid_format"

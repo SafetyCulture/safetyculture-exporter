@@ -32,11 +32,12 @@ type ListInspectionsResponse struct {
 
 // ListInspectionsParams is a list of all parameters we can set when fetching inspections
 type ListInspectionsParams struct {
-	ModifiedAfter time.Time `url:"modified_after,omitempty"`
-	TemplateIDs   []string  `url:"template,omitempty"`
-	Archived      string    `url:"archived,omitempty"`
-	Completed     string    `url:"completed,omitempty"`
-	Limit         int       `url:"limit,omitempty"`
+	ModifiedAfter  time.Time `url:"modified_after,omitempty"`
+	ModifiedBefore time.Time `url:"modified_before,omitempty"`
+	TemplateIDs    []string  `url:"template,omitempty"`
+	Archived       string    `url:"archived,omitempty"`
+	Completed      string    `url:"completed,omitempty"`
+	Limit          int       `url:"limit,omitempty"`
 }
 
 // InspectionReportExportCompletionResponse represents the response of report export completion status

@@ -47,6 +47,8 @@ type ExporterFeedCfg struct {
 	SheqsyCompanyID                       string
 	ExportInspectionSkipIds               []string
 	ExportModifiedAfterTime               time.Time
+	ExportModifiedBeforeTime              time.Time
+	ExportBlockSize                       string
 	ExportTemplateIds                     []string
 	ExportInspectionArchived              string
 	ExportInspectionCompleted             string
@@ -286,6 +288,8 @@ func (e *ExporterFeedClient) GetFeeds() []Feed {
 			SkipIDs:         e.configuration.ExportInspectionSkipIds,
 			SkipFields:      e.configuration.ExportInspectionItemsSkipFields,
 			ModifiedAfter:   e.configuration.ExportModifiedAfterTime,
+			ModifiedBefore:  e.configuration.ExportModifiedBeforeTime,
+			BlockSize:       e.configuration.ExportBlockSize,
 			TemplateIDs:     e.configuration.ExportTemplateIds,
 			Archived:        e.configuration.ExportInspectionArchived,
 			Completed:       e.configuration.ExportInspectionCompleted,
@@ -324,14 +328,16 @@ func (e *ExporterFeedClient) GetFeeds() []Feed {
 
 func (e *ExporterFeedClient) getInspectionFeed() *InspectionFeed {
 	return &InspectionFeed{
-		SkipIDs:       e.configuration.ExportInspectionSkipIds,
-		ModifiedAfter: e.configuration.ExportModifiedAfterTime,
-		TemplateIDs:   e.configuration.ExportTemplateIds,
-		Archived:      e.configuration.ExportInspectionArchived,
-		Completed:     e.configuration.ExportInspectionCompleted,
-		Incremental:   e.configuration.ExportIncremental,
-		Limit:         e.configuration.ExportInspectionLimit,
-		WebReportLink: e.configuration.ExportInspectionWebReportLink,
+		SkipIDs:        e.configuration.ExportInspectionSkipIds,
+		ModifiedAfter:  e.configuration.ExportModifiedAfterTime,
+		ModifiedBefore: e.configuration.ExportModifiedBeforeTime,
+		BlockSize:      e.configuration.ExportBlockSize,
+		TemplateIDs:    e.configuration.ExportTemplateIds,
+		Archived:       e.configuration.ExportInspectionArchived,
+		Completed:      e.configuration.ExportInspectionCompleted,
+		Incremental:    e.configuration.ExportIncremental,
+		Limit:          e.configuration.ExportInspectionLimit,
+		WebReportLink:  e.configuration.ExportInspectionWebReportLink,
 	}
 }
 

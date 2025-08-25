@@ -5,10 +5,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/SafetyCulture/safetyculture-exporter/pkg/api"
-	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/util"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/api"
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/util"
 )
 
 func TestNewConfigurationManagerFromFile_when_invalid_filename(t *testing.T) {
@@ -246,4 +247,72 @@ func TestNewConfigurationManagerFromFile_WhenFileIsCorrupt(t *testing.T) {
 	cm, err := api.NewConfigurationManagerFromFile("", "fixtures/corrupted_configuration.yaml")
 	require.NotNil(t, err)
 	require.Nil(t, cm)
+}
+
+func TestNewConfigurationManagerFromFile_WithModifiedBefore(t *testing.T) {
+	cm, err := api.NewConfigurationManagerFromFile("", "fixtures/valid_with_modified_before.yaml")
+	require.Nil(t, err)
+	require.NotNil(t, cm)
+	require.NotNil(t, cm.Configuration)
+
+	cfg := cm.Configuration
+	expected, _ := time.Parse("2006-01-02T15:04:05Z0700", "2023-12-31T23:59:59Z")
+	assert.Equal(t, expected, cfg.Export.Inspection.ModifiedBefore.Time)
+	assert.Equal(t, "7d", cfg.Export.Inspection.BlockSize)
+}
+
+func TestNewConfigurationManagerFromFile_WithBlockSize(t *testing.T) {
+	cm, err := api.NewConfigurationManagerFromFile("", "fixtures/valid_with_block_size.yaml")
+	require.Nil(t, err)
+	require.NotNil(t, cm)
+	require.NotNil(t, cm.Configuration)
+
+	cfg := cm.Configuration
+	assert.Equal(t, "30d", cfg.Export.Inspection.BlockSize)
+}
+
+func TestConfigurationManager_ApplySafetyGuards_InvalidBlockSize(t *testing.T) {
+	cm, err := api.NewConfigurationManagerFromFile("", "fixtures/invalid_block_size.yaml")
+	require.Nil(t, err)
+	require.NotNil(t, cm)
+	require.NotNil(t, cm.Configuration)
+
+	assert.Equal(t, "", cm.Configuration.Export.Inspection.BlockSize)
+}
+
+func TestConfigurationManager_ApplySafetyGuards_ModifiedBeforeAfterConflict(t *testing.T) {
+	cm, err := api.NewConfigurationManagerFromFile("", "fixtures/modified_before_after_conflict.yaml")
+	require.Nil(t, err)
+	require.NotNil(t, cm)
+	require.NotNil(t, cm.Configuration)
+
+	cfg := cm.Configuration
+
+	// ModifiedBefore should be reset to zero time due to conflict (before is earlier than after)
+	assert.True(t, cfg.Export.Inspection.ModifiedBefore.Time.IsZero())
+	// ModifiedAfter should remain unchanged
+	expectedAfter, _ := time.Parse("2006-01-02T15:04:05Z0700", "2023-12-31T23:59:59Z")
+	assert.Equal(t, expectedAfter, cfg.Export.ModifiedAfter.Time)
+}
+
+func TestConfigurationManager_ToExporterConfig_IncludesNewFields(t *testing.T) {
+	cm, err := api.NewConfigurationManagerFromFile("", "fixtures/valid_with_modified_before.yaml")
+	require.Nil(t, err)
+	require.NotNil(t, cm)
+	require.NotNil(t, cm.Configuration)
+
+	cfg := cm.Configuration
+	exporterCfg := cfg.ToExporterConfig()
+
+	expected, _ := time.Parse("2006-01-02T15:04:05Z0700", "2023-12-31T23:59:59Z")
+	assert.Equal(t, expected, exporterCfg.ExportModifiedBeforeTime)
+	assert.Equal(t, "7d", exporterCfg.ExportBlockSize)
+}
+
+func TestBuildConfigurationWithDefaults_SetsNewFieldDefaults(t *testing.T) {
+	cfg := api.BuildConfigurationWithDefaults()
+	require.NotNil(t, cfg)
+
+	assert.True(t, cfg.Export.Inspection.ModifiedBefore.Time.IsZero())
+	assert.Equal(t, "", cfg.Export.Inspection.BlockSize)
 }

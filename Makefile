@@ -1,5 +1,6 @@
 PACKAGE_NAME        	:= "github.com/safetyculture/safetyculture-exporter"
 GOLANG_CROSS_VERSION  := v1.18.1
+NAME := safetyculture-exporter
 
 .PHONY: help
 help:
@@ -25,3 +26,10 @@ start-local-mssql:
 .PHONY: start-local-postgres
 start-local-postgres:
 	 docker-compose -f docker-compose-local-volume.yml up postgres
+
+.PHONY: build
+DIST_PATH=dist
+BUILD_OUTPUT_PATH=$(DIST_PATH)/$(NAME)
+build: ## Builds the executable for arch it is run on
+	rm -rf $(DIST_PATH)
+	go build -o ./$(BUILD_OUTPUT_PATH) ./cmd/$(NAME)

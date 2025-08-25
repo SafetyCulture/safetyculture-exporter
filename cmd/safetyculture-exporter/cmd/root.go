@@ -115,6 +115,8 @@ func configFlags() {
 	exportFlags.String("export-path", "./export/", "File Export Path")
 	exportFlags.Bool("incremental", true, "Update inspections, inspection_items and templates tables incrementally")
 	exportFlags.String("modified-after", "", "Return inspections modified after this date (see readme for supported formats)")
+	exportFlags.String("modified-before", "", "Return inspections modified before this date (see readme for supported formats)")
+	exportFlags.String("block-size", "", "Split export into time blocks (e.g., \"1d\", \"1w\", \"1m\")")
 
 	mediaFlags = flag.NewFlagSet("media", flag.ContinueOnError)
 	mediaFlags.Bool("export-media", false, "Export media")
@@ -173,6 +175,8 @@ func bindFlags() {
 	util.Check(viper.BindPFlag("export.path", exportFlags.Lookup("export-path")), "while binding flag")
 	util.Check(viper.BindPFlag("export.incremental", exportFlags.Lookup("incremental")), "while binding flag")
 	util.Check(viper.BindPFlag("export.modified_after", exportFlags.Lookup("modified-after")), "while binding flag")
+	util.Check(viper.BindPFlag("export.inspection.modified_before", exportFlags.Lookup("modified-before")), "while binding flag")
+	util.Check(viper.BindPFlag("export.inspection.block_size", exportFlags.Lookup("block-size")), "while binding flag")
 
 	util.Check(viper.BindPFlag("export.media", mediaFlags.Lookup("export-media")), "while binding flag")
 	util.Check(viper.BindPFlag("export.media_path", mediaFlags.Lookup("export-media-path")), "while binding flag")
