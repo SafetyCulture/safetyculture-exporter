@@ -40,6 +40,7 @@ type Client struct {
 	RetryMax      int
 	RetryWaitMin  time.Duration
 	RetryWaitMax  time.Duration
+	rateLimiter   *RateLimiter
 }
 
 type ClientCfg struct {
@@ -141,6 +142,42 @@ func OptSetInsecureTLS(insecureSkipVerify bool) Opt {
 	}
 }
 
+// OptSetRateLimiter configures rate limiting for the client
+func OptSetRateLimiter(limiter *RateLimiter) Opt {
+	return func(a *Client) {
+		a.rateLimiter = limiter
+	}
+}
+
+// WithRateLimiter returns a shallow copy of the client with the specified rate limiter.
+// This allows different feeds to have different rate limits while sharing the underlying HTTP client.
+// The returned client shares all HTTP resources (connection pool, etc.) with the original.
+func (a *Client) WithRateLimiter(limiter *RateLimiter) *Client {
+	return &Client{
+		logger:        a.logger,
+		BaseURL:       a.BaseURL,
+		sling:         a.sling,
+		httpClient:    a.httpClient,
+		httpTransport: a.httpTransport,
+		Duration:      a.Duration,
+		CheckForRetry: a.CheckForRetry,
+		backoff:       a.backoff,
+		RetryMax:      a.RetryMax,
+		RetryWaitMin:  a.RetryWaitMin,
+		RetryWaitMax:  a.RetryWaitMax,
+		rateLimiter:   limiter,
+	}
+}
+
+// Wait blocks until the rate limiter allows a request or the context is cancelled.
+// This is useful for testing and for manual rate limiting in application code.
+func (a *Client) Wait(ctx context.Context) error {
+	if a.rateLimiter == nil {
+		return nil
+	}
+	return a.rateLimiter.Wait(ctx)
+}
+
 // OptAddTLSCert adds a certificate at the supplied path to the cert pool
 func OptAddTLSCert(certPath string) Opt {
 	return func(a *Client) {
@@ -183,6 +220,13 @@ func (a *Client) Do(ctx context.Context, doer HTTPDoer) (*http.Response, error) 
 
 		iter++
 		a.logger.Debugw("http request", "url", u)
+
+		// Apply rate limiting before making the request
+		if a.rateLimiter != nil {
+			if err := a.rateLimiter.Wait(ctx); err != nil {
+				return nil, fmt.Errorf("rate limit wait: %w", err)
+			}
+		}
 
 		start := time.Now()
 		resp, err := doer.Do()

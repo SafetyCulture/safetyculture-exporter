@@ -56,9 +56,20 @@ type ExporterConfiguration struct {
 			WebReportLink         string   `yaml:"web_report_link"`
 			ModifiedBefore        mTime    `yaml:"modified_before"`
 			BlockSize             string   `yaml:"block_size"`
+			BlockMaxRetries       int      `yaml:"block_max_retries"`
+			BlockConcurrency      int      `yaml:"block_concurrency"`
+			BlockStopOnFailure    bool     `yaml:"block_stop_on_failure"`
+			RateLimitEnabled      bool     `yaml:"rate_limit_enabled"`
+			RateLimitPerMinute    int      `yaml:"rate_limit_per_minute"`
 		} `yaml:"inspection"`
 		InspectionItems struct {
-			SkipFields []string `yaml:"skip_fields"`
+			SkipFields         []string `yaml:"skip_fields"`
+			BlockSize          string   `yaml:"block_size"`
+			BlockMaxRetries    int      `yaml:"block_max_retries"`
+			BlockConcurrency   int      `yaml:"block_concurrency"`
+			BlockStopOnFailure bool     `yaml:"block_stop_on_failure"`
+			RateLimitEnabled   bool     `yaml:"rate_limit_enabled"`
+			RateLimitPerMinute int      `yaml:"rate_limit_per_minute"`
 		} `yaml:"inspection_items"`
 		Issue struct {
 			Limit int `yaml:"limit"`
@@ -261,6 +272,53 @@ func (c *ConfigurationManager) ApplySafetyGuards() {
 			c.Configuration.Export.Inspection.ModifiedBefore = defaultCfg.Export.Inspection.ModifiedBefore
 		}
 	}
+
+	// Validate Inspection parallel processing config
+	if c.Configuration.Export.Inspection.BlockMaxRetries < 1 {
+		c.Configuration.Export.Inspection.BlockMaxRetries = defaultCfg.Export.Inspection.BlockMaxRetries
+	}
+	if c.Configuration.Export.Inspection.BlockMaxRetries > 10 {
+		c.Configuration.Export.Inspection.BlockMaxRetries = 10
+	}
+	if c.Configuration.Export.Inspection.BlockConcurrency < 0 {
+		c.Configuration.Export.Inspection.BlockConcurrency = 0
+	}
+	if c.Configuration.Export.Inspection.BlockConcurrency > 50 {
+		c.Configuration.Export.Inspection.BlockConcurrency = 50
+	}
+	if c.Configuration.Export.Inspection.RateLimitPerMinute < 0 {
+		c.Configuration.Export.Inspection.RateLimitPerMinute = defaultCfg.Export.Inspection.RateLimitPerMinute
+	}
+	if c.Configuration.Export.Inspection.RateLimitPerMinute > 1000 {
+		c.Configuration.Export.Inspection.RateLimitPerMinute = 1000
+	}
+
+	// Validate InspectionItems block size
+	if c.Configuration.Export.InspectionItems.BlockSize != "" {
+		if _, err := util.ParseDuration(c.Configuration.Export.InspectionItems.BlockSize); err != nil {
+			c.Configuration.Export.InspectionItems.BlockSize = ""
+		}
+	}
+
+	// Validate InspectionItems parallel processing config
+	if c.Configuration.Export.InspectionItems.BlockMaxRetries < 1 {
+		c.Configuration.Export.InspectionItems.BlockMaxRetries = defaultCfg.Export.InspectionItems.BlockMaxRetries
+	}
+	if c.Configuration.Export.InspectionItems.BlockMaxRetries > 10 {
+		c.Configuration.Export.InspectionItems.BlockMaxRetries = 10
+	}
+	if c.Configuration.Export.InspectionItems.BlockConcurrency < 0 {
+		c.Configuration.Export.InspectionItems.BlockConcurrency = 0
+	}
+	if c.Configuration.Export.InspectionItems.BlockConcurrency > 50 {
+		c.Configuration.Export.InspectionItems.BlockConcurrency = 50
+	}
+	if c.Configuration.Export.InspectionItems.RateLimitPerMinute < 0 {
+		c.Configuration.Export.InspectionItems.RateLimitPerMinute = defaultCfg.Export.InspectionItems.RateLimitPerMinute
+	}
+	if c.Configuration.Export.InspectionItems.RateLimitPerMinute > 1000 {
+		c.Configuration.Export.InspectionItems.RateLimitPerMinute = 1000
+	}
 }
 
 // SaveConfiguration will save the configuration to the file
@@ -304,7 +362,18 @@ func BuildConfigurationWithDefaults() *ExporterConfiguration {
 	cfg.Export.Inspection.Limit = 100
 	cfg.Export.Inspection.SkipIds = []string{}
 	cfg.Export.Inspection.WebReportLink = "private"
+	cfg.Export.Inspection.BlockMaxRetries = 3
+	cfg.Export.Inspection.BlockConcurrency = 0 // Auto-calculate
+	cfg.Export.Inspection.BlockStopOnFailure = true
+	cfg.Export.Inspection.RateLimitEnabled = true
+	cfg.Export.Inspection.RateLimitPerMinute = 180
 	cfg.Export.InspectionItems.SkipFields = []string{}
+	cfg.Export.InspectionItems.BlockSize = ""
+	cfg.Export.InspectionItems.BlockMaxRetries = 3
+	cfg.Export.InspectionItems.BlockConcurrency = 0 // Auto-calculate
+	cfg.Export.InspectionItems.BlockStopOnFailure = true
+	cfg.Export.InspectionItems.RateLimitEnabled = true
+	cfg.Export.InspectionItems.RateLimitPerMinute = 180
 	cfg.Export.Issue.Limit = 100
 	cfg.Export.Path = exportLocation
 	cfg.Export.MediaPath = mediaPathLocation
@@ -364,31 +433,42 @@ func NewConfigurationManager(path string, fileName string) *ConfigurationManager
 
 func (ec *ExporterConfiguration) ToExporterConfig() *feed.ExporterFeedCfg {
 	return &feed.ExporterFeedCfg{
-		AccessToken:                           ec.AccessToken,
-		ExportTables:                          ec.Export.Tables,
-		SheqsyUsername:                        ec.SheqsyUsername,
-		SheqsyCompanyID:                       ec.SheqsyCompanyID,
-		ExportInspectionSkipIds:               ec.Export.Inspection.SkipIds,
-		ExportModifiedAfterTime:               ec.Export.ModifiedAfter.Time,
-		ExportModifiedBeforeTime:              ec.Export.Inspection.ModifiedBefore.Time,
-		ExportBlockSize:                       ec.Export.Inspection.BlockSize,
-		ExportTemplateIds:                     ec.Export.TemplateIds,
-		ExportInspectionArchived:              ec.Export.Inspection.Archived,
-		ExportInspectionCompleted:             ec.Export.Inspection.Completed,
-		ExportInspectionIncludedInactiveItems: ec.Export.Inspection.IncludedInactiveItems,
-		ExportInspectionWebReportLink:         ec.Export.Inspection.WebReportLink,
-		ExportInspectionItemsSkipFields:       ec.Export.InspectionItems.SkipFields,
-		ExportScheduleResumeDownload:          ec.Export.Schedule.ResumeDownload,
-		ExportIncremental:                     ec.Export.Incremental,
-		ExportInspectionLimit:                 ec.Export.Inspection.Limit,
-		ExportMedia:                           ec.Export.Media,
-		ExportSiteIncludeDeleted:              ec.Export.Site.IncludeDeleted,
-		ExportActionLimit:                     ec.Export.Action.Limit,
-		ExportSiteIncludeFullHierarchy:        ec.Export.Site.IncludeFullHierarchy,
-		ExportIssueLimit:                      ec.Export.Issue.Limit,
-		ExportAssetLimit:                      ec.Export.Asset.Limit,
-		ExportCourseProgressLimit:             ec.Export.Course.Progress.Limit,
-		MaxConcurrentGoRoutines:               ec.API.MaxConcurrency,
+		AccessToken:                             ec.AccessToken,
+		ExportTables:                            ec.Export.Tables,
+		SheqsyUsername:                          ec.SheqsyUsername,
+		SheqsyCompanyID:                         ec.SheqsyCompanyID,
+		ExportInspectionSkipIds:                 ec.Export.Inspection.SkipIds,
+		ExportModifiedAfterTime:                 ec.Export.ModifiedAfter.Time,
+		ExportModifiedBeforeTime:                ec.Export.Inspection.ModifiedBefore.Time,
+		ExportBlockSize:                         ec.Export.Inspection.BlockSize,
+		ExportInspectionBlockMaxRetries:         ec.Export.Inspection.BlockMaxRetries,
+		ExportInspectionBlockConcurrency:        ec.Export.Inspection.BlockConcurrency,
+		ExportInspectionBlockStopOnFailure:      ec.Export.Inspection.BlockStopOnFailure,
+		ExportInspectionRateLimitEnabled:        ec.Export.Inspection.RateLimitEnabled,
+		ExportInspectionRateLimitPerMinute:      ec.Export.Inspection.RateLimitPerMinute,
+		ExportInspectionItemsBlockSize:          ec.Export.InspectionItems.BlockSize,
+		ExportInspectionItemsBlockMaxRetries:    ec.Export.InspectionItems.BlockMaxRetries,
+		ExportInspectionItemsBlockConcurrency:   ec.Export.InspectionItems.BlockConcurrency,
+		ExportInspectionItemsBlockStopOnFailure: ec.Export.InspectionItems.BlockStopOnFailure,
+		ExportInspectionItemsRateLimitEnabled:   ec.Export.InspectionItems.RateLimitEnabled,
+		ExportInspectionItemsRateLimitPerMinute: ec.Export.InspectionItems.RateLimitPerMinute,
+		ExportTemplateIds:                       ec.Export.TemplateIds,
+		ExportInspectionArchived:                ec.Export.Inspection.Archived,
+		ExportInspectionCompleted:               ec.Export.Inspection.Completed,
+		ExportInspectionIncludedInactiveItems:   ec.Export.Inspection.IncludedInactiveItems,
+		ExportInspectionWebReportLink:           ec.Export.Inspection.WebReportLink,
+		ExportInspectionItemsSkipFields:         ec.Export.InspectionItems.SkipFields,
+		ExportScheduleResumeDownload:            ec.Export.Schedule.ResumeDownload,
+		ExportIncremental:                       ec.Export.Incremental,
+		ExportInspectionLimit:                   ec.Export.Inspection.Limit,
+		ExportMedia:                             ec.Export.Media,
+		ExportSiteIncludeDeleted:                ec.Export.Site.IncludeDeleted,
+		ExportActionLimit:                       ec.Export.Action.Limit,
+		ExportSiteIncludeFullHierarchy:          ec.Export.Site.IncludeFullHierarchy,
+		ExportIssueLimit:                        ec.Export.Issue.Limit,
+		ExportAssetLimit:                        ec.Export.Asset.Limit,
+		ExportCourseProgressLimit:               ec.Export.Course.Progress.Limit,
+		MaxConcurrentGoRoutines:                 ec.API.MaxConcurrency,
 	}
 }
 

@@ -41,31 +41,42 @@ type ExporterFeedClient struct {
 }
 
 type ExporterFeedCfg struct {
-	AccessToken                           string
-	ExportTables                          []string
-	SheqsyUsername                        string
-	SheqsyCompanyID                       string
-	ExportInspectionSkipIds               []string
-	ExportModifiedAfterTime               time.Time
-	ExportModifiedBeforeTime              time.Time
-	ExportBlockSize                       string
-	ExportTemplateIds                     []string
-	ExportInspectionArchived              string
-	ExportInspectionCompleted             string
-	ExportInspectionIncludedInactiveItems bool
-	ExportInspectionWebReportLink         string
-	ExportInspectionItemsSkipFields       []string
-	ExportIncremental                     bool
-	ExportInspectionLimit                 int
-	ExportMedia                           bool
-	ExportSiteIncludeDeleted              bool
-	ExportActionLimit                     int
-	ExportSiteIncludeFullHierarchy        bool
-	ExportIssueLimit                      int
-	ExportAssetLimit                      int
-	ExportCourseProgressLimit             int
-	ExportScheduleResumeDownload          bool
-	MaxConcurrentGoRoutines               int
+	AccessToken                             string
+	ExportTables                            []string
+	SheqsyUsername                          string
+	SheqsyCompanyID                         string
+	ExportInspectionSkipIds                 []string
+	ExportModifiedAfterTime                 time.Time
+	ExportModifiedBeforeTime                time.Time
+	ExportBlockSize                         string
+	ExportInspectionBlockMaxRetries         int
+	ExportInspectionBlockConcurrency        int
+	ExportInspectionBlockStopOnFailure      bool
+	ExportInspectionRateLimitEnabled        bool
+	ExportInspectionRateLimitPerMinute      int
+	ExportInspectionItemsBlockSize          string
+	ExportInspectionItemsBlockMaxRetries    int
+	ExportInspectionItemsBlockConcurrency   int
+	ExportInspectionItemsBlockStopOnFailure bool
+	ExportInspectionItemsRateLimitEnabled   bool
+	ExportInspectionItemsRateLimitPerMinute int
+	ExportTemplateIds                       []string
+	ExportInspectionArchived                string
+	ExportInspectionCompleted               string
+	ExportInspectionIncludedInactiveItems   bool
+	ExportInspectionWebReportLink           string
+	ExportInspectionItemsSkipFields         []string
+	ExportIncremental                       bool
+	ExportInspectionLimit                   int
+	ExportMedia                             bool
+	ExportSiteIncludeDeleted                bool
+	ExportActionLimit                       int
+	ExportSiteIncludeFullHierarchy          bool
+	ExportIssueLimit                        int
+	ExportAssetLimit                        int
+	ExportCourseProgressLimit               int
+	ExportScheduleResumeDownload            bool
+	MaxConcurrentGoRoutines                 int
 }
 
 func NewExporterApp(scApiClient *httpapi.Client, sheqsyApiClient *httpapi.Client, cfg *ExporterFeedCfg) *ExporterFeedClient {
@@ -285,18 +296,23 @@ func (e *ExporterFeedClient) GetFeeds() []Feed {
 			Limit:         e.configuration.ExportActionLimit,
 		},
 		&InspectionItemFeed{
-			SkipIDs:         e.configuration.ExportInspectionSkipIds,
-			SkipFields:      e.configuration.ExportInspectionItemsSkipFields,
-			ModifiedAfter:   e.configuration.ExportModifiedAfterTime,
-			ModifiedBefore:  e.configuration.ExportModifiedBeforeTime,
-			BlockSize:       e.configuration.ExportBlockSize,
-			TemplateIDs:     e.configuration.ExportTemplateIds,
-			Archived:        e.configuration.ExportInspectionArchived,
-			Completed:       e.configuration.ExportInspectionCompleted,
-			IncludeInactive: e.configuration.ExportInspectionIncludedInactiveItems,
-			Incremental:     e.configuration.ExportIncremental,
-			Limit:           e.configuration.ExportInspectionLimit,
-			ExportMedia:     e.configuration.ExportMedia,
+			SkipIDs:            e.configuration.ExportInspectionSkipIds,
+			SkipFields:         e.configuration.ExportInspectionItemsSkipFields,
+			ModifiedAfter:      e.configuration.ExportModifiedAfterTime,
+			ModifiedBefore:     e.configuration.ExportModifiedBeforeTime,
+			BlockSize:          e.configuration.ExportInspectionItemsBlockSize,
+			BlockMaxRetries:    e.configuration.ExportInspectionItemsBlockMaxRetries,
+			BlockConcurrency:   e.configuration.ExportInspectionItemsBlockConcurrency,
+			BlockStopOnFailure: e.configuration.ExportInspectionItemsBlockStopOnFailure,
+			RateLimitEnabled:   e.configuration.ExportInspectionItemsRateLimitEnabled,
+			RateLimitPerMinute: e.configuration.ExportInspectionItemsRateLimitPerMinute,
+			TemplateIDs:        e.configuration.ExportTemplateIds,
+			Archived:           e.configuration.ExportInspectionArchived,
+			Completed:          e.configuration.ExportInspectionCompleted,
+			IncludeInactive:    e.configuration.ExportInspectionIncludedInactiveItems,
+			Incremental:        e.configuration.ExportIncremental,
+			Limit:              e.configuration.ExportInspectionLimit,
+			ExportMedia:        e.configuration.ExportMedia,
 		},
 		&IssueFeed{
 			Incremental: false, // this was disabled on request. Issues API doesn't support modified After filters
@@ -328,16 +344,21 @@ func (e *ExporterFeedClient) GetFeeds() []Feed {
 
 func (e *ExporterFeedClient) getInspectionFeed() *InspectionFeed {
 	return &InspectionFeed{
-		SkipIDs:        e.configuration.ExportInspectionSkipIds,
-		ModifiedAfter:  e.configuration.ExportModifiedAfterTime,
-		ModifiedBefore: e.configuration.ExportModifiedBeforeTime,
-		BlockSize:      e.configuration.ExportBlockSize,
-		TemplateIDs:    e.configuration.ExportTemplateIds,
-		Archived:       e.configuration.ExportInspectionArchived,
-		Completed:      e.configuration.ExportInspectionCompleted,
-		Incremental:    e.configuration.ExportIncremental,
-		Limit:          e.configuration.ExportInspectionLimit,
-		WebReportLink:  e.configuration.ExportInspectionWebReportLink,
+		SkipIDs:            e.configuration.ExportInspectionSkipIds,
+		ModifiedAfter:      e.configuration.ExportModifiedAfterTime,
+		ModifiedBefore:     e.configuration.ExportModifiedBeforeTime,
+		BlockSize:          e.configuration.ExportBlockSize,
+		BlockMaxRetries:    e.configuration.ExportInspectionBlockMaxRetries,
+		BlockConcurrency:   e.configuration.ExportInspectionBlockConcurrency,
+		BlockStopOnFailure: e.configuration.ExportInspectionBlockStopOnFailure,
+		RateLimitEnabled:   e.configuration.ExportInspectionRateLimitEnabled,
+		RateLimitPerMinute: e.configuration.ExportInspectionRateLimitPerMinute,
+		TemplateIDs:        e.configuration.ExportTemplateIds,
+		Archived:           e.configuration.ExportInspectionArchived,
+		Completed:          e.configuration.ExportInspectionCompleted,
+		Incremental:        e.configuration.ExportIncremental,
+		Limit:              e.configuration.ExportInspectionLimit,
+		WebReportLink:      e.configuration.ExportInspectionWebReportLink,
 	}
 }
 

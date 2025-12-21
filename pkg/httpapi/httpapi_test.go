@@ -183,3 +183,113 @@ func TestClient_HeadersShouldMatch(t *testing.T) {
 	require.Nil(t, err)
 	require.NotNil(t, r)
 }
+
+func TestClient_WithRateLimiter_CreatesShallowCopy(t *testing.T) {
+	// Create original client
+	cfg := httpapi.ClientCfg{
+		Addr:                "http://localhost:9999",
+		AuthorizationHeader: "test-token",
+		IntegrationID:       "test-id",
+		IntegrationVersion:  "v1.0",
+	}
+	originalClient := httpapi.NewClient(&cfg)
+
+	// Create rate limiter
+	rateLimiter := httpapi.NewRateLimiter(httpapi.RateLimiterConfig{
+		RequestsPerMinute: 60,
+		BurstSize:         60,
+		Enabled:           true,
+		Name:              "test",
+	})
+
+	// Create copy with rate limiter
+	rateLimitedClient := originalClient.WithRateLimiter(rateLimiter)
+
+	// Verify they are different instances
+	assert.NotSame(t, originalClient, rateLimitedClient, "should create a new client instance")
+
+	// Verify they share the same underlying HTTP resources
+	assert.Same(t, originalClient.HTTPClient(), rateLimitedClient.HTTPClient(), "should share HTTP client")
+	assert.Same(t, originalClient.HTTPTransport(), rateLimitedClient.HTTPTransport(), "should share HTTP transport")
+
+	// Verify base URL is copied
+	assert.Equal(t, originalClient.BaseURL, rateLimitedClient.BaseURL)
+}
+
+func TestClient_WithRateLimiter_AppliesRateLimiting(t *testing.T) {
+	defer gock.Off()
+
+	// Mock endpoint that always succeeds
+	gock.New("http://localhost:9999").
+		Get("/test").
+		Persist().
+		Reply(200).
+		BodyString(`{"status": "ok"}`)
+
+	// Create client with rate limiter (60 requests per minute = 1 per second)
+	cfg := httpapi.ClientCfg{
+		Addr:                "http://localhost:9999",
+		AuthorizationHeader: "test-token",
+		IntegrationID:       "test-id",
+		IntegrationVersion:  "v1.0",
+	}
+	client := httpapi.NewClient(&cfg)
+
+	rateLimiter := httpapi.NewRateLimiter(httpapi.RateLimiterConfig{
+		RequestsPerMinute: 60, // 1 request per second
+		BurstSize:         2,  // Allow initial burst of 2
+		Enabled:           true,
+		Name:              "test",
+		Algorithm:         httpapi.AlgorithmTokenBucket, // Use token bucket for this test
+	})
+	rateLimitedClient := client.WithRateLimiter(rateLimiter)
+	gock.InterceptClient(rateLimitedClient.HTTPClient())
+
+	// Make 3 requests - first 2 should be fast (burst), 3rd should be rate-limited
+	start := time.Now()
+
+	for i := 0; i < 3; i++ {
+		_, err := httpapi.ExecuteGet[map[string]string](context.Background(), rateLimitedClient, "/test", nil)
+		require.NoError(t, err)
+	}
+
+	elapsed := time.Since(start)
+
+	// The 3rd request should have been delayed by ~1 second due to rate limiting
+	// (burst allows 2, then we wait for the next token)
+	assert.GreaterOrEqual(t, elapsed, 900*time.Millisecond, "should enforce rate limiting")
+}
+
+func TestClient_WithRateLimiter_NoRateLimitingWhenNil(t *testing.T) {
+	defer gock.Off()
+
+	// Mock endpoint
+	gock.New("http://localhost:9999").
+		Get("/test").
+		Times(3).
+		Reply(200).
+		BodyString(`{"status": "ok"}`)
+
+	// Create client without rate limiter
+	cfg := httpapi.ClientCfg{
+		Addr:                "http://localhost:9999",
+		AuthorizationHeader: "test-token",
+		IntegrationID:       "test-id",
+		IntegrationVersion:  "v1.0",
+	}
+	client := httpapi.NewClient(&cfg)
+	gock.InterceptClient(client.HTTPClient())
+
+	// Make 3 requests quickly
+	start := time.Now()
+
+	for i := 0; i < 3; i++ {
+		_, err := httpapi.ExecuteGet[map[string]string](context.Background(), client, "/test", nil)
+		require.NoError(t, err)
+	}
+
+	elapsed := time.Since(start)
+
+	// Should complete quickly without rate limiting
+	assert.Less(t, elapsed, 500*time.Millisecond, "should not apply rate limiting")
+}

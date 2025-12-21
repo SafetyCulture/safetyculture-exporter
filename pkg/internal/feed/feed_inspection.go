@@ -55,16 +55,21 @@ type Inspection struct {
 
 // InspectionFeed is a representation of the inspections feed
 type InspectionFeed struct {
-	SkipIDs        []string
-	ModifiedAfter  time.Time
-	ModifiedBefore time.Time
-	BlockSize      string
-	TemplateIDs    []string
-	Archived       string
-	Completed      string
-	Incremental    bool
-	Limit          int
-	WebReportLink  string
+	SkipIDs            []string
+	ModifiedAfter      time.Time
+	ModifiedBefore     time.Time
+	BlockSize          string
+	BlockMaxRetries    int
+	BlockConcurrency   int
+	BlockStopOnFailure bool
+	RateLimitEnabled   bool
+	RateLimitPerMinute int
+	TemplateIDs        []string
+	Archived           string
+	Completed          string
+	Incremental        bool
+	Limit              int
+	WebReportLink      string
 }
 
 // Name is the name of the feed
@@ -170,6 +175,31 @@ func (f *InspectionFeed) CreateSchema(exporter Exporter) error {
 func (f *InspectionFeed) Export(ctx context.Context, apiClient *httpapi.Client, exporter Exporter, orgID string) error {
 	status := GetExporterStatus()
 
+	// Create rate-limited client if enabled
+	// All workers/goroutines will share this same client instance and thus the same rate limiter
+	if f.RateLimitEnabled && f.RateLimitPerMinute > 0 {
+		// Use sliding window algorithm (default) - matches server-side Istio/Envoy rate limiting
+		// This prevents bursts and ensures smooth distribution across the time window
+		rateLimiter := httpapi.NewRateLimiter(httpapi.RateLimiterConfig{
+			RequestsPerMinute: f.RateLimitPerMinute,
+			Enabled:           true,
+			Name:              f.Name(),
+			// Algorithm defaults to AlgorithmSlidingWindow
+		})
+		apiClient = apiClient.WithRateLimiter(rateLimiter)
+		logger.GetLogger().With(
+			"feed", f.Name(),
+			"rate_limit_rpm", f.RateLimitPerMinute,
+			"algorithm", "sliding_window",
+		).Info("rate limiting enabled for feed")
+	} else {
+		logger.GetLogger().With(
+			"feed", f.Name(),
+			"rate_limit_enabled", f.RateLimitEnabled,
+			"rate_limit_rpm", f.RateLimitPerMinute,
+		).Warn("rate limiting NOT enabled for feed")
+	}
+
 	if err := exporter.InitFeed(f, &InitFeedOptions{
 		// Delete data if incremental refresh is disabled so there is no duplicates
 		Truncate: !f.Incremental,
@@ -271,9 +301,142 @@ func (f *InspectionFeed) processInspectionsInBlocks(ctx context.Context, apiClie
 		return nil
 	}
 
-	l.With("total_blocks", len(blocks), "block_size", f.BlockSize).Info("starting block-based export")
+	// Cast exporter to SQLExporter (required for block progress tracking)
+	sqlExporter, ok := exporter.(*SQLExporter)
+	if !ok {
+		// Fallback to sequential processing for non-SQL exporters
+		l.Warn("parallel processing requires SQL exporter, falling back to sequential")
+		return f.processInspectionsInBlocksSequential(ctx, apiClient, exporter, orgID, status, blocks)
+	}
 
-	// Process each block
+	// Ensure block_progress table exists
+	if err := sqlExporter.DB.AutoMigrate(&BlockProgress{}); err != nil {
+		return fmt.Errorf("migrate block progress table: %w", err)
+	}
+
+	blockRepo := NewBlockProgressRepository(sqlExporter.DB)
+
+	// Initialize blocks in database
+	isFirstRun, err := blockRepo.InitializeBlocks(f.Name(), orgID, blocks, f.BlockSize)
+	if err != nil {
+		return fmt.Errorf("initialize blocks: %w", err)
+	}
+
+	if !isFirstRun {
+		l.Info("resuming previous block-based export")
+	}
+
+	// Determine concurrency level
+	numWorkers := f.BlockConcurrency
+	if numWorkers == 0 {
+		// Auto-calculate based on rate limit
+		maxWorkers := 50 // Safety cap
+		if f.RateLimitPerMinute > 0 {
+			numWorkers = util.CalculateOptimalConcurrency(f.RateLimitPerMinute, len(blocks), maxWorkers)
+		} else {
+			numWorkers = util.CalculateOptimalConcurrency(180, len(blocks), maxWorkers)
+		}
+	}
+
+	l.With("total_blocks", len(blocks), "workers", numWorkers, "block_size", f.BlockSize).
+		Info("starting parallel block-based export")
+
+	// Create block processor
+	processor := NewBlockProcessor(
+		BlockProcessorConfig{
+			FeedName:      f.Name(),
+			OrgID:         orgID,
+			NumWorkers:    numWorkers,
+			MaxRetries:    f.BlockMaxRetries,
+			RetryBackoff:  5 * time.Second,
+			StopOnFailure: f.BlockStopOnFailure,
+		},
+		blockRepo,
+	)
+
+	// Define block processing function
+	processBlock := func(
+		ctx context.Context,
+		apiClient *httpapi.Client,
+		exporter Exporter,
+		block util.TimeBlock,
+		retryCount int,
+	) error {
+		l.With(
+			"start", block.Start.Format(time.RFC3339),
+			"end", block.End.Format(time.RFC3339),
+			"retry", retryCount,
+		).Debug("processing block")
+
+		req := GetFeedRequest{
+			InitialURL: "/feed/inspections",
+			Params: GetFeedParams{
+				ModifiedAfter:  block.Start,
+				ModifiedBefore: block.End,
+				TemplateIDs:    f.TemplateIDs,
+				Archived:       f.Archived,
+				Completed:      f.Completed,
+				Limit:          f.Limit,
+				WebReportLink:  f.WebReportLink,
+			},
+		}
+
+		feedFn := func(resp *GetFeedResponse) error {
+			var rows []Inspection
+
+			if err := json.Unmarshal(resp.Data, &rows); err != nil {
+				return events.NewEventErrorWithMessage(err, events.ErrorSeverityError, events.ErrorSubSystemDataIntegrity, false, "map data")
+			}
+
+			if len(rows) != 0 {
+				err := f.writeRows(exporter, rows)
+				if err != nil {
+					return err
+				}
+			}
+
+			status.UpdateStatus(f.Name(), resp.Metadata.RemainingRecords, exporter.GetDuration().Milliseconds())
+
+			l.With(
+				"estimated_remaining", resp.Metadata.RemainingRecords,
+				"duration_ms", apiClient.Duration.Milliseconds(),
+				"export_duration_ms", exporter.GetDuration().Milliseconds(),
+			).Debug("export batch complete")
+
+			return nil
+		}
+
+		return DrainFeed(ctx, apiClient, &req, feedFn)
+	}
+
+	// Process blocks in parallel
+	err = processor.ProcessBlocksInParallel(ctx, apiClient, exporter, processBlock)
+	if err != nil {
+		return fmt.Errorf("parallel block processing failed: %w", err)
+	}
+
+	// Cleanup completed blocks
+	if err := blockRepo.DeleteCompletedBlocks(f.Name(), orgID); err != nil {
+		l.Warnf("failed to cleanup completed blocks: %v", err)
+	}
+
+	l.With("total_blocks", len(blocks)).Info("completed parallel block-based export")
+	return nil
+}
+
+// processInspectionsInBlocksSequential is the fallback sequential implementation
+func (f *InspectionFeed) processInspectionsInBlocksSequential(
+	ctx context.Context,
+	apiClient *httpapi.Client,
+	exporter Exporter,
+	orgID string,
+	status *ExportStatus,
+	blocks []util.TimeBlock,
+) error {
+	l := logger.GetLogger().With("feed", f.Name(), "org_id", orgID)
+	l.With("total_blocks", len(blocks), "block_size", f.BlockSize).Info("starting sequential block-based export")
+
+	// Process each block sequentially (original implementation)
 	for i, block := range blocks {
 		l.With("block", i+1, "total_blocks", len(blocks), "start", block.Start.Format(time.RFC3339), "end", block.End.Format(time.RFC3339)).Info("processing time block")
 
@@ -324,7 +487,7 @@ func (f *InspectionFeed) processInspectionsInBlocks(ctx context.Context, apiClie
 		l.With("block", i+1, "total_blocks", len(blocks)).Info("completed time block")
 	}
 
-	l.With("total_blocks", len(blocks)).Info("completed block-based export")
+	l.With("total_blocks", len(blocks)).Info("completed sequential block-based export")
 	return nil
 }
 

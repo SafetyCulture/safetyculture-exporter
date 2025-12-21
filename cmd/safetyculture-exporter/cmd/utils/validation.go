@@ -1,9 +1,10 @@
 package util
 
 import (
-	"github.com/SafetyCulture/safetyculture-exporter/pkg/logger"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
+
+	"github.com/SafetyCulture/safetyculture-exporter/pkg/logger"
 )
 
 var lgr *zap.SugaredLogger
@@ -15,6 +16,6 @@ func Check(err error, msg string) {
 	}
 
 	if err != nil {
-		lgr.Fatal(errors.Wrapf(err, msg))
+		lgr.Fatal(errors.Wrap(err, msg))
 	}
 }
