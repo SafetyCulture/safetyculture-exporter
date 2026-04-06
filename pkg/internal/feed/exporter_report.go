@@ -25,13 +25,14 @@ const feedReports = "reports"
 // ReportExporter is an interface to export data feeds to CSV files
 type ReportExporter struct {
 	*SQLExporter
-	Logger       *zap.SugaredLogger
-	ExportPath   string
-	PreferenceID string
-	Filename     string
-	Format       []string
-	Mu           sync.Mutex
-	RetryTimeout int
+	Logger         *zap.SugaredLogger
+	ExportPath     string
+	PreferenceID   string
+	Filename       string
+	Format         []string
+	Mu             sync.Mutex
+	RetryTimeout   int
+	ReportClient   *httpapi.Client
 }
 
 type reportExportFormat struct {
@@ -241,6 +242,17 @@ func (e *ReportExporter) exportInspection(ctx context.Context, apiClient *httpap
 		return err
 	}
 
+	downloadClient := apiClient
+	if e.ReportClient != nil {
+		downloadClient = e.ReportClient
+	}
+
+	// Lock the entire poll + download + write cycle so that:
+	// 1. The pre-signed download URL doesn't expire while waiting for the lock
+	// 2. The HTTP client timeout doesn't expire on an unread response body
+	e.Mu.Lock()
+	defer e.Mu.Unlock()
+
 	tries := 0
 
 	for {
@@ -252,17 +264,13 @@ func (e *ReportExporter) exportInspection(ctx context.Context, apiClient *httpap
 			err = cErr
 			break
 		} else if rec.Status == "SUCCESS" {
-			resp, dErr := httpapi.ExecuteRawGet(ctx, apiClient, rec.URL)
+			resp, dErr := httpapi.ExecuteRawGet(ctx, downloadClient, rec.URL)
 			if dErr != nil {
 				err = dErr
 				break
 			}
 
-			// only allow one process to access disk at the same time
-			// this way we won't allow process to overwrite reports with the same name
-			e.Mu.Lock()
 			err = e.saveReportResponse(resp.Body, inspection, format)
-			e.Mu.Unlock()
 			break
 		} else if rec.Status == "FAILED" {
 			err = fmt.Errorf("%s report generation failed on server for %s", format, fmt.Sprintf("%s (%s)", inspection.Name, inspection.ID))
