@@ -25,14 +25,14 @@ const feedReports = "reports"
 // ReportExporter is an interface to export data feeds to CSV files
 type ReportExporter struct {
 	*SQLExporter
-	Logger         *zap.SugaredLogger
-	ExportPath     string
-	PreferenceID   string
-	Filename       string
-	Format         []string
-	Mu             sync.Mutex
-	RetryTimeout   int
-	ReportClient   *httpapi.Client
+	Logger       *zap.SugaredLogger
+	ExportPath   string
+	PreferenceID string
+	Filename     string
+	Format       []string
+	Mu           sync.Mutex
+	RetryTimeout int
+	ReportClient *httpapi.Client
 }
 
 type reportExportFormat struct {
