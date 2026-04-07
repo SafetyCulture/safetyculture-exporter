@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/httpapi"
 	"github.com/SafetyCulture/safetyculture-exporter/pkg/internal/exporter"
@@ -36,6 +37,7 @@ func NewSafetyCultureExporter(cfg *ExporterConfiguration, version *AppVersion) (
 		apiClient:       apiClient,
 		sheqsyApiClient: sheqsyApiClient,
 		cfg:             cfg,
+		version:         version,
 		exportStatus:    feed.GetExporterStatus(),
 	}, nil
 }
@@ -109,6 +111,9 @@ func NewReportExporter(exportPath string, reportCfg *ReportExporterCfg) (*feed.R
 	if err != nil {
 		return nil, err
 	}
+	if res := sqlExporter.DB.Exec("PRAGMA busy_timeout = 20000"); res.Error != nil {
+		return nil, res.Error
+	}
 
 	return &feed.ReportExporter{
 		SQLExporter:  sqlExporter,
@@ -143,6 +148,7 @@ type SafetyCultureExporter struct {
 	apiClient       *httpapi.Client
 	sheqsyApiClient *httpapi.Client
 	cfg             *ExporterConfiguration
+	version         *AppVersion
 	exportStatus    *feed.ExportStatus
 }
 
@@ -300,6 +306,15 @@ func (s *SafetyCultureExporter) RunInspectionReports() error {
 	if err != nil {
 		return errors.Wrap(err, "unable to create report exporter")
 	}
+
+	// Create a dedicated client with a longer timeout for report downloads,
+	// as Word report generation and download can exceed the default 120s timeout.
+	reportClient, err := getAPIClient(s.cfg.ToApiConfig(), s.version)
+	if err != nil {
+		return errors.Wrap(err, "unable to create report download client")
+	}
+	reportClient.HTTPClient().Timeout = 10 * time.Minute
+	e.ReportClient = reportClient
 
 	exporterApp := feed.NewExporterApp(s.apiClient, s.sheqsyApiClient, s.cfg.ToExporterConfig())
 	err = exporterApp.ExportInspectionReports(e, ctx)

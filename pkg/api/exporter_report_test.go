@@ -504,6 +504,16 @@ func TestExportReports_should_return_error_for_unsupported_format(t *testing.T) 
 	assert.EqualError(t, err, "save reports: no valid export format specified")
 }
 
+func TestNewReportExporter_should_set_busy_timeout(t *testing.T) {
+	exporter, err := getTemporaryReportExporter([]string{"PDF"}, "", "INSPECTION_TITLE")
+	assert.NoError(t, err)
+
+	var busyTimeout int
+	err = exporter.DB.Raw("PRAGMA busy_timeout").Scan(&busyTimeout).Error
+	assert.NoError(t, err)
+	assert.Equal(t, 20000, busyTimeout)
+}
+
 func Test_GetWaitTime(t *testing.T) {
 	assert.Equal(t, time.Duration(1), feed.GetWaitTime(0))
 	assert.Equal(t, time.Duration(1), feed.GetWaitTime(10))
