@@ -323,6 +323,10 @@ func (e *ExporterFeedClient) GetFeeds() []Feed {
 			Incremental: true,
 			Limit:       250,
 		},
+		&IssueRelationshipFeed{
+			Incremental: true,
+			Limit:       e.configuration.ExportIssueLimit,
+		},
 	}
 }
 
