@@ -332,7 +332,7 @@ func (e *ReportExporter) saveReportResponse(resp io.ReadCloser, inspection *Insp
 func sanitizeName(name string) string {
 	res := strings.ReplaceAll(name, " / ", "-")
 	res = strings.ReplaceAll(res, " // ", "-")
-	var rx = regexp.MustCompile(`[/\\?%*:|"<> \t\n]`)
+	var rx = regexp.MustCompile(`[/\\?%*:|"<> \t\n\r]`)
 	res = rx.ReplaceAllString(res, "-")
 	return res
 }
