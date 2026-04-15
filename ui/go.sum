@@ -23,8 +23,6 @@ github.com/AzureAD/microsoft-authentication-library-for-go v1.1.0 h1:HCc0+LpPfpC
 github.com/AzureAD/microsoft-authentication-library-for-go v1.1.0/go.mod h1:wP83P5OoQ5p6ip3ScPr0BAq0BvuPAvacpEuSzyouqAI=
 github.com/MickStanciu/go-fn v1.8.1 h1:SxRokXRVhLLwiz38c7RR5VD6uBeusBxQkGPXkuMFaQM=
 github.com/MickStanciu/go-fn v1.8.1/go.mod h1:EEU7jqIpyWeaKqjiEb8k3NU1qMMGA0yCZQUBI9WyK3s=
-github.com/SafetyCulture/safetyculture-exporter v0.0.0-20260414010053-ea43ffed54c1 h1:2OAZ48CUgLhz6gNkUBpK3cuYIPZHMK98LK4r8HrRPms=
-github.com/SafetyCulture/safetyculture-exporter v0.0.0-20260414010053-ea43ffed54c1/go.mod h1:thk5zaAlIOrUhYhbAnYFaiXxspQ7xYWCosOS3IpJnMY=
 github.com/bep/debounce v1.2.1 h1:v67fRdBA9UQu2NhLFXrSg0Brw7CexQekrBwDMM8bzeY=
 github.com/bep/debounce v1.2.1/go.mod h1:H8yggRPQKLUhUoqrJC1bO2xNya7vanpDl7xR3ISbCJ0=
 github.com/creack/pty v1.1.9/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ33E=
