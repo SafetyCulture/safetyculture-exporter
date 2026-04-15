@@ -259,4 +259,68 @@ jobs:
           name: ui-macos
           path: safetyculture-exporter-ui-darwin-universal.zip
 
+  ui-windows:
+    name: UI Windows (amd64)
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+          cache-dependency-path: ui/frontend/pnpm-lock.yaml
+
+      - name: Install Wails
+        run: go install github.com/wailsapp/wails/v2/cmd/wails@v2.12.0
+
+      - name: Install mingw
+        run: choco install mingw
+
+      - name: Build Windows amd64
+        working-directory: ui
+        shell: pwsh
+        run: |
+          $GP = (go env GOPATH)
+          $env:path = "$env:path;$GP\bin"
+          wails build -platform windows/amd64 -clean -skipbindings `
+            -ldflags "-s -w -X github.com/SafetyCulture/safetyculture-exporter-ui/internal/version.version=${{ github.ref_name }}"
+
+      - name: Sign with CodeSignTool
+        uses: sslcom/esigner-codesign@v2.0.0
+        with:
+          command: sign
+          username: ${{ secrets.SSL_DOT_COM_USERNAME }}
+          password: ${{ secrets.SSL_DOT_COM_PASSWORD }}
+          credential_id: ${{ secrets.CREDENTIAL_ID }}
+          totp_secret: ${{ secrets.TOTP_SECRET }}
+          file_path: ${{ github.workspace }}\ui\build\bin\safetyculture-exporter-ui.exe
+          dir_path: ${{ github.workspace }}\ui\build\bin
+          override: true
+          signing_method: v2
+          jvm_max_memory: 1024M
+
+      - name: Copy signed binary
+        shell: pwsh
+        run: |
+          Copy-Item -Path .\ui\build\bin\safetyculture-exporter-ui.exe -Destination .\safetyculture-exporter-ui-windows-x86_64.exe
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ui-windows
+          path: safetyculture-exporter-ui-windows-x86_64.exe
+
   # Release aggregator job is added by Plan 02-06
