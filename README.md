@@ -62,8 +62,12 @@ The UI references the CLI as a local module via Go workspaces, so both always bu
 
 ```bash
 cd cli
-GOWORK=off go test ./...        # Unit tests
-GOWORK=off go build ./cmd/safetyculture-exporter  # Build
+
+# Unit tests
+GOWORK=off go test ./...
+
+# Build
+GOWORK=off go build ./cmd/safetyculture-exporter
 ```
 
 Use `GOWORK=off` for CLI-only work to avoid pulling in Wails/CGO dependencies.
@@ -74,8 +78,12 @@ When adding new columns in methods that implement `Columns() []string`, make sur
 
 ```bash
 cd ui
-wails dev         # Dev server with hot reload
-wails build       # Production build
+
+# Dev server with hot reload
+wails dev
+
+# Production build
+wails build
 ```
 
 ### Integration Tests
