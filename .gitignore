@@ -1,31 +1,44 @@
-# Binaries for programs and plugins
+# OS
+.DS_Store
+*.swp
+
+# Editor
+.idea
+.vscode/
+.run
+
+# Go build artifacts
 *.exe
 *.exe~
 *.dll
 *.so
 *.dylib
-
-# Test binary, build with `go test -c`
 *.test
-
-# Output of the go coverage tool, specifically when used with LiteIDE
-*.idea
 *.out
-.DS_Store
-dist/
-.run
 
-*swp
-.vscode/
+# NOTE: go.work and go.work.sum are NOT ignored — they are committed to the repo
 
+# CLI runtime artifacts
+cli/**/safetyculture-exporter*.yaml
+/export/
+
+# Wails build output
+ui/build/bin/
+ui/build/darwin/
+ui/build/windows/
+
+# Frontend build output
+ui/frontend/dist/
+
+# Frontend dependencies
+ui/frontend/node_modules/
+
+# Node artifacts
+.npmrc.local
+
+# Environment / secrets
 .release-env
 
-/export/
-safetyculture-exporter*.yaml
+# Logs
 *.log
 perf.md
-
-# UI build output
-ui/build/bin/
-ui/frontend/dist/
-ui/frontend/node_modules/

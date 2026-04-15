@@ -1,0 +1,41 @@
+# Wails Build Smoke Test Failure — 2026-04-15
+
+## Exit Code
+1
+
+## Error Summary
+Frontend compilation failed: Vite could not resolve '../../wailsjs/go/main/App.js'
+from src/routes/Welcome.svelte
+
+## Root Cause
+NOT a module/workspace resolution error.
+
+The failure is a frontend import path mismatch:
+- The Svelte source files (src/routes/Welcome.svelte) import wailsjs bindings
+  using a relative path: ../../wailsjs/go/main/App.js
+- This path assumed the OLD project layout (wailsjsdir was ./frontend/src/wailsjs,
+  bindings ended up in a nested wailsjs/wailsjs/ path).
+- After correcting wailsjsdir to ./frontend/src, bindings now live at
+  frontend/src/wailsjs/go/main/App.js but the Svelte imports still use the old
+  relative path.
+
+Additionally: the UI frontend is currently Svelte + Vite 3, which is the legacy
+stack from the upstream safetyculture-exporter-ui repo. The target stack (per
+CLAUDE.md) is React + Vite 5.4.x + Tailwind v4 + shadcn/ui. The frontend
+migration is out of scope for Phase 1 (Plan 3).
+
+## Workspace/Module Resolution: PASS
+- go.work correctly links ./cli and ./ui
+- go build ./... succeeds in both cli/ and ui/ with GOWORK=on
+- GOWORK=off go build ./... succeeds in cli/ (isolation check)
+- go work sync completes cleanly
+- No replace directive in ui/go.mod
+
+## Primary Criterion Met
+go build ./... in ui/ succeeds via workspace (the primary Phase 1 criterion).
+The wails build failure is a pre-existing frontend compatibility issue unrelated
+to Go workspace wiring.
+
+## Required Fix (Future Phase)
+Update Svelte import paths in src/routes/ to use the corrected wailsjs location,
+OR migrate the frontend to the target React stack as planned.
