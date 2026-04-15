@@ -42,3 +42,6 @@ ui/frontend/node_modules/
 # Logs
 *.log
 perf.md
+
+# Local planning (GSD workflow artifacts)
+.planning/
