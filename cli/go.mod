@@ -2,7 +2,7 @@ module github.com/SafetyCulture/safetyculture-exporter
 
 go 1.23
 
-toolchain go1.24.1
+toolchain go1.24.4
 
 require (
 	github.com/MickStanciu/go-fn v1.8.1

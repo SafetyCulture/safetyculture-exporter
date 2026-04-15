@@ -2,7 +2,7 @@ module github.com/SafetyCulture/safetyculture-exporter-ui
 
 go 1.23
 
-toolchain go1.24.3
+toolchain go1.24.4
 
 require (
 	github.com/SafetyCulture/safetyculture-exporter v0.0.0-20260414010053-ea43ffed54c1

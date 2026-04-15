@@ -1,4 +1,3 @@
-# yamllint disable rule:line-length
 ---
 linters-settings:
   govet:

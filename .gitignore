@@ -34,6 +34,7 @@ ui/frontend/dist/
 ui/frontend/node_modules/
 
 # Node artifacts
+package-lock.json
 .npmrc.local
 
 # Environment / secrets

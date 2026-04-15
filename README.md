@@ -2,7 +2,7 @@
 
 [![Maintainability](https://api.codeclimate.com/v1/badges/39eecd9ef3573ecca044/maintainability)](https://codeclimate.com/github/SafetyCulture/safetyculture-exporter/maintainability) [![Test Coverage](https://api.codeclimate.com/v1/badges/39eecd9ef3573ecca044/test_coverage)](https://codeclimate.com/github/SafetyCulture/safetyculture-exporter/test_coverage)
 
-SafetyCulture Exporter is a command-line tool (CLI tool) that’s available to all our Premium and Enterprise customers. You can use the SafetyCulture Exporter to export your data, such as inspections, templates, schedules, and actions, to multiple formats that can be used for business intelligence tools or record keeping.
+SafetyCulture Exporter is available as both a **command-line tool (CLI)** and a **desktop application (UI)**. You can use it to export your data — inspections, templates, schedules, actions, and more — to multiple formats for business intelligence tools or record keeping. Available to all Premium and Enterprise customers.
 
 For instructions on downloading and running the SafetyCulture Exporter, as well as interpreting the data output, please check out our [SafetyCulture Exporter documentation](https://developer.safetyculture.com/docs/safetyculture-exporter).
 
@@ -34,36 +34,74 @@ For instructions on downloading and running the SafetyCulture Exporter, as well 
 
 ***
 
+## Repository Structure
+
+This is a monorepo containing both the CLI and the desktop UI:
+
+```
+.
+├── cli/          # Go CLI tool (module: github.com/SafetyCulture/safetyculture-exporter)
+├── ui/           # Wails v2 desktop app (React + Tailwind + shadcn/ui)
+│   └── frontend/ # React frontend (pnpm)
+├── go.work       # Go workspace linking cli/ and ui/
+└── .github/      # CI workflows
+```
+
+The UI references the CLI as a local module via Go workspaces, so both always build against the same code.
+
 ## Development
 
-To develop the `safetyculture-exporter`, you'll need the [latest version of Golang](https://golang.org/doc/install).
-When adding new columns in methods that implement `Columns() []string`, we need to make sure they are added at the end.
-This way we can preserve the CSV columns in the export files.
+### Prerequisites
 
-#### NOTE: Consider that every change in PKG directory can affect the Exporter-UI project as well
+* [Go 1.23+](https://golang.org/doc/install) (toolchain 1.24.4 is fetched automatically)
+* [pnpm 10+](https://pnpm.io/installation) (for the UI frontend)
+* [Node.js 20+](https://nodejs.org/) (LTS)
+* [Wails v2 CLI](https://wails.io/docs/gettingstarted/installation/) (for UI development)
 
-### Testing
+### CLI
 
-Locally you can run `go test ./...`, this will run all the Unit tests and Integration tests that can be run without an external DB.
+```bash
+cd cli
+GOWORK=off go test ./...        # Unit tests
+GOWORK=off go build ./cmd/safetyculture-exporter  # Build
+```
 
-SQL Database integration tests can be run by starting the SQL DBs `docker-compose up -d` and then running `make integration-tests`.
+Use `GOWORK=off` for CLI-only work to avoid pulling in Wails/CGO dependencies.
 
-Note: these tests will be automatically when pushing or opening a pull request against the repository.
+When adding new columns in methods that implement `Columns() []string`, make sure they are added at the end to preserve CSV column order in export files.
 
-To run dockers with local volume:
-create folder structure ~/docker-volume/mssql then execute:
-`docker-compose -f docker-compose-local-volume.yml up sqlserver`
+### UI
+
+```bash
+cd ui
+wails dev         # Dev server with hot reload
+wails build       # Production build
+```
+
+### Integration Tests
+
+SQL database integration tests require running databases:
+
+```bash
+cd cli
+docker-compose up -d
+make integration-tests
+```
+
+To run with local volume:
+
+```bash
+mkdir -p ~/docker-volume/mssql
+docker-compose -f docker-compose-local-volume.yml up sqlserver
+```
 
 ### Releasing
 
-To release a new version you need just need to push a new tag to GitHub and [goreleaser](https://goreleaser.com) will do most of the work.
+Releases are triggered by pushing a version tag. The CI pipeline builds CLI binaries (linux/amd64, darwin/amd64, darwin/arm64, windows/amd64) and desktop app bundles (macOS universal, Windows amd64), then publishes them as GitHub Release assets.
 
-1. Execute `make release-dry-run` locally to make sure all things go well.
-2. Checkout the `main` branch and pull the latest changes. If you don't you'll tag the wrong commit for release!
-3. Create your tag, make sure it follows [Semantic Versioning](https://semver.org) and increments on the [latest release](https://github.com/SafetyCulture/safetyculture-exporter/releases)\
-`git tag -a v3.0.0 -m "Initial Public Release"`.\
-Acceptable versions include `v3.0.0`, `v3.0.0-alpha.22`, `v3.0.0-prealpha.22`, `v3.0.0-beta.22`.
-4. Push your tag to GitHub\
-`git push origin v3.0.0`
-5. Update the [release draft](https://github.com/SafetyCulture/safetyculture-exporter/releases) and publish it!
-6. Upload the exe file to https://www.virustotal.com and check for false positives
+1. Checkout `main` and pull the latest changes.
+2. Create a tag following [Semantic Versioning](https://semver.org):
+   `git tag -a v3.1.0 -m "Release v3.1.0"`
+   Acceptable formats: `v3.1.0`, `v3.1.0-alpha.1`, `v3.1.0-beta.1`
+3. Push the tag: `git push origin v3.1.0`
+4. Review and publish the [draft release](https://github.com/SafetyCulture/safetyculture-exporter/releases).

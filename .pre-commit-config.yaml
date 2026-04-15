@@ -27,8 +27,16 @@ repos:
     hooks:
       - id: yamllint
         args: ['-s']
-        exclude: ^(pkg/api/fixtures/corrupted_configuration.yaml)
-  - repo: https://github.com/golangci/golangci-lint
-    rev: v1.21.0
+        exclude: >-
+          (?x)^(
+            cli/pkg/api/fixtures/corrupted_configuration.yaml|
+            ui/frontend/pnpm-lock.yaml
+          )$
+  - repo: local
     hooks:
       - id: golangci-lint
+        name: golangci-lint
+        entry: bash -c 'cd cli && GOWORK=off golangci-lint run'
+        language: system
+        types: [go]
+        pass_filenames: false
