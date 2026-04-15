@@ -24,3 +24,8 @@ dist/
 safetyculture-exporter*.yaml
 *.log
 perf.md
+
+# UI build output
+ui/build/bin/
+ui/frontend/dist/
+ui/frontend/node_modules/
