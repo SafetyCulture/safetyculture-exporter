@@ -13,7 +13,7 @@ on:
 
 jobs:
   unit-tests:
-    name: Unit Tests
+    name: CLI Unit Tests
     runs-on: ubuntu-latest
     env:
       GOWORK: off
@@ -31,7 +31,7 @@ jobs:
         run: go test ./...
 
   pre-commit:
-    name: Pre-commit Linting
+    name: CLI Pre-commit Linting
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -49,7 +49,7 @@ jobs:
         uses: pre-commit/action@v3.0.1
 
   govulncheck:
-    name: Go Vulnerability Check
+    name: CLI Vulnerability Check
     runs-on: ubuntu-latest
     env:
       GOWORK: off
@@ -60,7 +60,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.23'
+          go-version: '1.24'
 
       - name: Install govulncheck
         run: go install golang.org/x/vuln/cmd/govulncheck@latest
