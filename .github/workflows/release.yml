@@ -323,4 +323,29 @@ jobs:
           name: ui-windows
           path: safetyculture-exporter-ui-windows-x86_64.exe
 
-  # Release aggregator job is added by Plan 02-06
+  release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    needs:
+      - cli-linux-amd64
+      - cli-windows-amd64
+      - cli-darwin-amd64
+      - cli-darwin-arm64
+      - ui-macos
+      - ui-windows
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts/
+          merge-multiple: true
+
+      - name: Create Release
+        uses: ncipollo/release-action@v1
+        with:
+          token: "${{ secrets.GITHUB_TOKEN }}"
+          artifacts: "artifacts/*"
+          allowUpdates: true
+          draft: true
+          prerelease: true
+          makeLatest: false
