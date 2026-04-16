@@ -228,10 +228,10 @@ jobs:
             -ldflags "-s -w -X github.com/SafetyCulture/safetyculture-exporter-ui/internal/version.version=${{ github.ref_name }}"
 
       - name: Codesign app bundle
-        run: codesign --force -s "${{ secrets.MAC_SIGNING_CERT_NAME }}" --options runtime ui/build/bin/safetyculture-exporter-ui.app -v
+        run: codesign --force -s "${{ secrets.MAC_SIGNING_CERT_NAME }}" --options runtime ui/build/bin/SafetyCulture-Exporter.app -v
 
       - name: Create notarization zip
-        run: ditto -c -k --keepParent ui/build/bin/safetyculture-exporter-ui.app ./safetyculture-exporter-ui-darwin-universal.zip
+        run: ditto -c -k --keepParent ui/build/bin/SafetyCulture-Exporter.app ./safetyculture-exporter-ui-darwin-universal.zip
 
       - name: Notarize with Apple
         run: |
@@ -243,10 +243,10 @@ jobs:
             --wait
 
       - name: Staple notarization ticket
-        run: xcrun stapler staple ui/build/bin/safetyculture-exporter-ui.app
+        run: xcrun stapler staple ui/build/bin/SafetyCulture-Exporter.app
 
       - name: Re-zip with staple ticket
-        run: ditto -c -k --keepParent ui/build/bin/safetyculture-exporter-ui.app ./safetyculture-exporter-ui-darwin-universal.zip
+        run: ditto -c -k --keepParent ui/build/bin/SafetyCulture-Exporter.app ./safetyculture-exporter-ui-darwin-universal.zip
 
       - name: Clean up sensitive files
         if: always()
@@ -298,7 +298,7 @@ jobs:
             -ldflags "-s -w -X github.com/SafetyCulture/safetyculture-exporter-ui/internal/version.version=${{ github.ref_name }}"
 
       - name: Sign with CodeSignTool
-        uses: sslcom/esigner-codesign@v2.0.0
+        uses: sslcom/esigner-codesign@v1.3.2
         with:
           command: sign
           username: ${{ secrets.SSL_DOT_COM_USERNAME }}
