@@ -1,0 +1,350 @@
+---
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+env:
+  GO_VERSION: '1.23'
+
+jobs:
+  cli-linux-amd64:
+    name: CLI linux/amd64
+    runs-on: ubuntu-latest
+    env:
+      GOWORK: off
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: Build CLI linux/amd64
+        working-directory: cli
+        run: |
+          GOOS=linux GOARCH=amd64 CGO_ENABLED=1 go build -v \
+            -ldflags "-s -w -X github.com/SafetyCulture/safetyculture-exporter/internal/app/version.version=${{ github.ref_name }}" \
+            -o safetyculture-exporter ./cmd/safetyculture-exporter/main.go
+
+      - name: Package artifact
+        working-directory: cli
+        run: |
+          mkdir safetyculture-exporter-cli
+          cp safetyculture-exporter THIRD_PARTY_NOTICES.md ../README.md safetyculture-exporter-cli/
+          zip -r safetyculture-exporter-linux-amd64.zip safetyculture-exporter-cli
+          rm -rf safetyculture-exporter-cli
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: cli-linux-amd64
+          path: cli/safetyculture-exporter-linux-amd64.zip
+
+  cli-windows-amd64:
+    name: CLI windows/amd64
+    runs-on: ubuntu-latest
+    env:
+      GOWORK: off
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: Install cross-compiler
+        run: sudo apt-get update -y && sudo apt-get install -y gcc-mingw-w64 zip
+
+      - name: Build CLI windows/amd64
+        working-directory: cli
+        run: |
+          GOOS=windows GOARCH=amd64 CGO_ENABLED=1 CC=x86_64-w64-mingw32-gcc go build -v \
+            -ldflags "-s -w -X github.com/SafetyCulture/safetyculture-exporter/internal/app/version.version=${{ github.ref_name }}" \
+            -o safetyculture-exporter.exe ./cmd/safetyculture-exporter/main.go
+
+      - name: Package artifact
+        working-directory: cli
+        run: |
+          mkdir safetyculture-exporter-cli
+          cp safetyculture-exporter.exe THIRD_PARTY_NOTICES.md ../README.md safetyculture-exporter-cli/
+          zip -r safetyculture-exporter-windows-x86_64.zip safetyculture-exporter-cli
+          rm -rf safetyculture-exporter-cli
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: cli-windows-amd64
+          path: cli/safetyculture-exporter-windows-x86_64.zip
+
+  cli-darwin-amd64:
+    name: CLI darwin/amd64
+    runs-on: macos-latest
+    env:
+      GOWORK: off
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: Import signing certificate
+        env:
+          MAC_SIGNING_CERT: ${{ secrets.MAC_SIGNING_CERT }}
+        run: |
+          echo $MAC_SIGNING_CERT | base64 --decode > certificate.p12
+          security create-keychain -p ${{ secrets.MAC_SIGNING_KEYCHAIN_PWD }} build.keychain
+          security default-keychain -s build.keychain
+          security unlock-keychain -p ${{ secrets.MAC_SIGNING_KEYCHAIN_PWD }} build.keychain
+          security import certificate.p12 -k build.keychain -P ${{ secrets.MAC_SIGNING_CERT_PASSWORD }} -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k ${{ secrets.MAC_SIGNING_KEYCHAIN_PWD }} build.keychain
+
+      - name: Build CLI darwin/amd64
+        working-directory: cli
+        run: |
+          GOOS=darwin GOARCH=amd64 CGO_ENABLED=1 go build -v \
+            -ldflags "-s -w -X github.com/SafetyCulture/safetyculture-exporter/internal/app/version.version=${{ github.ref_name }}" \
+            -o safetyculture-exporter ./cmd/safetyculture-exporter/main.go
+
+      - name: Codesign binary
+        working-directory: cli
+        run: codesign --force -s "${{ secrets.MAC_SIGNING_CERT_NAME }}" --options runtime ./safetyculture-exporter -v
+
+      - name: Package artifact
+        working-directory: cli
+        run: |
+          mkdir safetyculture-exporter-cli
+          cp safetyculture-exporter THIRD_PARTY_NOTICES.md ../README.md safetyculture-exporter-cli/
+          zip -r safetyculture-exporter-darwin-amd64.zip safetyculture-exporter-cli
+          rm -rf safetyculture-exporter-cli
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: cli-darwin-amd64
+          path: cli/safetyculture-exporter-darwin-amd64.zip
+
+  cli-darwin-arm64:
+    name: CLI darwin/arm64
+    runs-on: macos-latest
+    env:
+      GOWORK: off
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: Import signing certificate
+        env:
+          MAC_SIGNING_CERT: ${{ secrets.MAC_SIGNING_CERT }}
+        run: |
+          echo $MAC_SIGNING_CERT | base64 --decode > certificate.p12
+          security create-keychain -p ${{ secrets.MAC_SIGNING_KEYCHAIN_PWD }} build.keychain
+          security default-keychain -s build.keychain
+          security unlock-keychain -p ${{ secrets.MAC_SIGNING_KEYCHAIN_PWD }} build.keychain
+          security import certificate.p12 -k build.keychain -P ${{ secrets.MAC_SIGNING_CERT_PASSWORD }} -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k ${{ secrets.MAC_SIGNING_KEYCHAIN_PWD }} build.keychain
+
+      - name: Build CLI darwin/arm64
+        working-directory: cli
+        run: |
+          GOOS=darwin GOARCH=arm64 CGO_ENABLED=1 go build -v \
+            -ldflags "-s -w -X github.com/SafetyCulture/safetyculture-exporter/internal/app/version.version=${{ github.ref_name }}" \
+            -o safetyculture-exporter ./cmd/safetyculture-exporter/main.go
+
+      - name: Codesign binary
+        working-directory: cli
+        run: codesign --force -s "${{ secrets.MAC_SIGNING_CERT_NAME }}" --options runtime ./safetyculture-exporter -v
+
+      - name: Package artifact
+        working-directory: cli
+        run: |
+          mkdir safetyculture-exporter-cli
+          cp safetyculture-exporter THIRD_PARTY_NOTICES.md ../README.md safetyculture-exporter-cli/
+          zip -r safetyculture-exporter-darwin-arm64.zip safetyculture-exporter-cli
+          rm -rf safetyculture-exporter-cli
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: cli-darwin-arm64
+          path: cli/safetyculture-exporter-darwin-arm64.zip
+
+  ui-macos:
+    name: UI macOS (universal)
+    runs-on: macos-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+          cache-dependency-path: ui/frontend/pnpm-lock.yaml
+
+      - name: Install Wails
+        run: go install github.com/wailsapp/wails/v2/cmd/wails@v2.12.0
+
+      - name: Import signing certificate
+        env:
+          MAC_SIGNING_CERT: ${{ secrets.MAC_SIGNING_CERT }}
+        run: |
+          echo $MAC_SIGNING_CERT | base64 --decode > certificate.p12
+          security create-keychain -p ${{ secrets.MAC_SIGNING_KEYCHAIN_PWD }} build.keychain
+          security default-keychain -s build.keychain
+          security unlock-keychain -p ${{ secrets.MAC_SIGNING_KEYCHAIN_PWD }} build.keychain
+          security import certificate.p12 -k build.keychain -P ${{ secrets.MAC_SIGNING_CERT_PASSWORD }} -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k ${{ secrets.MAC_SIGNING_KEYCHAIN_PWD }} build.keychain
+
+      - name: Build macOS universal
+        working-directory: ui
+        run: |
+          wails build -platform darwin/universal -clean \
+            -ldflags "-s -w -X github.com/SafetyCulture/safetyculture-exporter-ui/internal/version.version=${{ github.ref_name }}"
+
+      - name: Codesign app bundle
+        run: codesign --force -s "${{ secrets.MAC_SIGNING_CERT_NAME }}" --options runtime ui/build/bin/safetyculture-exporter-ui.app -v
+
+      - name: Create notarization zip
+        run: ditto -c -k --keepParent ui/build/bin/safetyculture-exporter-ui.app ./safetyculture-exporter-ui-darwin-universal.zip
+
+      - name: Notarize with Apple
+        run: |
+          echo "${{ secrets.APPSTORE_API_KEY }}" > appstore_api_key.p8
+          xcrun notarytool submit safetyculture-exporter-ui-darwin-universal.zip \
+            --key appstore_api_key.p8 \
+            --key-id "${{ secrets.APPSTORE_API_KEY_ID }}" \
+            --issuer "${{ secrets.APPSTORE_API_ISSUER_ID }}" \
+            --wait
+
+      - name: Staple notarization ticket
+        run: xcrun stapler staple ui/build/bin/safetyculture-exporter-ui.app
+
+      - name: Re-zip with staple ticket
+        run: ditto -c -k --keepParent ui/build/bin/safetyculture-exporter-ui.app ./safetyculture-exporter-ui-darwin-universal.zip
+
+      - name: Clean up sensitive files
+        if: always()
+        run: rm -f certificate.p12 appstore_api_key.p8
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ui-macos
+          path: safetyculture-exporter-ui-darwin-universal.zip
+
+  ui-windows:
+    name: UI Windows (amd64)
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+          cache-dependency-path: ui/frontend/pnpm-lock.yaml
+
+      - name: Install Wails
+        run: go install github.com/wailsapp/wails/v2/cmd/wails@v2.12.0
+
+      - name: Install mingw
+        run: choco install mingw
+
+      - name: Build Windows amd64
+        working-directory: ui
+        shell: pwsh
+        run: |
+          $GP = (go env GOPATH)
+          $env:path = "$env:path;$GP\bin"
+          wails build -platform windows/amd64 -clean -skipbindings `
+            -ldflags "-s -w -X github.com/SafetyCulture/safetyculture-exporter-ui/internal/version.version=${{ github.ref_name }}"
+
+      - name: Sign with CodeSignTool
+        uses: sslcom/esigner-codesign@v2.0.0
+        with:
+          command: sign
+          username: ${{ secrets.SSL_DOT_COM_USERNAME }}
+          password: ${{ secrets.SSL_DOT_COM_PASSWORD }}
+          credential_id: ${{ secrets.CREDENTIAL_ID }}
+          totp_secret: ${{ secrets.TOTP_SECRET }}
+          file_path: ${{ github.workspace }}\ui\build\bin\safetyculture-exporter-ui.exe
+          dir_path: ${{ github.workspace }}\ui\build\bin
+          override: true
+          signing_method: v2
+          jvm_max_memory: 1024M
+
+      - name: Copy signed binary
+        shell: pwsh
+        run: |
+          Copy-Item -Path .\ui\build\bin\safetyculture-exporter-ui.exe -Destination .\safetyculture-exporter-ui-windows-x86_64.exe
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ui-windows
+          path: safetyculture-exporter-ui-windows-x86_64.exe
+
+  release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    needs:
+      - cli-linux-amd64
+      - cli-windows-amd64
+      - cli-darwin-amd64
+      - cli-darwin-arm64
+      - ui-macos
+      - ui-windows
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts/
+          merge-multiple: true
+
+      - name: Create Release
+        uses: ncipollo/release-action@v1
+        with:
+          token: "${{ secrets.GITHUB_TOKEN }}"
+          artifacts: "artifacts/*"
+          allowUpdates: true
+          draft: true
+          prerelease: true
+          makeLatest: false

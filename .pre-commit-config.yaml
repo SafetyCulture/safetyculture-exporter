@@ -21,14 +21,20 @@ repos:
     rev: 1.11.2
     hooks:
       - id: forbid-binary
-        exclude: ^(docs/assets/|ui/frontend/)
+        exclude: ^(cli/docs/assets/|docs/assets/|ui/)
   - repo: https://github.com/adrienverge/yamllint
     rev: v1.20.0
     hooks:
       - id: yamllint
         args: ['-s']
-        exclude: ^(pkg/api/fixtures/corrupted_configuration.yaml)
+        exclude: >-
+          (?x)^(
+            cli/pkg/api/fixtures/corrupted_configuration.yaml|
+            ui/frontend/pnpm-lock.yaml
+          )$
   - repo: https://github.com/golangci/golangci-lint
-    rev: v1.21.0
+    rev: v1.64.8
     hooks:
       - id: golangci-lint
+        entry: bash -c 'cd cli && GOWORK=off golangci-lint run'
+        pass_filenames: false

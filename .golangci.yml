@@ -1,10 +1,5 @@
-# yamllint disable rule:line-length
 ---
 linters-settings:
-  govet:
-    check-shadowing: true
-  maligned:
-    suggest-new: true
   dupl:
     threshold: 100
   goconst:
@@ -14,13 +9,65 @@ linters-settings:
 linters:
   enable-all: true
   disable:
+    # Original disables
     - misspell  # Messes with package imports
     - funlen  # We have lots of long functions
-    - gochecknoglobals  # Good practice but not always practical.
+    - gochecknoglobals  # Good practice but not always practical
     - gochecknoinits  # init functions required by cobra
     - gocognit  # We have lots of complex functions
     - godox  # We use TODO to plan longer-term fixes
-    - interfacer  # Prone to bad suggestions. Check has been deprecated: https://github.com/mvdan/interfacer
-    - lll  # Line-length-linter: restricts lines to 131 characters.
-    - scopelint  # Detects too many false positives in tests: https://github.com/kyoh86/scopelint/issues/4
-    - wsl  # adds to unnecessary complexity
+    - lll  # Line-length-linter
+    - wsl  # Adds unnecessary complexity
+    # Linters added after v1.21.0 — to be triaged and re-enabled incrementally
+    - goimports
+    - predeclared
+    - tenv  # Deprecated in v1.64.0, replaced by usetesting
+    - usestdlibvars
+    - bodyclose
+    - canonicalheader
+    - containedctx
+    - cyclop
+    - depguard
+    - dupl
+    - dupword
+    - durationcheck
+    - err113
+    - errcheck
+    - errorlint
+    - exhaustive
+    - exhaustruct
+    - fatcontext
+    - forbidigo
+    - forcetypeassert
+    - gci
+    - goconst
+    - gocritic
+    - godot
+    - gofumpt
+    - gosec
+    - govet
+    - interfacebloat
+    - ireturn
+    - mirror
+    - mnd
+    - musttag
+    - nestif
+    - nilnil
+    - nlreturn
+    - paralleltest
+    - perfsprint
+    - prealloc
+    - recvcheck
+    - revive
+    - stylecheck
+    - tagalign
+    - tagliatelle
+    - testifylint
+    - testpackage
+    - thelper
+    - unparam
+    - unused
+    - usetesting
+    - varnamelen
+    - whitespace
+    - wrapcheck
