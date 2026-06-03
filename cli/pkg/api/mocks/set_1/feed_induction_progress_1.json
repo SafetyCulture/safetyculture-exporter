@@ -1,0 +1,56 @@
+{
+    "metadata": {
+        "next_page": null,
+        "next_page_token": null
+    },
+    "data": [
+        {
+            "opened_at": "2022-10-07T02:08:46.289Z",
+            "completed_at": "",
+            "is_waiting_for_completion": true,
+            "step_progresses_count": 5,
+            "step_progresses_completed_count": 2,
+            "induction_id": "induction_733e547a8a7dfb438d27acc8",
+            "induction_version_id": "version_a1b2c3d4e5f6",
+            "induction_title": "Site Safety Onboarding",
+            "org_id": "role_ada3042f16a44249915ddc088adef92a",
+            "user_email": "a@example.com",
+            "user_first_name": "Tony",
+            "user_last_name": "Blair",
+            "user_id": "user_4c5b19c1b75449a4ac3ea72d158a5a3d",
+            "user_external_id": ""
+        },
+        {
+            "opened_at": "2022-10-07T04:39:05.861Z",
+            "completed_at": "2022-10-09T04:39:05.861Z",
+            "is_waiting_for_completion": false,
+            "step_progresses_count": 5,
+            "step_progresses_completed_count": 5,
+            "induction_id": "induction_733e547a8a7dfb438d27acc8",
+            "induction_version_id": "version_a1b2c3d4e5f6",
+            "induction_title": "Site Safety Onboarding",
+            "org_id": "role_ada3042f16a44249915ddc088adef92a",
+            "user_email": "b@example.com",
+            "user_first_name": "John",
+            "user_last_name": "Murphy",
+            "user_id": "user_d64b89887cf44b8d83681103c319f922",
+            "user_external_id": ""
+        },
+        {
+            "opened_at": "2022-10-10T21:06:22.727Z",
+            "completed_at": "",
+            "is_waiting_for_completion": false,
+            "step_progresses_count": 5,
+            "step_progresses_completed_count": 0,
+            "induction_id": "induction_733e547a8a7dfb438d27acc8",
+            "induction_version_id": "version_a1b2c3d4e5f6",
+            "induction_title": "Site Safety Onboarding",
+            "org_id": "role_ada3042f16a44249915ddc088adef92a",
+            "user_email": "c@example.com",
+            "user_first_name": "Ryan",
+            "user_last_name": "Black",
+            "user_id": "user_839468bf0d574dd18c5cacb31fcfa6c1",
+            "user_external_id": ""
+        }
+    ]
+}

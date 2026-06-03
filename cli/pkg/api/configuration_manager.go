@@ -46,6 +46,11 @@ type ExporterConfiguration struct {
 				CompletionStatus string `yaml:"completion_status"`
 			} `yaml:"progress"`
 		} `yaml:"course"`
+		Induction struct {
+			Progress struct {
+				Limit int `yaml:"limit"`
+			} `yaml:"progress"`
+		} `yaml:"induction"`
 		Incremental bool `yaml:"incremental"`
 		Inspection  struct {
 			Archived              string   `yaml:"archived"`
@@ -185,6 +190,11 @@ func (c *ConfigurationManager) ApplySafetyGuards() {
 		c.Configuration.Export.Course.Progress.CompletionStatus = defaultCfg.Export.Course.Progress.CompletionStatus
 	}
 
+	// caps induction progress batch limit to 1000
+	if c.Configuration.Export.Induction.Progress.Limit > 1000 || c.Configuration.Export.Induction.Progress.Limit == 0 {
+		c.Configuration.Export.Induction.Progress.Limit = defaultCfg.Export.Induction.Progress.Limit
+	}
+
 	if c.Configuration.Export.Inspection.Limit == 0 {
 		c.Configuration.Export.Inspection.Limit = defaultCfg.Export.Inspection.Limit
 	}
@@ -296,6 +306,7 @@ func BuildConfigurationWithDefaults() *ExporterConfiguration {
 	cfg.Export.Asset.Limit = 100
 	cfg.Export.Course.Progress.Limit = 1000
 	cfg.Export.Course.Progress.CompletionStatus = "COMPLETION_STATUS_COMPLETED"
+	cfg.Export.Induction.Progress.Limit = 1000
 	cfg.Export.Incremental = true
 	cfg.Export.Inspection.Archived = "false"
 	cfg.Export.Inspection.Completed = "true"
@@ -388,6 +399,7 @@ func (ec *ExporterConfiguration) ToExporterConfig() *feed.ExporterFeedCfg {
 		ExportIssueLimit:                      ec.Export.Issue.Limit,
 		ExportAssetLimit:                      ec.Export.Asset.Limit,
 		ExportCourseProgressLimit:             ec.Export.Course.Progress.Limit,
+		ExportInductionProgressLimit:          ec.Export.Induction.Progress.Limit,
 		MaxConcurrentGoRoutines:               ec.API.MaxConcurrency,
 	}
 }

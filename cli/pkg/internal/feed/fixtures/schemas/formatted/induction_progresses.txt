@@ -1,0 +1,18 @@
++---------------------------------+---------+-------------+
+|              NAME               |  TYPE   | PRIMARY KEY |
++---------------------------------+---------+-------------+
+| opened_at                       | TEXT    |             |
+| completed_at                    | TEXT    |             |
+| is_waiting_for_completion       | numeric |             |
+| step_progresses_count           | INTEGER |             |
+| step_progresses_completed_count | INTEGER |             |
+| induction_id                    | TEXT    | true        |
+| induction_version_id            | TEXT    |             |
+| induction_title                 | TEXT    |             |
+| org_id                          | TEXT    |             |
+| user_email                      | TEXT    |             |
+| user_first_name                 | TEXT    |             |
+| user_last_name                  | TEXT    |             |
+| user_id                         | TEXT    | true        |
+| user_external_id                | TEXT    |             |
++---------------------------------+---------+-------------+

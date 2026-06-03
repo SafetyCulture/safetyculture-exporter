@@ -64,6 +64,7 @@ type ExporterFeedCfg struct {
 	ExportIssueLimit                      int
 	ExportAssetLimit                      int
 	ExportCourseProgressLimit             int
+	ExportInductionProgressLimit          int
 	ExportScheduleResumeDownload          bool
 	MaxConcurrentGoRoutines               int
 }
@@ -314,6 +315,10 @@ func (e *ExporterFeedClient) GetFeeds() []Feed {
 			Incremental:      false, // CourseProgress doesn't support modified after filters,
 			Limit:            e.configuration.ExportCourseProgressLimit,
 			CompletionStatus: "COMPLETION_STATUS_COMPLETED",
+		},
+		&InductionProgressFeed{
+			Incremental: false, // InductionProgress is full-export only; the admin RPC has no modified_after filter
+			Limit:       e.configuration.ExportInductionProgressLimit,
 		},
 		&IssueAssigneeFeed{
 			Incremental: false, // IssueAssignee doesn't support modified after filters
