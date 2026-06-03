@@ -46,6 +46,11 @@ type ExporterConfiguration struct {
 				CompletionStatus string `yaml:"completion_status"`
 			} `yaml:"progress"`
 		} `yaml:"course"`
+		Induction struct {
+			Progress struct {
+				Limit int `yaml:"limit"`
+			} `yaml:"progress"`
+		} `yaml:"induction"`
 		Incremental bool `yaml:"incremental"`
 		Inspection  struct {
 			Archived              string   `yaml:"archived"`
@@ -163,23 +168,27 @@ func (c *ConfigurationManager) loadConfiguration() error {
 }
 
 // ApplySafetyGuards will adjust certain values to acceptable maximum values
+// clampLimit resets an export batch limit to def when it is unset (0) or exceeds
+// maxLimit, otherwise returns it unchanged. It keeps each feed's batch limit
+// within the range its server-side validator accepts.
+func clampLimit(limit, maxLimit, def int) int {
+	if limit == 0 || limit > maxLimit {
+		return def
+	}
+	return limit
+}
+
 func (c *ConfigurationManager) ApplySafetyGuards() {
 	defaultCfg := BuildConfigurationWithDefaults()
 
-	// caps action batch limit to 100
-	if c.Configuration.Export.Action.Limit > 100 || c.Configuration.Export.Action.Limit == 0 {
-		c.Configuration.Export.Action.Limit = defaultCfg.Export.Action.Limit
-	}
-
-	// caps issue batch limit to 100
-	if c.Configuration.Export.Issue.Limit > 100 || c.Configuration.Export.Issue.Limit == 0 {
-		c.Configuration.Export.Issue.Limit = defaultCfg.Export.Issue.Limit
-	}
-
-	// caps course progress batch limit to 1000
-	if c.Configuration.Export.Course.Progress.Limit > 1000 || c.Configuration.Export.Course.Progress.Limit == 0 {
-		c.Configuration.Export.Course.Progress.Limit = defaultCfg.Export.Course.Progress.Limit
-	}
+	// Cap each feed's export batch limit to the maximum its server-side validator
+	// accepts, resetting an unset (0) or out-of-range value to the default. The
+	// onboarding-progress feed proto restricts limit to 1:100, so a higher value
+	// would be rejected with InvalidArgument.
+	c.Configuration.Export.Action.Limit = clampLimit(c.Configuration.Export.Action.Limit, 100, defaultCfg.Export.Action.Limit)
+	c.Configuration.Export.Issue.Limit = clampLimit(c.Configuration.Export.Issue.Limit, 100, defaultCfg.Export.Issue.Limit)
+	c.Configuration.Export.Course.Progress.Limit = clampLimit(c.Configuration.Export.Course.Progress.Limit, 1000, defaultCfg.Export.Course.Progress.Limit)
+	c.Configuration.Export.Induction.Progress.Limit = clampLimit(c.Configuration.Export.Induction.Progress.Limit, 100, defaultCfg.Export.Induction.Progress.Limit)
 
 	if c.Configuration.Export.Course.Progress.CompletionStatus == "" {
 		c.Configuration.Export.Course.Progress.CompletionStatus = defaultCfg.Export.Course.Progress.CompletionStatus
@@ -296,6 +305,7 @@ func BuildConfigurationWithDefaults() *ExporterConfiguration {
 	cfg.Export.Asset.Limit = 100
 	cfg.Export.Course.Progress.Limit = 1000
 	cfg.Export.Course.Progress.CompletionStatus = "COMPLETION_STATUS_COMPLETED"
+	cfg.Export.Induction.Progress.Limit = 100
 	cfg.Export.Incremental = true
 	cfg.Export.Inspection.Archived = "false"
 	cfg.Export.Inspection.Completed = "true"
@@ -388,6 +398,7 @@ func (ec *ExporterConfiguration) ToExporterConfig() *feed.ExporterFeedCfg {
 		ExportIssueLimit:                      ec.Export.Issue.Limit,
 		ExportAssetLimit:                      ec.Export.Asset.Limit,
 		ExportCourseProgressLimit:             ec.Export.Course.Progress.Limit,
+		ExportInductionProgressLimit:          ec.Export.Induction.Progress.Limit,
 		MaxConcurrentGoRoutines:               ec.API.MaxConcurrency,
 	}
 }

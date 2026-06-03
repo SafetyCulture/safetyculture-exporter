@@ -10,6 +10,7 @@ on:
       - 'go.work.sum'
       - '.github/workflows/ci-cli.yml'
       - '.pre-commit-config.yaml'
+      - '.golangci.yml'
 
 jobs:
   unit-tests:
@@ -60,7 +61,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.25.9'
+          go-version: '1.25.11'
 
       - name: Install govulncheck
         run: go install golang.org/x/vuln/cmd/govulncheck@latest

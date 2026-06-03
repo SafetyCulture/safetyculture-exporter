@@ -19,6 +19,9 @@ export:
   course:
     progress:
       limit: 1001
+  induction:
+    progress:
+      limit: 101
   incremental: true
   inspection:
     archived: "false"

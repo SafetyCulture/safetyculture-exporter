@@ -43,6 +43,7 @@ func TestExporterFeedClient_ExportFeeds_should_create_all_schemas_to_file(t *tes
 	filesEqualish(t, "mocks/set_1/schemas/schedule_occurrences.csv", filepath.Join(exporter.ExportPath, "schedule_occurrences.csv"))
 
 	filesEqualish(t, "mocks/set_1/schemas/training_course_progresses.csv", filepath.Join(exporter.ExportPath, "training_course_progresses.csv"))
+	filesEqualish(t, "mocks/set_1/schemas/induction_progresses.csv", filepath.Join(exporter.ExportPath, "induction_progresses.csv"))
 	filesEqualish(t, "mocks/set_1/schemas/issue_assignees.csv", filepath.Join(exporter.ExportPath, "issue_assignees.csv"))
 
 	filesEqualish(t, "mocks/set_1/schemas/issue_assignees.csv", filepath.Join(exporter.ExportPath, "issue_assignees.csv"))
@@ -127,6 +128,7 @@ func TestExporterFeedClient_ExportFeeds_should_export_all_feeds_to_file(t *testi
 	filesEqualish(t, "mocks/set_1/outputs/sheqsy_departments.csv", filepath.Join(exporter.ExportPath, "sheqsy_departments.csv"))
 
 	filesEqualish(t, "mocks/set_1/outputs/training_course_progresses.csv", filepath.Join(exporter.ExportPath, "training_course_progresses.csv"))
+	filesEqualish(t, "mocks/set_1/outputs/induction_progresses.csv", filepath.Join(exporter.ExportPath, "induction_progresses.csv"))
 	filesEqualish(t, "mocks/set_1/outputs/account_histories.csv", filepath.Join(exporter.ExportPath, "account_histories.csv"))
 }
 

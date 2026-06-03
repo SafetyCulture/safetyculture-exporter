@@ -14,4 +14,5 @@ export function isNullOrEmptyObject(obj) {
 
 export const allTables = ['inspections', 'inspection_items', 'schedules', 'templates', 'template_permissions',
     'sites', 'site_members', 'groups', 'group_users', 'schedule_assignees', 'schedule_occurrences', 'actions',
-    'action_assignees', 'action_timeline_items', 'issues', 'issue_timeline_items', 'assets', 'users', 'issue_assignees'];
+    'action_assignees', 'action_timeline_items', 'issues', 'issue_timeline_items', 'assets', 'users', 'issue_assignees',
+    'induction_progresses'];
