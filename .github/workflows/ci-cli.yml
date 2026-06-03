@@ -10,6 +10,7 @@ on:
       - 'go.work.sum'
       - '.github/workflows/ci-cli.yml'
       - '.pre-commit-config.yaml'
+      - '.golangci.yml'
 
 jobs:
   unit-tests:

@@ -1,4 +1,11 @@
 ---
+run:
+  # enable-all loads and type-checks every package, which can exceed the 1m
+  # default on a cold CI cache (setup-go cannot restore the module cache here
+  # because go.sum lives in cli/, not the repo root). Give the load headroom so
+  # CI fails on real findings, not a context-deadline timeout.
+  timeout: 5m
+
 linters-settings:
   dupl:
     threshold: 100
