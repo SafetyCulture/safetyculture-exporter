@@ -193,6 +193,7 @@ func TestMapViperConfigToConfigurationOptions_ShouldRespectLimit(t *testing.T) {
 	assert.EqualValues(t, 50, cm.Configuration.Export.Action.Limit)
 	assert.EqualValues(t, 50, cm.Configuration.Export.Issue.Limit)
 	assert.EqualValues(t, 50, cm.Configuration.Export.Course.Progress.Limit)
+	assert.EqualValues(t, 50, cm.Configuration.Export.Induction.Progress.Limit)
 }
 
 func TestMapViperConfigToConfigurationOptions_ShouldEnforceLimit(t *testing.T) {
@@ -202,6 +203,8 @@ func TestMapViperConfigToConfigurationOptions_ShouldEnforceLimit(t *testing.T) {
 	assert.EqualValues(t, 100, cm.Configuration.Export.Action.Limit)
 	assert.EqualValues(t, 100, cm.Configuration.Export.Issue.Limit)
 	assert.EqualValues(t, 1000, cm.Configuration.Export.Course.Progress.Limit)
+	// induction limit 101 is over the proto 1:100 cap, so it resets to the default (100)
+	assert.EqualValues(t, 100, cm.Configuration.Export.Induction.Progress.Limit)
 }
 
 func TestMapViperConfigToConfigurationOptions_CustomValues(t *testing.T) {
@@ -230,6 +233,7 @@ func TestNewConfigurationManagerFromFile_WhenZeroLengthFile(t *testing.T) {
 	assert.EqualValues(t, 100, cm.Configuration.Export.Inspection.Limit)
 	assert.EqualValues(t, 100, cm.Configuration.Export.Asset.Limit)
 	assert.EqualValues(t, 1000, cm.Configuration.Export.Course.Progress.Limit)
+	assert.EqualValues(t, 100, cm.Configuration.Export.Induction.Progress.Limit)
 	assert.EqualValues(t, "COMPLETION_STATUS_COMPLETED", cm.Configuration.Export.Course.Progress.CompletionStatus)
 	assert.EqualValues(t, "true", cm.Configuration.Export.Inspection.Completed)
 	assert.EqualValues(t, "false", cm.Configuration.Export.Inspection.Archived)

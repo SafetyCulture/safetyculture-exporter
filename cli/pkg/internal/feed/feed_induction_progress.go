@@ -21,7 +21,7 @@ type InductionProgress struct {
 	InductionID                  string `json:"induction_id" csv:"induction_id" gorm:"primarykey;column:induction_id;size:64"`
 	InductionVersionID           string `json:"induction_version_id" csv:"induction_version_id" gorm:"size:64"`
 	InductionTitle               string `json:"induction_title" csv:"induction_title"`
-	OrgID                        string `json:"org_id" csv:"org_id" gorm:"size:37"`
+	OrganisationID               string `json:"organisation_id" csv:"organisation_id" gorm:"size:37"`
 	UserEmail                    string `json:"user_email" csv:"user_email" gorm:"size:256"`
 	UserFirstName                string `json:"user_first_name" csv:"user_first_name"`
 	UserLastName                 string `json:"user_last_name" csv:"user_last_name"`
@@ -70,7 +70,7 @@ func (f *InductionProgressFeed) Columns() []string {
 		"induction_id",
 		"induction_version_id",
 		"induction_title",
-		"org_id",
+		"organisation_id",
 		"user_email",
 		"user_first_name",
 		"user_last_name",

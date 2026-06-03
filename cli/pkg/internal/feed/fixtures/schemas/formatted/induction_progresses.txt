@@ -9,7 +9,7 @@
 | induction_id                    | TEXT    | true        |
 | induction_version_id            | TEXT    |             |
 | induction_title                 | TEXT    |             |
-| org_id                          | TEXT    |             |
+| organisation_id                 | TEXT    |             |
 | user_email                      | TEXT    |             |
 | user_first_name                 | TEXT    |             |
 | user_last_name                  | TEXT    |             |
