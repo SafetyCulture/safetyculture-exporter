@@ -1,0 +1,4 @@
+opened_at,completed_at,is_waiting_for_completion,step_progresses_count,step_progresses_completed_count,induction_id,induction_version_id,induction_title,org_id,user_email,user_first_name,user_last_name,user_id,user_external_id
+--date--,,true,5,2,induction_733e547a8a7dfb438d27acc8,version_a1b2c3d4e5f6,Site Safety Onboarding,role_ada3042f16a44249915ddc088adef92a,a@example.com,Tony,Blair,user_4c5b19c1b75449a4ac3ea72d158a5a3d,
+--date--,--date--,false,5,5,induction_733e547a8a7dfb438d27acc8,version_a1b2c3d4e5f6,Site Safety Onboarding,role_ada3042f16a44249915ddc088adef92a,b@example.com,John,Murphy,user_d64b89887cf44b8d83681103c319f922,
+--date--,,false,5,0,induction_733e547a8a7dfb438d27acc8,version_a1b2c3d4e5f6,Site Safety Onboarding,role_ada3042f16a44249915ddc088adef92a,c@example.com,Ryan,Black,user_839468bf0d574dd18c5cacb31fcfa6c1,
