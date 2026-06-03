@@ -47,6 +47,10 @@
         {
             "left": { "id": "assets", "name": "Assets"},
             "right": { "id": "training_course_progresses", "name": "Training course completions"},
+        },
+        {
+            "left": { "id": "induction_progresses", "name": "Onboarding (induction) progress"},
+            "right": null,
         }
 
     ]
