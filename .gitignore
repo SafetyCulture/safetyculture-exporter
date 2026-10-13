@@ -45,5 +45,8 @@ package-lock.json
 *.log
 perf.md
 
+# Local planning artifacts
+.planning/
+
 # Local planning (GSD workflow artifacts)
 .planning/
