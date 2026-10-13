@@ -1,0 +1,43 @@
+{
+  "$schema": "https://raw.githubusercontent.com/anthropics/mcpb/main/schemas/mcpb-manifest-v0.3.schema.json",
+  "manifest_version": "0.3",
+  "name": "mitti-exporter",
+  "display_name": "Mitti Exporter",
+  "version": "${VERSION}",
+  "description": "Let Claude sync and query your exported Mitti data — inspections, actions, issues, schedules — and build reports. Local-first: your API token stays in the exporter's own config, never in Claude's.",
+  "long_description": "Mitti Exporter runs as a local MCP server over stdio.\n\nWhat Claude can do once connected:\n- Sync your latest data locally (incremental or full)\n- Answer questions with read-only SQL over your inspections, inspection items, templates, sites, users, actions, issues, schedules, assets and more\n- Generate PDF/Word inspection reports with in-chat download buttons\n- Show inspection photos inline\n- Render query results as interactive tables (MCP Apps / SEP-1865)\n\nSetup: install the Mitti Exporter desktop app or CLI first and configure your API token there (the token is read from the exporter's own config file — it is never stored in Claude's config).\n\nAll queries are read-only: the database is opened read-only and only single SELECT statements are accepted.",
+  "author": {
+    "name": "SafetyCulture",
+    "url": "https://safetyculture.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/SafetyCulture/mitti-exporter"
+  },
+  "homepage": "https://developer.mitti.com/docs/mitti-exporter",
+  "documentation": "https://developer.mitti.com/docs/mitti-exporter",
+  "support": "https://github.com/SafetyCulture/mitti-exporter/issues",
+  "icon": "icon.png",
+  "server": {
+    "type": "binary",
+    "entry_point": "server/${BINARY_NAME}",
+    "mcp_config": {
+      "command": "${__dirname}/server/${BINARY_NAME}",
+      "args": ["mcp"]
+    }
+  },
+  "tools": [
+    { "name": "list_tables", "description": "List all tables in the local export database" },
+    { "name": "describe_table", "description": "Show a table's schema plus sample rows" },
+    { "name": "query", "description": "Run read-only SQL against the local export database" },
+    { "name": "sync_data", "description": "Sync the latest Mitti data locally" },
+    { "name": "generate_report", "description": "Generate PDF/Word inspection reports" },
+    { "name": "read_media", "description": "Read inspection photos from the media export" }
+  ],
+  "tools_generated": true,
+  "keywords": ["safetyculture", "mitti", "inspections", "safety", "reports", "analytics"],
+  "license": "MIT",
+  "compatibility": {
+    "platforms": ["${PLATFORM}"]
+  }
+}
