@@ -9,7 +9,7 @@ import (
 	"github.com/SafetyCulture/mitti-exporter/cmd/mitti-exporter/cmd/export"
 	util "github.com/SafetyCulture/mitti-exporter/cmd/mitti-exporter/cmd/utils"
 	"github.com/SafetyCulture/mitti-exporter/internal/app/version"
-	mittimcp "github.com/SafetyCulture/mitti-exporter/internal/mcp"
+	mittimcp "github.com/SafetyCulture/mitti-exporter/pkg/mcp"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )

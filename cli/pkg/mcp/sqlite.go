@@ -61,21 +61,55 @@ func validateReadOnlySQL(query string) error {
 	if !strings.HasPrefix(upper, "SELECT") && !strings.HasPrefix(upper, "WITH") && !strings.HasPrefix(upper, "EXPLAIN") {
 		return fmt.Errorf("only read-only SELECT queries are allowed")
 	}
-	// Cheap keyword screen for writes hidden in CTEs/subqueries.
+	// Keyword screen for writes hidden in CTEs/subqueries. String literals are
+	// blanked first so text like WHERE note = 'drop it' doesn't false-positive.
+	scan := blankStringLiterals(upper)
 	for _, kw := range []string{"INSERT", "UPDATE", "DELETE", "DROP", "ALTER", "CREATE", "REPLACE", "ATTACH", "DETACH", "PRAGMA", "VACUUM"} {
 		// Word-boundary-ish check: keyword surrounded by non-letters.
-		for i := 0; i+len(kw) <= len(upper); i++ {
-			if upper[i:i+len(kw)] != kw {
+		for i := 0; i+len(kw) <= len(scan); i++ {
+			if scan[i:i+len(kw)] != kw {
 				continue
 			}
-			beforeOK := i == 0 || !isLetter(upper[i-1])
-			afterOK := i+len(kw) == len(upper) || !isLetter(upper[i+len(kw)])
+			beforeOK := i == 0 || !isLetter(scan[i-1])
+			afterOK := i+len(kw) == len(scan) || !isLetter(scan[i+len(kw)])
 			if beforeOK && afterOK {
 				return fmt.Errorf("keyword %s is not allowed in read-only queries", kw)
 			}
 		}
 	}
 	return nil
+}
+
+// blankStringLiterals replaces the contents of single-quoted string literals
+// with spaces (preserving length and positions) so keyword scans don't trip
+// over user text. Handles '' escaping. Doubled quotes inside literals are
+// consumed as part of the literal.
+func blankStringLiterals(s string) string {
+	b := []byte(s)
+	for i := 0; i < len(b); i++ {
+		if b[i] != '\'' {
+			continue
+		}
+		// Inside a literal: blank until the closing quote.
+		for j := i + 1; j < len(b); j++ {
+			if b[j] == '\'' {
+				if j+1 < len(b) && b[j+1] == '\'' { // escaped quote ''
+					b[j] = ' '
+					b[j+1] = ' '
+					j++
+					continue
+				}
+				// Closing quote; blank everything between i and j.
+				for k := i + 1; k < j; k++ {
+					b[k] = ' '
+				}
+				i = j
+				break
+			}
+			b[j] = ' '
+		}
+	}
+	return string(b)
 }
 
 func isLetter(b byte) bool {

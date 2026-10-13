@@ -159,6 +159,11 @@ func registerResources(srv *mcp.Server) {
 
 // --- Result helpers ---
 
+// maxTextPayload caps the JSON embedded in the text content block. The full
+// payload always goes to structuredContent; the text copy is a bounded preview
+// so the model's context isn't flooded by large result sets.
+const maxTextPayload = 4000
+
 // structuredResult packs a structured payload plus a human/model-readable text
 // summary. The text keeps non-MCP-Apps hosts (and the model) fully functional.
 func structuredResult(payload any, summary string) (*mcp.CallToolResult, any, error) {
@@ -166,8 +171,14 @@ func structuredResult(payload any, summary string) (*mcp.CallToolResult, any, er
 	if err != nil {
 		return errorResult(err)
 	}
+	text := summary
+	if len(raw) <= maxTextPayload {
+		text += "\n\n" + string(raw)
+	} else {
+		text += fmt.Sprintf("\n\n(result is %d bytes of JSON — see structured content; refine the query to reduce size)", len(raw))
+	}
 	return &mcp.CallToolResult{
-		Content: []mcp.Content{&mcp.TextContent{Text: summary + "\n\n" + string(raw)}},
+		Content: []mcp.Content{&mcp.TextContent{Text: text}},
 	}, payload, nil
 }
 

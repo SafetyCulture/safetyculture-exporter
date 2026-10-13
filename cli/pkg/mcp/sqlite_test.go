@@ -20,6 +20,9 @@ func TestValidateReadOnlySQL(t *testing.T) {
 		"  select id from users  ",
 		"EXPLAIN QUERY PLAN SELECT * FROM sites",
 		"SELECT name FROM templates WHERE name LIKE '%updated%'", // keyword inside string literal-ish word
+		"SELECT * FROM inspections WHERE notes = 'drop it'",
+		"SELECT * FROM inspections WHERE notes = 'it''s a delete word'",
+		"SELECT updated_at, deleted_at FROM inspections", // column names containing keywords
 	}
 	for _, q := range valid {
 		assert.NoError(t, validateReadOnlySQL(q), q)
@@ -34,6 +37,8 @@ func TestValidateReadOnlySQL(t *testing.T) {
 		"ATTACH DATABASE 'x' AS y",
 		"WITH x AS (DELETE FROM t RETURNING *) SELECT * FROM x",
 		"CREATE TABLE foo (id INT)",
+		"SELECT * FROM t WHERE x = 'ok'; DROP TABLE t", // stacked even with literal
+		"SELECT 1 FROM t WHERE a = 'x' OR 1=1; DELETE FROM t",
 	}
 	for _, q := range invalid {
 		assert.Error(t, validateReadOnlySQL(q), q)
