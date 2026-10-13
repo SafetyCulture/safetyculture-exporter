@@ -24,9 +24,23 @@ type Config struct {
 	// ExportPath is where the SQLite export database lives (export.path).
 	ExportPath string
 
-	// Sync runs a full SQLite export (equivalent to `mitti-exporter sqlite`).
-	// Called by the sync_data tool. Must be safe to call more than once.
+	// MediaPath is where exported media files live (export.media_path).
+	// Defaults to <ExportPath>/media when empty.
+	MediaPath string
+
+	// Sync runs an incremental SQLite export (equivalent to
+	// `mitti-exporter sqlite`). Called by the sync_data tool.
+	// Must be safe to call more than once.
 	Sync func(ctx context.Context) error
+
+	// SyncFull runs a non-incremental export. Optional — when nil, sync_data
+	// always uses Sync.
+	SyncFull func(ctx context.Context) error
+
+	// GenerateReports generates inspection reports in the given formats
+	// ("PDF", "WORD") and returns the files written. Optional — the
+	// generate_report tool errors clearly when nil.
+	GenerateReports func(ctx context.Context, formats []string) ([]string, error)
 }
 
 // NewServer builds the MCP server with all tools and UI resources registered.
@@ -37,6 +51,8 @@ func NewServer(cfg *Config) *mcp.Server {
 	}, nil)
 
 	registerTools(srv, cfg)
+	registerExtendedTools(srv, cfg)
+	registerPrompts(srv)
 	registerResources(srv)
 
 	return srv
@@ -97,7 +113,9 @@ func registerTools(srv *mcp.Server, cfg *Config) {
 			"Example: SELECT status, COUNT(*) AS n FROM inspections GROUP BY status",
 		Annotations: &mcp.ToolAnnotations{ReadOnlyHint: true},
 		// SEP-1865: hosts that support MCP Apps render results in the table viewer UI.
-		Meta: mcp.Meta{"ui": map[string]any{"resourceUri": tableViewerURI}},
+		// "app" visibility lets the view re-run queries (pagination/sorting)
+		// without spending model tokens.
+		Meta: mcp.Meta{"ui": map[string]any{"resourceUri": tableViewerURI, "visibility": []string{"model", "app"}}},
 	}, func(ctx context.Context, _ *mcp.CallToolRequest, args queryArgs) (*mcp.CallToolResult, any, error) {
 		if args.MaxRows > 1000 {
 			args.MaxRows = 1000
@@ -116,17 +134,25 @@ func registerTools(srv *mcp.Server, cfg *Config) {
 	mcp.AddTool(srv, &mcp.Tool{
 		Name: "sync_data",
 		Description: "Sync the latest Mitti data into the local export database (same as `mitti-exporter sqlite`). " +
-			"Incremental: only fetches changes since the last sync. Run this when the user asks for fresh data " +
-			"or when list_tables reports the database is missing.",
-	}, func(ctx context.Context, _ *mcp.CallToolRequest, _ emptyArgs) (*mcp.CallToolResult, any, error) {
+			"Incremental by default: only fetches changes since the last sync. Run this when the user asks " +
+			"for fresh data or when list_tables reports the database is missing.",
+		Meta: mcp.Meta{"ui": map[string]any{"resourceUri": syncStatusURI}},
+	}, func(ctx context.Context, req *mcp.CallToolRequest, _ emptyArgs) (*mcp.CallToolResult, any, error) {
 		if cfg.Sync == nil {
 			return errorResult(fmt.Errorf("sync is not configured"))
 		}
-		if err := cfg.Sync(ctx); err != nil {
+		syncFn := cfg.Sync
+		mode := "incremental"
+		// Ask the user when the host supports elicitation and a full sync is available.
+		if cfg.SyncFull != nil && elicitSyncMode(ctx, req) == "full" {
+			syncFn = cfg.SyncFull
+			mode = "full"
+		}
+		if err := syncFn(ctx); err != nil {
 			return errorResult(fmt.Errorf("sync failed: %w", err))
 		}
 		tables, _ := listTables(ctx, cfg.ExportPath)
-		return structuredResult(map[string]any{"synced": true, "tables": tables}, "sync complete")
+		return structuredResult(map[string]any{"synced": true, "mode": mode, "tables": tables}, fmt.Sprintf("sync complete (%s)", mode))
 	})
 }
 
@@ -151,6 +177,40 @@ func registerResources(srv *mcp.Server) {
 				URI:      req.Params.URI,
 				MIMEType: "text/html;profile=mcp-app",
 				Text:     tableViewerHTML,
+				Meta:     uiMeta,
+			}},
+		}, nil
+	})
+
+	srv.AddResource(&mcp.Resource{
+		URI:         reportViewerURI,
+		Name:        "Mitti Reports",
+		Description: "Generated inspection reports with download buttons",
+		MIMEType:    "text/html;profile=mcp-app",
+		Meta:        uiMeta,
+	}, func(_ context.Context, req *mcp.ReadResourceRequest) (*mcp.ReadResourceResult, error) {
+		return &mcp.ReadResourceResult{
+			Contents: []*mcp.ResourceContents{{
+				URI:      req.Params.URI,
+				MIMEType: "text/html;profile=mcp-app",
+				Text:     reportViewerHTML,
+				Meta:     uiMeta,
+			}},
+		}, nil
+	})
+
+	srv.AddResource(&mcp.Resource{
+		URI:         syncStatusURI,
+		Name:        "Mitti Sync Status",
+		Description: "Live progress while data syncs",
+		MIMEType:    "text/html;profile=mcp-app",
+		Meta:        uiMeta,
+	}, func(_ context.Context, req *mcp.ReadResourceRequest) (*mcp.ReadResourceResult, error) {
+		return &mcp.ReadResourceResult{
+			Contents: []*mcp.ResourceContents{{
+				URI:      req.Params.URI,
+				MIMEType: "text/html;profile=mcp-app",
+				Text:     syncStatusHTML,
 				Meta:     uiMeta,
 			}},
 		}, nil

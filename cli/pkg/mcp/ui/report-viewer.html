@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mitti Reports</title>
+<style>
+  :root {
+    --color-background-primary: light-dark(#ffffff, #171717);
+    --color-background-secondary: light-dark(#f5f5f5, #262626);
+    --color-text-primary: light-dark(#171717, #fafafa);
+    --color-text-secondary: light-dark(#525252, #a3a3a3);
+    --color-border-primary: light-dark(#e5e5e5, #404040);
+    --font-sans: system-ui, -apple-system, sans-serif;
+    --border-radius-md: 8px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 12px;
+    background: var(--color-background-primary);
+    color: var(--color-text-primary);
+    font-family: var(--font-sans);
+    font-size: 13px;
+  }
+  .meta { color: var(--color-text-secondary); margin-bottom: 8px; }
+  .file-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 8px 10px; border: 1px solid var(--color-border-primary);
+    border-radius: var(--border-radius-md); margin-bottom: 6px;
+    background: var(--color-background-secondary);
+  }
+  .file-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-right: 8px; }
+  button {
+    border: 1px solid var(--color-border-primary); border-radius: var(--border-radius-md);
+    background: var(--color-background-primary); color: var(--color-text-primary);
+    padding: 4px 12px; cursor: pointer; font-size: 12px; flex-shrink: 0;
+  }
+  button:disabled { opacity: 0.5; cursor: default; }
+  .empty { color: var(--color-text-secondary); padding: 24px; text-align: center; }
+  .err { color: var(--color-text-danger, #b02010); font-size: 12px; margin-top: 6px; }
+</style>
+</head>
+<body>
+  <div class="meta" id="summary">Waiting for reports…</div>
+  <div id="files"></div>
+  <div class="empty" id="empty" hidden>No report files yet</div>
+  <div class="err" id="err" hidden></div>
+
+<script>
+(function () {
+  var nextId = 1;
+  var pending = {};
+
+  function sendRequest(method, params) {
+    var id = nextId++;
+    window.parent.postMessage({ jsonrpc: "2.0", id: id, method: method, params: params }, "*");
+    return new Promise(function (resolve, reject) { pending[id] = { resolve: resolve, reject: reject }; });
+  }
+  function sendNotification(method, params) {
+    window.parent.postMessage({ jsonrpc: "2.0", method: method, params: params }, "*");
+  }
+  function notifySize() {
+    sendNotification("ui/notifications/size-changed", {
+      width: document.documentElement.scrollWidth,
+      height: document.documentElement.scrollHeight
+    });
+  }
+  function showErr(msg) {
+    var el = document.getElementById("err");
+    el.textContent = msg; el.hidden = !msg;
+    notifySize();
+  }
+
+  function download(fileName, btn) {
+    btn.disabled = true; btn.textContent = "…";
+    showErr("");
+    // App-only tool: fetch bytes from the server, then ask the host to save.
+    sendRequest("tools/call", { name: "read_export_file", arguments: { path: fileName } })
+      .then(function (res) {
+        var sc = res && res.structuredContent;
+        if (!sc || !sc.data) { throw new Error("no file data returned"); }
+        return sendRequest("ui/download-file", {
+          contents: [{
+            type: "resource",
+            resource: {
+              uri: "file:///" + sc.name,
+              mimeType: sc.mime_type,
+              blob: sc.data
+            }
+          }]
+        });
+      })
+      .then(function () { btn.textContent = "Saved"; })
+      .catch(function (e) {
+        btn.textContent = "Download";
+        showErr("Download failed: " + (e && e.message ? e.message : e) +
+          " — the file is on disk in the export folder.");
+      })
+      .finally(function () { btn.disabled = false; notifySize(); });
+  }
+
+  function render(data) {
+    var summary = document.getElementById("summary");
+    var filesEl = document.getElementById("files");
+    var empty = document.getElementById("empty");
+    filesEl.innerHTML = "";
+
+    if (!data || !data.files) {
+      summary.textContent = "No structured result available";
+      return;
+    }
+    summary.textContent = data.count + " report" + (data.count === 1 ? "" : "s") +
+      " · saved in " + (data.export_path || "export folder");
+    empty.hidden = data.files.length > 0;
+
+    data.files.forEach(function (f) {
+      var row = document.createElement("div");
+      row.className = "file-row";
+      var name = document.createElement("span");
+      name.className = "file-name"; name.textContent = f; name.title = f;
+      var btn = document.createElement("button");
+      btn.textContent = "Download";
+      btn.onclick = function () { download(f, btn); };
+      row.appendChild(name); row.appendChild(btn);
+      filesEl.appendChild(row);
+    });
+    notifySize();
+  }
+
+  window.addEventListener("message", function (event) {
+    var msg = event.data;
+    if (!msg || msg.jsonrpc !== "2.0") return;
+    if (msg.id && pending[msg.id]) {
+      var p = pending[msg.id]; delete pending[msg.id];
+      if (msg.error) { p.reject(new Error(msg.error.message)); } else { p.resolve(msg.result); }
+      return;
+    }
+    if (msg.method === "ui/notifications/tool-result") {
+      var result = msg.params || {};
+      if (result.structuredContent) { render(result.structuredContent); }
+    }
+  });
+
+  sendRequest("ui/initialize", {
+    protocolVersion: "2025-06-18",
+    clientInfo: { name: "mitti-report-viewer", version: "0.1.0" },
+    appCapabilities: { availableDisplayModes: ["inline", "fullscreen"] }
+  }).then(function (result) {
+    var ctx = (result && result.hostContext) || {};
+    if (ctx.theme) { document.documentElement.style.colorScheme = ctx.theme; }
+    sendNotification("ui/notifications/initialized", {});
+    notifySize();
+  }).catch(function () { /* host without MCP Apps: text fallback suffices */ });
+})();
+</script>
+</body>
+</html>

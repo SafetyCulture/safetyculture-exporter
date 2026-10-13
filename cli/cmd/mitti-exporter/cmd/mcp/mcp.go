@@ -8,10 +8,12 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"strings"
 
 	"github.com/SafetyCulture/mitti-exporter/cmd/mitti-exporter/cmd/export"
 	util "github.com/SafetyCulture/mitti-exporter/cmd/mitti-exporter/cmd/utils"
 	"github.com/SafetyCulture/mitti-exporter/internal/app/version"
+	exporterAPI "github.com/SafetyCulture/mitti-exporter/pkg/api"
 	mittimcp "github.com/SafetyCulture/mitti-exporter/pkg/mcp"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -62,16 +64,66 @@ func runMCP(cmd *cobra.Command, _ []string) error {
 			exportPath = filepath.Join(filepath.Dir(cfgFile), exportPath)
 		}
 	}
+	mediaPath := v.GetString("export.media_path")
+	if mediaPath != "" && !filepath.IsAbs(mediaPath) {
+		if cfgFile := v.ConfigFileUsed(); cfgFile != "" {
+			mediaPath = filepath.Join(filepath.Dir(cfgFile), mediaPath)
+		}
+	}
+
+	// makeExporter builds a fresh exporter per call so config/token changes
+	// are picked up and a failed run doesn't poison the server.
+	makeExporter := func(fullSync bool, reportFormats []string) (*exporterAPI.MittiExporter, error) {
+		cm, err := exporterAPI.NewConfigurationManagerFromFile("", v.ConfigFileUsed())
+		if err != nil {
+			return nil, err
+		}
+		export.MapViperConfigToExporterConfiguration(v, cm.Configuration)
+		cm.ApplySafetyGuards()
+		if fullSync {
+			cm.Configuration.Export.Incremental = false
+		}
+		if len(reportFormats) > 0 {
+			cm.Configuration.Report.Format = reportFormats
+		}
+		ver := exporterAPI.AppVersion{
+			IntegrationID:      version.GetIntegrationID(),
+			IntegrationVersion: version.GetVersion(),
+		}
+		return exporterAPI.NewMittiExporter(cm.Configuration, &ver)
+	}
 
 	cfg := &mittimcp.Config{
 		Name:       "mitti-exporter",
 		Version:    version.GetVersion(),
 		ExportPath: exportPath,
+		MediaPath:  mediaPath,
 		Sync: func(ctx context.Context) error {
-			// Build the exporter lazily per sync so config/token changes are
-			// picked up and a failed sync doesn't poison the server.
-			exp := export.NewMittiExporter(v)
+			exp, err := makeExporter(false, nil)
+			if err != nil {
+				return err
+			}
 			return exp.RunSQLite()
+		},
+		SyncFull: func(ctx context.Context) error {
+			exp, err := makeExporter(true, nil)
+			if err != nil {
+				return err
+			}
+			return exp.RunSQLite()
+		},
+		GenerateReports: func(ctx context.Context, formats []string) ([]string, error) {
+			for i, f := range formats {
+				formats[i] = strings.ToUpper(f)
+			}
+			exp, err := makeExporter(false, formats)
+			if err != nil {
+				return nil, err
+			}
+			if err := exp.RunInspectionReports(); err != nil {
+				return nil, err
+			}
+			return mittimcp.ListReportFiles(exportPath)
 		},
 	}
 

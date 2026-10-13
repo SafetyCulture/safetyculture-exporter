@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mitti Sync Status</title>
+<style>
+  :root {
+    --color-background-primary: light-dark(#ffffff, #171717);
+    --color-background-secondary: light-dark(#f5f5f5, #262626);
+    --color-text-primary: light-dark(#171717, #fafafa);
+    --color-text-secondary: light-dark(#525252, #a3a3a3);
+    --color-border-primary: light-dark(#e5e5e5, #404040);
+    --color-text-success: light-dark(#1f8a4c, #4ade80);
+    --color-text-danger: light-dark(#b02010, #f87171);
+    --font-sans: system-ui, -apple-system, sans-serif;
+    --border-radius-md: 8px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 12px;
+    background: var(--color-background-primary);
+    color: var(--color-text-primary);
+    font-family: var(--font-sans);
+    font-size: 13px;
+  }
+  .meta { color: var(--color-text-secondary); margin-bottom: 8px; display: flex; justify-content: space-between; }
+  .feed-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 6px 10px; border: 1px solid var(--color-border-primary);
+    border-radius: var(--border-radius-md); margin-bottom: 4px;
+    background: var(--color-background-secondary);
+  }
+  .feed-name { font-weight: 500; }
+  .feed-state { color: var(--color-text-secondary); font-size: 12px; }
+  .feed-state.done { color: var(--color-text-success); }
+  .feed-state.err { color: var(--color-text-danger); }
+  .empty { color: var(--color-text-secondary); padding: 24px; text-align: center; }
+  .spinner {
+    display: inline-block; width: 10px; height: 10px; margin-right: 6px;
+    border: 2px solid var(--color-border-primary); border-top-color: var(--color-text-primary);
+    border-radius: 50%; animation: spin 0.8s linear infinite; vertical-align: -1px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+  <div class="meta">
+    <span id="summary">Starting sync…</span>
+    <span id="running"><span class="spinner"></span></span>
+  </div>
+  <div id="feeds"></div>
+  <div class="empty" id="empty" hidden>Waiting for export progress…</div>
+
+<script>
+(function () {
+  var nextId = 1;
+  var pending = {};
+  var pollTimer = null;
+
+  function sendRequest(method, params) {
+    var id = nextId++;
+    window.parent.postMessage({ jsonrpc: "2.0", id: id, method: method, params: params }, "*");
+    return new Promise(function (resolve, reject) { pending[id] = { resolve: resolve, reject: reject }; });
+  }
+  function sendNotification(method, params) {
+    window.parent.postMessage({ jsonrpc: "2.0", method: method, params: params }, "*");
+  }
+  function notifySize() {
+    sendNotification("ui/notifications/size-changed", {
+      width: document.documentElement.scrollWidth,
+      height: document.documentElement.scrollHeight
+    });
+  }
+
+  function render(status) {
+    var summary = document.getElementById("summary");
+    var feedsEl = document.getElementById("feeds");
+    var empty = document.getElementById("empty");
+    var running = document.getElementById("running");
+    feedsEl.innerHTML = "";
+
+    if (!status) { summary.textContent = "No progress available"; return; }
+
+    var feeds = status.feeds || [];
+    var done = feeds.filter(function (f) { return f.finished; }).length;
+
+    if (status.export_completed) {
+      summary.textContent = "Sync complete — " + done + "/" + feeds.length + " feeds";
+      running.hidden = true;
+      stopPolling();
+    } else if (status.export_started) {
+      summary.textContent = "Syncing… " + done + "/" + feeds.length + " feeds";
+      running.hidden = false;
+    } else {
+      summary.textContent = "Starting sync…";
+    }
+    empty.hidden = feeds.length > 0;
+
+    feeds.forEach(function (f) {
+      var row = document.createElement("div");
+      row.className = "feed-row";
+      var name = document.createElement("span");
+      name.className = "feed-name"; name.textContent = f.feed_name;
+      var state = document.createElement("span");
+      state.className = "feed-state" + (f.has_error ? " err" : (f.finished ? " done" : ""));
+      if (f.has_error) { state.textContent = "error"; }
+      else if (f.finished) { state.textContent = "done · " + f.counter + " rows"; }
+      else if (f.started) { state.textContent = (f.counter || 0) + " rows…"; }
+      else { state.textContent = "waiting"; }
+      row.appendChild(name); row.appendChild(state);
+      feedsEl.appendChild(row);
+    });
+    notifySize();
+  }
+
+  function poll() {
+    sendRequest("tools/call", { name: "sync_progress", arguments: {} })
+      .then(function (res) {
+        if (res && res.structuredContent) { render(res.structuredContent); }
+      })
+      .catch(function () { /* host may not proxy app tools; final tool-result still renders */ });
+  }
+  function startPolling() {
+    if (!pollTimer) { pollTimer = setInterval(poll, 1500); poll(); }
+  }
+  function stopPolling() {
+    if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
+  }
+
+  window.addEventListener("message", function (event) {
+    var msg = event.data;
+    if (!msg || msg.jsonrpc !== "2.0") return;
+    if (msg.id && pending[msg.id]) {
+      var p = pending[msg.id]; delete pending[msg.id];
+      if (msg.error) { p.reject(new Error(msg.error.message)); } else { p.resolve(msg.result); }
+      return;
+    }
+    if (msg.method === "ui/notifications/tool-result") {
+      var result = msg.params || {};
+      if (result.structuredContent) {
+        document.getElementById("summary").textContent =
+          result.isError ? "Sync failed" : "Sync complete";
+        document.getElementById("running").hidden = true;
+        stopPolling();
+      }
+    }
+    if (msg.method === "ui/notifications/tool-cancelled") {
+      document.getElementById("summary").textContent = "Sync cancelled";
+      document.getElementById("running").hidden = true;
+      stopPolling();
+    }
+  });
+
+  sendRequest("ui/initialize", {
+    protocolVersion: "2025-06-18",
+    clientInfo: { name: "mitti-sync-status", version: "0.1.0" },
+    appCapabilities: { availableDisplayModes: ["inline"] }
+  }).then(function (result) {
+    var ctx = (result && result.hostContext) || {};
+    if (ctx.theme) { document.documentElement.style.colorScheme = ctx.theme; }
+    sendNotification("ui/notifications/initialized", {});
+    startPolling();
+    notifySize();
+  }).catch(function () { /* host without MCP Apps: text fallback suffices */ });
+})();
+</script>
+</body>
+</html>

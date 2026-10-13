@@ -42,7 +42,9 @@
     border-bottom: 1px solid var(--color-border-primary);
     white-space: nowrap; max-width: 320px; overflow: hidden; text-overflow: ellipsis;
   }
-  th { background: var(--color-background-secondary); position: sticky; top: 0; font-weight: 600; }
+  th { background: var(--color-background-secondary); position: sticky; top: 0; font-weight: 600; cursor: pointer; user-select: none; }
+  th:hover { text-decoration: underline; }
+  th .arrow { font-size: 10px; margin-left: 4px; }
   tr:last-child td { border-bottom: none; }
   td { font-family: var(--font-mono); font-size: 12px; }
   .empty { color: var(--color-text-secondary); padding: 24px; text-align: center; }
@@ -80,7 +82,12 @@
     });
   }
 
+  var currentData = null;
+  var sortCol = -1;
+  var sortAsc = true;
+
   function render(data) {
+    currentData = data;
     var thead = document.querySelector("#grid thead");
     var tbody = document.querySelector("#grid tbody");
     var summary = document.getElementById("summary");
@@ -92,13 +99,23 @@
       summary.textContent = "No structured result available";
       return;
     }
-    summary.textContent = data.row_count + " row" + (data.row_count === 1 ? "" : "s");
+    summary.textContent = data.row_count + " row" + (data.row_count === 1 ? "" : "s") +
+      " · click a column to sort";
     truncated.hidden = !data.truncated;
     empty.hidden = data.rows.length > 0;
 
     var hr = document.createElement("tr");
-    data.columns.forEach(function (c) {
-      var th = document.createElement("th"); th.textContent = c; hr.appendChild(th);
+    data.columns.forEach(function (c, idx) {
+      var th = document.createElement("th");
+      th.textContent = c;
+      if (idx === sortCol) {
+        var arrow = document.createElement("span");
+        arrow.className = "arrow";
+        arrow.textContent = sortAsc ? "▲" : "▼";
+        th.appendChild(arrow);
+      }
+      th.onclick = function () { sortBy(idx); };
+      hr.appendChild(th);
     });
     thead.appendChild(hr);
 
@@ -112,6 +129,23 @@
       tbody.appendChild(tr);
     });
     notifySize();
+  }
+
+  function sortBy(idx) {
+    if (!currentData) return;
+    if (sortCol === idx) { sortAsc = !sortAsc; } else { sortCol = idx; sortAsc = true; }
+    currentData.rows.sort(function (a, b) {
+      var va = a[idx], vb = b[idx];
+      if (va === null && vb === null) return 0;
+      if (va === null) return 1;
+      if (vb === null) return -1;
+      var na = Number(va), nb = Number(vb);
+      var cmp;
+      if (!isNaN(na) && !isNaN(nb) && va !== "" && vb !== "") { cmp = na - nb; }
+      else { cmp = String(va).localeCompare(String(vb)); }
+      return sortAsc ? cmp : -cmp;
+    });
+    render(currentData);
   }
 
   window.addEventListener("message", function (event) {
