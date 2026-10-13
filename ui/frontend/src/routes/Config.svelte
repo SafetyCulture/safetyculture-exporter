@@ -480,7 +480,8 @@
 			<div class="h1 p-left-16">Export configuration</div>
 		</div>
 		<div class="nav-right">
-			<Button label="Save and close" type="active-white" onClick={handleSaveAndClose}/>
+			<Button label="Connect AI" type="active-white" onClick={() => push("/connect-ai")}/>
+			<Button label="Save and close" type="active-white" clazz="m-left-8" onClick={handleSaveAndClose}/>
 			<Button label="Save and export" type="active-purple" clazz="m-left-8" error={formError} onClick={handleSaveAndExport}/>
 		</div>
 	</section>
