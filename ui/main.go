@@ -3,6 +3,7 @@ package main
 import (
 	"embed"
 	"fmt"
+	"os"
 	"time"
 
 	"github.com/SafetyCulture/mitti-exporter-ui/internal/version"
@@ -23,6 +24,13 @@ var assets embed.FS
 var icon []byte
 
 func main() {
+	// Dual-mode: `<binary> mcp` runs a headless MCP server (stdio) instead of
+	// the desktop UI, so UI-only installs can still connect AI agents.
+	if len(os.Args) > 1 && os.Args[1] == "mcp" {
+		runMCPHeadless()
+		return
+	}
+
 	// Create an instance of the app structure
 	app := NewApp()
 

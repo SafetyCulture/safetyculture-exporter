@@ -26,6 +26,10 @@ export function ExportSQLite() {
   return window['go']['main']['App']['ExportSQLite']();
 }
 
+export function GetMCPConnectInfo() {
+  return window['go']['main']['App']['GetMCPConnectInfo']();
+}
+
 export function GetSettingDir() {
   return window['go']['main']['App']['GetSettingDir']();
 }
@@ -76,4 +80,8 @@ export function ValidateApiKey(arg1) {
 
 export function ValidateExportDirectory() {
   return window['go']['main']['App']['ValidateExportDirectory']();
+}
+
+export function WriteMCPConfig(arg1) {
+  return window['go']['main']['App']['WriteMCPConfig'](arg1);
 }

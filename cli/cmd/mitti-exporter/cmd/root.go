@@ -7,6 +7,7 @@ import (
 
 	"github.com/SafetyCulture/mitti-exporter/cmd/mitti-exporter/cmd/configure"
 	"github.com/SafetyCulture/mitti-exporter/cmd/mitti-exporter/cmd/export"
+	mcpcmd "github.com/SafetyCulture/mitti-exporter/cmd/mitti-exporter/cmd/mcp"
 	util "github.com/SafetyCulture/mitti-exporter/cmd/mitti-exporter/cmd/utils"
 	"github.com/SafetyCulture/mitti-exporter/internal/app/version"
 	"github.com/SafetyCulture/mitti-exporter/pkg/update"
@@ -33,7 +34,15 @@ var RootCmd = &cobra.Command{
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
-	fmt.Printf("Mitti Exporter CLI version %s\n", version.GetVersion())
+	// The `mcp` subcommand speaks JSON-RPC on stdout; everything else may use it.
+	bannerOut := os.Stdout
+	for _, arg := range os.Args[1:] {
+		if arg == "mcp" {
+			bannerOut = os.Stderr
+			break
+		}
+	}
+	fmt.Fprintf(bannerOut, "Mitti Exporter CLI version %s\n", version.GetVersion())
 	updateMsgChan := make(chan *update.ReleaseInfo)
 
 	go func() {
@@ -79,6 +88,7 @@ func init() {
 	addCmd(export.InspectionJSONCmd(), exportFlags, connectionFlags, inspectionFlags, actionFlags, templatesFlag)
 	addCmd(export.ReportCmd(), connectionFlags, exportFlags, inspectionFlags, actionFlags, templatesFlag, reportFlags)
 	addCmd(export.PrintSchemaCmd())
+	addCmd(mcpcmd.Cmd(), connectionFlags, exportFlags, inspectionFlags, actionFlags, templatesFlag, tablesFlag, mediaFlags, sitesFlags)
 	addCmd(configure.Cmd(), connectionFlags, dbFlags, exportFlags, inspectionFlags, actionFlags, templatesFlag, tablesFlag)
 	RootCmd.AddCommand(&cobra.Command{
 		Hidden: true,

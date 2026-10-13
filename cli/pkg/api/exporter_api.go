@@ -383,6 +383,36 @@ func (s *MittiExporter) GetExportStatus() *ExportStatusResponse {
 	}
 }
 
+// GetGlobalExportStatus reads the process-wide export status without an
+// exporter instance. Used by the MCP server to report sync progress.
+// Unlike GetExportStatus it does not purge finished feeds, so progress
+// remains visible after completion until the next export starts.
+func GetGlobalExportStatus() *ExportStatusResponse {
+	status := feed.GetExporterStatus()
+	data := status.ReadStatus()
+	var res []ExportStatusResponseItem
+
+	for _, v := range data {
+		res = append(res, ExportStatusResponseItem{
+			FeedName:           v.Name,
+			Started:            v.Started,
+			Finished:           v.Finished,
+			HasError:           v.HasError,
+			DurationMs:         v.DurationMs,
+			Counter:            v.Counter,
+			CounterDecremental: v.CounterDecremental,
+			StatusMessage:      v.StatusMessage,
+			Stage:              string(v.Stage),
+		})
+	}
+
+	return &ExportStatusResponse{
+		ExportStarted:   status.GetExportStarted(),
+		ExportCompleted: status.GetExportCompleted(),
+		Feeds:           res,
+	}
+}
+
 // SetConfiguration will replace the configuration. Used by the UI to pass in the newly saved configuration
 func (s *MittiExporter) SetConfiguration(cfg *ExporterConfiguration) {
 	s.cfg = cfg

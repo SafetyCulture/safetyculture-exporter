@@ -106,6 +106,36 @@ export namespace api {
 
 export namespace main {
 	
+	export class MCPConnectInfo {
+	    binary_path: string;
+	    config_snippet: string;
+	    claude_config_path: string;
+	    claude_configured: boolean;
+	    cursor_config_path: string;
+	    cursor_configured: boolean;
+	    claude_code_command: string;
+	    has_token: boolean;
+	    has_database: boolean;
+	    export_path: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new MCPConnectInfo(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.binary_path = source["binary_path"];
+	        this.config_snippet = source["config_snippet"];
+	        this.claude_config_path = source["claude_config_path"];
+	        this.claude_configured = source["claude_configured"];
+	        this.cursor_config_path = source["cursor_config_path"];
+	        this.cursor_configured = source["cursor_configured"];
+	        this.claude_code_command = source["claude_code_command"];
+	        this.has_token = source["has_token"];
+	        this.has_database = source["has_database"];
+	        this.export_path = source["export_path"];
+	    }
+	}
 	export class VersionResponse {
 	    os: string;
 	    current: string;

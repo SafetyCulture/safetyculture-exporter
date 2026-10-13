@@ -326,6 +326,44 @@ jobs:
           name: ui-windows
           path: mitti-exporter-ui-windows-x86_64.exe
 
+  mcpb:
+    name: MCP Bundles (.mcpb)
+    runs-on: ubuntu-latest
+    needs:
+      - cli-darwin-arm64
+      - cli-windows-amd64
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Download CLI artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts/
+          merge-multiple: false
+
+      - name: Pack macOS bundle
+        run: |
+          unzip -o artifacts/cli-darwin-arm64/mitti-exporter-darwin-arm64.zip -d darwin/
+          chmod +x darwin/mitti-exporter-cli/mitti-exporter
+          scripts/pack-mcpb.sh darwin darwin/mitti-exporter-cli/mitti-exporter "${{ github.ref_name }}"
+
+      - name: Pack Windows bundle
+        run: |
+          unzip -o artifacts/cli-windows-amd64/mitti-exporter-windows-x86_64.zip -d win32/
+          scripts/pack-mcpb.sh win32 win32/mitti-exporter-cli/mitti-exporter.exe "${{ github.ref_name }}"
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: mcpb-bundles
+          path: "*.mcpb"
+
   release:
     name: Create GitHub Release
     runs-on: ubuntu-latest
@@ -336,6 +374,7 @@ jobs:
       - cli-darwin-arm64
       - ui-macos
       - ui-windows
+      - mcpb
     steps:
       - name: Download all artifacts
         uses: actions/download-artifact@v4

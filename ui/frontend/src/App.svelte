@@ -8,6 +8,7 @@
     import DataSetFilter from "./routes/DataSetFilter.svelte";
     import ExportStatus from "./routes/ExportStatus.svelte";
     import Update from "./routes/Update.svelte";
+    import ConnectAI from "./routes/ConnectAI.svelte";
 </script>
 
 <div class="container">
@@ -19,6 +20,7 @@
 	'/config/templates': TemplateFilter,
 	'/config/datasets': DataSetFilter,
 	'/export/status': ExportStatus,
+	'/connect-ai': ConnectAI,
 	'*': Page404
 }} />
 </div>

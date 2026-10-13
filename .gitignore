@@ -28,6 +28,9 @@ ui/build/bin/
 ui/build/darwin/
 ui/build/windows/
 
+# Local dev binaries
+/bin/
+
 # Frontend build output
 ui/frontend/dist/
 
@@ -44,6 +47,9 @@ package-lock.json
 # Logs
 *.log
 perf.md
+
+# Local planning artifacts
+.planning/
 
 # Local planning (GSD workflow artifacts)
 .planning/

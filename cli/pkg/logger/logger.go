@@ -3,7 +3,6 @@ package logger
 import (
 	"context"
 	"fmt"
-	"log"
 	"os"
 	"path/filepath"
 	"time"
@@ -129,6 +128,18 @@ func getLogger(cores ...zapcore.Core) *zap.SugaredLogger {
 	return slg
 }
 
+// openLogFile opens the daily log file in dir, falling back to the system
+// temp dir when dir isn't writable (e.g. MCP hosts launch the server with a
+// read-only cwd like /). Never fatal: logging must not kill the process.
+func openLogFile(dir string) (*os.File, error) {
+	logName := fmt.Sprintf("sc-exporter-%s.log", time.Now().Format(time.DateOnly))
+	file, err := os.OpenFile(filepath.Join(dir, logName), os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	if err != nil {
+		file, err = os.OpenFile(filepath.Join(os.TempDir(), logName), os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	}
+	return file, err
+}
+
 // GetLogger returns a configured instance of the logger
 func GetLogger() *zap.SugaredLogger {
 	if slg != nil {
@@ -140,19 +151,18 @@ func GetLogger() *zap.SugaredLogger {
 	logFileEncoder := zapcore.NewJSONEncoder(prodConfig)
 	consoleEncoder := zapcore.NewConsoleEncoder(zap.NewDevelopmentEncoderConfig())
 
-	logName := fmt.Sprintf("sc-exporter-%s.log", time.Now().Format(time.DateOnly))
-	file, err := os.OpenFile(logName, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
-	if err != nil {
-		log.Fatalf("unable to open log file %v", err)
-	}
-
-	logFileWriter := zapcore.Lock(file)
 	consoleWriter := zapcore.Lock(os.Stderr)
 
-	slg = getLogger(
+	cores := []zapcore.Core{
 		zapcore.NewCore(consoleEncoder, consoleWriter, zap.InfoLevel),
-		zapcore.NewCore(logFileEncoder, logFileWriter, zap.DebugLevel),
-	)
+	}
+	if file, err := openLogFile("."); err == nil {
+		cores = append(cores, zapcore.NewCore(logFileEncoder, zapcore.Lock(file), zap.DebugLevel))
+	} else {
+		fmt.Fprintf(os.Stderr, "warning: unable to open log file, logging to stderr only: %v\n", err)
+	}
+
+	slg = getLogger(cores...)
 
 	return slg
 }
@@ -169,15 +179,20 @@ func GetExporterLogger(path string) *ExporterLogger {
 	prodConfig.EncodeTime = zapcore.ISO8601TimeEncoder
 	logFileEncoder := zapcore.NewJSONEncoder(prodConfig)
 
-	logName := fmt.Sprintf("sc-exporter-%s.log", time.Now().Format(time.DateOnly))
-	file, err := os.OpenFile(filepath.Join(path, logName), os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	file, err := openLogFile(path)
 	if err != nil {
-		log.Fatalf("unable to open log file %v", err)
+		// Last resort: stderr-only so the process still starts (e.g. MCP mode
+		// launched with a read-only cwd and no writable settings dir).
+		fmt.Fprintf(os.Stderr, "warning: unable to open log file, logging to stderr only: %v\n", err)
+		slg = getLogger(zapcore.NewCore(
+			zapcore.NewConsoleEncoder(zap.NewDevelopmentEncoderConfig()),
+			zapcore.Lock(os.Stderr),
+			zap.InfoLevel,
+		))
+		return &ExporterLogger{l: slg}
 	}
 
-	logFileWriter := zapcore.Lock(file)
-
-	slg = getLogger(zapcore.NewCore(logFileEncoder, logFileWriter, zap.DebugLevel))
+	slg = getLogger(zapcore.NewCore(logFileEncoder, zapcore.Lock(file), zap.DebugLevel))
 
 	return &ExporterLogger{
 		l: slg,
