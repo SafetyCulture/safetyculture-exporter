@@ -28,6 +28,14 @@ func runMCPHeadless() {
 	if err != nil {
 		fatalMCP("failed to get settings directory", err)
 	}
+
+	// Initialise logging FIRST, into the (writable) settings dir. MCP hosts
+	// launch us with an unpredictable, possibly read-only cwd (e.g. /), and
+	// every feed exporter calls logger.GetLogger() — without this, the first
+	// log call would try to open the log file in cwd and kill the process.
+	// GetExporterLogger is file-only, keeping stdout clean for JSON-RPC.
+	extLogger.GetExporterLogger(settingsDir)
+
 	configFile := resolveConfigFileName(settingsDir)
 	if !checkForConfigFile(settingsDir, configFile) {
 		fatalMCP("no configuration found", fmt.Errorf("open the Mitti Exporter app once and enter your API token first (expected config at %s)", filepath.Join(settingsDir, configFile)))
@@ -104,8 +112,7 @@ func runMCPHeadless() {
 		},
 	}
 
-	// Logs go to stderr + file; stdout is reserved for JSON-RPC.
-	extLogger.GetLogger()
+	// Logs go to the settings-dir file; stdout is reserved for JSON-RPC.
 	if err := mittimcp.Run(context.Background(), cfg); err != nil && err != context.Canceled {
 		fatalMCP("MCP server stopped with an error", err)
 	}
