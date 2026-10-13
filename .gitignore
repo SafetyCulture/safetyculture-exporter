@@ -28,6 +28,9 @@ ui/build/bin/
 ui/build/darwin/
 ui/build/windows/
 
+# Local dev binaries
+/bin/
+
 # Frontend build output
 ui/frontend/dist/
 
