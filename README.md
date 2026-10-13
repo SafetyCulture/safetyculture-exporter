@@ -4,6 +4,8 @@
 
 Mitti Exporter is available as both a **command-line tool (CLI)** and a **desktop application (UI)**. You can use it to export your data — inspections, templates, schedules, actions, and more — to multiple formats for business intelligence tools or record keeping. Available to all Premium and Enterprise customers.
 
+It can also run as a **local MCP server** (`mitti-exporter mcp`) so AI agents like Claude can sync and query your exported data — see [docs/MCP.md](docs/MCP.md).
+
 For instructions on downloading and running Mitti Exporter, as well as interpreting the data output, please check out our [Mitti Exporter documentation](https://developer.mitti.com/docs/mitti-exporter).
 
 * [Mitti Exporter documentation](https://developer.mitti.com/docs/mitti-exporter)

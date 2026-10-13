@@ -1,0 +1,179 @@
+package mcp
+
+import (
+	"context"
+	_ "embed"
+	"encoding/json"
+	"fmt"
+
+	"github.com/modelcontextprotocol/go-sdk/mcp"
+)
+
+// tableViewerURI is the SEP-1865 (MCP Apps) UI resource used to render query results.
+const tableViewerURI = "ui://mitti/table-viewer"
+
+//go:embed ui/table-viewer.html
+var tableViewerHTML string
+
+// Config wires the MCP server into the exporter.
+type Config struct {
+	// Name/Version identify the server to MCP hosts.
+	Name    string
+	Version string
+
+	// ExportPath is where the SQLite export database lives (export.path).
+	ExportPath string
+
+	// Sync runs a full SQLite export (equivalent to `mitti-exporter sqlite`).
+	// Called by the sync_data tool. Must be safe to call more than once.
+	Sync func(ctx context.Context) error
+}
+
+// NewServer builds the MCP server with all tools and UI resources registered.
+func NewServer(cfg *Config) *mcp.Server {
+	srv := mcp.NewServer(&mcp.Implementation{
+		Name:    cfg.Name,
+		Version: cfg.Version,
+	}, nil)
+
+	registerTools(srv, cfg)
+	registerResources(srv)
+
+	return srv
+}
+
+// Run starts the server over stdio until the host disconnects.
+func Run(ctx context.Context, cfg *Config) error {
+	return NewServer(cfg).Run(ctx, &mcp.StdioTransport{})
+}
+
+// --- Tool argument types ---
+
+type queryArgs struct {
+	SQL     string `json:"sql" jsonschema:"read-only SQL SELECT to run against the local export database"`
+	MaxRows int    `json:"max_rows,omitempty" jsonschema:"maximum rows to return (default 200, hard cap 1000)"`
+}
+
+type describeTableArgs struct {
+	Table string `json:"table" jsonschema:"name of the table to describe (see list_tables)"`
+}
+
+type emptyArgs struct{}
+
+// --- Tool registration ---
+
+func registerTools(srv *mcp.Server, cfg *Config) {
+	mcp.AddTool(srv, &mcp.Tool{
+		Name: "list_tables",
+		Description: "List all tables in the local Mitti export database with column and row counts. " +
+			"Start here to discover what data is available before writing queries.",
+		Annotations: &mcp.ToolAnnotations{ReadOnlyHint: true},
+	}, func(ctx context.Context, _ *mcp.CallToolRequest, _ emptyArgs) (*mcp.CallToolResult, any, error) {
+		tables, err := listTables(ctx, cfg.ExportPath)
+		if err != nil {
+			return errorResult(err)
+		}
+		return structuredResult(tables, fmt.Sprintf("%d tables available", len(tables)))
+	})
+
+	mcp.AddTool(srv, &mcp.Tool{
+		Name: "describe_table",
+		Description: "Show the schema (columns, types, primary keys) of one table plus 5 sample rows. " +
+			"Use this before writing a query against a table you haven't seen.",
+		Annotations: &mcp.ToolAnnotations{ReadOnlyHint: true},
+	}, func(ctx context.Context, _ *mcp.CallToolRequest, args describeTableArgs) (*mcp.CallToolResult, any, error) {
+		cols, sample, err := describeTable(ctx, cfg.ExportPath, args.Table)
+		if err != nil {
+			return errorResult(err)
+		}
+		out := map[string]any{"columns": cols, "sample_rows": sample}
+		return structuredResult(out, fmt.Sprintf("table %s: %d columns", args.Table, len(cols)))
+	})
+
+	mcp.AddTool(srv, &mcp.Tool{
+		Name: "query",
+		Description: "Run a read-only SQL SELECT against the local Mitti export database (SQLite). " +
+			"Returns JSON rows, capped at max_rows. Use list_tables/describe_table first to learn the schema. " +
+			"Example: SELECT status, COUNT(*) AS n FROM inspections GROUP BY status",
+		Annotations: &mcp.ToolAnnotations{ReadOnlyHint: true},
+		// SEP-1865: hosts that support MCP Apps render results in the table viewer UI.
+		Meta: mcp.Meta{"ui": map[string]any{"resourceUri": tableViewerURI}},
+	}, func(ctx context.Context, _ *mcp.CallToolRequest, args queryArgs) (*mcp.CallToolResult, any, error) {
+		if args.MaxRows > 1000 {
+			args.MaxRows = 1000
+		}
+		res, err := runQuery(ctx, cfg.ExportPath, args.SQL, args.MaxRows)
+		if err != nil {
+			return errorResult(err)
+		}
+		summary := fmt.Sprintf("%d rows returned", res.RowCount)
+		if res.Truncated {
+			summary += fmt.Sprintf(" (truncated at %d — refine the query with WHERE/LIMIT)", args.MaxRows)
+		}
+		return structuredResult(res, summary)
+	})
+
+	mcp.AddTool(srv, &mcp.Tool{
+		Name: "sync_data",
+		Description: "Sync the latest Mitti data into the local export database (same as `mitti-exporter sqlite`). " +
+			"Incremental: only fetches changes since the last sync. Run this when the user asks for fresh data " +
+			"or when list_tables reports the database is missing.",
+	}, func(ctx context.Context, _ *mcp.CallToolRequest, _ emptyArgs) (*mcp.CallToolResult, any, error) {
+		if cfg.Sync == nil {
+			return errorResult(fmt.Errorf("sync is not configured"))
+		}
+		if err := cfg.Sync(ctx); err != nil {
+			return errorResult(fmt.Errorf("sync failed: %w", err))
+		}
+		tables, _ := listTables(ctx, cfg.ExportPath)
+		return structuredResult(map[string]any{"synced": true, "tables": tables}, "sync complete")
+	})
+}
+
+// --- SEP-1865 UI resources ---
+
+func registerResources(srv *mcp.Server) {
+	uiMeta := mcp.Meta{"ui": map[string]any{
+		// Fully self-contained: no network, no external resources.
+		"csp":           map[string]any{},
+		"prefersBorder": true,
+	}}
+
+	srv.AddResource(&mcp.Resource{
+		URI:         tableViewerURI,
+		Name:        "Mitti Query Results",
+		Description: "Interactive table view for query tool results",
+		MIMEType:    "text/html;profile=mcp-app",
+		Meta:        uiMeta,
+	}, func(_ context.Context, req *mcp.ReadResourceRequest) (*mcp.ReadResourceResult, error) {
+		return &mcp.ReadResourceResult{
+			Contents: []*mcp.ResourceContents{{
+				URI:      req.Params.URI,
+				MIMEType: "text/html;profile=mcp-app",
+				Text:     tableViewerHTML,
+				Meta:     uiMeta,
+			}},
+		}, nil
+	})
+}
+
+// --- Result helpers ---
+
+// structuredResult packs a structured payload plus a human/model-readable text
+// summary. The text keeps non-MCP-Apps hosts (and the model) fully functional.
+func structuredResult(payload any, summary string) (*mcp.CallToolResult, any, error) {
+	raw, err := json.Marshal(payload)
+	if err != nil {
+		return errorResult(err)
+	}
+	return &mcp.CallToolResult{
+		Content: []mcp.Content{&mcp.TextContent{Text: summary + "\n\n" + string(raw)}},
+	}, payload, nil
+}
+
+func errorResult(err error) (*mcp.CallToolResult, any, error) {
+	return &mcp.CallToolResult{
+		Content: []mcp.Content{&mcp.TextContent{Text: err.Error()}},
+		IsError: true,
+	}, nil, nil
+}

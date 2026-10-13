@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mitti Query Results</title>
+<style>
+  :root {
+    /* Fallbacks; hosts may inject SEP-1865 theme variables. */
+    --color-background-primary: light-dark(#ffffff, #171717);
+    --color-background-secondary: light-dark(#f5f5f5, #262626);
+    --color-text-primary: light-dark(#171717, #fafafa);
+    --color-text-secondary: light-dark(#525252, #a3a3a3);
+    --color-border-primary: light-dark(#e5e5e5, #404040);
+    --font-sans: system-ui, -apple-system, sans-serif;
+    --font-mono: ui-monospace, SFMono-Regular, monospace;
+    --border-radius-md: 8px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 12px;
+    background: var(--color-background-primary);
+    color: var(--color-text-primary);
+    font-family: var(--font-sans);
+    font-size: 13px;
+  }
+  .meta {
+    color: var(--color-text-secondary);
+    margin-bottom: 8px;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .badge {
+    background: var(--color-background-secondary);
+    border: 1px solid var(--color-border-primary);
+    border-radius: var(--border-radius-md);
+    padding: 2px 8px; font-size: 11px;
+  }
+  .wrap { overflow-x: auto; border: 1px solid var(--color-border-primary); border-radius: var(--border-radius-md); }
+  table { border-collapse: collapse; width: 100%; }
+  th, td {
+    text-align: left; padding: 6px 10px;
+    border-bottom: 1px solid var(--color-border-primary);
+    white-space: nowrap; max-width: 320px; overflow: hidden; text-overflow: ellipsis;
+  }
+  th { background: var(--color-background-secondary); position: sticky; top: 0; font-weight: 600; }
+  tr:last-child td { border-bottom: none; }
+  td { font-family: var(--font-mono); font-size: 12px; }
+  .empty { color: var(--color-text-secondary); padding: 24px; text-align: center; }
+</style>
+</head>
+<body>
+  <div class="meta">
+    <span id="summary">Waiting for results…</span>
+    <span class="badge" id="truncated" hidden>truncated</span>
+  </div>
+  <div class="wrap"><table id="grid"><thead></thead><tbody></tbody></table></div>
+  <div class="empty" id="empty" hidden>No rows returned</div>
+
+<script>
+(function () {
+  var nextId = 1;
+  var pending = {};
+
+  function sendRequest(method, params) {
+    var id = nextId++;
+    window.parent.postMessage({ jsonrpc: "2.0", id: id, method: method, params: params }, "*");
+    return new Promise(function (resolve, reject) {
+      pending[id] = { resolve: resolve, reject: reject };
+    });
+  }
+
+  function sendNotification(method, params) {
+    window.parent.postMessage({ jsonrpc: "2.0", method: method, params: params }, "*");
+  }
+
+  function notifySize() {
+    sendNotification("ui/notifications/size-changed", {
+      width: document.documentElement.scrollWidth,
+      height: document.documentElement.scrollHeight
+    });
+  }
+
+  function render(data) {
+    var thead = document.querySelector("#grid thead");
+    var tbody = document.querySelector("#grid tbody");
+    var summary = document.getElementById("summary");
+    var truncated = document.getElementById("truncated");
+    var empty = document.getElementById("empty");
+    thead.innerHTML = ""; tbody.innerHTML = "";
+
+    if (!data || !data.columns) {
+      summary.textContent = "No structured result available";
+      return;
+    }
+    summary.textContent = data.row_count + " row" + (data.row_count === 1 ? "" : "s");
+    truncated.hidden = !data.truncated;
+    empty.hidden = data.rows.length > 0;
+
+    var hr = document.createElement("tr");
+    data.columns.forEach(function (c) {
+      var th = document.createElement("th"); th.textContent = c; hr.appendChild(th);
+    });
+    thead.appendChild(hr);
+
+    data.rows.forEach(function (row) {
+      var tr = document.createElement("tr");
+      row.forEach(function (v) {
+        var td = document.createElement("td");
+        td.textContent = v === null ? "NULL" : String(v);
+        tr.appendChild(td);
+      });
+      tbody.appendChild(tr);
+    });
+    notifySize();
+  }
+
+  window.addEventListener("message", function (event) {
+    var msg = event.data;
+    if (!msg || msg.jsonrpc !== "2.0") return;
+    if (msg.id && pending[msg.id]) {
+      var p = pending[msg.id]; delete pending[msg.id];
+      if (msg.error) { p.reject(new Error(msg.error.message)); } else { p.resolve(msg.result); }
+      return;
+    }
+    if (msg.method === "ui/notifications/tool-result") {
+      var result = msg.params || {};
+      if (result.structuredContent) { render(result.structuredContent); }
+    }
+  });
+
+  // SEP-1865 handshake.
+  sendRequest("ui/initialize", {
+    protocolVersion: "2025-06-18",
+    clientInfo: { name: "mitti-table-viewer", version: "0.1.0" },
+    appCapabilities: { availableDisplayModes: ["inline", "fullscreen"] }
+  }).then(function (result) {
+    var ctx = (result && result.hostContext) || {};
+    if (ctx.theme === "dark") { document.documentElement.style.colorScheme = "dark"; }
+    else if (ctx.theme === "light") { document.documentElement.style.colorScheme = "light"; }
+    sendNotification("ui/notifications/initialized", {});
+    notifySize();
+  }).catch(function () {
+    // Host doesn't support MCP Apps — nothing else to do; tool text result is the fallback.
+  });
+})();
+</script>
+</body>
+</html>
