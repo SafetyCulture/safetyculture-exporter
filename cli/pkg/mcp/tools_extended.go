@@ -13,7 +13,6 @@ import (
 	exporterAPI "github.com/SafetyCulture/mitti-exporter/pkg/api"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
-
 // SEP-1865 UI resources for reports and sync progress.
 const (
 	reportViewerURI = "ui://mitti/report-viewer"
@@ -249,7 +248,7 @@ func registerPrompts(srv *mcp.Server) {
 		Name:        "weekly_safety_review",
 		Description: "Summarise the last 7 days of safety activity: inspections, failures, actions, issues",
 	}, func(_ context.Context, _ *mcp.GetPromptRequest) (*mcp.GetPromptResult, error) {
-		return promptResult("Weekly safety review", `Using the Mitti data tools, produce a weekly safety review:
+		return promptResult("Weekly safety review", `Using the Mitti Exporter data tools, produce a weekly safety review:
 1. Call sync_data if the data hasn't been synced today.
 2. Inspections completed in the last 7 days vs the 7 before (count, average score).
 3. Failed inspection items this week, grouped by template, top 10.
@@ -262,7 +261,7 @@ Finish with a short "what needs attention" list. Present as a concise report.`),
 		Name:        "overdue_actions",
 		Description: "List overdue actions grouped by site and assignee, with ageing",
 	}, func(_ context.Context, _ *mcp.GetPromptRequest) (*mcp.GetPromptResult, error) {
-		return promptResult("Overdue actions", `Using the Mitti data tools, report on overdue actions:
+		return promptResult("Overdue actions", `Using the Mitti Exporter data tools, report on overdue actions:
 1. Query the actions and action_assignees tables for actions past their due date that are not completed.
 2. Group by site, then by assignee, showing count and oldest overdue age in days.
 3. Highlight the 10 oldest overdue actions with their titles and due dates.
@@ -275,7 +274,7 @@ Suggest follow-ups for the worst offenders.`), nil
 		Arguments:   []*mcp.PromptArgument{{Name: "site", Description: "Site name or ID", Required: true}},
 	}, func(_ context.Context, req *mcp.GetPromptRequest) (*mcp.GetPromptResult, error) {
 		site := req.Params.Arguments["site"]
-		return promptResult("Site scorecard", fmt.Sprintf(`Using the Mitti data tools, build a scorecard for the site "%s":
+		return promptResult("Site scorecard", fmt.Sprintf(`Using the Mitti Exporter data tools, build a scorecard for the site "%s":
 1. Find the site in the sites table (match by name if needed).
 2. Inspection volume and average score for the last 90 days.
 3. Most-failed inspection items for this site.

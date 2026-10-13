@@ -57,7 +57,7 @@ exposes a small discovery → execute surface:
 | `list_tables` | All tables with column/row counts | read-only, cheap manifest |
 | `describe_table` | Schema + 5 sample rows for one table | read-only |
 | `query` | Arbitrary read-only SQL `SELECT` | row-capped (default 200, max 1000), 30s timeout; visibility `[model, app]` |
-| `sync_data` | SQLite export (same as `mitti-exporter sqlite`) | mutating; elicits incremental vs full where supported |
+| `sync_data` | SQLite export (same as `mitti-exporter sqlite`) | mutating; **scoped**: `tables` + `template_ids` args so agents sync only the domains needed; elicits incremental vs full where supported |
 | `generate_report` | PDF/WORD inspection reports via `RunInspectionReports` | renders in report-viewer app |
 | `read_media` | Inspection photos as MCP image content | path-jailed to media dir, 25MB cap |
 | `read_export_file` | File bytes for the report viewer | **app-only** (`visibility: ["app"]`) |

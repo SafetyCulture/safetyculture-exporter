@@ -73,15 +73,23 @@ func runMCP(cmd *cobra.Command, _ []string) error {
 
 	// makeExporter builds a fresh exporter per call so config/token changes
 	// are picked up and a failed run doesn't poison the server.
-	makeExporter := func(fullSync bool, reportFormats []string) (*exporterAPI.MittiExporter, error) {
+	makeExporter := func(sync *mittimcp.SyncOptions, reportFormats []string) (*exporterAPI.MittiExporter, error) {
 		cm, err := exporterAPI.NewConfigurationManagerFromFile("", v.ConfigFileUsed())
 		if err != nil {
 			return nil, err
 		}
 		export.MapViperConfigToExporterConfiguration(v, cm.Configuration)
 		cm.ApplySafetyGuards()
-		if fullSync {
-			cm.Configuration.Export.Incremental = false
+		if sync != nil {
+			if sync.Full {
+				cm.Configuration.Export.Incremental = false
+			}
+			if len(sync.Tables) > 0 {
+				cm.Configuration.Export.Tables = sync.Tables
+			}
+			if len(sync.TemplateIDs) > 0 {
+				cm.Configuration.Export.TemplateIds = sync.TemplateIDs
+			}
 		}
 		if len(reportFormats) > 0 {
 			cm.Configuration.Report.Format = reportFormats
@@ -98,15 +106,8 @@ func runMCP(cmd *cobra.Command, _ []string) error {
 		Version:    version.GetVersion(),
 		ExportPath: exportPath,
 		MediaPath:  mediaPath,
-		Sync: func(ctx context.Context) error {
-			exp, err := makeExporter(false, nil)
-			if err != nil {
-				return err
-			}
-			return exp.RunSQLite()
-		},
-		SyncFull: func(ctx context.Context) error {
-			exp, err := makeExporter(true, nil)
+		Sync: func(ctx context.Context, opts mittimcp.SyncOptions) error {
+			exp, err := makeExporter(&opts, nil)
 			if err != nil {
 				return err
 			}
@@ -116,7 +117,7 @@ func runMCP(cmd *cobra.Command, _ []string) error {
 			for i, f := range formats {
 				formats[i] = strings.ToUpper(f)
 			}
-			exp, err := makeExporter(false, formats)
+			exp, err := makeExporter(nil, formats)
 			if err != nil {
 				return nil, err
 			}

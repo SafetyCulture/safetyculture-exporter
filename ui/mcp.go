@@ -50,14 +50,22 @@ func runMCPHeadless() {
 
 	// makeExporter rebuilds config + exporter per call so token/config changes
 	// are picked up without restarting the MCP server.
-	makeExporter := func(fullSync bool, reportFormats []string) (*exporterAPI.MittiExporter, error) {
+	makeExporter := func(sync *mittimcp.SyncOptions, reportFormats []string) (*exporterAPI.MittiExporter, error) {
 		fresh, err := exporterAPI.NewConfigurationManagerFromFile(settingsDir, configFile)
 		if err != nil {
 			return nil, err
 		}
 		fresh.ApplySafetyGuards()
-		if fullSync {
-			fresh.Configuration.Export.Incremental = false
+		if sync != nil {
+			if sync.Full {
+				fresh.Configuration.Export.Incremental = false
+			}
+			if len(sync.Tables) > 0 {
+				fresh.Configuration.Export.Tables = sync.Tables
+			}
+			if len(sync.TemplateIDs) > 0 {
+				fresh.Configuration.Export.TemplateIds = sync.TemplateIDs
+			}
 		}
 		if len(reportFormats) > 0 {
 			for i, f := range reportFormats {
@@ -77,22 +85,15 @@ func runMCPHeadless() {
 		Version:    version.GetVersion(),
 		ExportPath: exportPath,
 		MediaPath:  mediaPath,
-		Sync: func(ctx context.Context) error {
-			exp, err := makeExporter(false, nil)
-			if err != nil {
-				return err
-			}
-			return exp.RunSQLite()
-		},
-		SyncFull: func(ctx context.Context) error {
-			exp, err := makeExporter(true, nil)
+		Sync: func(ctx context.Context, opts mittimcp.SyncOptions) error {
+			exp, err := makeExporter(&opts, nil)
 			if err != nil {
 				return err
 			}
 			return exp.RunSQLite()
 		},
 		GenerateReports: func(ctx context.Context, formats []string) ([]string, error) {
-			exp, err := makeExporter(false, formats)
+			exp, err := makeExporter(nil, formats)
 			if err != nil {
 				return nil, err
 			}
@@ -116,17 +117,20 @@ func fatalMCP(msg string, err error) {
 	os.Exit(1)
 }
 
-// --- "Connect to Claude" support (bound to the Wails frontend) ---
+// --- "Connect AI" support (bound to the Wails frontend) ---
 
-// MCPConnectInfo describes everything the Connect-to-Claude page needs.
+// MCPConnectInfo describes everything the Connect-AI page needs.
 type MCPConnectInfo struct {
-	BinaryPath    string `json:"binary_path"`
-	HostConfigPath string `json:"host_config_path"`
-	ConfigSnippet string `json:"config_snippet"`
-	ConfigWritten bool   `json:"config_written"`
-	HasToken      bool   `json:"has_token"`
-	HasDatabase   bool   `json:"has_database"`
-	ExportPath    string `json:"export_path"`
+	BinaryPath        string `json:"binary_path"`
+	ConfigSnippet     string `json:"config_snippet"`
+	ClaudeConfigPath  string `json:"claude_config_path"`
+	ClaudeConfigured  bool   `json:"claude_configured"`
+	CursorConfigPath  string `json:"cursor_config_path"`
+	CursorConfigured  bool   `json:"cursor_configured"`
+	ClaudeCodeCommand string `json:"claude_code_command"`
+	HasToken          bool   `json:"has_token"`
+	HasDatabase       bool   `json:"has_database"`
+	ExportPath        string `json:"export_path"`
 }
 
 // claudeDesktopConfigPath returns the Claude Desktop config file location.
@@ -149,6 +153,15 @@ func claudeDesktopConfigPath() (string, error) {
 	}
 }
 
+// cursorConfigPath returns the Cursor MCP config file location.
+func cursorConfigPath() (string, error) {
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		return "", err
+	}
+	return filepath.Join(homeDir, ".cursor", "mcp.json"), nil
+}
+
 // mcpServerEntry builds the mcpServers.mitti entry pointing at this binary.
 func mcpServerEntry(binaryPath string) map[string]any {
 	return map[string]any{
@@ -157,19 +170,22 @@ func mcpServerEntry(binaryPath string) map[string]any {
 	}
 }
 
-// GetMCPConnectInfo returns the binary path, a ready-to-paste config snippet,
-// and status checks for the Connect-to-Claude page.
-func (a *App) GetMCPConnectInfo() (*MCPConnectInfo, error) {
+// resolvedBinaryPath returns the absolute, symlink-resolved path of this binary.
+func resolvedBinaryPath() (string, error) {
 	binaryPath, err := os.Executable()
 	if err != nil {
-		return nil, err
+		return "", err
 	}
-	// Resolve symlinks so the config points at a stable path.
 	if resolved, err := filepath.EvalSymlinks(binaryPath); err == nil {
 		binaryPath = resolved
 	}
+	return binaryPath, nil
+}
 
-	hostConfigPath, err := claudeDesktopConfigPath()
+// GetMCPConnectInfo returns the binary path, ready-to-paste snippets per
+// client, and status checks for the Connect-AI page.
+func (a *App) GetMCPConnectInfo() (*MCPConnectInfo, error) {
+	binaryPath, err := resolvedBinaryPath()
 	if err != nil {
 		return nil, err
 	}
@@ -181,6 +197,9 @@ func (a *App) GetMCPConnectInfo() (*MCPConnectInfo, error) {
 		return nil, err
 	}
 
+	claudePath, _ := claudeDesktopConfigPath()
+	cursorPath, _ := cursorConfigPath()
+
 	exportPath := a.cm.Configuration.Export.Path
 	settingsDir, _ := GetSettingDirectoryPath()
 	if !filepath.IsAbs(exportPath) {
@@ -189,13 +208,16 @@ func (a *App) GetMCPConnectInfo() (*MCPConnectInfo, error) {
 	_, dbErr := os.Stat(filepath.Join(exportPath, "sqlite_export.db"))
 
 	return &MCPConnectInfo{
-		BinaryPath:     binaryPath,
-		HostConfigPath: hostConfigPath,
-		ConfigSnippet:  string(snippet),
-		ConfigWritten:  mcpConfigAlreadyWritten(hostConfigPath, binaryPath),
-		HasToken:       a.cm.Configuration.AccessToken != "",
-		HasDatabase:    dbErr == nil,
-		ExportPath:     exportPath,
+		BinaryPath:        binaryPath,
+		ConfigSnippet:     string(snippet),
+		ClaudeConfigPath:  claudePath,
+		ClaudeConfigured:  mcpConfigAlreadyWritten(claudePath, binaryPath),
+		CursorConfigPath:  cursorPath,
+		CursorConfigured:  mcpConfigAlreadyWritten(cursorPath, binaryPath),
+		ClaudeCodeCommand: fmt.Sprintf("claude mcp add mitti -- \"%s\" mcp", binaryPath),
+		HasToken:          a.cm.Configuration.AccessToken != "",
+		HasDatabase:       dbErr == nil,
+		ExportPath:        exportPath,
 	}, nil
 }
 
@@ -219,19 +241,25 @@ func mcpConfigAlreadyWritten(hostConfigPath, binaryPath string) bool {
 	return entry["command"] == binaryPath
 }
 
-// WriteMCPConfig merges the mitti server entry into the Claude Desktop config,
-// preserving any other servers the user has configured. Backs up the existing
-// file first. Never writes secrets — only the binary path and args.
-func (a *App) WriteMCPConfig() error {
-	binaryPath, err := os.Executable()
+// WriteMCPConfig merges the mitti server entry into an MCP client's config
+// file, preserving any other servers. Backs up the existing file first.
+// Never writes secrets — only the binary path and args.
+// Supported clients: "claude" (Claude Desktop), "cursor".
+func (a *App) WriteMCPConfig(client string) error {
+	binaryPath, err := resolvedBinaryPath()
 	if err != nil {
 		return err
 	}
-	if resolved, err := filepath.EvalSymlinks(binaryPath); err == nil {
-		binaryPath = resolved
-	}
 
-	hostConfigPath, err := claudeDesktopConfigPath()
+	var hostConfigPath string
+	switch client {
+	case "claude":
+		hostConfigPath, err = claudeDesktopConfigPath()
+	case "cursor":
+		hostConfigPath, err = cursorConfigPath()
+	default:
+		return fmt.Errorf("unsupported client %q — copy the snippet manually", client)
+	}
 	if err != nil {
 		return err
 	}
@@ -239,7 +267,7 @@ func (a *App) WriteMCPConfig() error {
 	cfg := map[string]any{}
 	if data, err := os.ReadFile(hostConfigPath); err == nil {
 		if err := json.Unmarshal(data, &cfg); err != nil {
-			return fmt.Errorf("existing Claude config at %s is not valid JSON — fix or remove it first", hostConfigPath)
+			return fmt.Errorf("existing config at %s is not valid JSON — fix or remove it first", hostConfigPath)
 		}
 		// Back up before modifying.
 		if err := os.WriteFile(hostConfigPath+".bak", data, 0600); err != nil {

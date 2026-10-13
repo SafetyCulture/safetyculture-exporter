@@ -82,6 +82,6 @@ export function ValidateExportDirectory() {
   return window['go']['main']['App']['ValidateExportDirectory']();
 }
 
-export function WriteMCPConfig() {
-  return window['go']['main']['App']['WriteMCPConfig']();
+export function WriteMCPConfig(arg1) {
+  return window['go']['main']['App']['WriteMCPConfig'](arg1);
 }

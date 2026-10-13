@@ -42,6 +42,8 @@ For Claude Code: `claude mcp add mitti -- /path/to/mitti-exporter mcp --config-p
 ## What you can ask
 
 - *"Sync my latest data, then show inspections that failed last month by site."*
+  (syncs are **scoped** — the assistant syncs only the domains needed, e.g. just
+  `inspections` + `inspection_items`, not your whole organisation)
 - *"Which actions are overdue, grouped by assignee?"*
 - *"Generate a PDF report for last week's inspections."* (download button appears in chat)
 - *"Build a scorecard for Eastgate Yard."* (or use the built-in prompts:
@@ -51,7 +53,7 @@ For Claude Code: `claude mcp add mitti -- /path/to/mitti-exporter mcp --config-p
 
 - **Read-only by design.** Queries run against a *local copy* of your data. The database
   is opened read-only and only single `SELECT` statements are accepted — the assistant
-  cannot change your Mitti data through this server.
+  cannot change your Mitti Exporter data through this server.
 - **Token stays local.** It's read from the exporter config file only.
 - **Data stays on your machine.** Sync downloads via the same API the exporter already
   uses; queries never leave your computer. (What the AI assistant does with the answers

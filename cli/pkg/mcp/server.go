@@ -5,6 +5,7 @@ import (
 	_ "embed"
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
@@ -14,6 +15,20 @@ const tableViewerURI = "ui://mitti/table-viewer"
 
 //go:embed ui/table-viewer.html
 var tableViewerHTML string
+
+// SyncOptions scopes a sync so agents don't have to clone everything locally.
+type SyncOptions struct {
+	// Tables limits the sync to these domains (e.g. "inspections", "actions").
+	// Empty means the config's export.tables (which itself defaults to all).
+	Tables []string
+
+	// TemplateIDs limits inspection/schedule feeds to these templates.
+	// Empty means the config's export.template_ids (which defaults to all).
+	TemplateIDs []string
+
+	// Full disables incremental sync (re-downloads the selected scope).
+	Full bool
+}
 
 // Config wires the MCP server into the exporter.
 type Config struct {
@@ -28,14 +43,10 @@ type Config struct {
 	// Defaults to <ExportPath>/media when empty.
 	MediaPath string
 
-	// Sync runs an incremental SQLite export (equivalent to
-	// `mitti-exporter sqlite`). Called by the sync_data tool.
-	// Must be safe to call more than once.
-	Sync func(ctx context.Context) error
-
-	// SyncFull runs a non-incremental export. Optional — when nil, sync_data
-	// always uses Sync.
-	SyncFull func(ctx context.Context) error
+	// Sync runs a SQLite export scoped by SyncOptions (equivalent to
+	// `mitti-exporter sqlite --tables ... --template-ids ...`).
+	// Called by the sync_data tool. Must be safe to call more than once.
+	Sync func(ctx context.Context, opts SyncOptions) error
 
 	// GenerateReports generates inspection reports in the given formats
 	// ("PDF", "WORD") and returns the files written. Optional — the
@@ -74,6 +85,11 @@ type describeTableArgs struct {
 	Table string `json:"table" jsonschema:"name of the table to describe (see list_tables)"`
 }
 
+type syncArgs struct {
+	Tables      []string `json:"tables,omitempty" jsonschema:"limit the sync to these domains, e.g. [inspections, inspection_items, actions]. Empty = the config's table selection (default: all). Prefer scoping to what the user actually needs instead of syncing everything."`
+	TemplateIDs []string `json:"template_ids,omitempty" jsonschema:"limit inspection and schedule feeds to these template IDs (e.g. template_abc123). Empty = all templates."`
+}
+
 type emptyArgs struct{}
 
 // --- Tool registration ---
@@ -81,7 +97,7 @@ type emptyArgs struct{}
 func registerTools(srv *mcp.Server, cfg *Config) {
 	mcp.AddTool(srv, &mcp.Tool{
 		Name: "list_tables",
-		Description: "List all tables in the local Mitti export database with column and row counts. " +
+		Description: "List all tables in the local Mitti Exporter database with column and row counts. " +
 			"Start here to discover what data is available before writing queries.",
 		Annotations: &mcp.ToolAnnotations{ReadOnlyHint: true},
 	}, func(ctx context.Context, _ *mcp.CallToolRequest, _ emptyArgs) (*mcp.CallToolResult, any, error) {
@@ -108,7 +124,7 @@ func registerTools(srv *mcp.Server, cfg *Config) {
 
 	mcp.AddTool(srv, &mcp.Tool{
 		Name: "query",
-		Description: "Run a read-only SQL SELECT against the local Mitti export database (SQLite). " +
+		Description: "Run a read-only SQL SELECT against the local Mitti Exporter database (SQLite). " +
 			"Returns JSON rows, capped at max_rows. Use list_tables/describe_table first to learn the schema. " +
 			"Example: SELECT status, COUNT(*) AS n FROM inspections GROUP BY status",
 		Annotations: &mcp.ToolAnnotations{ReadOnlyHint: true},
@@ -133,26 +149,38 @@ func registerTools(srv *mcp.Server, cfg *Config) {
 
 	mcp.AddTool(srv, &mcp.Tool{
 		Name: "sync_data",
-		Description: "Sync the latest Mitti data into the local export database (same as `mitti-exporter sqlite`). " +
-			"Incremental by default: only fetches changes since the last sync. Run this when the user asks " +
-			"for fresh data or when list_tables reports the database is missing.",
+		Description: "Sync Mitti data into the local export database (same as `mitti-exporter sqlite`). " +
+			"Incremental by default: only fetches changes since the last sync. " +
+			"IMPORTANT: prefer scoping with `tables` (and `template_ids` when known) so you only sync the " +
+			"domains the user needs — e.g. tables=[\"actions\"] for an actions question — rather than " +
+			"syncing everything. Run this when the user asks for fresh data or list_tables reports the " +
+			"database is missing.",
 		Meta: mcp.Meta{"ui": map[string]any{"resourceUri": syncStatusURI}},
-	}, func(ctx context.Context, req *mcp.CallToolRequest, _ emptyArgs) (*mcp.CallToolResult, any, error) {
+	}, func(ctx context.Context, req *mcp.CallToolRequest, args syncArgs) (*mcp.CallToolResult, any, error) {
 		if cfg.Sync == nil {
 			return errorResult(fmt.Errorf("sync is not configured"))
 		}
-		syncFn := cfg.Sync
-		mode := "incremental"
-		// Ask the user when the host supports elicitation and a full sync is available.
-		if cfg.SyncFull != nil && elicitSyncMode(ctx, req) == "full" {
-			syncFn = cfg.SyncFull
-			mode = "full"
+		opts := SyncOptions{
+			Tables:      args.Tables,
+			TemplateIDs: args.TemplateIDs,
+			Full:        elicitSyncMode(ctx, req) == "full",
 		}
-		if err := syncFn(ctx); err != nil {
+		if err := cfg.Sync(ctx, opts); err != nil {
 			return errorResult(fmt.Errorf("sync failed: %w", err))
 		}
 		tables, _ := listTables(ctx, cfg.ExportPath)
-		return structuredResult(map[string]any{"synced": true, "mode": mode, "tables": tables}, fmt.Sprintf("sync complete (%s)", mode))
+		mode := "incremental"
+		if opts.Full {
+			mode = "full"
+		}
+		scope := "all tables"
+		if len(opts.Tables) > 0 {
+			scope = strings.Join(opts.Tables, ", ")
+		}
+		return structuredResult(
+			map[string]any{"synced": true, "mode": mode, "scope": opts.Tables, "tables": tables},
+			fmt.Sprintf("sync complete (%s, %s)", mode, scope),
+		)
 	})
 }
 
@@ -167,7 +195,7 @@ func registerResources(srv *mcp.Server) {
 
 	srv.AddResource(&mcp.Resource{
 		URI:         tableViewerURI,
-		Name:        "Mitti Query Results",
+		Name:        "Mitti Exporter Query Results",
 		Description: "Interactive table view for query tool results",
 		MIMEType:    "text/html;profile=mcp-app",
 		Meta:        uiMeta,
@@ -184,7 +212,7 @@ func registerResources(srv *mcp.Server) {
 
 	srv.AddResource(&mcp.Resource{
 		URI:         reportViewerURI,
-		Name:        "Mitti Reports",
+		Name:        "Mitti Exporter Reports",
 		Description: "Generated inspection reports with download buttons",
 		MIMEType:    "text/html;profile=mcp-app",
 		Meta:        uiMeta,
@@ -201,7 +229,7 @@ func registerResources(srv *mcp.Server) {
 
 	srv.AddResource(&mcp.Resource{
 		URI:         syncStatusURI,
-		Name:        "Mitti Sync Status",
+		Name:        "Mitti Exporter Sync Status",
 		Description: "Live progress while data syncs",
 		MIMEType:    "text/html;profile=mcp-app",
 		Meta:        uiMeta,

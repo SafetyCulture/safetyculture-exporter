@@ -43,4 +43,4 @@ export function ValidateApiKey(arg1:string):Promise<string>;
 
 export function ValidateExportDirectory():Promise<boolean>;
 
-export function WriteMCPConfig():Promise<void>;
+export function WriteMCPConfig(arg1:string):Promise<void>;

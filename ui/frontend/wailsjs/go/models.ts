@@ -108,9 +108,12 @@ export namespace main {
 	
 	export class MCPConnectInfo {
 	    binary_path: string;
-	    host_config_path: string;
 	    config_snippet: string;
-	    config_written: boolean;
+	    claude_config_path: string;
+	    claude_configured: boolean;
+	    cursor_config_path: string;
+	    cursor_configured: boolean;
+	    claude_code_command: string;
 	    has_token: boolean;
 	    has_database: boolean;
 	    export_path: string;
@@ -122,9 +125,12 @@ export namespace main {
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.binary_path = source["binary_path"];
-	        this.host_config_path = source["host_config_path"];
 	        this.config_snippet = source["config_snippet"];
-	        this.config_written = source["config_written"];
+	        this.claude_config_path = source["claude_config_path"];
+	        this.claude_configured = source["claude_configured"];
+	        this.cursor_config_path = source["cursor_config_path"];
+	        this.cursor_configured = source["cursor_configured"];
+	        this.claude_code_command = source["claude_code_command"];
 	        this.has_token = source["has_token"];
 	        this.has_database = source["has_database"];
 	        this.export_path = source["export_path"];
