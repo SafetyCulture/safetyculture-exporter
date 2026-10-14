@@ -9,6 +9,7 @@ import (
 
 func initMockFeedsSet1(httpClient *http.Client) {
 	gock.InterceptClient(httpClient)
+	initMockEmptyNewFeeds()
 
 	gock.New("http://localhost:9999").
 		Get("/feed/inspections").
@@ -173,6 +174,7 @@ func initMockFeedsSet1(httpClient *http.Client) {
 
 func initMockFeedsSet2(httpClient *http.Client) {
 	gock.InterceptClient(httpClient)
+	initMockEmptyNewFeeds()
 
 	gock.New("http://localhost:9999").
 		Get("/feed/inspections").
@@ -293,6 +295,7 @@ func initMockFeedsSet2(httpClient *http.Client) {
 
 func initMockFeedsSet3(httpClient *http.Client) {
 	gock.InterceptClient(httpClient)
+	initMockEmptyNewFeeds()
 
 	gock.New("http://localhost:9999").
 		Get("/feed/inspections").
@@ -432,4 +435,14 @@ func resetMocks(httpClient *http.Client) {
 	gock.Off()
 	gock.Clean()
 	gock.RestoreClient(httpClient)
+}
+
+// initMockEmptyNewFeeds serves an empty page for the feeds that are not covered by the fixture files of the mock sets
+func initMockEmptyNewFeeds() {
+	for _, fixture := range newFeedFixtures {
+		gock.New("http://localhost:9999").
+			Get(fixture.path).
+			Reply(200).
+			BodyString(`{"metadata":{},"data":[]}`)
+	}
 }
