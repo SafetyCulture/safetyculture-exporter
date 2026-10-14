@@ -437,11 +437,15 @@ func resetMocks(httpClient *http.Client) {
 	gock.RestoreClient(httpClient)
 }
 
-// initMockEmptyNewFeeds serves an empty page for the feeds that are not covered by the fixture files of the mock sets
+// initMockEmptyNewFeeds serves an empty page for the feeds that are not covered by the fixture files of the mock sets.
+// gock matches paths as unanchored regular expressions, so the paths are anchored here. Otherwise a mock for
+// /companies/v1/feed/companies would also answer /companies/v1/feed/companies/documents, and an existing mock for
+// /feed/schedules would answer /scheduling/v1/feed/schedules. As the feeds run concurrently, that makes the export flaky.
+// This is called first in every mock set so these mocks are matched before the unanchored ones.
 func initMockEmptyNewFeeds() {
 	for _, fixture := range newFeedFixtures {
 		gock.New("http://localhost:9999").
-			Get(fixture.path).
+			Get("^" + fixture.path + "$").
 			Reply(200).
 			BodyString(`{"metadata":{},"data":[]}`)
 	}

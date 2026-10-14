@@ -28,7 +28,7 @@ func TestRowFeeds_columns_should_match_row_model(t *testing.T) {
 
 			var modelColumns []string
 			primaryKeys := map[string]bool{}
-			for i := 0; i < modelType.NumField(); i++ {
+			for i := range modelType.NumField() {
 				field := modelType.Field(i)
 				column := field.Tag.Get("csv")
 				assert.NotEmpty(t, column, "field %s has no csv tag", field.Name)
