@@ -7,7 +7,9 @@
 
 ## Executive summary
 
-The customer complaints are confirmed. The exporter is **17 documented feed endpoints behind** across **7 feature families**, and the family with active complaints — **Scheduling** — is the most serious: the exporter still exports schedules from the **legacy** `thepubservice` feeds, while the docs now label those "(legacy)" and direct orgs on the new Schedules experience to a **new Scheduling feed service** (`/scheduling/v1/feed/*`) that the exporter does not call at all.
+*The findings below are the original audit, written before the feeds were implemented. All 17 gaps are now closed; see the status note under this summary and the matrix in section 3.*
+
+The customer complaints were confirmed. The exporter was **17 documented feed endpoints behind** across **7 feature families**, and the family with active complaints — **Scheduling** — is the most serious: the exporter still exports schedules from the **legacy** `thepubservice` feeds, while the docs now label those "(legacy)" and direct orgs on the new Schedules experience to a **new Scheduling feed service** (`/scheduling/v1/feed/*`) that the exporter does not call at all.
 
 ---
 
@@ -66,7 +68,7 @@ For orgs migrated to the new Schedules experience, the legacy feeds return incom
 
 ---
 
-## 2. Other documented feed families with ZERO exporter coverage
+## 2. Other documented feed families with ZERO exporter coverage (before this change)
 
 Verified absent — no references anywhere in the exporter codebase (grep for `investigation|contractor|credential|maintenance_plan|maintenance_program|action_field|issue_relation` matches nothing but a comment):
 
@@ -152,7 +154,7 @@ The reference lists what look like two generations of the same feed under differ
 - The legacy `/feed/schedules` doc schema doesn't even include `asset_id`, though the exporter's `Schedule` struct has an `AssetID` column — the legacy feed is already drifting from its own docs, which reinforces moving to the V2 service.
 - `ScheduleOccurrenceFeed.ResumeDownload` is marked `// EXPERIMENTAL: we don't have modified_at from the backend` — the new V2 occurrences feed's `start_date`/`end_date` filtering on `due_time` may allow a cleaner resume strategy.
 
-## 5. Recommended priority order
+## 5. Recommended priority order (as originally proposed; all items now done)
 
 1. **New Scheduling feeds** (3 endpoints) — active customer complaints; docs already steer new builds here. Decide: additive new tables vs replacing legacy (recommend additive while migration is ongoing).
 2. **Action fields** — completes the Actions story customers already assume exists.

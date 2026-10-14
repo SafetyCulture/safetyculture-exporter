@@ -26,7 +26,7 @@ func (a *JSONArray) UnmarshalJSON(b []byte) error {
 
 	var buf bytes.Buffer
 	if err := json.Compact(&buf, b); err != nil {
-		return err
+		return fmt.Errorf("JSONArray.UnmarshalJSON: compact json array: %w", err)
 	}
 	*a = JSONArray(buf.String())
 	return nil
@@ -147,5 +147,8 @@ func (f *rowFeed[T]) Export(ctx context.Context, apiClient *httpapi.Client, expo
 	if err := DrainFeed(ctx, apiClient, req, drainFn); err != nil {
 		return events.WrapEventError(err, fmt.Sprintf("feed %q", f.Name()))
 	}
-	return exporter.FinaliseExport(f, &[]*T{})
+	if err := exporter.FinaliseExport(f, &[]*T{}); err != nil {
+		return events.WrapEventError(err, fmt.Sprintf("finalise export of feed %q", f.Name()))
+	}
+	return nil
 }
