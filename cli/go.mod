@@ -2,7 +2,7 @@ module github.com/SafetyCulture/mitti-exporter
 
 go 1.25.0
 
-toolchain go1.26.9
+toolchain go1.26.10
 
 require (
 	github.com/MickStanciu/go-fn v1.8.1
