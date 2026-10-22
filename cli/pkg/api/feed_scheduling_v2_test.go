@@ -12,6 +12,8 @@ import (
 
 func TestScheduleV2Feed_should_follow_pagination_and_keep_arrays_as_json(t *testing.T) {
 	defer gock.Off()
+	// drop the mocks that other tests left behind
+	gock.Flush()
 
 	exporter, err := getInmemorySQLExporter("")
 	assert.NoError(t, err)
@@ -40,6 +42,8 @@ func TestScheduleV2Feed_should_follow_pagination_and_keep_arrays_as_json(t *test
 
 func TestSchedulingV2Feeds_should_export_every_column_and_a_row_per_target(t *testing.T) {
 	defer gock.Off()
+	// drop the mocks that other tests left behind
+	gock.Flush()
 
 	exporter, err := getInmemorySQLExporter("")
 	assert.NoError(t, err)
