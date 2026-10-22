@@ -74,12 +74,9 @@ type ExporterConfiguration struct {
 			IncludeFullHierarchy bool `yaml:"include_full_hierarchy"`
 		} `yaml:"site"`
 		Schedule struct {
-			ResumeDownload bool `yaml:"resume_download"`
-			// EndDate is the end of the date range of the new_schedule_occurrences table. It is empty for the API default
-			EndDate mTime `yaml:"end_date"`
-			// Statuses are the schedule statuses (ACTIVE, PAUSED, FINISHED) of the new_schedules and new_schedule_assignees
-			// tables. They are empty for all statuses
-			Statuses []string `yaml:"statuses"`
+			ResumeDownload bool     `yaml:"resume_download"`
+			Statuses       []string `yaml:"statuses"`
+			EndDate        mTime    `yaml:"end_date"`
 		} `yaml:"schedule"`
 		Tables      []string `yaml:"tables"`
 		TemplateIds []string `yaml:"template_ids"`

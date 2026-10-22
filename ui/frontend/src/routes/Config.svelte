@@ -139,6 +139,12 @@
 		FINISHED: savedScheduleStatuses.length === 0 || savedScheduleStatuses.includes("FINISHED"),
 	}
 
+	// The new schedules filters are shown when a data set they apply to is exported. No data set selected exports all
+	$: exportedTables = $shadowConfig["Export"]["Tables"] ?? []
+	$: showScheduleEndDate = exportedTables.length === 0 || exportedTables.includes("new_schedule_occurrences")
+	$: showScheduleStatuses = exportedTables.length === 0 ||
+		exportedTables.includes("new_schedules") || exportedTables.includes("new_schedule_assignees")
+
 	function prepareScheduleStatusesForSave() {
 		const selected = Object.keys(scheduleStatuses).filter(status => scheduleStatuses[status])
 		return selected.length === Object.keys(scheduleStatuses).length ? [] : selected
@@ -527,19 +533,23 @@
 			<div class="border-weak border-round-8 m-top-4">
 				<DateInput max={new Date()} format="dd-MM-yyyy" closeOnSelection={true} bind:value={date}/>
 			</div>
-			<div class="label">New schedule occurrences due up to (UTC)</div>
-			<div class="border-weak border-round-8 m-top-4">
-				<DateInput max={scheduleEndDateMax} format="dd-MM-yyyy" placeholder="1 month from today" closeOnSelection={true} bind:value={scheduleEndDate}/>
-			</div>
-			<div class="label">Include new schedules that are:</div>
-			<div class="m-top-4">
-				<input type="checkbox" id="schedule-active" bind:checked={scheduleStatuses.ACTIVE}>
-				<label class="text-size-medium" for="schedule-active">Active</label>
-				<input type="checkbox" id="schedule-paused" bind:checked={scheduleStatuses.PAUSED}>
-				<label class="text-size-medium" for="schedule-paused">Paused</label>
-				<input type="checkbox" id="schedule-finished" bind:checked={scheduleStatuses.FINISHED}>
-				<label class="text-size-medium" for="schedule-finished">Finished</label>
-			</div>
+			{#if showScheduleEndDate}
+				<div class="label">New schedule occurrences due up to (UTC)</div>
+				<div class="border-weak border-round-8 m-top-4">
+					<DateInput max={scheduleEndDateMax} format="dd-MM-yyyy" placeholder="1 month from today" closeOnSelection={true} bind:value={scheduleEndDate}/>
+				</div>
+			{/if}
+			{#if showScheduleStatuses}
+				<div class="label">Include new schedules that are:</div>
+				<div class="m-top-4">
+					<input type="checkbox" id="schedule-active" bind:checked={scheduleStatuses.ACTIVE}>
+					<label class="text-size-medium" for="schedule-active">Active</label>
+					<input type="checkbox" id="schedule-paused" bind:checked={scheduleStatuses.PAUSED}>
+					<label class="text-size-medium" for="schedule-paused">Paused</label>
+					<input type="checkbox" id="schedule-finished" bind:checked={scheduleStatuses.FINISHED}>
+					<label class="text-size-medium" for="schedule-finished">Finished</label>
+				</div>
+			{/if}
 			<div class="label">Include completed or incomplete inspections</div>
 			<div class="border-weak border-round-8 m-top-4">
 				<Select items={statusItems} clearable={false} showChevron={true} searchable={false} --border="0px" bind:value={selectedStatus} >
