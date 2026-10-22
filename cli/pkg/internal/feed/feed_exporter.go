@@ -326,9 +326,6 @@ func (e *ExporterFeedClient) GetFeeds() []Feed {
 			Incremental: true,
 			Limit:       250,
 		},
-		NewScheduleV2Feed(e.configuration.ExportTemplateIds),
-		NewScheduleAssigneeV2Feed(e.configuration.ExportTemplateIds),
-		NewScheduleOccurrenceV2Feed(e.configuration.ExportTemplateIds, e.configuration.ExportModifiedAfterTime),
 		NewActionFieldFeed(e.configuration.ExportActionLimit),
 		NewIssueRelationFeed(e.configuration.ExportIssueLimit),
 		NewInvestigationFeed(defaultFeedLimit),
@@ -343,6 +340,10 @@ func (e *ExporterFeedClient) GetFeeds() []Feed {
 		NewAssetMaintenanceFeed(e.configuration.ExportAssetLimit),
 		NewCredentialTypeFeed(defaultFeedLimit),
 		NewCredentialFeed(defaultFeedLimit),
+		&LoneWorkerJobFeed{
+			Incremental: true,
+			Limit:       defaultFeedLimit,
+		},
 	}
 }
 
