@@ -22,4 +22,5 @@
 | asset_id          | TEXT     |             |
 | target_type       | TEXT     |             |
 | target_ids        | TEXT     |             |
+| timezone_type     | TEXT     |             |
 +-------------------+----------+-------------+

@@ -101,6 +101,7 @@ func TestSchedulingV2Feeds_should_export_every_column_and_a_row_per_target(t *te
 		Status:          "ACTIVE",
 		OrganisationID:  "role_org",
 		Timezone:        "Australia/Sydney",
+		TimezoneType:    "CUSTOM_TIMEZONE",
 		CanLateSubmit:   true,
 		SiteID:          "location_75fc77d9a3b14c5e9f0e1a2b3c4d5e6f",
 		TemplateID:      "template_1",

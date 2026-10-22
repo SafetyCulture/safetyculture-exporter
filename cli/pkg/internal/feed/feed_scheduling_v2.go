@@ -20,7 +20,8 @@ import (
 // maxSchedulingFeedLimit is the largest page size the Scheduling feed service accepts (the default is 50)
 const maxSchedulingFeedLimit = 1000
 
-// ScheduleV2 represents a row from the Scheduling feed service schedules feed
+// ScheduleV2 represents a row from the Scheduling feed service schedules feed.
+// The legacy schedules columns come first, then the columns the PRD adds
 type ScheduleV2 struct {
 	ID              string     `json:"id" csv:"schedule_id" gorm:"primarykey;column:schedule_id;size:128"`
 	Description     string     `json:"-" csv:"description"`
@@ -44,6 +45,9 @@ type ScheduleV2 struct {
 	TargetType      string     `json:"-" csv:"target_type" gorm:"size:10"`
 	// TargetIDs is the JSON array of the site or asset UUIDs of the schedule, empty for schedules without sites or assets
 	TargetIDs JSONArray `json:"-" csv:"target_ids"`
+	// TimezoneType is CUSTOM_TIMEZONE or SITE_TIMEZONE. With SITE_TIMEZONE, recurrence has the site wall-clock time
+	// as UTC and each site uses its own time zone
+	TimezoneType string `json:"timezone_type" csv:"timezone_type" gorm:"size:30"`
 }
 
 // UnmarshalJSON decodes the API fields and fills the legacy and target columns. A column that can't be parsed is left empty
@@ -164,7 +168,8 @@ func (ScheduleV2) TableName() string {
 	return "new_schedules"
 }
 
-// ScheduleAssigneeV2 represents a row from the Scheduling feed service schedule_assignees feed
+// ScheduleAssigneeV2 represents a row from the Scheduling feed service schedule_assignees feed.
+// The legacy schedule_assignees columns come first, then the target
 type ScheduleAssigneeV2 struct {
 	ID             string    `json:"id" csv:"id" gorm:"primarykey;size:375"`
 	ScheduleID     string    `json:"schedule_id" csv:"schedule_id" gorm:"size:128"`
@@ -184,18 +189,25 @@ func (ScheduleAssigneeV2) TableName() string {
 	return "new_schedule_assignees"
 }
 
-// ScheduleOccurrenceV2 represents a row from the Scheduling feed service schedule_occurrences feed
+// ScheduleOccurrenceV2 represents a row from the Scheduling feed service schedule_occurrences feed.
+// The legacy schedule_occurrences columns come first, then the columns the PRD adds
 type ScheduleOccurrenceV2 struct {
-	ID               string `json:"id" csv:"id" gorm:"primarykey;size:375"`
-	ScheduleID       string `json:"schedule_id" csv:"schedule_id" gorm:"size:128"`
-	OccurrenceID     string `json:"occurrence_id" csv:"occurrence_id" gorm:"size:128"`
-	TemplateID       string `json:"template_id" csv:"template_id" gorm:"size:100"`
-	StartTime        string `json:"start_time" csv:"start_time" gorm:"size:40"`
-	DueTime          string `json:"due_time" csv:"due_time" gorm:"size:40"`
-	MissTime         string `json:"miss_time" csv:"miss_time" gorm:"size:40"`
-	OccurrenceStatus string `json:"occurrence_status" csv:"occurrence_status" gorm:"size:20"`
-	AuditID          string `json:"audit_id" csv:"audit_id" gorm:"size:100"`
-	CompletedAt      string `json:"completed_at" csv:"completed_at" gorm:"size:40"`
+	ID               string    `json:"id" csv:"id" gorm:"primarykey;size:375"`
+	ScheduleID       string    `json:"schedule_id" csv:"schedule_id" gorm:"size:128"`
+	OccurrenceID     string    `json:"occurrence_id" csv:"occurrence_id" gorm:"size:128"`
+	TemplateID       string    `json:"template_id" csv:"template_id" gorm:"size:100"`
+	OrganisationID   string    `json:"organisation_id" csv:"organisation_id" gorm:"size:37"`
+	StartTime        string    `json:"start_time" csv:"start_time" gorm:"size:40"`
+	DueTime          string    `json:"due_time" csv:"due_time" gorm:"size:40"`
+	MissTime         string    `json:"miss_time" csv:"miss_time" gorm:"size:40"`
+	OccurrenceStatus string    `json:"occurrence_status" csv:"occurrence_status" gorm:"size:20"`
+	AuditID          string    `json:"audit_id" csv:"audit_id" gorm:"size:100"`
+	CompletedAt      string    `json:"completed_at" csv:"completed_at" gorm:"size:40"`
+	ExportedAt       time.Time `json:"-" csv:"exported_at" gorm:"autoUpdateTime"`
+	UserID           string    `json:"assignee_id" csv:"user_id" gorm:"size:256"`
+	AssigneeStatus   string    `json:"assignee_status" csv:"assignee_status" gorm:"size:20"`
+	Note             string    `json:"-" csv:"note"`
+
 	// AssigneeType is how the user was assigned: user, site or group. A group within a site is a group with the site set
 	AssigneeType        string `json:"-" csv:"assignee_type" gorm:"size:10"`
 	AssigneeUserID      string `json:"-" csv:"assignee_user_id" gorm:"size:37"`
@@ -211,13 +223,8 @@ type ScheduleOccurrenceV2 struct {
 	TargetID   string `json:"target_id" csv:"target_id" gorm:"primarykey;size:36"`
 	TargetType string `json:"target_type" csv:"target_type" gorm:"size:10"`
 	// TargetName is the name of the site, or the code of the asset
-	TargetName     string    `json:"-" csv:"target_name"`
-	OrganisationID string    `json:"organisation_id" csv:"organisation_id" gorm:"size:37"`
-	WontDoNote     string    `json:"wont_do_note" csv:"wont_do_note"`
-	UserID         string    `json:"assignee_id" csv:"user_id" gorm:"size:256"`
-	AssigneeStatus string    `json:"assignee_status" csv:"assignee_status" gorm:"size:20"`
-	Note           string    `json:"-" csv:"note"`
-	ExportedAt     time.Time `json:"-" csv:"exported_at" gorm:"autoUpdateTime"`
+	TargetName string `json:"-" csv:"target_name"`
+	WontDoNote string `json:"wont_do_note" csv:"wont_do_note"`
 }
 
 // UnmarshalJSON decodes the API fields and fills the assignment and legacy columns.
@@ -373,6 +380,7 @@ func NewScheduleV2Feed(templateIDs []string) Feed {
 			"description", "recurrence", "duration", "modified_at", "exported_at", "from_date", "to_date",
 			"start_time_hour", "start_time_minute", "all_must_complete", "status", "organisation_id", "timezone",
 			"can_late_submit", "site_id", "template_id", "creator_user_id", "asset_id", "target_type", "target_ids",
+			"timezone_type",
 		},
 	}
 }
@@ -409,11 +417,11 @@ func NewScheduleOccurrenceV2Feed(templateIDs []string, startDate time.Time) Feed
 		key:     func(r *ScheduleOccurrenceV2) string { return r.ID + "|" + r.TargetID },
 		prepare: prepareOccurrenceNames,
 		columns: []string{
-			"schedule_id", "occurrence_id", "template_id", "start_time", "due_time", "miss_time", "occurrence_status",
-			"audit_id", "completed_at", "assignee_type", "assignee_user_id", "assignee_user_name", "assignee_site_id",
-			"assignee_site_name", "assignee_group_id", "assignee_group_name", "completed_by_user_id",
-			"completed_by_user_name", "target_type", "target_name", "organisation_id", "wont_do_note", "user_id",
-			"assignee_status", "note", "exported_at",
+			"schedule_id", "occurrence_id", "template_id", "organisation_id", "start_time", "due_time", "miss_time",
+			"occurrence_status", "audit_id", "completed_at", "exported_at", "user_id", "assignee_status", "note",
+			"assignee_type", "assignee_user_id", "assignee_user_name", "assignee_site_id", "assignee_site_name",
+			"assignee_group_id", "assignee_group_name", "completed_by_user_id", "completed_by_user_name", "target_type",
+			"target_name", "wont_do_note",
 		},
 	}
 }
