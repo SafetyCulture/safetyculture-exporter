@@ -48,6 +48,7 @@ func TestSchedulingV2Feeds_should_send_the_status_and_date_filters(t *testing.T)
 	gock.InterceptClient(apiClient.HTTPClient())
 	for _, path := range []string{"/scheduling/v1/feed/schedules", "/scheduling/v1/feed/schedule_assignees"} {
 		gock.New("http://localhost:9999").Get(path).
+			MatchParam("limit", "1000").
 			MatchParam("show_active", "true").
 			MatchParam("show_paused", "false").
 			MatchParam("show_finished", "true").

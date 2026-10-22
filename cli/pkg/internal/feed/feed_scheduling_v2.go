@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/url"
+	"strconv"
 	"strings"
 	"time"
 
@@ -362,19 +364,22 @@ func prepareOccurrenceNames(ctx context.Context, apiClient *httpapi.Client) func
 	return names.fillNames
 }
 
-// scheduleStatusParams sets the status filter of the schedules and schedule assignees feeds.
-// No statuses, or none that are known, leaves the filter unset so schedules of every status are returned
-func scheduleStatusParams(params GetFeedParams, statuses []string) GetFeedParams {
+// withScheduleStatuses adds the status filter of the schedules and schedule assignees feeds to their path.
+// No statuses, or none that are known, keeps the path so schedules of every status are returned
+func withScheduleStatuses(path string, statuses []string) string {
 	show := map[string]bool{}
 	for _, status := range statuses {
 		show[strings.ToUpper(strings.TrimSpace(status))] = true
 	}
-	active, paused, finished := show["ACTIVE"], show["PAUSED"], show["FINISHED"]
-	if !active && !paused && !finished {
-		return params
+	if !show["ACTIVE"] && !show["PAUSED"] && !show["FINISHED"] {
+		return path
 	}
-	params.ShowActive, params.ShowPaused, params.ShowFinished = &active, &paused, &finished
-	return params
+
+	query := url.Values{}
+	query.Set("show_active", strconv.FormatBool(show["ACTIVE"]))
+	query.Set("show_paused", strconv.FormatBool(show["PAUSED"]))
+	query.Set("show_finished", strconv.FormatBool(show["FINISHED"]))
+	return path + "?" + query.Encode()
 }
 
 // NewScheduleV2Feed returns the feed for /scheduling/v1/feed/schedules.
@@ -382,14 +387,14 @@ func scheduleStatusParams(params GetFeedParams, statuses []string) GetFeedParams
 func NewScheduleV2Feed(templateIDs []string, statuses []string) Feed {
 	return &rowFeed[ScheduleV2]{
 		name:         "new_schedules",
-		initialURL:   "/scheduling/v1/feed/schedules",
+		initialURL:   withScheduleStatuses("/scheduling/v1/feed/schedules", statuses),
 		primaryKey:   []string{"schedule_id"},
 		order:        "schedule_id",
 		hasRemaining: false, // FeedMetadataSimple has no remaining_records
-		params: scheduleStatusParams(GetFeedParams{
+		params: GetFeedParams{
 			TemplateIDs: templateIDs,
 			Limit:       maxSchedulingFeedLimit,
-		}, statuses),
+		},
 		key: func(r *ScheduleV2) string { return r.ID },
 		columns: []string{
 			"description", "recurrence", "duration", "modified_at", "exported_at", "from_date", "to_date",
@@ -405,13 +410,13 @@ func NewScheduleV2Feed(templateIDs []string, statuses []string) Feed {
 func NewScheduleAssigneeV2Feed(templateIDs []string, statuses []string) Feed {
 	return &rowFeed[ScheduleAssigneeV2]{
 		name:       "new_schedule_assignees",
-		initialURL: "/scheduling/v1/feed/schedule_assignees",
+		initialURL: withScheduleStatuses("/scheduling/v1/feed/schedule_assignees", statuses),
 		primaryKey: []string{"id", "target_id"},
 		order:      "schedule_id, assignee_id, target_id",
-		params: scheduleStatusParams(GetFeedParams{
+		params: GetFeedParams{
 			TemplateIDs: templateIDs,
 			Limit:       maxSchedulingFeedLimit,
-		}, statuses),
+		},
 		key:     func(r *ScheduleAssigneeV2) string { return r.ID + "|" + r.TargetID },
 		columns: []string{"schedule_id", "assignee_id", "organisation_id", "type", "name", "exported_at", "target_type"},
 	}
