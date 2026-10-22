@@ -45,15 +45,15 @@
         },
         {
             "left":  { "id": "schedules", "name": "Schedules"},
-            "right": null
+            "right": { "id": "schedules_v2", "name": "Schedules (new)"}
         },
         {
             "left":  { "id": "schedule_assignees", "name": "Schedule Assignees"},
-            "right": null
+            "right": { "id": "schedule_assignees_v2", "name": "Schedule Assignees (new)"}
         },
         {
             "left":  { "id": "schedule_occurrences", "name": "Schedule Occurrences"},
-            "right": null
+            "right": { "id": "schedule_occurrences_v2", "name": "Schedule Occurrences (new)"}
         },
         {
             "left":  { "id": "investigations", "name": "Investigations"},

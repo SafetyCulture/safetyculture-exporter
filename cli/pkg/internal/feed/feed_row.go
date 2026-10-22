@@ -46,6 +46,8 @@ type rowFeed[T any] struct {
 	params       GetFeedParams
 	// key returns the primary key of a row. It is used to deduplicate rows returned by the API
 	key func(*T) string
+	// prepare is optional. It runs before the export and returns a function that fills each row before it is written
+	prepare func(ctx context.Context, apiClient *httpapi.Client) func(*T)
 }
 
 // Name is the name of the feed
@@ -100,11 +102,22 @@ func (f *rowFeed[T]) Export(ctx context.Context, apiClient *httpapi.Client, expo
 		return events.WrapEventError(err, "init feed")
 	}
 
+	var fill func(*T)
+	if f.prepare != nil {
+		fill = f.prepare(ctx, apiClient)
+	}
+
 	drainFn := func(resp *GetFeedResponse) error {
 		var rows []*T
 
 		if err := json.Unmarshal(resp.Data, &rows); err != nil {
 			return events.NewEventErrorWithMessage(err, events.ErrorSeverityError, events.ErrorSubSystemDataIntegrity, false, "map data")
+		}
+
+		if fill != nil {
+			for _, row := range rows {
+				fill(row)
+			}
 		}
 
 		// deduplicate rows because a page containing the same primary key twice causes PK violations

@@ -8,4 +8,6 @@
 | name            | TEXT |             |
 | organisation_id | TEXT |             |
 | completion_rule | TEXT |             |
+| target_id       | TEXT | true        |
+| target_type     | TEXT |             |
 +-----------------+------+-------------+
