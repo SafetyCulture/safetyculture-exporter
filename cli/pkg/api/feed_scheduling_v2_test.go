@@ -103,8 +103,8 @@ func TestSchedulingV2Feeds_should_export_every_column_and_a_row_per_target(t *te
 	gock.New("http://localhost:9999").Get("/scheduling/v1/feed/schedule_occurrences").
 		Reply(200).
 		BodyString(`{"metadata":{},"data":[
-			{"id":"scheduleitem_1_occurrence_1_user_1","schedule_id":"scheduleitem_1","occurrence_id":"1","template_id":"template_1","start_time":"2026-09-28T09:30:00Z","due_time":"2026-09-28T17:30:00Z","occurrence_status":"COMPLETED","audit_id":"audit_1","completed_at":"2026-09-28T10:00:00Z","completion_rule":"all","organisation_id":"role_org","assignee_id":"user_1","assignee_from":"location_1+role_1","target_id":"site_1","target_type":"SITE","assignee_status":"COMPLETED","completed_by_user_id":"user_2"},
-			{"id":"scheduleitem_1_occurrence_1_user_1","schedule_id":"scheduleitem_1","occurrence_id":"1","template_id":"template_1","start_time":"2026-09-28T09:30:00Z","due_time":"2026-09-28T17:30:00Z","occurrence_status":"WONT_DO","completion_rule":"all","organisation_id":"role_org","wont_do_note":"closed","assignee_id":"user_1","assignee_from":"role_1","target_id":"site_2","target_type":"SITE","assignee_status":"WONT_DO"}
+			{"id":"scheduleitem_1_occurrence_1_user_1","schedule_id":"scheduleitem_1","occurrence_id":"1","template_id":"template_1","start_time":"2026-09-28T09:30:00Z","due_time":"2026-09-28T17:30:00Z","miss_time":"2026-09-28T13:30:00.123Z","occurrence_status":"COMPLETED","audit_id":"audit_1","completed_at":"2026-09-28T10:00:00Z","completion_rule":"all","organisation_id":"role_org","assignee_id":"user_1","assignee_from":"location_1+role_1","target_id":"site_1","target_type":"SITE","assignee_status":"COMPLETED","completed_by_user_id":"user_2"},
+			{"id":"scheduleitem_1_occurrence_1_user_1","schedule_id":"scheduleitem_1","occurrence_id":"1","template_id":"template_1","start_time":"2026-09-28T09:30:00Z","due_time":"2026-09-28T17:30:00Z","miss_time":"","occurrence_status":"WONT_DO","completion_rule":"all","organisation_id":"role_org","wont_do_note":"closed","assignee_id":"user_1","assignee_from":"role_1","target_id":"site_2","target_type":"SITE","assignee_status":"WONT_DO"}
 		]}`)
 
 	assert.NoError(t, feed.NewScheduleV2Feed(nil, nil).Export(context.Background(), apiClient, exporter, ""))
@@ -164,19 +164,29 @@ func TestSchedulingV2Feeds_should_export_every_column_and_a_row_per_target(t *te
 	for i := range occurrences {
 		assert.False(t, occurrences[i].ExportedAt.IsZero())
 		occurrences[i].ExportedAt = time.Time{}
+		for _, t := range []**time.Time{&occurrences[i].StartTime, &occurrences[i].DueTime, &occurrences[i].MissTime, &occurrences[i].CompletedAt} {
+			if *t != nil {
+				utc := (*t).UTC()
+				*t = &utc
+			}
+		}
+	}
+	at := func(hour, minute, ms int) *time.Time {
+		t := time.Date(2026, 9, 28, hour, minute, 0, ms*int(time.Millisecond), time.UTC)
+		return &t
 	}
 	assert.Equal(t, []feed.ScheduleOccurrenceV2{
 		{
 			ID: "scheduleitem_1_occurrence_1_user_1", ScheduleID: "scheduleitem_1", OccurrenceID: "1", TemplateID: "template_1",
-			StartTime: "2026-09-28T09:30:00Z", DueTime: "2026-09-28T17:30:00Z", OccurrenceStatus: "COMPLETED", AuditID: "audit_1",
-			CompletedAt: "2026-09-28T10:00:00Z", AssigneeType: "site", AssigneeSiteID: "location_1", AssigneeSiteName: "Sydney",
+			StartTime: at(9, 30, 0), DueTime: at(17, 30, 0), MissTime: at(13, 30, 123), OccurrenceStatus: "COMPLETED",
+			AuditID: "audit_1", CompletedAt: at(10, 0, 0), AssigneeType: "site", AssigneeSiteID: "location_1", AssigneeSiteName: "Sydney",
 			AssigneeGroupID: "role_1", AssigneeGroupName: "Cleaners", CompletedByUserID: "user_2",
 			CompletedByUserName: "Alan Turing", TargetID: "site_1", TargetType: "SITE", TargetName: "Sydney",
 			OrganisationID: "role_org", UserID: "user_1", AssigneeStatus: "COMPLETED",
 		},
 		{
 			ID: "scheduleitem_1_occurrence_1_user_1", ScheduleID: "scheduleitem_1", OccurrenceID: "1", TemplateID: "template_1",
-			StartTime: "2026-09-28T09:30:00Z", DueTime: "2026-09-28T17:30:00Z", OccurrenceStatus: "WONT_DO",
+			StartTime: at(9, 30, 0), DueTime: at(17, 30, 0), OccurrenceStatus: "WONT_DO",
 			AssigneeType: "group", AssigneeGroupID: "role_1", AssigneeGroupName: "Cleaners", TargetID: "site_2",
 			TargetType: "SITE", TargetName: "Melbourne", OrganisationID: "role_org", WontDoNote: "closed", UserID: "user_1",
 			AssigneeStatus: "WONT_DO", Note: "closed",
