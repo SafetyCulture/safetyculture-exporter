@@ -105,9 +105,11 @@ func (s *ScheduleV2) UnmarshalJSON(b []byte) error {
 		s.ToDate = &toDate
 	}
 	if fromDate := parseDTStart(s.Recurrence, s.Timezone); fromDate != nil {
-		s.FromDate = fromDate
+		// The start time is the local time of the schedule, and the date is in UTC like the other times
 		s.StartTimeHour = fromDate.Hour()
 		s.StartTimeMinute = fromDate.Minute()
+		utc := fromDate.UTC()
+		s.FromDate = &utc
 	}
 	return nil
 }

@@ -118,6 +118,8 @@ func TestSchedulingV2Feeds_should_export_every_column_and_a_row_per_target(t *te
 	sydney, err := time.LoadLocation("Australia/Sydney")
 	assert.NoError(t, err)
 	assert.True(t, time.Date(2026, 9, 28, 9, 30, 0, 0, sydney).Equal(*schedule.FromDate))
+	_, fromDateOffset := schedule.FromDate.Zone()
+	assert.Equal(t, 0, fromDateOffset, "from_date should be in UTC")
 	assert.True(t, time.Date(2026, 12, 31, 0, 0, 0, 0, time.UTC).Equal(*schedule.ToDate))
 	assert.False(t, schedule.ExportedAt.IsZero())
 	schedule.FromDate, schedule.ToDate, schedule.ExportedAt = nil, nil, time.Time{}
