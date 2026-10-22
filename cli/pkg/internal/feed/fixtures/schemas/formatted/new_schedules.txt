@@ -1,41 +1,25 @@
-+-------------------------------+----------+-------------+
-|             NAME              |   TYPE   | PRIMARY KEY |
-+-------------------------------+----------+-------------+
-| schedule_id                   | TEXT     | true        |
-| title                         | TEXT     |             |
-| recurrence                    | TEXT     |             |
-| duration                      | TEXT     |             |
-| modified_at                   | datetime |             |
-| organisation_id               | TEXT     |             |
-| created_at                    | datetime |             |
-| completion_rule               | TEXT     |             |
-| status                        | TEXT     |             |
-| timezone                      | TEXT     |             |
-| timezone_type                 | TEXT     |             |
-| is_late_submit_allowed        | numeric  |             |
-| site_ids                      | TEXT     |             |
-| template_id                   | TEXT     |             |
-| created_by                    | TEXT     |             |
-| grace_period_duration         | TEXT     |             |
-| site_based_assignment_enabled | numeric  |             |
-| ending_rule_type              | TEXT     |             |
-| ending_rule_end_date          | TEXT     |             |
-| ending_rule_end_after_repeats | INTEGER  |             |
-| assignees                     | TEXT     |             |
-| intersections                 | TEXT     |             |
-| schedule_type                 | TEXT     |             |
-| asset_ids                     | TEXT     |             |
-| description                   | TEXT     |             |
-| exported_at                   | datetime |             |
-| from_date                     | datetime |             |
-| to_date                       | datetime |             |
-| start_time_hour               | INTEGER  |             |
-| start_time_minute             | INTEGER  |             |
-| all_must_complete             | numeric  |             |
-| can_late_submit               | numeric  |             |
-| site_id                       | TEXT     |             |
-| creator_user_id               | TEXT     |             |
-| asset_id                      | TEXT     |             |
-| target_type                   | TEXT     |             |
-| target_ids                    | TEXT     |             |
-+-------------------------------+----------+-------------+
++-------------------+----------+-------------+
+|       NAME        |   TYPE   | PRIMARY KEY |
++-------------------+----------+-------------+
+| schedule_id       | TEXT     | true        |
+| description       | TEXT     |             |
+| recurrence        | TEXT     |             |
+| duration          | TEXT     |             |
+| modified_at       | datetime |             |
+| exported_at       | datetime |             |
+| from_date         | datetime |             |
+| to_date           | datetime |             |
+| start_time_hour   | INTEGER  |             |
+| start_time_minute | INTEGER  |             |
+| all_must_complete | numeric  |             |
+| status            | TEXT     |             |
+| organisation_id   | TEXT     |             |
+| timezone          | TEXT     |             |
+| can_late_submit   | numeric  |             |
+| site_id           | TEXT     |             |
+| template_id       | TEXT     |             |
+| creator_user_id   | TEXT     |             |
+| asset_id          | TEXT     |             |
+| target_type       | TEXT     |             |
+| target_ids        | TEXT     |             |
++-------------------+----------+-------------+

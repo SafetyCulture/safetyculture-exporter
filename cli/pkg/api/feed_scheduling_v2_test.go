@@ -10,7 +10,7 @@ import (
 	"gopkg.in/h2non/gock.v1"
 )
 
-func TestScheduleV2Feed_should_follow_pagination_and_keep_arrays_as_json(t *testing.T) {
+func TestScheduleV2Feed_should_follow_pagination(t *testing.T) {
 	defer gock.Off()
 	// drop the mocks that other tests left behind
 	gock.Flush()
@@ -33,11 +33,7 @@ func TestScheduleV2Feed_should_follow_pagination_and_keep_arrays_as_json(t *test
 	var rows []feed.ScheduleV2
 	assert.NoError(t, exporter.DB.Table("new_schedules").Order("schedule_id").Scan(&rows).Error)
 	assert.Len(t, rows, 2)
-	assert.Equal(t, feed.JSONArray(`["site_1","site_2"]`), rows[0].SiteIDs)
-	assert.Equal(t, feed.JSONArray(`["user_1"]`), rows[0].Assignees)
-	assert.Equal(t, int32(5), *rows[0].EndingRuleEndAfterRepeats)
-	assert.Nil(t, rows[1].EndingRuleEndAfterRepeats)
-	assert.Equal(t, feed.JSONArray(""), rows[1].SiteIDs)
+	assert.Equal(t, []string{"One", "Two"}, []string{rows[0].Description, rows[1].Description})
 }
 
 func TestSchedulingV2Feeds_should_export_every_column_and_a_row_per_target(t *testing.T) {
@@ -92,71 +88,62 @@ func TestSchedulingV2Feeds_should_export_every_column_and_a_row_per_target(t *te
 	assert.True(t, time.Date(2026, 12, 31, 0, 0, 0, 0, time.UTC).Equal(*schedule.ToDate))
 	assert.False(t, schedule.ExportedAt.IsZero())
 	schedule.FromDate, schedule.ToDate, schedule.ExportedAt = nil, nil, time.Time{}
-	schedule.ModifiedAt, schedule.CreatedAt = schedule.ModifiedAt.UTC(), schedule.CreatedAt.UTC()
+	schedule.ModifiedAt = schedule.ModifiedAt.UTC()
 	assert.Equal(t, feed.ScheduleV2{
-		ID:                         "scheduleitem_1",
-		Title:                      "Daily check",
-		Recurrence:                 "DTSTART;TZID=Australia/Sydney:20260928T093000\nRRULE:FREQ=DAILY",
-		Duration:                   "PT8H",
-		ModifiedAt:                 time.Date(2026, 9, 28, 5, 59, 8, 0, time.UTC),
-		OrganisationID:             "role_org",
-		CreatedAt:                  time.Date(2026, 9, 28, 5, 59, 8, 0, time.UTC),
-		CompletionRule:             "all",
-		Status:                     "ACTIVE",
-		Timezone:                   "Australia/Sydney",
-		TimezoneType:               "CUSTOM_TIMEZONE",
-		IsLateSubmitAllowed:        true,
-		SiteIDs:                    `["location_75fc77d9a3b14c5e9f0e1a2b3c4d5e6f"]`,
-		TemplateID:                 "template_1",
-		CreatedBy:                  "user_1",
-		GracePeriodDuration:        "until_next",
-		SiteBasedAssignmentEnabled: true,
-		EndingRuleType:             "end_date",
-		EndingRuleEndDate:          "2026-12-31T00:00:00Z",
-		Assignees:                  `["role_1"]`,
-		Intersections:              `[]`,
-		ScheduleType:               "SCHEDULE_TYPE_SITES",
-		AssetIDs:                   `[]`,
-		Description:                "Daily check",
-		StartTimeHour:              9,
-		StartTimeMinute:            30,
-		AllMustComplete:            true,
-		CanLateSubmit:              true,
-		SiteID:                     "location_75fc77d9a3b14c5e9f0e1a2b3c4d5e6f",
-		CreatorUserID:              "user_1",
-		TargetType:                 "SITE",
-		TargetIDs:                  "75fc77d9-a3b1-4c5e-9f0e-1a2b3c4d5e6f",
+		ID:              "scheduleitem_1",
+		Description:     "Daily check",
+		Recurrence:      "DTSTART;TZID=Australia/Sydney:20260928T093000\nRRULE:FREQ=DAILY",
+		Duration:        "PT8H",
+		ModifiedAt:      time.Date(2026, 9, 28, 5, 59, 8, 0, time.UTC),
+		StartTimeHour:   9,
+		StartTimeMinute: 30,
+		AllMustComplete: true,
+		Status:          "ACTIVE",
+		OrganisationID:  "role_org",
+		Timezone:        "Australia/Sydney",
+		CanLateSubmit:   true,
+		SiteID:          "location_75fc77d9a3b14c5e9f0e1a2b3c4d5e6f",
+		TemplateID:      "template_1",
+		CreatorUserID:   "user_1",
+		TargetType:      "SITE",
+		TargetIDs:       `["75fc77d9-a3b1-4c5e-9f0e-1a2b3c4d5e6f"]`,
 	}, schedule)
 
 	var assignees []feed.ScheduleAssigneeV2
 	assert.NoError(t, exporter.DB.Table("new_schedule_assignees").Order("target_id").Scan(&assignees).Error)
+	for i := range assignees {
+		assert.False(t, assignees[i].ExportedAt.IsZero())
+		assignees[i].ExportedAt = time.Time{}
+	}
 	assigneeOf := func(targetID string) feed.ScheduleAssigneeV2 {
 		return feed.ScheduleAssigneeV2{
-			ID: "scheduleitem_1_role_1", ScheduleID: "scheduleitem_1", AssigneeID: "role_1", Type: "role", Name: "Cleaners",
-			OrganisationID: "role_org", CompletionRule: "all", TargetID: targetID, TargetType: "SITE",
+			ID: "scheduleitem_1_role_1", ScheduleID: "scheduleitem_1", AssigneeID: "role_1", OrganisationID: "role_org",
+			Type: "role", Name: "Cleaners", TargetID: targetID, TargetType: "SITE",
 		}
 	}
 	assert.Equal(t, []feed.ScheduleAssigneeV2{assigneeOf("site_1"), assigneeOf("site_2")}, assignees)
 
 	var occurrences []feed.ScheduleOccurrenceV2
 	assert.NoError(t, exporter.DB.Table("new_schedule_occurrences").Order("target_id").Scan(&occurrences).Error)
+	for i := range occurrences {
+		assert.False(t, occurrences[i].ExportedAt.IsZero())
+		occurrences[i].ExportedAt = time.Time{}
+	}
 	assert.Equal(t, []feed.ScheduleOccurrenceV2{
 		{
 			ID: "scheduleitem_1_occurrence_1_user_1", ScheduleID: "scheduleitem_1", OccurrenceID: "1", TemplateID: "template_1",
 			StartTime: "2026-09-28T09:30:00Z", DueTime: "2026-09-28T17:30:00Z", OccurrenceStatus: "COMPLETED", AuditID: "audit_1",
-			CompletedAt: "2026-09-28T10:00:00Z", CompletionRule: "all", OrganisationID: "role_org", AssigneeID: "user_1",
-			AssigneeFrom: "location_1+role_1", TargetID: "site_1", TargetType: "SITE", AssigneeStatus: "COMPLETED",
-			CompletedByUserID: "user_2", UserID: "user_1", AssigneeType: "group", AssigneeSiteID: "location_1",
-			AssigneeGroupID: "role_1", UserName: "Ada Lovelace", AssigneeSiteName: "Sydney", AssigneeGroupName: "Cleaners",
-			CompletedByUserName: "Alan Turing", TargetName: "Sydney",
+			CompletedAt: "2026-09-28T10:00:00Z", AssigneeType: "group", AssigneeSiteID: "location_1", AssigneeSiteName: "Sydney",
+			AssigneeGroupID: "role_1", AssigneeGroupName: "Cleaners", CompletedByUserID: "user_2",
+			CompletedByUserName: "Alan Turing", TargetID: "site_1", TargetType: "SITE", TargetName: "Sydney",
+			OrganisationID: "role_org", UserID: "user_1", AssigneeStatus: "COMPLETED",
 		},
 		{
 			ID: "scheduleitem_1_occurrence_1_user_1", ScheduleID: "scheduleitem_1", OccurrenceID: "1", TemplateID: "template_1",
 			StartTime: "2026-09-28T09:30:00Z", DueTime: "2026-09-28T17:30:00Z", OccurrenceStatus: "WONT_DO",
-			CompletionRule: "all", OrganisationID: "role_org", WontDoNote: "closed", AssigneeID: "user_1", AssigneeFrom: "role_1",
-			TargetID: "site_2", TargetType: "SITE", AssigneeStatus: "WONT_DO", UserID: "user_1", Note: "closed",
-			AssigneeType: "group", AssigneeGroupID: "role_1", UserName: "Ada Lovelace", AssigneeGroupName: "Cleaners",
-			TargetName: "Melbourne",
+			AssigneeType: "group", AssigneeGroupID: "role_1", AssigneeGroupName: "Cleaners", TargetID: "site_2",
+			TargetType: "SITE", TargetName: "Melbourne", OrganisationID: "role_org", WontDoNote: "closed", UserID: "user_1",
+			AssigneeStatus: "WONT_DO", Note: "closed",
 		},
 	}, occurrences)
 }

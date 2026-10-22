@@ -14,91 +14,88 @@ import (
 
 // The feeds in this file use the Scheduling feed service (/scheduling/v1/feed/*) which replaces the legacy
 // /feed/schedules* endpoints for organisations on the new Schedules experience.
-// They export to separate *_v2 tables so organisations that are still on the legacy experience keep working.
+// They export to separate new_* tables so organisations that are still on the legacy experience keep working.
+// Each table has the columns of the legacy table, plus the columns the new Schedules exporter PRD adds.
 
 // maxSchedulingFeedLimit is the largest page size the Scheduling feed service accepts (the default is 50)
 const maxSchedulingFeedLimit = 1000
 
 // ScheduleV2 represents a row from the Scheduling feed service schedules feed
 type ScheduleV2 struct {
-	ID                         string    `json:"id" csv:"schedule_id" gorm:"primarykey;column:schedule_id;size:128"`
-	Title                      string    `json:"title" csv:"title"`
-	Recurrence                 string    `json:"recurrence" csv:"recurrence"`
-	Duration                   string    `json:"duration" csv:"duration" gorm:"size:50"`
-	ModifiedAt                 time.Time `json:"modified_at" csv:"modified_at"`
-	OrganisationID             string    `json:"organisation_id" csv:"organisation_id" gorm:"size:37"`
-	CreatedAt                  time.Time `json:"created_at" csv:"created_at"`
-	CompletionRule             string    `json:"completion_rule" csv:"completion_rule" gorm:"size:10"`
-	Status                     string    `json:"status" csv:"status" gorm:"size:20"`
-	Timezone                   string    `json:"timezone" csv:"timezone"`
-	TimezoneType               string    `json:"timezone_type" csv:"timezone_type" gorm:"size:30"`
-	IsLateSubmitAllowed        bool      `json:"is_late_submit_allowed" csv:"is_late_submit_allowed"`
-	SiteIDs                    JSONArray `json:"site_ids" csv:"site_ids"`
-	TemplateID                 string    `json:"template_id" csv:"template_id" gorm:"size:100"`
-	CreatedBy                  string    `json:"created_by" csv:"created_by" gorm:"size:37"`
-	GracePeriodDuration        string    `json:"grace_period_duration" csv:"grace_period_duration" gorm:"size:50"`
-	SiteBasedAssignmentEnabled bool      `json:"site_based_assignment_enabled" csv:"site_based_assignment_enabled"`
-	EndingRuleType             string    `json:"ending_rule_type" csv:"ending_rule_type" gorm:"size:20"`
-	EndingRuleEndDate          string    `json:"ending_rule_end_date" csv:"ending_rule_end_date"`
-	EndingRuleEndAfterRepeats  *int32    `json:"ending_rule_end_after_repeats" csv:"ending_rule_end_after_repeats"`
-	Assignees                  JSONArray `json:"assignees" csv:"assignees"`
-	Intersections              JSONArray `json:"intersections" csv:"intersections"`
-	ScheduleType               string    `json:"schedule_type" csv:"schedule_type" gorm:"size:30"`
-	AssetIDs                   JSONArray `json:"asset_ids" csv:"asset_ids"`
-
-	// The fields below are derived from the API fields: the legacy schedules columns, then the targets
+	ID              string     `json:"id" csv:"schedule_id" gorm:"primarykey;column:schedule_id;size:128"`
 	Description     string     `json:"-" csv:"description"`
+	Recurrence      string     `json:"recurrence" csv:"recurrence"`
+	Duration        string     `json:"duration" csv:"duration" gorm:"size:50"`
+	ModifiedAt      time.Time  `json:"modified_at" csv:"modified_at"`
 	ExportedAt      time.Time  `json:"-" csv:"exported_at" gorm:"autoUpdateTime"`
 	FromDate        *time.Time `json:"-" csv:"from_date"`
 	ToDate          *time.Time `json:"-" csv:"to_date"`
 	StartTimeHour   int        `json:"-" csv:"start_time_hour"`
 	StartTimeMinute int        `json:"-" csv:"start_time_minute"`
 	AllMustComplete bool       `json:"-" csv:"all_must_complete"`
+	Status          string     `json:"status" csv:"status" gorm:"size:20"`
+	OrganisationID  string     `json:"organisation_id" csv:"organisation_id" gorm:"size:37"`
+	Timezone        string     `json:"timezone" csv:"timezone"`
 	CanLateSubmit   bool       `json:"-" csv:"can_late_submit"`
 	SiteID          string     `json:"-" csv:"site_id" gorm:"size:41"`
+	TemplateID      string     `json:"template_id" csv:"template_id" gorm:"size:100"`
 	CreatorUserID   string     `json:"-" csv:"creator_user_id" gorm:"size:37"`
 	AssetID         string     `json:"-" csv:"asset_id" gorm:"size:37"`
 	TargetType      string     `json:"-" csv:"target_type" gorm:"size:10"`
-	// TargetIDs is the comma-joined list of the site or asset UUIDs of the schedule
-	TargetIDs string `json:"-" csv:"target_ids"`
+	// TargetIDs is the JSON array of the site or asset UUIDs of the schedule, empty for schedules without sites or assets
+	TargetIDs JSONArray `json:"-" csv:"target_ids"`
 }
 
-// UnmarshalJSON decodes the API fields and fills the derived fields. A derived field that can't be parsed is left empty
+// UnmarshalJSON decodes the API fields and fills the legacy and target columns. A column that can't be parsed is left empty
 func (s *ScheduleV2) UnmarshalJSON(b []byte) error {
 	type apiSchedule ScheduleV2
 	if err := json.Unmarshal(b, (*apiSchedule)(s)); err != nil {
 		return err
 	}
 
-	var ids struct {
-		SiteIDs  []string `json:"site_ids"`
-		AssetIDs []string `json:"asset_ids"`
+	var api struct {
+		Title               string   `json:"title"`
+		CompletionRule      string   `json:"completion_rule"`
+		IsLateSubmitAllowed bool     `json:"is_late_submit_allowed"`
+		CreatedBy           string   `json:"created_by"`
+		EndingRuleEndDate   string   `json:"ending_rule_end_date"`
+		ScheduleType        string   `json:"schedule_type"`
+		SiteIDs             []string `json:"site_ids"`
+		AssetIDs            []string `json:"asset_ids"`
 	}
-	if err := json.Unmarshal(b, &ids); err != nil {
+	if err := json.Unmarshal(b, &api); err != nil {
 		return err
 	}
 
-	s.Description = s.Title
-	s.AllMustComplete = s.CompletionRule == "all"
-	s.CanLateSubmit = s.IsLateSubmitAllowed
-	s.CreatorUserID = s.CreatedBy
-	if len(ids.SiteIDs) == 1 {
-		s.SiteID = ids.SiteIDs[0]
+	s.Description = api.Title
+	s.AllMustComplete = api.CompletionRule == "all"
+	s.CanLateSubmit = api.IsLateSubmitAllowed
+	s.CreatorUserID = api.CreatedBy
+	if len(api.SiteIDs) == 1 {
+		s.SiteID = api.SiteIDs[0]
 	}
-	if len(ids.AssetIDs) == 1 {
-		s.AssetID = ids.AssetIDs[0]
+	if len(api.AssetIDs) == 1 {
+		s.AssetID = api.AssetIDs[0]
 	}
 
-	switch s.ScheduleType {
+	var targetIDs []string
+	switch api.ScheduleType {
 	case "SCHEDULE_TYPE_SITES":
 		s.TargetType = "SITE"
-		s.TargetIDs = strings.Join(siteUUIDs(ids.SiteIDs), ",")
+		targetIDs = siteUUIDs(api.SiteIDs)
 	case "SCHEDULE_TYPE_ASSETS":
 		s.TargetType = "ASSET"
-		s.TargetIDs = strings.Join(ids.AssetIDs, ",")
+		targetIDs = api.AssetIDs
+	}
+	if s.TargetType != "" {
+		ids, err := json.Marshal(targetIDs)
+		if err != nil {
+			return err
+		}
+		s.TargetIDs = JSONArray(ids)
 	}
 
-	if toDate, err := time.Parse(time.RFC3339, s.EndingRuleEndDate); err == nil {
+	if toDate, err := time.Parse(time.RFC3339, api.EndingRuleEndDate); err == nil {
 		s.ToDate = &toDate
 	}
 	if fromDate := parseDTStart(s.Recurrence, s.Timezone); fromDate != nil {
@@ -169,14 +166,15 @@ func (ScheduleV2) TableName() string {
 
 // ScheduleAssigneeV2 represents a row from the Scheduling feed service schedule_assignees feed
 type ScheduleAssigneeV2 struct {
-	ID             string `json:"id" csv:"id" gorm:"primarykey;size:375"`
-	ScheduleID     string `json:"schedule_id" csv:"schedule_id" gorm:"size:128"`
-	AssigneeID     string `json:"assignee_id" csv:"assignee_id" gorm:"size:256"`
-	Type           string `json:"type" csv:"type" gorm:"size:30"`
-	Name           string `json:"name" csv:"name"`
-	OrganisationID string `json:"organisation_id" csv:"organisation_id" gorm:"size:37"`
-	CompletionRule string `json:"completion_rule" csv:"completion_rule" gorm:"size:10"`
-	// TargetID is the site or asset UUID of the row, empty for schedules without sites or assets
+	ID             string    `json:"id" csv:"id" gorm:"primarykey;size:375"`
+	ScheduleID     string    `json:"schedule_id" csv:"schedule_id" gorm:"size:128"`
+	AssigneeID     string    `json:"assignee_id" csv:"assignee_id" gorm:"size:256"`
+	OrganisationID string    `json:"organisation_id" csv:"organisation_id" gorm:"size:37"`
+	Type           string    `json:"type" csv:"type" gorm:"size:30"`
+	Name           string    `json:"name" csv:"name"`
+	ExportedAt     time.Time `json:"-" csv:"exported_at" gorm:"autoUpdateTime"`
+	// TargetID is the site or asset UUID of the row, empty for schedules without sites or assets.
+	// It is part of the primary key, as the API returns the same id once per site or asset
 	TargetID   string `json:"target_id" csv:"target_id" gorm:"primarykey;size:36"`
 	TargetType string `json:"target_type" csv:"target_type" gorm:"size:10"`
 }
@@ -198,48 +196,49 @@ type ScheduleOccurrenceV2 struct {
 	OccurrenceStatus string `json:"occurrence_status" csv:"occurrence_status" gorm:"size:20"`
 	AuditID          string `json:"audit_id" csv:"audit_id" gorm:"size:100"`
 	CompletedAt      string `json:"completed_at" csv:"completed_at" gorm:"size:40"`
-	CompletionRule   string `json:"completion_rule" csv:"completion_rule" gorm:"size:10"`
-	OrganisationID   string `json:"organisation_id" csv:"organisation_id" gorm:"size:37"`
-	WontDoNote       string `json:"wont_do_note" csv:"wont_do_note"`
-	AssigneeID       string `json:"assignee_id" csv:"assignee_id" gorm:"size:256"`
-	AssigneeFrom     string `json:"assignee_from" csv:"assignee_from" gorm:"size:300"`
-	// TargetID is the site or asset UUID of the row, empty for schedules without sites or assets
-	TargetID          string `json:"target_id" csv:"target_id" gorm:"primarykey;size:36"`
-	TargetType        string `json:"target_type" csv:"target_type" gorm:"size:10"`
-	AssigneeStatus    string `json:"assignee_status" csv:"assignee_status" gorm:"size:20"`
-	CompletedByUserID string `json:"completed_by_user_id" csv:"completed_by_user_id" gorm:"size:37"`
-
-	// The fields below are derived from the API fields: the legacy schedule_occurrences columns, then the assignment
-	UserID string `json:"-" csv:"user_id" gorm:"size:256"`
-	Note   string `json:"-" csv:"note"`
 	// AssigneeType is how the user was assigned: user, site or group. A group within a site is a group with the site set
-	AssigneeType    string `json:"-" csv:"assignee_type" gorm:"size:30"`
-	AssigneeUserID  string `json:"-" csv:"assignee_user_id" gorm:"size:37"`
-	AssigneeSiteID  string `json:"-" csv:"assignee_site_id" gorm:"size:41"`
-	AssigneeGroupID string `json:"-" csv:"assignee_group_id" gorm:"size:37"`
-
-	// The names are looked up when exporting. A name is empty when it can't be found
-	UserName            string `json:"-" csv:"user_name"`
+	AssigneeType        string `json:"-" csv:"assignee_type" gorm:"size:10"`
+	AssigneeUserID      string `json:"-" csv:"assignee_user_id" gorm:"size:37"`
 	AssigneeUserName    string `json:"-" csv:"assignee_user_name"`
+	AssigneeSiteID      string `json:"-" csv:"assignee_site_id" gorm:"size:41"`
 	AssigneeSiteName    string `json:"-" csv:"assignee_site_name"`
+	AssigneeGroupID     string `json:"-" csv:"assignee_group_id" gorm:"size:37"`
 	AssigneeGroupName   string `json:"-" csv:"assignee_group_name"`
+	CompletedByUserID   string `json:"completed_by_user_id" csv:"completed_by_user_id" gorm:"size:37"`
 	CompletedByUserName string `json:"-" csv:"completed_by_user_name"`
+	// TargetID is the site or asset UUID of the row, empty for schedules without sites or assets.
+	// It is part of the primary key, as the API returns the same id once per site or asset
+	TargetID   string `json:"target_id" csv:"target_id" gorm:"primarykey;size:36"`
+	TargetType string `json:"target_type" csv:"target_type" gorm:"size:10"`
 	// TargetName is the name of the site, or the code of the asset
-	TargetName string `json:"-" csv:"target_name"`
+	TargetName     string    `json:"-" csv:"target_name"`
+	OrganisationID string    `json:"organisation_id" csv:"organisation_id" gorm:"size:37"`
+	WontDoNote     string    `json:"wont_do_note" csv:"wont_do_note"`
+	UserID         string    `json:"assignee_id" csv:"user_id" gorm:"size:256"`
+	AssigneeStatus string    `json:"assignee_status" csv:"assignee_status" gorm:"size:20"`
+	Note           string    `json:"-" csv:"note"`
+	ExportedAt     time.Time `json:"-" csv:"exported_at" gorm:"autoUpdateTime"`
 }
 
-// UnmarshalJSON decodes the API fields and fills the derived fields
+// UnmarshalJSON decodes the API fields and fills the assignment and legacy columns.
+// The names are filled when exporting
 func (o *ScheduleOccurrenceV2) UnmarshalJSON(b []byte) error {
 	type apiOccurrence ScheduleOccurrenceV2
 	if err := json.Unmarshal(b, (*apiOccurrence)(o)); err != nil {
 		return err
 	}
 
-	o.UserID = o.AssigneeID
+	var api struct {
+		AssigneeFrom string `json:"assignee_from"`
+	}
+	if err := json.Unmarshal(b, &api); err != nil {
+		return err
+	}
+
 	o.Note = o.WontDoNote
 
-	// assignee_from is user_<id>, role_<id>, location_<id> or location_<id>+role_<id> for a site and group intersection
-	switch from := o.AssigneeFrom; {
+	// assignee_from is user_<id>, role_<id>, location_<id> or location_<id>+role_<id> for a group within a site
+	switch from := api.AssigneeFrom; {
 	case strings.HasPrefix(from, "user_"):
 		o.AssigneeType = "user"
 		o.AssigneeUserID = from
@@ -335,7 +334,6 @@ func drainRows[T any](ctx context.Context, apiClient *httpapi.Client, req *GetFe
 
 // fillNames sets the names of the occurrence
 func (n *nameLookup) fillNames(o *ScheduleOccurrenceV2) {
-	o.UserName = n.users[o.UserID]
 	o.AssigneeUserName = n.users[o.AssigneeUserID]
 	o.AssigneeSiteName = n.sites[o.AssigneeSiteID]
 	o.AssigneeGroupName = n.groups[o.AssigneeGroupID]
@@ -372,13 +370,9 @@ func NewScheduleV2Feed(templateIDs []string) Feed {
 		},
 		key: func(r *ScheduleV2) string { return r.ID },
 		columns: []string{
-			"title", "recurrence", "duration", "modified_at", "organisation_id", "created_at", "completion_rule",
-			"status", "timezone", "timezone_type", "is_late_submit_allowed", "site_ids", "template_id", "created_by",
-			"grace_period_duration", "site_based_assignment_enabled", "ending_rule_type", "ending_rule_end_date",
-			"ending_rule_end_after_repeats", "assignees", "intersections", "schedule_type", "asset_ids",
-			"description", "exported_at", "from_date", "to_date", "start_time_hour", "start_time_minute",
-			"all_must_complete", "can_late_submit", "site_id", "creator_user_id", "asset_id", "target_type",
-			"target_ids",
+			"description", "recurrence", "duration", "modified_at", "exported_at", "from_date", "to_date",
+			"start_time_hour", "start_time_minute", "all_must_complete", "status", "organisation_id", "timezone",
+			"can_late_submit", "site_id", "template_id", "creator_user_id", "asset_id", "target_type", "target_ids",
 		},
 	}
 }
@@ -394,10 +388,8 @@ func NewScheduleAssigneeV2Feed(templateIDs []string) Feed {
 			TemplateIDs: templateIDs,
 			Limit:       maxSchedulingFeedLimit,
 		},
-		key: func(r *ScheduleAssigneeV2) string { return r.ID + "|" + r.TargetID },
-		columns: []string{
-			"schedule_id", "assignee_id", "type", "name", "organisation_id", "completion_rule", "target_type",
-		},
+		key:     func(r *ScheduleAssigneeV2) string { return r.ID + "|" + r.TargetID },
+		columns: []string{"schedule_id", "assignee_id", "organisation_id", "type", "name", "exported_at", "target_type"},
 	}
 }
 
@@ -418,10 +410,10 @@ func NewScheduleOccurrenceV2Feed(templateIDs []string, startDate time.Time) Feed
 		prepare: prepareOccurrenceNames,
 		columns: []string{
 			"schedule_id", "occurrence_id", "template_id", "start_time", "due_time", "miss_time", "occurrence_status",
-			"audit_id", "completed_at", "completion_rule", "organisation_id", "wont_do_note", "assignee_id", "assignee_from",
-			"target_type", "assignee_status", "completed_by_user_id", "user_id", "note", "assignee_type",
-			"assignee_user_id", "assignee_site_id", "assignee_group_id", "user_name", "assignee_user_name",
-			"assignee_site_name", "assignee_group_name", "completed_by_user_name", "target_name",
+			"audit_id", "completed_at", "assignee_type", "assignee_user_id", "assignee_user_name", "assignee_site_id",
+			"assignee_site_name", "assignee_group_id", "assignee_group_name", "completed_by_user_id",
+			"completed_by_user_name", "target_type", "target_name", "organisation_id", "wont_do_note", "user_id",
+			"assignee_status", "note", "exported_at",
 		},
 	}
 }
