@@ -134,7 +134,7 @@ func TestSchedulingV2Feeds_should_export_every_column_and_a_row_per_target(t *te
 		{
 			ID: "scheduleitem_1_occurrence_1_user_1", ScheduleID: "scheduleitem_1", OccurrenceID: "1", TemplateID: "template_1",
 			StartTime: "2026-09-28T09:30:00Z", DueTime: "2026-09-28T17:30:00Z", OccurrenceStatus: "COMPLETED", AuditID: "audit_1",
-			CompletedAt: "2026-09-28T10:00:00Z", AssigneeType: "group", AssigneeSiteID: "location_1", AssigneeSiteName: "Sydney",
+			CompletedAt: "2026-09-28T10:00:00Z", AssigneeType: "site", AssigneeSiteID: "location_1", AssigneeSiteName: "Sydney",
 			AssigneeGroupID: "role_1", AssigneeGroupName: "Cleaners", CompletedByUserID: "user_2",
 			CompletedByUserName: "Alan Turing", TargetID: "site_1", TargetType: "SITE", TargetName: "Sydney",
 			OrganisationID: "role_org", UserID: "user_1", AssigneeStatus: "COMPLETED",

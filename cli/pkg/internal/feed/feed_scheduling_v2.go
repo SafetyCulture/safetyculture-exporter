@@ -208,7 +208,7 @@ type ScheduleOccurrenceV2 struct {
 	AssigneeStatus   string    `json:"assignee_status" csv:"assignee_status" gorm:"size:20"`
 	Note             string    `json:"-" csv:"note"`
 
-	// AssigneeType is how the user was assigned: user, site or group. A group within a site is a group with the site set
+	// AssigneeType is how the user was assigned: user, site or group. A group within a site is a site with the group set
 	AssigneeType        string `json:"-" csv:"assignee_type" gorm:"size:10"`
 	AssigneeUserID      string `json:"-" csv:"assignee_user_id" gorm:"size:37"`
 	AssigneeUserName    string `json:"-" csv:"assignee_user_name"`
@@ -254,10 +254,9 @@ func (o *ScheduleOccurrenceV2) UnmarshalJSON(b []byte) error {
 		o.AssigneeGroupID = from
 	case strings.HasPrefix(from, "location_"):
 		site, group, found := strings.Cut(from, "+")
-		o.AssigneeSiteID = site
 		o.AssigneeType = "site"
+		o.AssigneeSiteID = site
 		if found {
-			o.AssigneeType = "group"
 			o.AssigneeGroupID = group
 		}
 	}
