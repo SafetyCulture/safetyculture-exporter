@@ -75,6 +75,11 @@ type ExporterConfiguration struct {
 		} `yaml:"site"`
 		Schedule struct {
 			ResumeDownload bool `yaml:"resume_download"`
+			// EndDate is the end of the date range of the new_schedule_occurrences table. It is empty for the API default
+			EndDate mTime `yaml:"end_date"`
+			// Statuses are the schedule statuses (ACTIVE, PAUSED, FINISHED) of the new_schedules and new_schedule_assignees
+			// tables. They are empty for all statuses
+			Statuses []string `yaml:"statuses"`
 		} `yaml:"schedule"`
 		Tables      []string `yaml:"tables"`
 		TemplateIds []string `yaml:"template_ids"`
@@ -379,6 +384,8 @@ func (ec *ExporterConfiguration) ToExporterConfig() *feed.ExporterFeedCfg {
 		ExportInspectionWebReportLink:         ec.Export.Inspection.WebReportLink,
 		ExportInspectionItemsSkipFields:       ec.Export.InspectionItems.SkipFields,
 		ExportScheduleResumeDownload:          ec.Export.Schedule.ResumeDownload,
+		ExportScheduleEndDate:                 ec.Export.Schedule.EndDate.Time,
+		ExportScheduleStatuses:                ec.Export.Schedule.Statuses,
 		ExportIncremental:                     ec.Export.Incremental,
 		ExportInspectionLimit:                 ec.Export.Inspection.Limit,
 		ExportMedia:                           ec.Export.Media,

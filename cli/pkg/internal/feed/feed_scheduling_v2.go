@@ -362,18 +362,34 @@ func prepareOccurrenceNames(ctx context.Context, apiClient *httpapi.Client) func
 	return names.fillNames
 }
 
-// NewScheduleV2Feed returns the feed for /scheduling/v1/feed/schedules
-func NewScheduleV2Feed(templateIDs []string) Feed {
+// scheduleStatusParams sets the status filter of the schedules and schedule assignees feeds.
+// No statuses, or none that are known, leaves the filter unset so schedules of every status are returned
+func scheduleStatusParams(params GetFeedParams, statuses []string) GetFeedParams {
+	show := map[string]bool{}
+	for _, status := range statuses {
+		show[strings.ToUpper(strings.TrimSpace(status))] = true
+	}
+	active, paused, finished := show["ACTIVE"], show["PAUSED"], show["FINISHED"]
+	if !active && !paused && !finished {
+		return params
+	}
+	params.ShowActive, params.ShowPaused, params.ShowFinished = &active, &paused, &finished
+	return params
+}
+
+// NewScheduleV2Feed returns the feed for /scheduling/v1/feed/schedules.
+// statuses filters on the schedule status (ACTIVE, PAUSED, FINISHED); it is empty for every status
+func NewScheduleV2Feed(templateIDs []string, statuses []string) Feed {
 	return &rowFeed[ScheduleV2]{
 		name:         "new_schedules",
 		initialURL:   "/scheduling/v1/feed/schedules",
 		primaryKey:   []string{"schedule_id"},
 		order:        "schedule_id",
 		hasRemaining: false, // FeedMetadataSimple has no remaining_records
-		params: GetFeedParams{
+		params: scheduleStatusParams(GetFeedParams{
 			TemplateIDs: templateIDs,
 			Limit:       maxSchedulingFeedLimit,
-		},
+		}, statuses),
 		key: func(r *ScheduleV2) string { return r.ID },
 		columns: []string{
 			"description", "recurrence", "duration", "modified_at", "exported_at", "from_date", "to_date",
@@ -384,25 +400,27 @@ func NewScheduleV2Feed(templateIDs []string) Feed {
 	}
 }
 
-// NewScheduleAssigneeV2Feed returns the feed for /scheduling/v1/feed/schedule_assignees
-func NewScheduleAssigneeV2Feed(templateIDs []string) Feed {
+// NewScheduleAssigneeV2Feed returns the feed for /scheduling/v1/feed/schedule_assignees.
+// statuses filters on the schedule status (ACTIVE, PAUSED, FINISHED); it is empty for every status
+func NewScheduleAssigneeV2Feed(templateIDs []string, statuses []string) Feed {
 	return &rowFeed[ScheduleAssigneeV2]{
 		name:       "new_schedule_assignees",
 		initialURL: "/scheduling/v1/feed/schedule_assignees",
 		primaryKey: []string{"id", "target_id"},
 		order:      "schedule_id, assignee_id, target_id",
-		params: GetFeedParams{
+		params: scheduleStatusParams(GetFeedParams{
 			TemplateIDs: templateIDs,
 			Limit:       maxSchedulingFeedLimit,
-		},
+		}, statuses),
 		key:     func(r *ScheduleAssigneeV2) string { return r.ID + "|" + r.TargetID },
 		columns: []string{"schedule_id", "assignee_id", "organisation_id", "type", "name", "exported_at", "target_type"},
 	}
 }
 
 // NewScheduleOccurrenceV2Feed returns the feed for /scheduling/v1/feed/schedule_occurrences.
-// startDate filters on the due time of the occurrences. When it is zero the API default window applies (5 months back, 1 month ahead).
-func NewScheduleOccurrenceV2Feed(templateIDs []string, startDate time.Time) Feed {
+// startDate and endDate filter on the due time of the occurrences. When one is zero, the API default applies to it
+// (5 months back for the start, 1 month ahead for the end).
+func NewScheduleOccurrenceV2Feed(templateIDs []string, startDate, endDate time.Time) Feed {
 	return &rowFeed[ScheduleOccurrenceV2]{
 		name:       "new_schedule_occurrences",
 		initialURL: "/scheduling/v1/feed/schedule_occurrences",
@@ -411,6 +429,7 @@ func NewScheduleOccurrenceV2Feed(templateIDs []string, startDate time.Time) Feed
 		params: GetFeedParams{
 			TemplateIDs: templateIDs,
 			StartDate:   startDate,
+			EndDate:     endDate,
 			Limit:       maxSchedulingFeedLimit,
 		},
 		key:     func(r *ScheduleOccurrenceV2) string { return r.ID + "|" + r.TargetID },

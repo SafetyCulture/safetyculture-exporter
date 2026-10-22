@@ -72,6 +72,11 @@ type GetFeedParams struct {
 	StartDate       time.Time `url:"start_date,omitempty"`
 	EndDate         time.Time `url:"end_date,omitempty"`
 
+	// Applicable only for the new schedules and schedule assignees. Nil returns schedules of every status
+	ShowActive   *bool `url:"show_active,omitempty"`
+	ShowPaused   *bool `url:"show_paused,omitempty"`
+	ShowFinished *bool `url:"show_finished,omitempty"`
+
 	// Applicable only for sites
 	IncludeDeleted    bool  `url:"include_deleted,omitempty"`
 	ShowOnlyLeafNodes *bool `url:"show_only_leaf_nodes,omitempty"`

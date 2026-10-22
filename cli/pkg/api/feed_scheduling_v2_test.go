@@ -28,12 +28,44 @@ func TestScheduleV2Feed_should_follow_pagination(t *testing.T) {
 		Reply(200).
 		BodyString(`{"metadata":{},"data":[{"id":"scheduleitem_2","title":"Two","modified_at":"2026-01-01T00:00:00Z","created_at":"2026-01-01T00:00:00Z"}]}`)
 
-	assert.NoError(t, feed.NewScheduleV2Feed(nil).Export(context.Background(), apiClient, exporter, ""))
+	assert.NoError(t, feed.NewScheduleV2Feed(nil, nil).Export(context.Background(), apiClient, exporter, ""))
 
 	var rows []feed.ScheduleV2
 	assert.NoError(t, exporter.DB.Table("new_schedules").Order("schedule_id").Scan(&rows).Error)
 	assert.Len(t, rows, 2)
 	assert.Equal(t, []string{"One", "Two"}, []string{rows[0].Description, rows[1].Description})
+}
+
+func TestSchedulingV2Feeds_should_send_the_status_and_date_filters(t *testing.T) {
+	defer gock.Off()
+	// drop the mocks that other tests left behind
+	gock.Flush()
+
+	exporter, err := getInmemorySQLExporter("")
+	assert.NoError(t, err)
+
+	apiClient := GetTestClient()
+	gock.InterceptClient(apiClient.HTTPClient())
+	for _, path := range []string{"/scheduling/v1/feed/schedules", "/scheduling/v1/feed/schedule_assignees"} {
+		gock.New("http://localhost:9999").Get(path).
+			MatchParam("show_active", "true").
+			MatchParam("show_paused", "false").
+			MatchParam("show_finished", "true").
+			Reply(200).
+			BodyString(`{"metadata":{},"data":[]}`)
+	}
+	gock.New("http://localhost:9999").Get("/scheduling/v1/feed/schedule_occurrences").
+		MatchParam("start_date", "2026-01-01").
+		MatchParam("end_date", "2026-03-31").
+		Reply(200).
+		BodyString(`{"metadata":{},"data":[]}`)
+
+	statuses := []string{"active", "FINISHED"}
+	start, end := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC), time.Date(2026, 3, 31, 0, 0, 0, 0, time.UTC)
+	assert.NoError(t, feed.NewScheduleV2Feed(nil, statuses).Export(context.Background(), apiClient, exporter, ""))
+	assert.NoError(t, feed.NewScheduleAssigneeV2Feed(nil, statuses).Export(context.Background(), apiClient, exporter, ""))
+	assert.NoError(t, feed.NewScheduleOccurrenceV2Feed(nil, start, end).Export(context.Background(), apiClient, exporter, ""))
+	assert.True(t, gock.IsDone())
 }
 
 func TestSchedulingV2Feeds_should_export_every_column_and_a_row_per_target(t *testing.T) {
@@ -74,9 +106,9 @@ func TestSchedulingV2Feeds_should_export_every_column_and_a_row_per_target(t *te
 			{"id":"scheduleitem_1_occurrence_1_user_1","schedule_id":"scheduleitem_1","occurrence_id":"1","template_id":"template_1","start_time":"2026-09-28T09:30:00Z","due_time":"2026-09-28T17:30:00Z","occurrence_status":"WONT_DO","completion_rule":"all","organisation_id":"role_org","wont_do_note":"closed","assignee_id":"user_1","assignee_from":"role_1","target_id":"site_2","target_type":"SITE","assignee_status":"WONT_DO"}
 		]}`)
 
-	assert.NoError(t, feed.NewScheduleV2Feed(nil).Export(context.Background(), apiClient, exporter, ""))
-	assert.NoError(t, feed.NewScheduleAssigneeV2Feed(nil).Export(context.Background(), apiClient, exporter, ""))
-	assert.NoError(t, feed.NewScheduleOccurrenceV2Feed(nil, time.Time{}).Export(context.Background(), apiClient, exporter, ""))
+	assert.NoError(t, feed.NewScheduleV2Feed(nil, nil).Export(context.Background(), apiClient, exporter, ""))
+	assert.NoError(t, feed.NewScheduleAssigneeV2Feed(nil, nil).Export(context.Background(), apiClient, exporter, ""))
+	assert.NoError(t, feed.NewScheduleOccurrenceV2Feed(nil, time.Time{}, time.Time{}).Export(context.Background(), apiClient, exporter, ""))
 
 	var schedules []feed.ScheduleV2
 	assert.NoError(t, exporter.DB.Table("new_schedules").Scan(&schedules).Error)
