@@ -164,7 +164,7 @@ func parseDTStart(recurrence, timezone string) *time.Time {
 
 // TableName makes the table match the name of the feed. By default gorm derives it from the type name
 func (ScheduleV2) TableName() string {
-	return "schedules_v2"
+	return "new_schedules"
 }
 
 // ScheduleAssigneeV2 represents a row from the Scheduling feed service schedule_assignees feed
@@ -183,7 +183,7 @@ type ScheduleAssigneeV2 struct {
 
 // TableName makes the table match the name of the feed. By default gorm derives it from the type name
 func (ScheduleAssigneeV2) TableName() string {
-	return "schedule_assignees_v2"
+	return "new_schedule_assignees"
 }
 
 // ScheduleOccurrenceV2 represents a row from the Scheduling feed service schedule_occurrences feed
@@ -212,8 +212,7 @@ type ScheduleOccurrenceV2 struct {
 	// The fields below are derived from the API fields: the legacy schedule_occurrences columns, then the assignment
 	UserID string `json:"-" csv:"user_id" gorm:"size:256"`
 	Note   string `json:"-" csv:"note"`
-	// AssigneeType is how the user was assigned, with the type values of the schedule assignees feed:
-	// user, role, location or location_intersection
+	// AssigneeType is how the user was assigned: user, site or group. A group within a site is a group with the site set
 	AssigneeType    string `json:"-" csv:"assignee_type" gorm:"size:30"`
 	AssigneeUserID  string `json:"-" csv:"assignee_user_id" gorm:"size:37"`
 	AssigneeSiteID  string `json:"-" csv:"assignee_site_id" gorm:"size:41"`
@@ -245,14 +244,14 @@ func (o *ScheduleOccurrenceV2) UnmarshalJSON(b []byte) error {
 		o.AssigneeType = "user"
 		o.AssigneeUserID = from
 	case strings.HasPrefix(from, "role_"):
-		o.AssigneeType = "role"
+		o.AssigneeType = "group"
 		o.AssigneeGroupID = from
 	case strings.HasPrefix(from, "location_"):
 		site, group, found := strings.Cut(from, "+")
 		o.AssigneeSiteID = site
-		o.AssigneeType = "location"
+		o.AssigneeType = "site"
 		if found {
-			o.AssigneeType = "location_intersection"
+			o.AssigneeType = "group"
 			o.AssigneeGroupID = group
 		}
 	}
@@ -261,7 +260,7 @@ func (o *ScheduleOccurrenceV2) UnmarshalJSON(b []byte) error {
 
 // TableName makes the table match the name of the feed. By default gorm derives it from the type name
 func (ScheduleOccurrenceV2) TableName() string {
-	return "schedule_occurrences_v2"
+	return "new_schedule_occurrences"
 }
 
 // nameLookup has the names of the users, groups, sites and assets of the organisation by ID.
@@ -353,7 +352,7 @@ func (n *nameLookup) fillNames(o *ScheduleOccurrenceV2) {
 func prepareOccurrenceNames(ctx context.Context, apiClient *httpapi.Client) func(*ScheduleOccurrenceV2) {
 	names, err := loadNames(ctx, apiClient)
 	if err != nil {
-		logger.GetLogger().With("feed", "schedule_occurrences_v2", "error", err).Warn("names are not exported")
+		logger.GetLogger().With("feed", "new_schedule_occurrences", "error", err).Warn("names are not exported")
 		return nil
 	}
 	return names.fillNames
@@ -362,7 +361,7 @@ func prepareOccurrenceNames(ctx context.Context, apiClient *httpapi.Client) func
 // NewScheduleV2Feed returns the feed for /scheduling/v1/feed/schedules
 func NewScheduleV2Feed(templateIDs []string) Feed {
 	return &rowFeed[ScheduleV2]{
-		name:         "schedules_v2",
+		name:         "new_schedules",
 		initialURL:   "/scheduling/v1/feed/schedules",
 		primaryKey:   []string{"schedule_id"},
 		order:        "schedule_id",
@@ -387,7 +386,7 @@ func NewScheduleV2Feed(templateIDs []string) Feed {
 // NewScheduleAssigneeV2Feed returns the feed for /scheduling/v1/feed/schedule_assignees
 func NewScheduleAssigneeV2Feed(templateIDs []string) Feed {
 	return &rowFeed[ScheduleAssigneeV2]{
-		name:       "schedule_assignees_v2",
+		name:       "new_schedule_assignees",
 		initialURL: "/scheduling/v1/feed/schedule_assignees",
 		primaryKey: []string{"id", "target_id"},
 		order:      "schedule_id, assignee_id, target_id",
@@ -406,7 +405,7 @@ func NewScheduleAssigneeV2Feed(templateIDs []string) Feed {
 // startDate filters on the due time of the occurrences. When it is zero the API default window applies (5 months back, 1 month ahead).
 func NewScheduleOccurrenceV2Feed(templateIDs []string, startDate time.Time) Feed {
 	return &rowFeed[ScheduleOccurrenceV2]{
-		name:       "schedule_occurrences_v2",
+		name:       "new_schedule_occurrences",
 		initialURL: "/scheduling/v1/feed/schedule_occurrences",
 		primaryKey: []string{"id", "target_id"},
 		order:      "schedule_id, due_time, target_id",

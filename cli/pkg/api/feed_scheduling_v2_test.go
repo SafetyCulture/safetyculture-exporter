@@ -31,7 +31,7 @@ func TestScheduleV2Feed_should_follow_pagination_and_keep_arrays_as_json(t *test
 	assert.NoError(t, feed.NewScheduleV2Feed(nil).Export(context.Background(), apiClient, exporter, ""))
 
 	var rows []feed.ScheduleV2
-	assert.NoError(t, exporter.DB.Table("schedules_v2").Order("schedule_id").Scan(&rows).Error)
+	assert.NoError(t, exporter.DB.Table("new_schedules").Order("schedule_id").Scan(&rows).Error)
 	assert.Len(t, rows, 2)
 	assert.Equal(t, feed.JSONArray(`["site_1","site_2"]`), rows[0].SiteIDs)
 	assert.Equal(t, feed.JSONArray(`["user_1"]`), rows[0].Assignees)
@@ -83,7 +83,7 @@ func TestSchedulingV2Feeds_should_export_every_column_and_a_row_per_target(t *te
 	assert.NoError(t, feed.NewScheduleOccurrenceV2Feed(nil, time.Time{}).Export(context.Background(), apiClient, exporter, ""))
 
 	var schedules []feed.ScheduleV2
-	assert.NoError(t, exporter.DB.Table("schedules_v2").Scan(&schedules).Error)
+	assert.NoError(t, exporter.DB.Table("new_schedules").Scan(&schedules).Error)
 	assert.Len(t, schedules, 1)
 	schedule := schedules[0]
 	sydney, err := time.LoadLocation("Australia/Sydney")
@@ -129,7 +129,7 @@ func TestSchedulingV2Feeds_should_export_every_column_and_a_row_per_target(t *te
 	}, schedule)
 
 	var assignees []feed.ScheduleAssigneeV2
-	assert.NoError(t, exporter.DB.Table("schedule_assignees_v2").Order("target_id").Scan(&assignees).Error)
+	assert.NoError(t, exporter.DB.Table("new_schedule_assignees").Order("target_id").Scan(&assignees).Error)
 	assigneeOf := func(targetID string) feed.ScheduleAssigneeV2 {
 		return feed.ScheduleAssigneeV2{
 			ID: "scheduleitem_1_role_1", ScheduleID: "scheduleitem_1", AssigneeID: "role_1", Type: "role", Name: "Cleaners",
@@ -139,14 +139,14 @@ func TestSchedulingV2Feeds_should_export_every_column_and_a_row_per_target(t *te
 	assert.Equal(t, []feed.ScheduleAssigneeV2{assigneeOf("site_1"), assigneeOf("site_2")}, assignees)
 
 	var occurrences []feed.ScheduleOccurrenceV2
-	assert.NoError(t, exporter.DB.Table("schedule_occurrences_v2").Order("target_id").Scan(&occurrences).Error)
+	assert.NoError(t, exporter.DB.Table("new_schedule_occurrences").Order("target_id").Scan(&occurrences).Error)
 	assert.Equal(t, []feed.ScheduleOccurrenceV2{
 		{
 			ID: "scheduleitem_1_occurrence_1_user_1", ScheduleID: "scheduleitem_1", OccurrenceID: "1", TemplateID: "template_1",
 			StartTime: "2026-09-28T09:30:00Z", DueTime: "2026-09-28T17:30:00Z", OccurrenceStatus: "COMPLETED", AuditID: "audit_1",
 			CompletedAt: "2026-09-28T10:00:00Z", CompletionRule: "all", OrganisationID: "role_org", AssigneeID: "user_1",
 			AssigneeFrom: "location_1+role_1", TargetID: "site_1", TargetType: "SITE", AssigneeStatus: "COMPLETED",
-			CompletedByUserID: "user_2", UserID: "user_1", AssigneeType: "location_intersection", AssigneeSiteID: "location_1",
+			CompletedByUserID: "user_2", UserID: "user_1", AssigneeType: "group", AssigneeSiteID: "location_1",
 			AssigneeGroupID: "role_1", UserName: "Ada Lovelace", AssigneeSiteName: "Sydney", AssigneeGroupName: "Cleaners",
 			CompletedByUserName: "Alan Turing", TargetName: "Sydney",
 		},
@@ -155,7 +155,7 @@ func TestSchedulingV2Feeds_should_export_every_column_and_a_row_per_target(t *te
 			StartTime: "2026-09-28T09:30:00Z", DueTime: "2026-09-28T17:30:00Z", OccurrenceStatus: "WONT_DO",
 			CompletionRule: "all", OrganisationID: "role_org", WontDoNote: "closed", AssigneeID: "user_1", AssigneeFrom: "role_1",
 			TargetID: "site_2", TargetType: "SITE", AssigneeStatus: "WONT_DO", UserID: "user_1", Note: "closed",
-			AssigneeType: "role", AssigneeGroupID: "role_1", UserName: "Ada Lovelace", AssigneeGroupName: "Cleaners",
+			AssigneeType: "group", AssigneeGroupID: "role_1", UserName: "Ada Lovelace", AssigneeGroupName: "Cleaners",
 			TargetName: "Melbourne",
 		},
 	}, occurrences)

@@ -15,9 +15,9 @@ var newFeedFixtures = []struct {
 	path  string
 	body  string
 }{
-	{"schedules_v2", "/scheduling/v1/feed/schedules", `{"metadata":{},"data":[{"id":"scheduleitem_1","title":"Weekly","modified_at":"2026-01-01T00:00:00Z","created_at":"2026-01-01T00:00:00Z","site_ids":["site_1"],"asset_ids":null}]}`},
-	{"schedule_assignees_v2", "/scheduling/v1/feed/schedule_assignees", `{"metadata":{},"data":[{"id":"scheduleitem_1_user_1","schedule_id":"scheduleitem_1","assignee_id":"user_1","type":"user"}]}`},
-	{"schedule_occurrences_v2", "/scheduling/v1/feed/schedule_occurrences", `{"metadata":{},"data":[{"id":"scheduleitem_1_occurrence_1_user_1","schedule_id":"scheduleitem_1","occurrence_id":"occurrence_1","occurrence_status":"WONT_DO","wont_do_note":"closed"}]}`},
+	{"new_schedules", "/scheduling/v1/feed/schedules", `{"metadata":{},"data":[{"id":"scheduleitem_1","title":"Weekly","modified_at":"2026-01-01T00:00:00Z","created_at":"2026-01-01T00:00:00Z","site_ids":["site_1"],"asset_ids":null}]}`},
+	{"new_schedule_assignees", "/scheduling/v1/feed/schedule_assignees", `{"metadata":{},"data":[{"id":"scheduleitem_1_user_1","schedule_id":"scheduleitem_1","assignee_id":"user_1","type":"user"}]}`},
+	{"new_schedule_occurrences", "/scheduling/v1/feed/schedule_occurrences", `{"metadata":{},"data":[{"id":"scheduleitem_1_occurrence_1_user_1","schedule_id":"scheduleitem_1","occurrence_id":"occurrence_1","occurrence_status":"WONT_DO","wont_do_note":"closed"}]}`},
 	{"action_fields", "/tasks/v1/feed/action_fields", `{"metadata":{"remaining_records":0},"data":[{"action_id":"a1","field_id":"f1","field_type":"text","field_value":"v"}]}`},
 	{"issue_relations", "/feed/issue_relations", `{"metadata":{},"data":[{"id":"r1","from_id":"i1","rel_type":"ISSUE-INSPECTION","to_id":"audit_1"}]}`},
 	{"investigations", "/incidents/v1/feed/investigations", `{"metadata":{},"data":[{"investigation_id":"inv1","title":"t","status_badge_color":3,"identifier_sequence":7}]}`},
