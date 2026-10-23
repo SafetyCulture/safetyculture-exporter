@@ -56,6 +56,7 @@ func TestSchedulingV2Feeds_should_send_the_status_and_date_filters(t *testing.T)
 			BodyString(`{"metadata":{},"data":[]}`)
 	}
 	gock.New("http://localhost:9999").Get("/scheduling/v1/feed/schedule_occurrences").
+		MatchParam("include_entity_names", "true").
 		MatchParam("start_date", "2026-01-01").
 		MatchParam("end_date", "2026-03-31").
 		Reply(200).
@@ -88,23 +89,12 @@ func TestSchedulingV2Feeds_should_export_every_column_and_a_row_per_target(t *te
 			{"id":"scheduleitem_1_role_1","schedule_id":"scheduleitem_1","assignee_id":"role_1","type":"role","name":"Cleaners","organisation_id":"role_org","completion_rule":"all","target_id":"site_1","target_type":"SITE"},
 			{"id":"scheduleitem_1_role_1","schedule_id":"scheduleitem_1","assignee_id":"role_1","type":"role","name":"Cleaners","organisation_id":"role_org","completion_rule":"all","target_id":"site_2","target_type":"SITE"}
 		]}`)
-	gock.New("http://localhost:9999").Get("/feed/users").
-		Reply(200).
-		BodyString(`{"metadata":{},"data":[{"id":"user_1","firstname":"Ada","lastname":"Lovelace"},{"id":"user_2","firstname":"Alan","lastname":"Turing"}]}`)
-	gock.New("http://localhost:9999").Get("/feed/groups").
-		Reply(200).
-		BodyString(`{"metadata":{},"data":[{"id":"role_1","name":"Cleaners"}]}`)
-	gock.New("http://localhost:9999").Get("/feed/sites").
-		Reply(200).
-		BodyString(`{"metadata":{},"data":[{"id":"location_1","site_uuid":"site_1","name":"Sydney"},{"id":"location_2","site_uuid":"site_2","name":"Melbourne"}]}`)
-	gock.New("http://localhost:9999").Get("/feed/assets").
-		Reply(200).
-		BodyString(`{"metadata":{},"data":[]}`)
 	gock.New("http://localhost:9999").Get("/scheduling/v1/feed/schedule_occurrences").
+		MatchParam("include_entity_names", "true").
 		Reply(200).
 		BodyString(`{"metadata":{},"data":[
-			{"id":"scheduleitem_1_occurrence_1_user_1","schedule_id":"scheduleitem_1","occurrence_id":"1","template_id":"template_1","start_time":"2026-09-28T09:30:00Z","due_time":"2026-09-28T17:30:00Z","miss_time":"2026-09-28T13:30:00.123Z","occurrence_status":"COMPLETED","audit_id":"audit_1","completed_at":"2026-09-28T10:00:00Z","completion_rule":"all","organisation_id":"role_org","assignee_id":"user_1","assignee_from":"location_1+role_1","target_id":"site_1","target_type":"SITE","assignee_status":"COMPLETED","completed_by_user_id":"user_2"},
-			{"id":"scheduleitem_1_occurrence_1_user_1","schedule_id":"scheduleitem_1","occurrence_id":"1","template_id":"template_1","start_time":"2026-09-28T09:30:00Z","due_time":"2026-09-28T17:30:00Z","miss_time":"","occurrence_status":"WONT_DO","completion_rule":"all","organisation_id":"role_org","wont_do_note":"closed","assignee_id":"user_1","assignee_from":"role_1","target_id":"site_2","target_type":"SITE","assignee_status":"WONT_DO"}
+			{"id":"scheduleitem_1_occurrence_1_user_1","schedule_id":"scheduleitem_1","occurrence_id":"1","template_id":"template_1","start_time":"2026-09-28T09:30:00Z","due_time":"2026-09-28T17:30:00Z","miss_time":"2026-09-28T13:30:00.123Z","occurrence_status":"COMPLETED","audit_id":"audit_1","completed_at":"2026-09-28T10:00:00Z","completion_rule":"all","organisation_id":"role_org","assignee_id":"user_1","assignee_from":"location_1+role_1","target_id":"site_1","target_type":"SITE","assignee_status":"COMPLETED","completed_by_user_id":"user_2","assignee_name":"Ada Lovelace","assignee_from_names":["Sydney","Cleaners"],"completed_by_user_name":"Alan Turing","target_name":"Sydney"},
+			{"id":"scheduleitem_1_occurrence_1_user_1","schedule_id":"scheduleitem_1","occurrence_id":"1","template_id":"template_1","start_time":"2026-09-28T09:30:00Z","due_time":"2026-09-28T17:30:00Z","miss_time":"","occurrence_status":"WONT_DO","completion_rule":"all","organisation_id":"role_org","wont_do_note":"closed","assignee_id":"user_1","assignee_from":"role_1","target_id":"site_2","target_type":"SITE","assignee_status":"WONT_DO","assignee_name":"Ada Lovelace","assignee_from_names":["Cleaners"],"completed_by_user_name":null,"target_name":"Melbourne"}
 		]}`)
 
 	assert.NoError(t, feed.NewScheduleV2Feed(nil, nil).Export(context.Background(), apiClient, exporter, ""))

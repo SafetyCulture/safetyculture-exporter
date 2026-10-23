@@ -1,14 +1,10 @@
 package feed
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
-
-	"github.com/SafetyCulture/mitti-exporter/pkg/httpapi"
-	"github.com/SafetyCulture/mitti-exporter/pkg/logger"
 )
 
 // ScheduleOccurrenceV2 represents a row from the Scheduling feed service schedule_occurrences feed.
@@ -39,18 +35,17 @@ type ScheduleOccurrenceV2 struct {
 	AssigneeGroupID     string `json:"-" csv:"assignee_group_id" gorm:"size:37"`
 	AssigneeGroupName   string `json:"-" csv:"assignee_group_name"`
 	CompletedByUserID   string `json:"completed_by_user_id" csv:"completed_by_user_id" gorm:"size:37"`
-	CompletedByUserName string `json:"-" csv:"completed_by_user_name"`
+	CompletedByUserName string `json:"completed_by_user_name" csv:"completed_by_user_name"`
 	// TargetID is the site or asset UUID of the row, empty for schedules without sites or assets.
 	// It is part of the primary key, as the API returns the same id once per site or asset
 	TargetID   string `json:"target_id" csv:"target_id" gorm:"primarykey;size:36"`
 	TargetType string `json:"target_type" csv:"target_type" gorm:"size:10"`
 	// TargetName is the name of the site, or the code of the asset
-	TargetName string `json:"-" csv:"target_name"`
+	TargetName string `json:"target_name" csv:"target_name"`
 	WontDoNote string `json:"wont_do_note" csv:"wont_do_note"`
 }
 
-// UnmarshalJSON decodes the API fields and fills the assignment and legacy columns.
-// The names are filled when exporting
+// UnmarshalJSON decodes the API fields and fills the assignment and legacy columns
 func (o *ScheduleOccurrenceV2) UnmarshalJSON(b []byte) error {
 	type apiOccurrence ScheduleOccurrenceV2
 	if err := json.Unmarshal(b, (*apiOccurrence)(o)); err != nil {
@@ -59,11 +54,12 @@ func (o *ScheduleOccurrenceV2) UnmarshalJSON(b []byte) error {
 
 	// The times are strings, as the API returns an empty miss_time for schedules without an overdue period
 	var api struct {
-		StartTime    string `json:"start_time"`
-		DueTime      string `json:"due_time"`
-		MissTime     string `json:"miss_time"`
-		CompletedAt  string `json:"completed_at"`
-		AssigneeFrom string `json:"assignee_from"`
+		StartTime         string   `json:"start_time"`
+		DueTime           string   `json:"due_time"`
+		MissTime          string   `json:"miss_time"`
+		CompletedAt       string   `json:"completed_at"`
+		AssigneeFrom      string   `json:"assignee_from"`
+		AssigneeFromNames []string `json:"assignee_from_names"`
 	}
 	if err := json.Unmarshal(b, &api); err != nil {
 		return err
@@ -91,20 +87,31 @@ func (o *ScheduleOccurrenceV2) UnmarshalJSON(b []byte) error {
 
 	o.Note = o.WontDoNote
 
+	getName := func(i int) string {
+		if i < len(api.AssigneeFromNames) {
+			return api.AssigneeFromNames[i]
+		}
+		return ""
+	}
+
 	// assignee_from is user_<id>, role_<id>, location_<id> or location_<id>+role_<id> for a group within a site
 	switch from := api.AssigneeFrom; {
 	case strings.HasPrefix(from, "user_"):
 		o.AssigneeType = "user"
 		o.AssigneeUserID = from
+		o.AssigneeUserName = getName(0)
 	case strings.HasPrefix(from, "role_"):
 		o.AssigneeType = "group"
 		o.AssigneeGroupID = from
+		o.AssigneeGroupName = getName(0)
 	case strings.HasPrefix(from, "location_"):
-		site, group, found := strings.Cut(from, "+")
+		site, group, groupFound := strings.Cut(from, "+")
 		o.AssigneeType = "site"
 		o.AssigneeSiteID = site
-		if found {
+		o.AssigneeSiteName = getName(0)
+		if groupFound {
 			o.AssigneeGroupID = group
+			o.AssigneeGroupName = getName(1)
 		}
 	}
 	return nil
@@ -115,107 +122,13 @@ func (ScheduleOccurrenceV2) TableName() string {
 	return "new_schedule_occurrences"
 }
 
-// nameLookup has the names of the users, groups, sites and assets of the organisation by ID.
-// Sites are found by both their location_<hex> ID and their UUID
-type nameLookup struct {
-	users  map[string]string
-	groups map[string]string
-	sites  map[string]string
-	assets map[string]string
-}
-
-// loadNames reads the names from the users, groups, sites and assets feeds
-func loadNames(ctx context.Context, apiClient *httpapi.Client) (*nameLookup, error) {
-	names := &nameLookup{
-		users:  map[string]string{},
-		groups: map[string]string{},
-		sites:  map[string]string{},
-		assets: map[string]string{},
-	}
-
-	err := drainRows(ctx, apiClient, &GetFeedRequest{InitialURL: "/feed/users"}, func(u *User) {
-		names.users[u.ID] = strings.TrimSpace(u.Firstname + " " + u.Lastname)
-	})
-	if err != nil {
-		return nil, fmt.Errorf("load user names: %w", err)
-	}
-
-	err = drainRows(ctx, apiClient, &GetFeedRequest{InitialURL: "/feed/groups"}, func(g *Group) {
-		names.groups[g.ID] = g.Name
-	})
-	if err != nil {
-		return nil, fmt.Errorf("load group names: %w", err)
-	}
-
-	showOnlyLeafNodes := false
-	sitesRequest := &GetFeedRequest{
-		InitialURL: "/feed/sites",
-		Params:     GetFeedParams{IncludeDeleted: true, ShowOnlyLeafNodes: &showOnlyLeafNodes},
-	}
-	err = drainRows(ctx, apiClient, sitesRequest, func(site *Site) {
-		names.sites[site.ID] = site.Name
-		if site.SiteUUID != "" {
-			names.sites[site.SiteUUID] = site.Name
-		}
-	})
-	if err != nil {
-		return nil, fmt.Errorf("load site names: %w", err)
-	}
-
-	err = drainRows(ctx, apiClient, &GetFeedRequest{InitialURL: "/feed/assets"}, func(a *Asset) {
-		names.assets[a.ID] = a.Code
-	})
-	if err != nil {
-		return nil, fmt.Errorf("load asset names: %w", err)
-	}
-	return names, nil
-}
-
-// drainRows calls add for every row of a feed
-func drainRows[T any](ctx context.Context, apiClient *httpapi.Client, req *GetFeedRequest, add func(*T)) error {
-	return DrainFeed(ctx, apiClient, req, func(resp *GetFeedResponse) error {
-		var rows []*T
-		if err := json.Unmarshal(resp.Data, &rows); err != nil {
-			return fmt.Errorf("map data: %w", err)
-		}
-		for _, row := range rows {
-			add(row)
-		}
-		return nil
-	})
-}
-
-// fillNames sets the names of the occurrence
-func (n *nameLookup) fillNames(o *ScheduleOccurrenceV2) {
-	o.AssigneeUserName = n.users[o.AssigneeUserID]
-	o.AssigneeSiteName = n.sites[o.AssigneeSiteID]
-	o.AssigneeGroupName = n.groups[o.AssigneeGroupID]
-	o.CompletedByUserName = n.users[o.CompletedByUserID]
-	switch o.TargetType {
-	case "SITE":
-		o.TargetName = n.sites[o.TargetID]
-	case "ASSET":
-		o.TargetName = n.assets[o.TargetID]
-	}
-}
-
-// prepareOccurrenceNames loads the names for the occurrences. The names are left empty when they can't be loaded
-func prepareOccurrenceNames(ctx context.Context, apiClient *httpapi.Client) func(*ScheduleOccurrenceV2) {
-	names, err := loadNames(ctx, apiClient)
-	if err != nil {
-		logger.GetLogger().With("feed", "new_schedule_occurrences", "error", err).Warn("names are not exported")
-		return nil
-	}
-	return names.fillNames
-}
-
 // NewScheduleOccurrenceV2Feed returns the feed for /scheduling/v1/feed/schedule_occurrences.
 // startDate and endDate filter on the due time of the occurrences. When one is zero, the API default applies to it
 // (5 months back for the start, 1 month ahead for the end).
 func NewScheduleOccurrenceV2Feed(templateIDs []string, startDate, endDate time.Time) Feed {
 	return &rowFeed[ScheduleOccurrenceV2]{
 		name:       "new_schedule_occurrences",
-		initialURL: "/scheduling/v1/feed/schedule_occurrences",
+		initialURL: "/scheduling/v1/feed/schedule_occurrences?include_entity_names=true",
 		primaryKey: []string{"id", "target_id"},
 		order:      "schedule_id, due_time, target_id",
 		params: GetFeedParams{
@@ -224,8 +137,7 @@ func NewScheduleOccurrenceV2Feed(templateIDs []string, startDate, endDate time.T
 			EndDate:     endDate,
 			Limit:       maxSchedulingFeedLimit,
 		},
-		key:     func(r *ScheduleOccurrenceV2) string { return r.ID + "|" + r.TargetID },
-		prepare: prepareOccurrenceNames,
+		key: func(r *ScheduleOccurrenceV2) string { return r.ID + "|" + r.TargetID },
 		columns: []string{
 			"schedule_id", "occurrence_id", "template_id", "organisation_id", "start_time", "due_time", "miss_time",
 			"occurrence_status", "audit_id", "completed_at", "exported_at", "user_id", "assignee_status", "note",
