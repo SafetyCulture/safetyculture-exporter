@@ -129,25 +129,11 @@
 	let date = convertStringToDate($shadowConfig["Export"]["ModifiedAfter"], selectedTimeZone);
 
 	// NEW SCHEDULES FILTERS
-	// An empty end date uses the API default (1 month ahead). No status selected, or all of them, exports every status
-	const scheduleEndDateMax = dayjs().add(5, 'year').toDate()
-	let scheduleEndDate = convertStringToOptionalDate($shadowConfig["Export"]["Schedule"]["EndDate"], selectedTimeZone);
-	const savedScheduleStatuses = $shadowConfig["Export"]["Schedule"]["Statuses"] ?? []
-	let scheduleStatuses = {
-		ACTIVE: savedScheduleStatuses.length === 0 || savedScheduleStatuses.includes("ACTIVE"),
-		PAUSED: savedScheduleStatuses.length === 0 || savedScheduleStatuses.includes("PAUSED"),
-		FINISHED: savedScheduleStatuses.length === 0 || savedScheduleStatuses.includes("FINISHED"),
-	}
-
-	// The new schedules filters are shown when a data set they apply to is exported. No data set selected exports all
-	$: exportedTables = $shadowConfig["Export"]["Tables"] ?? []
-	$: showScheduleEndDate = exportedTables.length === 0 || exportedTables.includes("new_schedule_occurrences")
-	$: showScheduleStatuses = exportedTables.length === 0 ||
-		exportedTables.includes("new_schedules") || exportedTables.includes("new_schedule_assignees")
-
-	function prepareScheduleStatusesForSave() {
-		const selected = Object.keys(scheduleStatuses).filter(status => scheduleStatuses[status])
-		return selected.length === Object.keys(scheduleStatuses).length ? [] : selected
+	let scheduleEndDate = [undefined, "", zeroDate].includes($shadowConfig["Export"]["Schedule"]["EndDate"])
+		? null
+		: dayjs($shadowConfig["Export"]["Schedule"]["EndDate"]).tz(selectedTimeZone).toDate()
+	if (!$shadowConfig["Export"]["Schedule"]["Statuses"]?.length) {
+		$shadowConfig["Export"]["Schedule"]["Statuses"] = ["ACTIVE", "PAUSED", "FINISHED"]
 	}
 
 	function generateTemplateName() {
@@ -245,7 +231,6 @@
 				? zeroDate
 				: dayjs(scheduleEndDate).tz(selectedTimeZone.value).endOf('day').format()
 		}
-		$shadowConfig["Export"]["Schedule"]["Statuses"] = prepareScheduleStatusesForSave()
 
 		$shadowConfig["Export"]["Inspection"]["Completed"] = selectedStatus.value
 		$shadowConfig["Export"]["Inspection"]["Archived"] = selectedArchived.value
@@ -276,15 +261,6 @@
 	function convertStringToDate(input, tz) {
 		if (input === "" || input === zeroDate) {
 			return minDate
-		}
-
-		return dayjs(input).tz(tz).toDate()
-	}
-
-	// convertStringToOptionalDate is convertStringToDate for a date that can be left empty
-	function convertStringToOptionalDate(input, tz) {
-		if (!input || input === zeroDate) {
-			return null
 		}
 
 		return dayjs(input).tz(tz).toDate()
@@ -533,20 +509,20 @@
 			<div class="border-weak border-round-8 m-top-4">
 				<DateInput max={new Date()} format="dd-MM-yyyy" closeOnSelection={true} bind:value={date}/>
 			</div>
-			{#if showScheduleEndDate}
+			{#if !$shadowConfig["Export"]["Tables"]?.length || $shadowConfig["Export"]["Tables"].includes("new_schedule_occurrences")}
 				<div class="label">New schedule occurrences due up to (UTC)</div>
 				<div class="border-weak border-round-8 m-top-4">
-					<DateInput max={scheduleEndDateMax} format="dd-MM-yyyy" placeholder="1 month from today" closeOnSelection={true} bind:value={scheduleEndDate}/>
+					<DateInput max={dayjs().add(5, 'year').toDate()} format="dd-MM-yyyy" placeholder="1 month from today" closeOnSelection={true} bind:value={scheduleEndDate}/>
 				</div>
 			{/if}
-			{#if showScheduleStatuses}
+			{#if !$shadowConfig["Export"]["Tables"]?.length || $shadowConfig["Export"]["Tables"].includes("new_schedules") || $shadowConfig["Export"]["Tables"].includes("new_schedule_assignees")}
 				<div class="label">Include new schedules that are:</div>
 				<div class="m-top-4">
-					<input type="checkbox" id="schedule-active" bind:checked={scheduleStatuses.ACTIVE}>
+					<input type="checkbox" id="schedule-active" name="schedule-active" value="ACTIVE" bind:group={$shadowConfig["Export"]["Schedule"]["Statuses"]}>
 					<label class="text-size-medium" for="schedule-active">Active</label>
-					<input type="checkbox" id="schedule-paused" bind:checked={scheduleStatuses.PAUSED}>
+					<input type="checkbox" id="schedule-paused" name="schedule-paused" value="PAUSED" bind:group={$shadowConfig["Export"]["Schedule"]["Statuses"]}>
 					<label class="text-size-medium" for="schedule-paused">Paused</label>
-					<input type="checkbox" id="schedule-finished" bind:checked={scheduleStatuses.FINISHED}>
+					<input type="checkbox" id="schedule-finished" name="schedule-finished" value="FINISHED" bind:group={$shadowConfig["Export"]["Schedule"]["Statuses"]}>
 					<label class="text-size-medium" for="schedule-finished">Finished</label>
 				</div>
 			{/if}
